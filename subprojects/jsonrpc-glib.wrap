@@ -1,0 +1,4 @@
+[wrap-git]
+directory = jsonrpc-glib
+url = https://github.com/GNOME/jsonrpc-glib.git
+revision = df1e5fb5a9
