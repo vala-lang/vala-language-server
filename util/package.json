@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "scripts": {
+    "start": "ts-node client.js"
+  },
+  "dependencies": {
+    "@types/node": "^8.0.14",
+    "ts-node": "^3.2.1",
+    "typescript": "^2.4.2",
+    "vscode-languageserver-types": "^3.3.0"
+  }
+}
