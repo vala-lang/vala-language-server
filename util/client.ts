@@ -45,7 +45,7 @@ function makeMessage(method: string, params: object) {
   const json = JSON.stringify({
     jsonrpc: "2.0",
     method,
-    params: Object.values(params),
+    params,
     id: id++
   })
 

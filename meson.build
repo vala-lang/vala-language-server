@@ -12,6 +12,7 @@ deps = [
 
 src = files([
     'main.vala',
+    'protocol.vala',
 ])
 
 executable('vala-language-server',
