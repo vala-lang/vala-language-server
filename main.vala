@@ -27,40 +27,16 @@ class ValaLanugageServer {
     return builder.end ();
   }
 
-  // a{sv}
-  void parseDict (Variant dict, ...) {
-    var l = va_list ();
-    var iter = dict.iterator ();
-    while (true) {
-      string type = l.arg ();
-      void *ptr = l.arg ();
-      Variant? val = null;
-
-      var next = iter.next ("{sv}", null, out val);
-      if (!next)
-        break;
-      val.get (type, ptr);
-    }
-  }
-
   void initialize (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-    var iter = @params.iterator ();
+    var dict = new VariantDict (@params);
 
-    // Variant? pid = null;
-    // iter.next ("{sv}", null, out pid);
+    int64 pid;
+    dict.lookup ("processId", "x", pid);
 
-    // Variant? root_path = null;
-    // iter.next ("{sv}", null, out root_path);
-
-    int64? pid = null;
     string root_path = null;
-    parseDict (@params,
-      "x", out pid,
-      "s", out root_path,
-      null);
+    dict.lookup ("rootPath", "s", out root_path);
 
-    // print ("pid = %s, root_path = %s\n", pid.get_int64 ().to_string (), root_path.get_string ());
-    print ("pid = %s, root_path = %s\n", pid.to_string (), root_path);
+    print ("pid = %" + int64.FORMAT + ", root_path = %s\n", pid, root_path);
 
     client.reply (id, buildDict (
       textDocumentSync: new Variant.int16 (TextDocumentSyncKind.Full)
