@@ -31,7 +31,7 @@ class ValaLanugageServer {
     var dict = new VariantDict (@params);
 
     int64 pid;
-    dict.lookup ("processId", "x", pid);
+    dict.lookup ("processId", "x", out pid);
 
     string root_path = null;
     dict.lookup ("rootPath", "s", out root_path);
