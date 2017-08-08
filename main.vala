@@ -1,10 +1,10 @@
 using LanguageServer;
 
-class ValaLanugageServer {
+class ValaLanguageServer {
   Jsonrpc.Server server;
   MainLoop loop;
 
-  public ValaLanugageServer (MainLoop loop) {
+  public ValaLanguageServer (MainLoop loop) {
     this.loop = loop;
     server = new Jsonrpc.Server ();
     var stdin = new UnixInputStream (Posix.STDIN_FILENO, false);
@@ -47,8 +47,10 @@ class ValaLanugageServer {
 
     //log (@"pid = $pid, root_path = $root_path\n");
 
-    client.reply (id, buildDict (
-      textDocumentSync: new Variant.int16 (TextDocumentSyncKind.Full)
+    client.reply (id, buildDict(
+      capabilities: buildDict (
+        textDocumentSync: new Variant.int16 (TextDocumentSyncKind.Full)
+      )
     ));
   }
 
@@ -72,6 +74,6 @@ class ValaLanugageServer {
 
 void main () {
   var loop = new MainLoop ();
-  new ValaLanugageServer (loop);
+  new ValaLanguageServer (loop);
   loop.run ();
 }
