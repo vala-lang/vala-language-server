@@ -2,7 +2,7 @@ project('vala-language-server', 'vala', 'c')
 
 jsonrpc_sp = subproject('jsonrpc-glib')
 
-libvala = dependency('libvala-0.36')
+libvala = dependency('libvala-0.38')
 
 deps = [
     dependency('glib-2.0'),
