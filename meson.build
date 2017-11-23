@@ -13,12 +13,12 @@ deps = [
     jsonrpc_sp.get_variable('libjsonrpc_glib_vapi'),
 ]
 
-conf = configuration_data()
-conf.set('LIBVALA_VERSION', libvala.version())
+#conf = configuration_data()
+#conf.set('LIBVALA_VERSION', libvala.version())
 
-conf_vapi = configure_file(input: 'config.vala.in',
-                           output: 'config.vala',
-                           configuration: conf)
+#conf_vapi = configure_file(input: 'config.vala.in',
+#                           output: 'config.vala',
+#                           configuration: conf)
 
 src = files([
     'main.vala',
@@ -28,5 +28,5 @@ src = files([
 
 executable('vala-language-server',
            dependencies: deps,
-           sources: [src, conf_vapi],
+           sources: src,
            vala_args: ['--pkg', 'posix'])

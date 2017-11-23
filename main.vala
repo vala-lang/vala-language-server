@@ -8,8 +8,33 @@ class Vls.Server {
 
     public Server (MainLoop loop) {
         this.loop = loop;
-        this.server = new Jsonrpc.Server ();
 
+        // libvala setup
+        this.ctx = new Vala.CodeContext ();
+        Vala.CodeContext.push (ctx);
+
+        string version = "0.38.3"; //Config.libvala_version;
+        string[] parts = version.split(".");
+        assert (parts.length == 3);
+        assert (parts[0] == "0");
+        var minor = int.parse (parts[1]);
+
+        ctx.profile = Vala.Profile.GOBJECT;
+        for (int i = 2; i <= minor; i += 2) {
+            ctx.add_define ("VALA_0_%d".printf (i));
+        }
+        ctx.target_glib_major = 2;
+        ctx.target_glib_minor = 38;
+        for (int i = 16; i <= ctx.target_glib_minor; i += 2) {
+            ctx.add_define ("GLIB_2_%d".printf (i));
+        }
+        ctx.report = new Report ();
+        ctx.add_external_package ("glib-2.0");
+        ctx.add_external_package ("gobject-2.0");
+
+        Vala.CodeContext.pop ();
+
+        this.server = new Jsonrpc.Server ();
         var stdin = new UnixInputStream (Posix.STDIN_FILENO, false);
         var stdout = new UnixOutputStream (Posix.STDOUT_FILENO, false);
         server.accept_io_stream (new SimpleIOStream (stdin, stdout));
@@ -22,29 +47,6 @@ class Vls.Server {
 
         server.add_handler ("initialize", this.initialize);
         server.add_handler ("exit", this.exit);
-
-        // libvala setup
-        this.ctx = new Vala.CodeContext ();
-        Vala.CodeContext.push (ctx);
-
-        string version = Config.libvala_version;
-        string[] parts = version.split(".");
-        assert (parts.length == 3);
-        assert (parts[0] == "0");
-        var minor = int.parse (parts[1]);
-
-        ctx.profile = Vala.Profile.GOBJECT;
-        for (int i = 2; i <= minor; i += 2) {
-            ctx.add_define ("VALA_0_%d".printf (i));
-        }
-        ctx.target_glib_major = 2;
-        ctx.target_glib_minor = 44;
-        for (int i = 16; i <= ctx.target_glib_major; i += 2) {
-            ctx.add_define ("GLIB_2_%d".printf (i));
-        }
-        ctx.report = new Report ();
-        ctx.add_external_package ("glib-2.0");
-        ctx.add_external_package ("gobject-2.0");
     }
 
     // a{sv} only
