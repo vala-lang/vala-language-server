@@ -28,7 +28,7 @@ class Vls.Server {
         for (int i = 16; i <= ctx.target_glib_minor; i += 2) {
             ctx.add_define ("GLIB_2_%d".printf (i));
         }
-        ctx.report = new Report ();
+        ctx.report = new Reporter ();
         ctx.add_external_package ("glib-2.0");
         ctx.add_external_package ("gobject-2.0");
 
