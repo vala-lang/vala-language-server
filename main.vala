@@ -112,6 +112,8 @@ class Vls.Server {
             var array = new Json.Array ();
 
             ((Vls.Reporter) ctx.report).errorlist.foreach (err => {
+                if (err.loc.file != source)
+                    return;
                 var from = new Position (err.loc.begin.line-1, err.loc.begin.column-1);
                 var to = new Position (err.loc.end.line-1, err.loc.end.column);
 
@@ -125,6 +127,8 @@ class Vls.Server {
             });
 
             ((Vls.Reporter) ctx.report).warnlist.foreach (err => {
+                if (err.loc.file != source)
+                    return;
                 var from = new Position (err.loc.begin.line-1, err.loc.begin.column-1);
                 var to = new Position (err.loc.end.line-1, err.loc.end.column);
 
