@@ -14,7 +14,7 @@ $ make jsonrpc_docs
 
 ### Workflow
 - Clone this repo: https://github.com/benwaffle/vala-code
-- Check out the `vala-language-server` branch
+- Check out the `language-server` branch
 - Run `npm install`
 - open this folder in VS Code
 - `git submodule update --init`
