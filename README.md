@@ -1,12 +1,9 @@
 # Vala Language Server
 
-
 ### Setup
 ```
 $ meson build
 $ ninja -C build
-$ cd util
-$ npm i
 ```
 
 ### Build JsonRpc valadocs
@@ -16,7 +13,11 @@ $ make jsonrpc_docs
 ```
 
 ### Workflow
-1. `cd util`
-2. Change code
-3. `ninja -C ../build && make client`
-4. go to 2
+- Clone this repoe: https://github.com/benwaffle/vala-code
+- Check out the `vala-language-server` branch
+- Run `npm install`
+- open this folder in VS Code
+- `git submodule update --init`
+- cd to vala-language-server and checkout master
+- compile the language server (see above)
+- Hit F5 in VS Code to run a new instance with the VLS
