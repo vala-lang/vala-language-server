@@ -43,6 +43,8 @@ class Vls.Server {
             stderr.printf (@"Got notification! $method\n");
             if (method == "textDocument/didOpen")
                 this.textDocumentDidOpen(client, @params);
+            else
+                stderr.printf (@"no handler for $method\n");
         });
 
         server.add_handler ("initialize", this.initialize);
@@ -102,9 +104,60 @@ class Vls.Server {
 
         ctx.add_source_file (source);
 
-        if (ctx.report.get_errors () > 0) {
-            stderr.printf ("got errors !!!! :/\n");
+        Vala.CodeContext.push (ctx);
+        this.check ();
+        Vala.CodeContext.pop ();
+
+        if (ctx.report.get_errors () + ctx.report.get_warnings () > 0) {
+            var array = new Json.Array ();
+
+            ((Vls.Reporter) ctx.report).errorlist.foreach (err => {
+                var from = new Position (err.loc.begin.line-1, err.loc.begin.column-1);
+                var to = new Position (err.loc.end.line-1, err.loc.end.column);
+
+                var diag = new Diagnostic ();
+                diag.range = new Range (from, to);
+                diag.severity = DiagnosticSeverity.Error;
+                diag.message = err.message;
+
+                var node = Json.gobject_serialize (diag);
+                array.add_element (node);
+            });
+
+            ((Vls.Reporter) ctx.report).warnlist.foreach (err => {
+                var from = new Position (err.loc.begin.line-1, err.loc.begin.column-1);
+                var to = new Position (err.loc.end.line-1, err.loc.end.column);
+
+                var diag = new Diagnostic ();
+                diag.range = new Range (from, to);
+                diag.severity = DiagnosticSeverity.Warning;
+                diag.message = err.message;
+
+                var node = Json.gobject_serialize (diag);
+                array.add_element (node);
+            });
+
+            var result = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (array), null);
+            client.send_notification ("textDocument/publishDiagnostics", buildDict(
+                uri: new Variant.string (uri),
+                diagnostics: result
+            ));
         }
+    }
+
+    void check () {
+        if (ctx.report.get_errors () > 0) {
+            return;
+        }
+
+        var parser = new Vala.Parser ();
+        parser.parse (ctx);
+
+        if (ctx.report.get_errors () > 0) {
+            return;
+        }
+
+        ctx.check ();
     }
 
     void exit (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
