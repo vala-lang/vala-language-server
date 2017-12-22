@@ -1,13 +1,21 @@
 using LanguageServer;
 
+struct CompileCommand {
+    string path;
+    string directory;
+    string command;
+}
+
 class Vls.Server {
     Jsonrpc.Server server;
     MainLoop loop;
-
+    HashTable<string, CompileCommand?> cc;
     Vala.CodeContext ctx;
 
     public Server (MainLoop loop) {
         this.loop = loop;
+
+        this.cc = new HashTable<string, CompileCommand?> (str_hash, str_equal);
 
         // libvala setup
         this.ctx = new Vala.CodeContext ();
@@ -82,6 +90,39 @@ class Vls.Server {
         ));
     }
 
+    string? findFile (string dirname, string target) {
+        Dir dir = null;
+        try {
+            dir = Dir.open (dirname, 0);
+        } catch (FileError e) {
+            stderr.printf ("dirname=%s, target=%s, error=%s\n", dirname, target, e.message);
+            return null;
+        }
+
+        string name;
+        while ((name = dir.read_name ()) != null) {
+            string path = Path.build_filename (dirname, name);
+            if (name == target)
+                return path;
+
+            if (FileUtils.test (path, FileTest.IS_DIR)) {
+                string r = findFile (path, target);
+                if (r != null)
+                    return r;
+            }
+        }
+        return null;
+    }
+
+    string findCompileCommands (string filename) {
+        string r = null, p = filename;
+        do {
+            p = Path.get_dirname (p);
+            r = findFile (p, "compile_commands.json");
+        } while (r == null && p != "/");
+        return r;
+    }
+
     void textDocumentDidOpen (Jsonrpc.Client client, Variant @params) {
         var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
 
@@ -100,11 +141,48 @@ class Vls.Server {
         else if (uri.has_suffix (".vapi"))
             type = Vala.SourceFileType.PACKAGE;
         var filename = Filename.from_uri (uri);
+
+        string ccjson = findCompileCommands (filename);
+        if (ccjson != null) {
+            var parser = new Json.Parser.immutable_new ();
+            try {
+                parser.load_from_file (ccjson);
+                var node = parser.get_root ().get_array ();
+                node.foreach_element ((arr, index, node) => {
+                    var o = node.get_object ();
+                    string dir = o.get_string_member ("directory");
+                    string file = o.get_string_member ("file");
+                    string path = File.new_for_path (Path.build_filename (dir, file)).get_path ();
+                    string cmd = o.get_string_member ("command");
+                    stderr.printf ("got args for %s\n", path);
+                    cc.insert (path, CompileCommand() {
+                        path = path,
+                        directory = dir,
+                        command = cmd
+                    });
+                });
+            } catch (Error e) {
+                stderr.printf ("failed to parse %s: %s\n", ccjson, e.message);
+            }
+        }
+
+        Vala.CodeContext.push (ctx);
+        stderr.printf ("finding args for %s\n", filename);
+        CompileCommand? command = cc[filename];
+        if (command != null) {
+            string[] args = command.command.split (" ");
+            for (int i = 0; i < args.length; ++i) {
+                if (args[i] == "--pkg") {
+                    stderr.printf ("%s, --pkg %s\n", filename, args[i+1]);
+                    ctx.add_external_package (args[i+1]);
+                    ++i;
+                }
+            }
+        }
+
         var source = new Vala.SourceFile (ctx, type, filename, fileContents);
 
         ctx.add_source_file (source);
-
-        Vala.CodeContext.push (ctx);
         this.check ();
         Vala.CodeContext.pop ();
 
