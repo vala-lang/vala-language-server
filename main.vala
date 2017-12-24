@@ -159,7 +159,21 @@ class Vls.Server {
         node.foreach_element ((arr, index, node) => {
             var o = node.get_object ();
             string id = o.get_string_member ("id");
+            string fname = o.get_string_member ("filename");
             string[] args = {"meson", "introspect", builddir, "--target-files", id};
+
+            if (fname.has_suffix (".vapi")) {
+                if (!Path.is_absolute (fname)) {
+                    fname = Path.build_path (Path.DIR_SEPARATOR_S, rootdir, fname);
+                }
+                try {
+                    var doc = new TextDocument (ctx, fname);
+                    ctx.add_source_file (doc);
+                    log.printf (@"Adding text document: $fname\n");
+                } catch (Error e) {
+                    log.printf (@"Failed to create text document: $(e.message)\n");
+                }
+            }
             
             try {
                 Process.spawn_sync (rootdir, 
