@@ -199,11 +199,47 @@ class Vls.Server {
             });
         });
 
+        // get all dependencies
+        spawn_args = {"meson", "introspect", builddir, "--dependencies"};
+        try {
+            Process.spawn_sync (rootdir, 
+                spawn_args, spawn_env,
+                SpawnFlags.SEARCH_PATH,
+                null,
+                out proc_stdout,
+                out proc_stderr,
+                out proc_status
+            );
+        } catch (SpawnError e) {
+            showMessage (client, e.message, MessageType.Error);
+            log.printf (@"failed to spawn process: $(e.message)\n");
+            return;
+        }
+
+        // we should have a list of dependencies in JSON format
+        string deps_json = proc_stdout;
+        var deps_parser = new Json.Parser.immutable_new ();
+        try {
+            deps_parser.load_from_data (deps_json);
+        } catch (Error e) {
+            log.printf (@"failed to load dependencies for build dir: $(builddir)\n");
+            return;
+        }
+
+        var deps_node = deps_parser.get_root ().get_array ();
+        deps_node.foreach_element ((arr, index, node) => {
+            var o = node.get_object ();
+            var name = o.get_string_member ("name");
+            ctx.add_package (name);
+            log.printf (@"adding package $name\n");
+        });
+
         // compile everything ahead of time
-        ctx.invalidate ();
-        Vala.CodeContext.push (ctx.code_context);
-        this.check ();
-        Vala.CodeContext.pop ();
+        if (ctx.dirty) {
+            Vala.CodeContext.push (ctx.code_context);
+            this.check ();
+            Vala.CodeContext.pop ();
+        }
     }
 
     void initialize (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
@@ -331,7 +367,6 @@ class Vls.Server {
             }
         }
 
-        // Vala.CodeContext.push (ctx);
         log.printf ("finding args for %s\n", filename);
         CompileCommand? command = cc[filename];
         if (command != null) {
@@ -353,9 +388,10 @@ class Vls.Server {
             return;
         }
 
-        if (ctx.add_source_file (doc)) {
-            // context is invalidated
-            // we have to update everything
+        ctx.add_source_file (doc);
+
+        // compile everything if context is dirty
+        if (ctx.dirty) {
             Vala.CodeContext.push (ctx.code_context);
             this.check ();
             Vala.CodeContext.pop ();
