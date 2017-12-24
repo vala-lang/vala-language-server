@@ -107,10 +107,14 @@ class Vls.Server {
     }
 
     void showMessage (Jsonrpc.Client client, string message, MessageType type) {
-        client.send_notification ("window/showMessage", buildDict(
-            type: new Variant.int16 (type),
-            message: new Variant.string (message)
-        ));
+        try {
+            client.send_notification ("window/showMessage", buildDict(
+                type: new Variant.int16 (type),
+                message: new Variant.string (message)
+            ));
+        } catch (Error e) {
+            log.printf (@"showMessage: failed to notify client: $(e.message)\n");
+        }
     }
 
     void analyze_build_dir (Jsonrpc.Client client, string rootdir, string builddir) {
@@ -131,7 +135,7 @@ class Vls.Server {
                 out proc_status
             );
         } catch (SpawnError e) {
-            showMessage (client, e.message, MessageType.Error);
+            showMessage (client, @"Failed to spawn $(spawn_args[0]): $(e.message)", MessageType.Error);
             log.printf (@"failed to spawn process: $(e.message)\n");
             return;
         }
@@ -150,7 +154,7 @@ class Vls.Server {
         try {
             targets_parser.load_from_data (targets_json);
         } catch (Error e) {
-            log.printf (@"failed to load targets for build dir: $(builddir)\n");
+            log.printf (@"failed to load targets for build dir $(builddir): $(e.message)\n");
             return;
         }
 
@@ -196,7 +200,7 @@ class Vls.Server {
             try {
                 files_parser.load_from_data (files_json);
             } catch (Error e) {
-                log.printf (@"failed to get target files for $id (ID)\n");
+                log.printf (@"failed to get target files for $id (ID): $(e.message)\n");
                 return;
             }
             var fnode = files_parser.get_root ().get_array ();
@@ -238,7 +242,7 @@ class Vls.Server {
         try {
             deps_parser.load_from_data (deps_json);
         } catch (Error e) {
-            log.printf (@"failed to load dependencies for build dir: $(builddir)\n");
+            log.printf (@"failed to load dependencies for build dir $(builddir): $(e.message)\n");
             return;
         }
 
@@ -281,11 +285,15 @@ class Vls.Server {
                 analyze_build_dir (client, root_path, Path.get_dirname (ninja));
         }
 
-        client.reply (id, buildDict(
-            capabilities: buildDict (
-                textDocumentSync: new Variant.int16 (TextDocumentSyncKind.Full)
-            )
-        ));
+        try {
+            client.reply (id, buildDict(
+                capabilities: buildDict (
+                    textDocumentSync: new Variant.int16 (TextDocumentSyncKind.Full)
+                )
+            ));
+        } catch (Error e) {
+            log.printf (@"initialize: failed to reply to client: $(e.message)");
+        }
     }
 
     string? findFile (string dirname, string target) {
@@ -355,7 +363,7 @@ class Vls.Server {
         try {
             filename = Filename.from_uri (uri);
         } catch (Error e) {
-            log.printf (@"failed to convert URI $uri to filename\n");
+            log.printf (@"failed to convert URI $uri to filename: $(e.message)\n");
             return;
         }
 
@@ -525,11 +533,23 @@ class Vls.Server {
                     array.add_element (node);
                 });
 
-                var result = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (array), null);
-                client.send_notification ("textDocument/publishDiagnostics", buildDict(
-                    uri: new Variant.string (uri),
-                    diagnostics: result
-                ));
+                Variant result;
+                try {
+                    result = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (array), null);
+                } catch (Error e) {
+                    log.printf (@"failed to create diagnostics: $(e.message)");
+                    continue;
+                }
+
+                try {
+                    client.send_notification ("textDocument/publishDiagnostics", buildDict(
+                        uri: new Variant.string (uri),
+                        diagnostics: result
+                    ));
+                } catch (Error e) {
+                    log.printf (@"publishDiagnostics: failed to notify client: $(e.message)\n");
+                    continue;
+                }
 
                 log.printf (@"textDocument/publishDiagnostics: $uri\n");
             }
@@ -553,7 +573,11 @@ class Vls.Server {
 
     void shutdown (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         ctx.clear ();
-        client.reply (id, buildDict());
+        try {
+            client.reply (id, buildDict());
+        } catch (Error e) {
+            log.printf (@"shutdown: failed to reply to client: $(e.message)\n");
+        }
         log.printf ("shutting down...\n");
     }
 
