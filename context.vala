@@ -93,14 +93,26 @@ class Vls.Context {
 
     public void clear_defines () {
         _defines.clear ();
+        _dirty = true;
     }
 
     public void clear_packages () {
         _packages.clear ();
+        _dirty = true;
     }
 
     public void clear_sources () {
         _sources.clear ();
+        _dirty = true;
+    }
+
+    /**
+     * Clear everything.
+     */
+    public void clear () {
+        clear_defines ();
+        clear_packages ();
+        clear_sources ();
     }
 
     /**

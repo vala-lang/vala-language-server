@@ -55,6 +55,7 @@ class Vls.Server {
         });
 
         server.add_handler ("initialize", this.initialize);
+        server.add_handler ("shutdown", this.shutdown);
         server.add_handler ("exit", this.exit);
 
         log.printf ("Finished constructing\n");
@@ -324,6 +325,12 @@ class Vls.Server {
         }
 
         ctx.code_context.check ();
+    }
+
+    void shutdown (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        ctx.clear ();
+        client.reply (id, buildDict());
+        log.printf ("shutting down...\n");
     }
 
     void exit (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
