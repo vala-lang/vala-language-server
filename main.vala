@@ -164,7 +164,7 @@ class Vls.Server {
 
             if (fname.has_suffix (".vapi")) {
                 if (!Path.is_absolute (fname)) {
-                    fname = Path.build_path (Path.DIR_SEPARATOR_S, rootdir, fname);
+                    fname = Path.build_path (Path.DIR_SEPARATOR_S, builddir, fname);
                 }
                 try {
                     var doc = new TextDocument (ctx, fname);
