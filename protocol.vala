@@ -104,3 +104,13 @@ class LanguageServer.Diagnostic : Object {
 	 */
 	public string message { get; set; }
 }
+
+/**
+ * An event describing a change to a text document. If range and rangeLength are omitted
+ * the new text is considered to be the full content of the document.
+ */
+class LanguageServer.TextDocumentContentChangeEvent : Object {
+	public Range? range 		{ get; set; }
+	public int? rangeLength 	{ get; set; }
+	public string text 			{ get; set; }
+}

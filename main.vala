@@ -6,16 +6,37 @@ struct CompileCommand {
     string command;
 }
 
+class TextDocument : Object {
+    public Vala.SourceFile file { get; construct; }
+    public string uri { get; construct; }
+    public int version { get; construct set; }
+
+    public TextDocument (Vala.SourceFile file, string uri, int version = 0) {
+        Object (file: file, uri: uri, version: version);
+    }
+}
+
 class Vls.Server {
+    FileStream log;
     Jsonrpc.Server server;
     MainLoop loop;
     HashTable<string, CompileCommand?> cc;
+    HashTable<string, TextDocument> docs;
     Vala.CodeContext ctx;
 
     public Server (MainLoop loop) {
         this.loop = loop;
 
         this.cc = new HashTable<string, CompileCommand?> (str_hash, str_equal);
+        this.docs = new HashTable<string, TextDocument> (str_hash, str_equal);
+
+        // initialize logging
+        log = FileStream.open (@"vls-$(new DateTime.now_local()).log", "a");
+        Posix.dup2 (log.fileno (), Posix.STDERR_FILENO);
+        Timeout.add (3000, () => {
+            log.printf (@"$(new DateTime.now_local()): listening...\n");
+            return log.flush() != Posix.FILE.EOF;
+        });
 
         // libvala setup
         this.ctx = new Vala.CodeContext ();
@@ -48,15 +69,19 @@ class Vls.Server {
         server.accept_io_stream (new SimpleIOStream (stdin, stdout));
 
         server.notification.connect ((client, method, @params) => {
-            stderr.printf (@"Got notification! $method\n");
+            log.printf (@"Got notification! $method\n");
             if (method == "textDocument/didOpen")
                 this.textDocumentDidOpen(client, @params);
+            else if (method == "textDocument/didChange")
+                this.textDocumentDidChange(client, @params);
             else
-                stderr.printf (@"no handler for $method\n");
+                log.printf (@"no handler for $method\n");
         });
 
         server.add_handler ("initialize", this.initialize);
         server.add_handler ("exit", this.exit);
+
+        log.printf ("Finished constructing\n");
     }
 
     // a{sv} only
@@ -95,7 +120,7 @@ class Vls.Server {
         try {
             dir = Dir.open (dirname, 0);
         } catch (FileError e) {
-            stderr.printf ("dirname=%s, target=%s, error=%s\n", dirname, target, e.message);
+            log.printf ("dirname=%s, target=%s, error=%s\n", dirname, target, e.message);
             return null;
         }
 
@@ -121,6 +146,24 @@ class Vls.Server {
             r = findFile (p, "compile_commands.json");
         } while (r == null && p != "/");
         return r;
+    }
+
+    T? parse_variant<T> (Variant variant) {
+        var json = Json.gvariant_serialize(variant);
+        return Json.gobject_deserialize(typeof(T), json);
+    }
+
+    size_t get_string_pos (string str, uint lineno, uint charno) {
+        int linepos = -1;
+
+        for (uint lno = 0; lno < lineno; ++lno) {
+            int pos = str.index_of_char ('\n', linepos + 1);
+            if (pos == -1)
+                break;
+            linepos = pos;
+        }
+
+        return linepos+1 + charno;
     }
 
     void textDocumentDidOpen (Jsonrpc.Client client, Variant @params) {
@@ -154,7 +197,7 @@ class Vls.Server {
                     string file = o.get_string_member ("file");
                     string path = File.new_for_path (Path.build_filename (dir, file)).get_path ();
                     string cmd = o.get_string_member ("command");
-                    stderr.printf ("got args for %s\n", path);
+                    log.printf ("got args for %s\n", path);
                     cc.insert (path, CompileCommand() {
                         path = path,
                         directory = dir,
@@ -162,18 +205,18 @@ class Vls.Server {
                     });
                 });
             } catch (Error e) {
-                stderr.printf ("failed to parse %s: %s\n", ccjson, e.message);
+                log.printf ("failed to parse %s: %s\n", ccjson, e.message);
             }
         }
 
-        Vala.CodeContext.push (ctx);
-        stderr.printf ("finding args for %s\n", filename);
+        // Vala.CodeContext.push (ctx);
+        log.printf ("finding args for %s\n", filename);
         CompileCommand? command = cc[filename];
         if (command != null) {
             string[] args = command.command.split (" ");
             for (int i = 0; i < args.length; ++i) {
                 if (args[i] == "--pkg") {
-                    stderr.printf ("%s, --pkg %s\n", filename, args[i+1]);
+                    log.printf ("%s, --pkg %s\n", filename, args[i+1]);
                     ctx.add_external_package (args[i+1]);
                     ++i;
                 }
@@ -181,11 +224,68 @@ class Vls.Server {
         }
 
         var source = new Vala.SourceFile (ctx, type, filename, fileContents);
-
         ctx.add_source_file (source);
+        var doc = new TextDocument (source, uri);
+        docs.insert (uri, doc);
+
+        // this.check ();
+        // Vala.CodeContext.pop ();
+        publishDiagnostics (client, doc);
+    }
+
+    void textDocumentDidChange (Jsonrpc.Client client, Variant @params) {
+        var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
+        var changes = @params.lookup_value ("contentChanges", VariantType.ARRAY);
+
+        var uri = (string) document.lookup_value ("uri", VariantType.STRING);
+        var version = (int) document.lookup_value ("version", VariantType.INT64);
+        TextDocument? source = docs[uri];
+
+        if (source == null) {
+            log.printf (@"no document found for $uri\n");
+            return;
+        }
+
+        if (source.file.content == null) {
+            char* ptr = source.file.get_mapped_contents ();
+
+            if (ptr == null) {
+                log.printf (@"$uri: get_mapped_contents() failed\n");
+            }
+            source.file.content = (string) ptr;
+
+            if (source.file.content == null) {
+                log.printf (@"$uri: content is NULL\n");
+                return;
+            }
+        }
+
+        var iter = changes.iterator ();
+        Variant? elem = null;
+        var sb = new StringBuilder (source.file.content);
+        while ((elem = iter.next_value ()) != null) {
+            var changeEvent = parse_variant<TextDocumentContentChangeEvent> (elem);
+
+            if (changeEvent.range == null && changeEvent.rangeLength == null)
+                sb.assign (changeEvent.text);
+            else {
+                var start = changeEvent.range.start;
+                size_t pos = get_string_pos (sb.str, start.line, start.character);
+                sb.overwrite (pos, changeEvent.text);
+            }
+        }
+        source.file.content = sb.str;
+        log.printf (@"publishDiagnostics (uri = $uri, filename = $(source.file.filename)\n");
+        publishDiagnostics (client, source);
+    }
+
+    void publishDiagnostics (Jsonrpc.Client client, TextDocument document) {
+        var source = document.file;
+        Vala.CodeContext.push (ctx);
         this.check ();
         Vala.CodeContext.pop ();
 
+        string uri = document.uri;
         if (ctx.report.get_errors () + ctx.report.get_warnings () > 0) {
             var array = new Json.Array ();
 
@@ -224,6 +324,8 @@ class Vls.Server {
                 uri: new Variant.string (uri),
                 diagnostics: result
             ));
+
+            log.printf (@"textDocument/publishDiagnostics: $uri\n");
         }
     }
 
