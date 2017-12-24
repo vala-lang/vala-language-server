@@ -122,7 +122,7 @@ class Vls.Server {
         do {
             p = Path.get_dirname (p);
             r = findFile (p, "compile_commands.json");
-        } while (r == null && p != "/");
+        } while (r == null && p != "/" && p != ".");
         return r;
     }
 
