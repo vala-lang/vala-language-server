@@ -50,10 +50,8 @@ class Vls.Context {
                     _ctx.root.add_using_directive (ns_ref);
                 }
 
-                _sources.@foreach (entry => {
-                    _ctx.add_source_file (entry.value.file);
-                    return true;
-                });
+                foreach (TextDocument doc in _sources.values)
+                    _ctx.add_source_file (doc.file);
             }
             return _ctx;
         }
