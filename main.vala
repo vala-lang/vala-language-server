@@ -31,7 +31,7 @@ class Vls.TextDocument : Object {
         Object (uri: Filename.to_uri (filename), version: version);
         _ctx = ctx;
         _type = Vala.SourceFileType.NONE;
-        if (uri.has_suffix (".vala"))
+        if (uri.has_suffix (".vala") || uri.has_suffix (".gs"))
             _type = Vala.SourceFileType.SOURCE;
         else if (uri.has_suffix (".vapi"))
             _type = Vala.SourceFileType.PACKAGE;
