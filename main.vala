@@ -1,4 +1,5 @@
 using LanguageServer;
+using Gee;
 
 struct CompileCommand {
     string path;
@@ -7,12 +8,38 @@ struct CompileCommand {
 }
 
 class Vls.TextDocument : Object {
-    public Vala.SourceFile file { get; construct; }
+    private bool _dirty = false;
+    private Context _ctx;
+    private Vala.SourceFileType _type;
+    private string _filename;
+
+    private Vala.SourceFile? _file;
+    public Vala.SourceFile file { 
+        get {
+            if (_dirty || _ctx.dirty) {
+                _file = new Vala.SourceFile (_ctx.code_context, _type, _filename);
+                _dirty = false;
+            }
+            return _file;
+        }
+    }
+
     public string uri { get; construct; }
     public int version { get; construct set; }
 
-    public TextDocument (Vala.SourceFile file, string uri, int version = 0) {
-        Object (file: file, uri: uri, version: version);
+    public TextDocument (Context ctx, 
+                         string filename, 
+                         string? content = null,
+                         int version = 0) throws ConvertError {
+        Object (uri: Filename.to_uri (filename), version: version);
+        _ctx = ctx;
+        _type = Vala.SourceFileType.NONE;
+        if (uri.has_suffix (".vala"))
+            _type = Vala.SourceFileType.SOURCE;
+        else if (uri.has_suffix (".vapi"))
+            _type = Vala.SourceFileType.PACKAGE;
+        _filename = filename;
+        _file = new Vala.SourceFile (ctx.code_context, _type, _filename, content);
     }
 }
 
@@ -77,14 +104,117 @@ class Vls.Server {
         return builder.end ();
     }
 
+    void showMessage (Jsonrpc.Client client, string message, MessageType type) {
+        client.send_notification ("window/showMessage", buildDict(
+            type: new Variant.int16 (type),
+            message: new Variant.string (message)
+        ));
+    }
+
+    void analyze_build_dir (Jsonrpc.Client client, string rootdir, string builddir) {
+        string[] spawn_args = {"meson", "introspect", builddir, "--targets"};
+        string[]? spawn_env = null; // Environ.get ();
+        string proc_stdout;
+        string proc_stderr;
+        int proc_status;
+
+        log.printf (@"analyzing build directory $rootdir ...\n");
+        try {
+            Process.spawn_sync (rootdir, 
+                spawn_args, spawn_env,
+                SpawnFlags.SEARCH_PATH,
+                null,
+                out proc_stdout,
+                out proc_stderr,
+                out proc_status
+            );
+        } catch (SpawnError e) {
+            showMessage (client, e.message, MessageType.Error);
+            log.printf (@"failed to spawn process: $(e.message)\n");
+            return;
+        }
+
+        if (proc_status != 0) {
+            showMessage (client, 
+                @"Failed to analyze build dir: meson terminated with error code $proc_status. Output:\n $proc_stderr", 
+                MessageType.Error);
+            log.printf (@"failed to analyze build dir: meson terminated with error code $proc_status. Output:\n $proc_stderr\n");
+            return;
+        }
+
+        // we should have a list of targets in JSON format
+        string targets_json = proc_stdout;
+        var targets_parser = new Json.Parser.immutable_new ();
+        targets_parser.load_from_data (targets_json);
+
+        // for every target, get all files
+        var node = targets_parser.get_root ().get_array ();
+        node.foreach_element ((arr, index, node) => {
+            var o = node.get_object ();
+            string id = o.get_string_member ("id");
+            string[] args = {"meson", "introspect", builddir, "--target-files", id};
+            
+            try {
+                Process.spawn_sync (rootdir, 
+                    args, spawn_env,
+                    SpawnFlags.SEARCH_PATH,
+                    null,
+                    out proc_stdout,
+                    out proc_stderr,
+                    out proc_status
+                );
+            } catch (SpawnError e) {
+                log.printf (@"Failed to analyze target $id: $(e.message)\n");
+                return;
+            }
+
+            // proc_stdout is a collection of files
+            // add all source files to the project
+            string files_json = proc_stdout;
+            var files_parser = new Json.Parser.immutable_new ();
+            files_parser.load_from_data (files_json);
+            var fnode = files_parser.get_root ().get_array ();
+            fnode.foreach_element ((arr, index, node) => {
+                var filename = node.get_string ();
+                if (!Path.is_absolute (filename)) {
+                    filename = Path.build_path (Path.DIR_SEPARATOR_S, rootdir, filename);
+                }
+                try {
+                    var doc = new TextDocument (ctx, filename);
+                    ctx.add_source_file (doc);
+                    log.printf (@"Adding text document: $filename\n");
+                } catch (Error e) {
+                    log.printf (@"Failed to create text document: $(e.message)\n");
+                }
+            });
+        });
+
+        // now, we want to 'compile' every source file at once
+        publishDiagnostics (client);
+    }
+
     void initialize (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var dict = new VariantDict (@params);
 
         int64 pid;
         dict.lookup ("processId", "x", out pid);
 
-        string root_path;
+        string? root_path;
         dict.lookup ("rootPath", "s", out root_path);
+
+        string? meson = findFile (root_path, "meson.build");
+        if (meson != null) {
+            string? ninja = findFile (root_path, "build.ninja");
+
+            if (ninja == null) {
+                // TODO: build again
+                // ninja = findFile (root_path, "build.ninja");
+            }
+            
+            // test again
+            if (ninja != null)
+                analyze_build_dir (client, root_path, Path.get_dirname (ninja));
+        }
 
         client.reply (id, buildDict(
             capabilities: buildDict (
@@ -156,12 +286,13 @@ class Vls.Server {
             return;
         }
 
-        var type = Vala.SourceFileType.NONE;
-        if (uri.has_suffix (".vala"))
-            type = Vala.SourceFileType.SOURCE;
-        else if (uri.has_suffix (".vapi"))
-            type = Vala.SourceFileType.PACKAGE;
-        var filename = Filename.from_uri (uri);
+        string filename;
+        try {
+            filename = Filename.from_uri (uri);
+        } catch (Error e) {
+            log.printf (@"failed to convert URI $uri to filename\n");
+            return;
+        }
 
         string ccjson = findCompileCommands (filename);
         if (ccjson != null) {
@@ -201,13 +332,17 @@ class Vls.Server {
             }
         }
 
-        var source = new Vala.SourceFile (ctx.code_context, type, filename, fileContents);
-        var doc = new TextDocument (source, uri);
-        ctx.add_source_file (doc);
+        TextDocument doc;
+        try {
+            doc = new TextDocument (ctx, filename, fileContents);
+        } catch (Error e) {
+            log.printf (@"failed to create text document: $(e.message)\n");
+            return;
+        }
 
-        // this.check ();
-        // Vala.CodeContext.pop ();
-        publishDiagnostics (client, doc);
+        if (ctx.add_source_file (doc)) {
+            publishDiagnostics (client);
+        }
     }
 
     void textDocumentDidChange (Jsonrpc.Client client, Variant @params) {
@@ -259,57 +394,73 @@ class Vls.Server {
             }
         }
         source.file.content = sb.str;
-        publishDiagnostics (client, source);
-    }
 
-    void publishDiagnostics (Jsonrpc.Client client, TextDocument document) {
-        var source = document.file;
+        // if we're at this point, the file is present in the context
+        // any change we make invalidates the context
         ctx.invalidate ();
+
+        // we have to update everything
         Vala.CodeContext.push (ctx.code_context);
         this.check ();
         Vala.CodeContext.pop ();
 
-        string uri = document.uri;
-        if (ctx.code_context.report.get_errors () + ctx.code_context.report.get_warnings () > 0) {
-            var array = new Json.Array ();
+        publishDiagnostics (client);
+    }
 
-            ((Vls.Reporter) ctx.code_context.report).errorlist.foreach (err => {
-                if (err.loc.file != source)
-                    return;
-                var from = new Position (err.loc.begin.line-1, err.loc.begin.column-1);
-                var to = new Position (err.loc.end.line-1, err.loc.end.column);
+    void publishDiagnostics (Jsonrpc.Client client, TextDocument? doc = null) {
+        Collection<TextDocument> docs;
 
-                var diag = new Diagnostic ();
-                diag.range = new Range (from, to);
-                diag.severity = DiagnosticSeverity.Error;
-                diag.message = err.message;
+        if (doc != null) {
+            docs = new ArrayList<TextDocument>();
+            docs.add (doc);
+        } else {
+            docs = ctx.get_source_files ();
+        }
 
-                var node = Json.gobject_serialize (diag);
-                array.add_element (node);
-            });
+        foreach (var document in docs) {
+            var source = document.file;
+            string uri = document.uri;
+            if (ctx.code_context.report.get_errors () + ctx.code_context.report.get_warnings () > 0) {
+                var array = new Json.Array ();
 
-            ((Vls.Reporter) ctx.code_context.report).warnlist.foreach (err => {
-                if (err.loc.file != source)
-                    return;
-                var from = new Position (err.loc.begin.line-1, err.loc.begin.column-1);
-                var to = new Position (err.loc.end.line-1, err.loc.end.column);
+                ((Vls.Reporter) ctx.code_context.report).errorlist.foreach (err => {
+                    if (err.loc.file != source)
+                        return;
+                    var from = new Position (err.loc.begin.line-1, err.loc.begin.column-1);
+                    var to = new Position (err.loc.end.line-1, err.loc.end.column);
 
-                var diag = new Diagnostic ();
-                diag.range = new Range (from, to);
-                diag.severity = DiagnosticSeverity.Warning;
-                diag.message = err.message;
+                    var diag = new Diagnostic ();
+                    diag.range = new Range (from, to);
+                    diag.severity = DiagnosticSeverity.Error;
+                    diag.message = err.message;
 
-                var node = Json.gobject_serialize (diag);
-                array.add_element (node);
-            });
+                    var node = Json.gobject_serialize (diag);
+                    array.add_element (node);
+                });
 
-            var result = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (array), null);
-            client.send_notification ("textDocument/publishDiagnostics", buildDict(
-                uri: new Variant.string (uri),
-                diagnostics: result
-            ));
+                ((Vls.Reporter) ctx.code_context.report).warnlist.foreach (err => {
+                    if (err.loc.file != source)
+                        return;
+                    var from = new Position (err.loc.begin.line-1, err.loc.begin.column-1);
+                    var to = new Position (err.loc.end.line-1, err.loc.end.column);
 
-            log.printf (@"textDocument/publishDiagnostics: $uri\n");
+                    var diag = new Diagnostic ();
+                    diag.range = new Range (from, to);
+                    diag.severity = DiagnosticSeverity.Warning;
+                    diag.message = err.message;
+
+                    var node = Json.gobject_serialize (diag);
+                    array.add_element (node);
+                });
+
+                var result = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (array), null);
+                client.send_notification ("textDocument/publishDiagnostics", buildDict(
+                    uri: new Variant.string (uri),
+                    diagnostics: result
+                ));
+
+                log.printf (@"textDocument/publishDiagnostics: $uri\n");
+            }
         }
     }
 

@@ -10,14 +10,16 @@ class Vls.Context {
     private HashSet<string> _packages;
     private HashMap<string, TextDocument> _sources;
 
-    private bool _dirty = true;
+    public bool dirty { get; private set; default = true; }
+
     private Vala.CodeContext? _ctx;
 
     public Vala.CodeContext code_context {
         get {
-            if (_dirty) {
+            if (dirty) {
                 // generate a new code context 
                 _ctx = new Vala.CodeContext ();
+                dirty = false;
 
                 string version = "0.38.3"; //Config.libvala_version;
                 string[] parts = version.split(".");
@@ -47,8 +49,6 @@ class Vls.Context {
                     _ctx.add_source_file (entry.value.file);
                     return true;
                 });
-
-                _dirty = false;
             }
             return _ctx;
         }
@@ -62,48 +62,58 @@ class Vls.Context {
 
     public void add_define (string define) {
         if (_defines.add (define))
-            _dirty = true;
+            dirty = true;
     }
 
     public void add_package (string pkgname) {
         if (_packages.add (pkgname))
-            _dirty = true;
+            dirty = true;
     }
 
     public void remove_package (string pkgname) {
         if (_packages.remove (pkgname))
-            _dirty = true;
+            dirty = true;
     }
 
-    public void add_source_file (TextDocument document) {
+    /**
+     * Returns whether the document was added.
+     */
+    public bool add_source_file (TextDocument document) {
         if (_sources.has_key (document.uri))
-            return;
+            return false;
         _sources[document.uri] = document;
-        _dirty = true;
+        dirty = true;
+        return true;
     }
 
     public TextDocument? get_source_file (string uri) {
+        if (!_sources.has_key (uri))
+            return null;
         return _sources[uri];
+    }
+
+    public Collection<TextDocument> get_source_files () {
+        return _sources.values;
     }
 
     public void remove_source_file (string uri) {
         if (_sources.unset (uri))
-            _dirty = true;
+            dirty = true;
     }
 
     public void clear_defines () {
         _defines.clear ();
-        _dirty = true;
+        dirty = true;
     }
 
     public void clear_packages () {
         _packages.clear ();
-        _dirty = true;
+        dirty = true;
     }
 
     public void clear_sources () {
         _sources.clear ();
-        _dirty = true;
+        dirty = true;
     }
 
     /**
@@ -119,6 +129,6 @@ class Vls.Context {
      * call this before each semantic update
      */
     public void invalidate() {
-        _dirty = true;
+        dirty = true;
     }
 }
