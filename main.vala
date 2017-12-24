@@ -50,13 +50,14 @@ class Vls.Server {
                 this.textDocumentDidOpen(client, @params);
             else if (method == "textDocument/didChange")
                 this.textDocumentDidChange(client, @params);
+            else if (method == "exit")
+                this.exit (client, @params);
             else
                 log.printf (@"no handler for $method\n");
         });
 
         server.add_handler ("initialize", this.initialize);
         server.add_handler ("shutdown", this.shutdown);
-        server.add_handler ("exit", this.exit);
 
         log.printf ("Finished constructing\n");
     }
@@ -333,7 +334,7 @@ class Vls.Server {
         log.printf ("shutting down...\n");
     }
 
-    void exit (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void exit (Jsonrpc.Client client, Variant @params) {
         loop.quit ();
     }
 }
