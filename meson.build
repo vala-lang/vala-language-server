@@ -8,6 +8,7 @@ deps = [
     dependency('glib-2.0'),
     dependency('gobject-2.0'),
     dependency('gio-unix-2.0'),
+    dependency('gee-0.8'),
     libvala,
     jsonrpc_sp.get_variable('libjsonrpc_glib_dep'),
     jsonrpc_sp.get_variable('libjsonrpc_glib_vapi'),
@@ -24,6 +25,7 @@ src = files([
     'main.vala',
     'protocol.vala',
     'reporter.vala',
+    'context.vala'
 ])
 
 executable('vala-language-server',

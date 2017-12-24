@@ -6,7 +6,7 @@ struct CompileCommand {
     string command;
 }
 
-class TextDocument : Object {
+class Vls.TextDocument : Object {
     public Vala.SourceFile file { get; construct; }
     public string uri { get; construct; }
     public int version { get; construct set; }
@@ -21,14 +21,12 @@ class Vls.Server {
     Jsonrpc.Server server;
     MainLoop loop;
     HashTable<string, CompileCommand?> cc;
-    HashTable<string, TextDocument> docs;
-    Vala.CodeContext ctx;
+    Context ctx;
 
     public Server (MainLoop loop) {
         this.loop = loop;
 
         this.cc = new HashTable<string, CompileCommand?> (str_hash, str_equal);
-        this.docs = new HashTable<string, TextDocument> (str_hash, str_equal);
 
         // initialize logging
         log = FileStream.open (@"vls-$(new DateTime.now_local()).log", "a");
@@ -39,29 +37,7 @@ class Vls.Server {
         });
 
         // libvala setup
-        this.ctx = new Vala.CodeContext ();
-        Vala.CodeContext.push (ctx);
-
-        string version = "0.38.3"; //Config.libvala_version;
-        string[] parts = version.split(".");
-        assert (parts.length == 3);
-        assert (parts[0] == "0");
-        var minor = int.parse (parts[1]);
-
-        ctx.profile = Vala.Profile.GOBJECT;
-        for (int i = 2; i <= minor; i += 2) {
-            ctx.add_define ("VALA_0_%d".printf (i));
-        }
-        ctx.target_glib_major = 2;
-        ctx.target_glib_minor = 38;
-        for (int i = 16; i <= ctx.target_glib_minor; i += 2) {
-            ctx.add_define ("GLIB_2_%d".printf (i));
-        }
-        ctx.report = new Reporter ();
-        ctx.add_external_package ("glib-2.0");
-        ctx.add_external_package ("gobject-2.0");
-
-        Vala.CodeContext.pop ();
+        this.ctx = new Vls.Context ();
 
         this.server = new Jsonrpc.Server ();
         var stdin = new UnixInputStream (Posix.STDIN_FILENO, false);
@@ -217,16 +193,15 @@ class Vls.Server {
             for (int i = 0; i < args.length; ++i) {
                 if (args[i] == "--pkg") {
                     log.printf ("%s, --pkg %s\n", filename, args[i+1]);
-                    ctx.add_external_package (args[i+1]);
+                    ctx.add_package (args[i+1]);
                     ++i;
                 }
             }
         }
 
-        var source = new Vala.SourceFile (ctx, type, filename, fileContents);
-        ctx.add_source_file (source);
+        var source = new Vala.SourceFile (ctx.code_context, type, filename, fileContents);
         var doc = new TextDocument (source, uri);
-        docs.insert (uri, doc);
+        ctx.add_source_file (doc);
 
         // this.check ();
         // Vala.CodeContext.pop ();
@@ -239,7 +214,7 @@ class Vls.Server {
 
         var uri = (string) document.lookup_value ("uri", VariantType.STRING);
         var version = (int) document.lookup_value ("version", VariantType.INT64);
-        TextDocument? source = docs[uri];
+        TextDocument? source = ctx.get_source_file (uri);
 
         if (source == null) {
             log.printf (@"no document found for $uri\n");
@@ -260,36 +235,43 @@ class Vls.Server {
             }
         }
 
+        if (source.version > version) {
+            log.printf (@"rejecting outdated version of $uri\n");
+            return;
+        }
+
+        source.version = version;
+
         var iter = changes.iterator ();
         Variant? elem = null;
         var sb = new StringBuilder (source.file.content);
         while ((elem = iter.next_value ()) != null) {
             var changeEvent = parse_variant<TextDocumentContentChangeEvent> (elem);
 
-            if (changeEvent.range == null && changeEvent.rangeLength == null)
+            if (changeEvent.range == null && changeEvent.rangeLength == null) {
                 sb.assign (changeEvent.text);
-            else {
+            } else {
                 var start = changeEvent.range.start;
                 size_t pos = get_string_pos (sb.str, start.line, start.character);
                 sb.overwrite (pos, changeEvent.text);
             }
         }
         source.file.content = sb.str;
-        log.printf (@"publishDiagnostics (uri = $uri, filename = $(source.file.filename)\n");
         publishDiagnostics (client, source);
     }
 
     void publishDiagnostics (Jsonrpc.Client client, TextDocument document) {
         var source = document.file;
-        Vala.CodeContext.push (ctx);
+        ctx.invalidate ();
+        Vala.CodeContext.push (ctx.code_context);
         this.check ();
         Vala.CodeContext.pop ();
 
         string uri = document.uri;
-        if (ctx.report.get_errors () + ctx.report.get_warnings () > 0) {
+        if (ctx.code_context.report.get_errors () + ctx.code_context.report.get_warnings () > 0) {
             var array = new Json.Array ();
 
-            ((Vls.Reporter) ctx.report).errorlist.foreach (err => {
+            ((Vls.Reporter) ctx.code_context.report).errorlist.foreach (err => {
                 if (err.loc.file != source)
                     return;
                 var from = new Position (err.loc.begin.line-1, err.loc.begin.column-1);
@@ -304,7 +286,7 @@ class Vls.Server {
                 array.add_element (node);
             });
 
-            ((Vls.Reporter) ctx.report).warnlist.foreach (err => {
+            ((Vls.Reporter) ctx.code_context.report).warnlist.foreach (err => {
                 if (err.loc.file != source)
                     return;
                 var from = new Position (err.loc.begin.line-1, err.loc.begin.column-1);
@@ -330,18 +312,18 @@ class Vls.Server {
     }
 
     void check () {
-        if (ctx.report.get_errors () > 0) {
+        if (ctx.code_context.report.get_errors () > 0) {
             return;
         }
 
         var parser = new Vala.Parser ();
-        parser.parse (ctx);
+        parser.parse (ctx.code_context);
 
-        if (ctx.report.get_errors () > 0) {
+        if (ctx.code_context.report.get_errors () > 0) {
             return;
         }
 
-        ctx.check ();
+        ctx.code_context.check ();
     }
 
     void exit (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
