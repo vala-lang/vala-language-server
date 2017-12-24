@@ -145,7 +145,12 @@ class Vls.Server {
         // we should have a list of targets in JSON format
         string targets_json = proc_stdout;
         var targets_parser = new Json.Parser.immutable_new ();
-        targets_parser.load_from_data (targets_json);
+        try {
+            targets_parser.load_from_data (targets_json);
+        } catch (Error e) {
+            log.printf (@"failed to load targets for build dir: $(builddir)\n");
+            return;
+        }
 
         // for every target, get all files
         var node = targets_parser.get_root ().get_array ();
@@ -172,7 +177,12 @@ class Vls.Server {
             // add all source files to the project
             string files_json = proc_stdout;
             var files_parser = new Json.Parser.immutable_new ();
-            files_parser.load_from_data (files_json);
+            try {
+                files_parser.load_from_data (files_json);
+            } catch (Error e) {
+                log.printf (@"failed to get target files for $id (ID)\n");
+                return;
+            }
             var fnode = files_parser.get_root ().get_array ();
             fnode.foreach_element ((arr, index, node) => {
                 var filename = node.get_string ();
@@ -189,8 +199,11 @@ class Vls.Server {
             });
         });
 
-        // now, we want to 'compile' every source file at once
-        publishDiagnostics (client);
+        // compile everything ahead of time
+        ctx.invalidate ();
+        Vala.CodeContext.push (ctx.code_context);
+        this.check ();
+        Vala.CodeContext.pop ();
     }
 
     void initialize (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
@@ -341,8 +354,14 @@ class Vls.Server {
         }
 
         if (ctx.add_source_file (doc)) {
-            publishDiagnostics (client);
+            // context is invalidated
+            // we have to update everything
+            Vala.CodeContext.push (ctx.code_context);
+            this.check ();
+            Vala.CodeContext.pop ();
         }
+
+        publishDiagnostics (client, uri);
     }
 
     void textDocumentDidChange (Jsonrpc.Client client, Variant @params) {
@@ -407,8 +426,9 @@ class Vls.Server {
         publishDiagnostics (client);
     }
 
-    void publishDiagnostics (Jsonrpc.Client client, TextDocument? doc = null) {
+    void publishDiagnostics (Jsonrpc.Client client, string? doc_uri = null) {
         Collection<TextDocument> docs;
+        TextDocument? doc = doc_uri == null ? null : ctx.get_source_file (doc_uri);
 
         if (doc != null) {
             docs = new ArrayList<TextDocument>();
