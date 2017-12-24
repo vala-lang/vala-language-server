@@ -1,5 +1,4 @@
 using Gee;
-using GLib;
 
 /**
  * The point of this class is to refresh the Vala.CodeContext every time
@@ -8,6 +7,7 @@ using GLib;
 class Vls.Context {
     private HashSet<string> _defines;
     private HashSet<string> _packages;
+    private HashSet<string> _usings;
     private HashMap<string, TextDocument> _sources;
 
     public bool dirty { get; private set; default = true; }
@@ -45,6 +45,11 @@ class Vls.Context {
                 foreach (var package in _packages)
                     _ctx.add_external_package (package);
 
+                foreach (string using_directive in _usings) {
+                    var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, using_directive, null));
+                    _ctx.root.add_using_directive (ns_ref);
+                }
+
                 _sources.@foreach (entry => {
                     _ctx.add_source_file (entry.value.file);
                     return true;
@@ -57,6 +62,7 @@ class Vls.Context {
     public Context() {
         _defines = new HashSet<string> (d => str_hash(d), (a,b) => str_equal (a,b));
         _packages = new HashSet<string> (d => str_hash(d), (a,b) => str_equal (a,b));
+        _usings = new HashSet<string> (d => str_hash(d), (a,b) => str_equal(a,b));
         _sources = new HashMap<string, TextDocument> (d => str_hash (d), (a,b) => str_equal (a,b));
     }
 
@@ -72,6 +78,11 @@ class Vls.Context {
 
     public void remove_package (string pkgname) {
         if (_packages.remove (pkgname))
+            dirty = true;
+    }
+
+    public void add_using (string using_directive) {
+        if (_usings.add (using_directive))
             dirty = true;
     }
 

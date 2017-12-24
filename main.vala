@@ -37,6 +37,11 @@ class Vls.TextDocument : Object {
             _type = Vala.SourceFileType.PACKAGE;
         _filename = filename;
         _file = new Vala.SourceFile (ctx.code_context, _type, _filename, content);
+        if (_type == Vala.SourceFileType.SOURCE) {
+            var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib", null));
+            _file.add_using_directive (ns_ref);
+            ctx.add_using ("GLib");
+        }
     }
 }
 
