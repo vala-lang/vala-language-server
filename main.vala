@@ -8,7 +8,6 @@ struct CompileCommand {
 }
 
 class Vls.TextDocument : Object {
-    private bool _dirty = false;
     private Context _ctx;
     private Vala.SourceFileType _type;
     private string _filename;
@@ -16,10 +15,8 @@ class Vls.TextDocument : Object {
     private Vala.SourceFile? _file;
     public Vala.SourceFile file { 
         get {
-            if (_dirty || _ctx.dirty) {
-                _file = new Vala.SourceFile (_ctx.code_context, _type, _filename);
-                _dirty = false;
-            }
+            if (_ctx.dirty)
+                _file.context = _ctx.code_context;
             return _file;
         }
     }
