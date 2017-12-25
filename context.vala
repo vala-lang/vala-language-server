@@ -28,6 +28,7 @@ class Vls.Context {
                 var minor = int.parse (parts[1]);
 
                 _ctx.profile = Vala.Profile.GOBJECT;
+                _ctx.add_define ("GOBJECT");
                 for (int i = 2; i <= minor; i += 2) {
                     _ctx.add_define ("VALA_0_%d".printf (i));
                 }
