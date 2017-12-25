@@ -46,13 +46,19 @@ class Vls.Context {
                 foreach (var package in _packages)
                     _ctx.add_external_package (package);
 
-                foreach (string using_directive in _usings) {
-                    var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, using_directive, null));
-                    _ctx.root.add_using_directive (ns_ref);
-                }
-
-                foreach (TextDocument doc in _sources.values)
+                foreach (TextDocument doc in _sources.values) {
+                    doc.file.context = _ctx;
                     _ctx.add_source_file (doc.file);
+                    // clear all using directives (to avoid "T ambiguous with T" errors)
+                    doc.file.current_using_directives = new Vala.ArrayList<Vala.UsingDirective> ();
+                    // The parser will only add using directives found in each source file.
+                    // Therefore, we have to add these directives manually:
+                    foreach (string using_directive in _usings) {
+                        var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, using_directive, null));
+                        doc.file.add_using_directive (ns_ref);
+                        _ctx.root.add_using_directive (ns_ref);
+                    }
+                }
             }
             return _ctx;
         }
