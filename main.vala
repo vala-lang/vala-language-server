@@ -574,7 +574,7 @@ class Vls.Server {
     void shutdown (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         ctx.clear ();
         try {
-            client.reply (id, buildDict());
+            client.reply (id, buildDict(null));
         } catch (Error e) {
             log.printf (@"shutdown: failed to reply to client: $(e.message)\n");
         }
