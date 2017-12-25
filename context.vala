@@ -58,6 +58,10 @@ class Vls.Context {
                         doc.file.add_using_directive (ns_ref);
                         _ctx.root.add_using_directive (ns_ref);
                     }
+
+                    // clear all code nodes from file
+                    doc.file.get_nodes ().clear ();
+                    assert (doc.file.get_nodes ().size == 0);
                 }
             }
             return _ctx;
