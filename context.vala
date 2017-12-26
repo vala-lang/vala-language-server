@@ -59,6 +59,10 @@ class Vls.Context {
                         _ctx.root.add_using_directive (ns_ref);
                     }
 
+                    // clear all comments from file
+                    doc.file.get_comments ().clear ();
+                    assert (doc.file.get_comments ().size == 0);
+
                     // clear all code nodes from file
                     doc.file.get_nodes ().clear ();
                     assert (doc.file.get_nodes ().size == 0);
