@@ -69,10 +69,10 @@ class Vls.Context {
     }
 
     public Context() {
-        _defines = new HashSet<string> (d => str_hash(d), (a,b) => str_equal (a,b));
-        _packages = new HashSet<string> (d => str_hash(d), (a,b) => str_equal (a,b));
-        _usings = new HashSet<string> (d => str_hash(d), (a,b) => str_equal(a,b));
-        _sources = new HashMap<string, TextDocument> (d => str_hash (d), (a,b) => str_equal (a,b));
+        _defines = new HashSet<string> ();
+        _packages = new HashSet<string> ();
+        _usings = new HashSet<string> (); 
+        _sources = new HashMap<string, TextDocument> ();
     }
 
     public void add_define (string define) {
