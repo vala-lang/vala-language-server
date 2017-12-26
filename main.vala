@@ -117,6 +117,11 @@ class Vls.Server {
         }
     }
 
+    bool is_source_file (string filename) {
+        return filename.has_suffix (".vapi") || filename.has_suffix (".vala")
+            || filename.has_suffix (".gs");
+    }
+
     void meson_analyze_build_dir (Jsonrpc.Client client, string rootdir, string builddir) {
         string[] spawn_args = {"meson", "introspect", builddir, "--targets"};
         string[]? spawn_env = null; // Environ.get ();
@@ -206,15 +211,17 @@ class Vls.Server {
             var fnode = files_parser.get_root ().get_array ();
             fnode.foreach_element ((arr, index, node) => {
                 var filename = node.get_string ();
-                if (!Path.is_absolute (filename)) {
-                    filename = Path.build_path (Path.DIR_SEPARATOR_S, rootdir, filename);
-                }
-                try {
-                    var doc = new TextDocument (ctx, filename);
-                    ctx.add_source_file (doc);
-                    log.printf (@"Adding text document: $filename\n");
-                } catch (Error e) {
-                    log.printf (@"Failed to create text document: $(e.message)\n");
+                if (is_source_file (filename)) {
+                    if (!Path.is_absolute (filename)) {
+                        filename = Path.build_path (Path.DIR_SEPARATOR_S, rootdir, filename);
+                    }
+                    try {
+                        var doc = new TextDocument (ctx, filename);
+                        ctx.add_source_file (doc);
+                        log.printf (@"Adding text document: $filename\n");
+                    } catch (Error e) {
+                        log.printf (@"Failed to create text document: $(e.message)\n");
+                    }
                 }
             });
         });
