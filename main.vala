@@ -117,7 +117,7 @@ class Vls.Server {
         }
     }
 
-    void analyze_build_dir (Jsonrpc.Client client, string rootdir, string builddir) {
+    void meson_analyze_build_dir (Jsonrpc.Client client, string rootdir, string builddir) {
         string[] spawn_args = {"meson", "introspect", builddir, "--targets"};
         string[]? spawn_env = null; // Environ.get ();
         string proc_stdout;
@@ -253,12 +253,48 @@ class Vls.Server {
             ctx.add_package (name);
             log.printf (@"adding package $name\n");
         });
+    }
 
-        // compile everything ahead of time
-        if (ctx.dirty) {
-            Vala.CodeContext.push (ctx.code_context);
-            this.check ();
-            Vala.CodeContext.pop ();
+    void cc_analyze () {
+        // analyze compile_commands.json
+        foreach (var doc in ctx.get_source_files ()) {
+            string filename = doc.file.filename;
+            string ccjson = findCompileCommands (filename);
+            if (ccjson != null) {
+                var parser = new Json.Parser.immutable_new ();
+                try {
+                    parser.load_from_file (ccjson);
+                    var ccnode = parser.get_root ().get_array ();
+                    ccnode.foreach_element ((arr, index, node) => {
+                        var o = node.get_object ();
+                        string dir = o.get_string_member ("directory");
+                        string file = o.get_string_member ("file");
+                        string path = File.new_for_path (Path.build_filename (dir, file)).get_path ();
+                        string cmd = o.get_string_member ("command");
+                        log.printf ("got args for %s\n", path);
+                        cc.insert (path, CompileCommand() {
+                            path = path,
+                            directory = dir,
+                            command = cmd
+                        });
+                    });
+                } catch (Error e) {
+                    log.printf ("failed to parse %s: %s\n", ccjson, e.message);
+                }
+            }
+
+            log.printf ("finding args for %s\n", filename);
+            CompileCommand? command = cc[filename];
+            if (command != null) {
+                string[] args = command.command.split (" ");
+                for (int i = 0; i < args.length; ++i) {
+                    if (args[i] == "--pkg") {
+                        log.printf ("%s, --pkg %s\n", filename, args[i+1]);
+                        ctx.add_package (args[i+1]);
+                        ++i;
+                    }
+                }
+            }
         }
     }
 
@@ -282,7 +318,16 @@ class Vls.Server {
             
             // test again
             if (ninja != null)
-                analyze_build_dir (client, root_path, Path.get_dirname (ninja));
+                meson_analyze_build_dir (client, root_path, Path.get_dirname (ninja));
+        }
+
+        cc_analyze ();
+
+        // compile everything ahead of time
+        if (ctx.dirty) {
+            Vala.CodeContext.push (ctx.code_context);
+            this.check ();
+            Vala.CodeContext.pop ();
         }
 
         try {
@@ -365,43 +410,6 @@ class Vls.Server {
         } catch (Error e) {
             log.printf (@"failed to convert URI $uri to filename: $(e.message)\n");
             return;
-        }
-
-        string ccjson = findCompileCommands (filename);
-        if (ccjson != null) {
-            var parser = new Json.Parser.immutable_new ();
-            try {
-                parser.load_from_file (ccjson);
-                var node = parser.get_root ().get_array ();
-                node.foreach_element ((arr, index, node) => {
-                    var o = node.get_object ();
-                    string dir = o.get_string_member ("directory");
-                    string file = o.get_string_member ("file");
-                    string path = File.new_for_path (Path.build_filename (dir, file)).get_path ();
-                    string cmd = o.get_string_member ("command");
-                    log.printf ("got args for %s\n", path);
-                    cc.insert (path, CompileCommand() {
-                        path = path,
-                        directory = dir,
-                        command = cmd
-                    });
-                });
-            } catch (Error e) {
-                log.printf ("failed to parse %s: %s\n", ccjson, e.message);
-            }
-        }
-
-        log.printf ("finding args for %s\n", filename);
-        CompileCommand? command = cc[filename];
-        if (command != null) {
-            string[] args = command.command.split (" ");
-            for (int i = 0; i < args.length; ++i) {
-                if (args[i] == "--pkg") {
-                    log.printf ("%s, --pkg %s\n", filename, args[i+1]);
-                    ctx.add_package (args[i+1]);
-                    ++i;
-                }
-            }
         }
 
         TextDocument doc;
