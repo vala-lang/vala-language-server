@@ -412,15 +412,17 @@ class Vls.Server {
             return;
         }
 
-        TextDocument doc;
-        try {
-            doc = new TextDocument (ctx, filename, fileContents);
-        } catch (Error e) {
-            log.printf (@"failed to create text document: $(e.message)\n");
-            return;
-        }
+        if (ctx.get_source_file (uri) == null) {
+            TextDocument doc;
+            try {
+                doc = new TextDocument (ctx, filename, fileContents);
+            } catch (Error e) {
+                log.printf (@"failed to create text document: $(e.message)\n");
+                return;
+            }
 
-        ctx.add_source_file (doc);
+            ctx.add_source_file (doc);
+        }
 
         // compile everything if context is dirty
         if (ctx.dirty) {
