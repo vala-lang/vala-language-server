@@ -9,6 +9,7 @@ class Vls.Context {
     private HashSet<string> _packages;
     private HashSet<string> _usings;
     private HashMap<string, TextDocument> _sources;
+    private HashSet<string> _csources;
 
     public bool dirty { get; private set; default = true; }
 
@@ -20,6 +21,7 @@ class Vls.Context {
                 // generate a new code context 
                 _ctx = new Vala.CodeContext ();
                 dirty = false;
+
 
                 string version = "0.38.3"; //Config.libvala_version;
                 string[] parts = version.split(".");
@@ -77,6 +79,7 @@ class Vls.Context {
         _packages = new HashSet<string> ();
         _usings = new HashSet<string> (); 
         _sources = new HashMap<string, TextDocument> ();
+        _csources = new HashSet<string> ();
     }
 
     public void add_define (string define) {
@@ -125,6 +128,29 @@ class Vls.Context {
             dirty = true;
     }
 
+    public bool add_c_source_file (string uri) {
+        return _csources.add (uri);
+    }
+
+    public bool remove_c_source_file (string uri) {
+        return _csources.remove (uri);
+    }
+
+    public void clear_c_sources () {
+        _csources.clear ();
+    }
+
+    public Collection<string> get_filenames () {
+        var col = new HashSet<string> ();
+        try {
+            foreach (string uri in _sources.keys)
+                col.add (Filename.from_uri (uri));
+            foreach (string uri in _csources)
+                col.add (Filename.from_uri (uri));
+        } catch { /* ignore */ }
+        return col;
+    }
+
     public void clear_defines () {
         _defines.clear ();
         dirty = true;
@@ -136,6 +162,7 @@ class Vls.Context {
     }
 
     public void clear_sources () {
+        _csources.clear ();
         _sources.clear ();
         dirty = true;
     }

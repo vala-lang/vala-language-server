@@ -122,6 +122,10 @@ class Vls.Server {
             || filename.has_suffix (".gs");
     }
 
+    bool is_c_source_file (string filename) {
+        return filename.has_suffix (".c") || filename.has_suffix (".h");
+    }
+
     void meson_analyze_build_dir (Jsonrpc.Client client, string rootdir, string builddir) {
         string[] spawn_args = {"meson", "introspect", builddir, "--targets"};
         string[]? spawn_env = null; // Environ.get ();
@@ -211,17 +215,26 @@ class Vls.Server {
             var fnode = files_parser.get_root ().get_array ();
             fnode.foreach_element ((arr, index, node) => {
                 var filename = node.get_string ();
+                if (!Path.is_absolute (filename)) {
+                    filename = Path.build_path (Path.DIR_SEPARATOR_S, rootdir, filename);
+                }
                 if (is_source_file (filename)) {
-                    if (!Path.is_absolute (filename)) {
-                        filename = Path.build_path (Path.DIR_SEPARATOR_S, rootdir, filename);
-                    }
                     try {
-                        var doc = new TextDocument (ctx, filename);
-                        ctx.add_source_file (doc);
-                        log.printf (@"Adding text document: $filename\n");
+                            var doc = new TextDocument (ctx, filename);
+                            ctx.add_source_file (doc);
+                            log.printf (@"Adding text document: $filename\n");
                     } catch (Error e) {
                         log.printf (@"Failed to create text document: $(e.message)\n");
                     }
+                } else if (is_c_source_file (filename)) {
+                    try {
+                        ctx.add_c_source_file (Filename.to_uri (filename));
+                        log.printf (@"Adding C source file: $filename\n");
+                    } catch (Error e) {
+                        log.printf (@"Failed to add C source file: $(e.message)\n");
+                    }
+                } else {
+                    log.printf (@"Unknown file type: $filename\n");
                 }
             });
         });
@@ -262,43 +275,45 @@ class Vls.Server {
         });
     }
 
-    void cc_analyze () {
-        // analyze compile_commands.json
-        foreach (var doc in ctx.get_source_files ()) {
-            string filename = doc.file.filename;
-            string ccjson = findCompileCommands (filename);
-            if (ccjson != null) {
-                var parser = new Json.Parser.immutable_new ();
-                try {
-                    parser.load_from_file (ccjson);
-                    var ccnode = parser.get_root ().get_array ();
-                    ccnode.foreach_element ((arr, index, node) => {
-                        var o = node.get_object ();
-                        string dir = o.get_string_member ("directory");
-                        string file = o.get_string_member ("file");
-                        string path = File.new_for_path (Path.build_filename (dir, file)).get_path ();
-                        string cmd = o.get_string_member ("command");
-                        log.printf ("got args for %s\n", path);
-                        cc.insert (path, CompileCommand() {
-                            path = path,
-                            directory = dir,
-                            command = cmd
-                        });
+    void cc_analyze (string root_dir) {
+        string ccjson = findCompileCommands (root_dir);
+        if (ccjson != null) {
+            var parser = new Json.Parser.immutable_new ();
+            try {
+                parser.load_from_file (ccjson);
+                var ccnode = parser.get_root ().get_array ();
+                ccnode.foreach_element ((arr, index, node) => {
+                    var o = node.get_object ();
+                    string dir = o.get_string_member ("directory");
+                    string file = o.get_string_member ("file");
+                    string path = File.new_for_path (Path.build_filename (dir, file)).get_path ();
+                    string cmd = o.get_string_member ("command");
+                    log.printf ("got args for %s\n", path);
+                    cc.insert (path, CompileCommand() {
+                        path = path,
+                        directory = dir,
+                        command = cmd
                     });
-                } catch (Error e) {
-                    log.printf ("failed to parse %s: %s\n", ccjson, e.message);
-                }
+                });
+            } catch (Error e) {
+                log.printf ("failed to parse %s: %s\n", ccjson, e.message);
             }
+        }
 
-            log.printf ("finding args for %s\n", filename);
+        // analyze compile_commands.json
+        foreach (string filename in ctx.get_filenames ()) {
+            log.printf ("analyzing args for %s\n", filename);
             CompileCommand? command = cc[filename];
             if (command != null) {
-                string[] args = command.command.split (" ");
-                for (int i = 0; i < args.length; ++i) {
-                    if (args[i] == "--pkg") {
-                        log.printf ("%s, --pkg %s\n", filename, args[i+1]);
-                        ctx.add_package (args[i+1]);
-                        ++i;
+                MatchInfo minfo;
+                if (/--pkg[= ](\S+)/.match (command.command, 0, out minfo)) {
+                    try {
+                        do {
+                            ctx.add_package (minfo.fetch (1));
+                            log.printf (@"adding package $(minfo.fetch (1))\n");
+                        } while (minfo.next ());
+                    } catch (Error e) {
+                        log.printf (@"regex match error: $(e.message)\n");
                     }
                 }
             }
@@ -328,7 +343,7 @@ class Vls.Server {
                 meson_analyze_build_dir (client, root_path, Path.get_dirname (ninja));
         }
 
-        cc_analyze ();
+        cc_analyze (root_path);
 
         // compile everything ahead of time
         if (ctx.dirty) {
