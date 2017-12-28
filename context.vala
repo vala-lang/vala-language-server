@@ -20,7 +20,7 @@ class Vls.Context {
             if (dirty) {
                 if (_ctx != null) {
                     // stupid workaround for memory leaks in Vala 0.38
-                    workaround_038 (_ctx);
+                    workaround_038 (_ctx, get_source_files ());
                 }
                 // generate a new code context 
                 _ctx = new Vala.CodeContext ();

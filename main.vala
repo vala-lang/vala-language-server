@@ -12,14 +12,7 @@ class Vls.TextDocument : Object {
     private Vala.SourceFileType _type;
     private string _filename;
 
-    private Vala.SourceFile? _file;
-    public Vala.SourceFile file { 
-        get {
-            if (_ctx.dirty)
-                _file.context = _ctx.code_context;
-            return _file;
-        }
-    }
+    public Vala.SourceFile file { get; private set; }
 
     public string uri { get; construct; }
     public int version { get; construct set; }
@@ -36,10 +29,10 @@ class Vls.TextDocument : Object {
         else if (uri.has_suffix (".vapi"))
             _type = Vala.SourceFileType.PACKAGE;
         _filename = filename;
-        _file = new Vala.SourceFile (ctx.code_context, _type, _filename, content);
+        file = new Vala.SourceFile (ctx.code_context, _type, _filename, content);
         if (_type == Vala.SourceFileType.SOURCE) {
             var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib", null));
-            _file.add_using_directive (ns_ref);
+            file.add_using_directive (ns_ref);
             ctx.add_using ("GLib");
         }
     }
