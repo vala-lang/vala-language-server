@@ -313,6 +313,41 @@ class Vls.Server {
         }
     }
 
+    void add_vala_files (File dir) throws Error {
+        var enumerator = dir.enumerate_children ("standard::*", FileQueryInfoFlags.NOFOLLOW_SYMLINKS);
+        FileInfo info;
+
+        try {
+            while ((info = enumerator.next_file (null)) != null) {
+                if (info.get_file_type () == FileType.DIRECTORY)
+                    add_vala_files (enumerator.get_child (info));
+                else {
+                    var file = enumerator.get_child (info);
+                    string fname = file.get_path ();
+                    if (is_source_file (fname)) {
+                        try {
+                            var doc = new TextDocument (ctx, fname);
+                            ctx.add_source_file (doc);
+                            log.printf (@"Adding text document: $fname\n");
+                        } catch (Error e) {
+                            log.printf (@"Failed to create text document: $(e.message)\n");
+                        }
+                    }
+                }
+            }
+        } catch (Error e) {
+            log.printf (@"Error adding files: $(e.message)\n");
+        }
+    }
+
+    void default_analyze_build_dir (Jsonrpc.Client client, string root_dir) {
+        try {
+            add_vala_files (File.new_for_path (root_dir));
+        } catch (Error e) {
+            log.printf (@"Error adding files $(e.message)\n");
+        }
+    }
+
     void initialize (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var dict = new VariantDict (@params);
 
@@ -334,6 +369,12 @@ class Vls.Server {
             // test again
             if (ninja != null)
                 meson_analyze_build_dir (client, root_path, Path.get_dirname (ninja));
+        } else {
+            /* if this isn't a Meson project, we should 
+             * just take every single file
+             */
+            log.printf (@"No meson project found. Adding all Vala files in project directory\n");
+            default_analyze_build_dir (client, root_path);
         }
 
         cc_analyze (root_path);
