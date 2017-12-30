@@ -2,7 +2,7 @@ class Vls.SourceError {
     public Vala.SourceReference? loc;
     public string message;
 
-    public SourceError(Vala.SourceReference? loc, string message) {
+    public SourceError (Vala.SourceReference? loc, string message) {
         this.loc = loc;
         this.message = message;
     }
@@ -17,8 +17,12 @@ class Vls.Reporter : Vala.Report {
         ++warnings;
     }
     public override void err (Vala.SourceReference? source, string message) {
-        errorlist.add (new SourceError (source, message));
-        ++errors;
+        if (source == null) { // internal compiler error
+            stderr.printf ("Error: %s\n", message);
+        } else {
+            errorlist.add (new SourceError (source, message));
+            ++errors;
+        }
     }
     public override void note (Vala.SourceReference? source, string message) {
         warnlist.add (new SourceError (source, message));
