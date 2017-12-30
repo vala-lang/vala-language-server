@@ -170,7 +170,7 @@ class Vls.Server {
 
             if (fname.has_suffix (".vapi")) {
                 if (!Path.is_absolute (fname)) {
-                    fname = Path.build_path (Path.DIR_SEPARATOR_S, builddir, fname);
+                    fname = Path.build_filename (builddir, fname);
                 }
                 try {
                     var doc = new TextDocument (ctx, fname);
@@ -209,7 +209,7 @@ class Vls.Server {
             fnode.foreach_element ((arr, index, node) => {
                 var filename = node.get_string ();
                 if (!Path.is_absolute (filename)) {
-                    filename = Path.build_path (Path.DIR_SEPARATOR_S, rootdir, filename);
+                    filename = Path.build_filename (rootdir, filename);
                 }
                 if (is_source_file (filename)) {
                     try {
