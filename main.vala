@@ -403,7 +403,7 @@ class Vls.Server {
 
         // compile everything ahead of time
         if (ctx.dirty) {
-            ctx.run (this.check);
+            ctx.check ();
         }
 
         try {
@@ -502,7 +502,7 @@ class Vls.Server {
 
         // compile everything if context is dirty
         if (ctx.dirty) {
-            ctx.run (this.check);
+            ctx.check ();
         }
 
         publishDiagnostics (client, uri);
@@ -563,7 +563,7 @@ class Vls.Server {
         ctx.invalidate ();
 
         // we have to update everything
-        ctx.run (this.check);
+        ctx.check ();
 
         publishDiagnostics (client);
     }
@@ -636,21 +636,6 @@ class Vls.Server {
                 log.printf (@"textDocument/publishDiagnostics: $uri\n");
             }
         }
-    }
-
-    void check () {
-        if (ctx.code_context.report.get_errors () > 0) {
-            return;
-        }
-
-        var parser = new Vala.Parser ();
-        parser.parse (ctx.code_context);
-
-        if (ctx.code_context.report.get_errors () > 0) {
-            return;
-        }
-
-        ctx.code_context.check ();
     }
 
     void shutdown (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {

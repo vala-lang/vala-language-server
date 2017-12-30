@@ -207,4 +207,21 @@ class Vls.Context {
         f ();
         Vala.CodeContext.pop ();
     }
+
+    public void check () {
+        this.run (() => {
+            if (report.get_errors () > 0) {
+                return;
+            }
+
+            var parser = new Vala.Parser ();
+            parser.parse (code_context);
+
+            if (report.get_errors () > 0) {
+                return;
+            }
+
+            code_context.check ();
+        });
+    }
 }
