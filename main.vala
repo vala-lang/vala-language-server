@@ -213,9 +213,9 @@ class Vls.Server {
                 }
                 if (is_source_file (filename)) {
                     try {
-                            var doc = new TextDocument (ctx, filename);
-                            ctx.add_source_file (doc);
-                            log.printf (@"Adding text document: $filename\n");
+                        var doc = new TextDocument (ctx, filename);
+                        ctx.add_source_file (doc);
+                        log.printf (@"Adding text document: $filename\n");
                     } catch (Error e) {
                         log.printf (@"Failed to create text document: $(e.message)\n");
                     }
@@ -399,7 +399,7 @@ class Vls.Server {
                 )
             ));
         } catch (Error e) {
-            log.printf (@"initialize: failed to reply to client: $(e.message)");
+            log.printf (@"initialize: failed to reply to client: $(e.message)\n");
         }
     }
 
