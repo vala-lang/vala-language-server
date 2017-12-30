@@ -217,6 +217,9 @@ class Vls.Context {
             var parser = new Vala.Parser ();
             parser.parse (code_context);
 
+            var genie_parser = new Vala.Genie.Parser ();
+            genie_parser.parse (code_context);
+
             if (report.get_errors () > 0) {
                 return;
             }
