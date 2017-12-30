@@ -392,9 +392,7 @@ class Vls.Server {
 
         // compile everything ahead of time
         if (ctx.dirty) {
-            Vala.CodeContext.push (ctx.code_context);
-            this.check ();
-            Vala.CodeContext.pop ();
+            ctx.run (this.check);
         }
 
         try {
@@ -493,9 +491,7 @@ class Vls.Server {
 
         // compile everything if context is dirty
         if (ctx.dirty) {
-            Vala.CodeContext.push (ctx.code_context);
-            this.check ();
-            Vala.CodeContext.pop ();
+            ctx.run (this.check);
         }
 
         publishDiagnostics (client, uri);
@@ -556,9 +552,7 @@ class Vls.Server {
         ctx.invalidate ();
 
         // we have to update everything
-        Vala.CodeContext.push (ctx.code_context);
-        this.check ();
-        Vala.CodeContext.pop ();
+        ctx.run (this.check);
 
         publishDiagnostics (client);
     }

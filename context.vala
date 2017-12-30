@@ -188,4 +188,12 @@ class Vls.Context {
     public void invalidate() {
         dirty = true;
     }
+
+    public delegate void RunFunc ();
+
+    public void run (RunFunc f) {
+        Vala.CodeContext.push (this.code_context);
+        f ();
+        Vala.CodeContext.pop ();
+    }
 }
