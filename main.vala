@@ -51,7 +51,7 @@ class Vls.Server {
         this.cc = new HashTable<string, CompileCommand?> (str_hash, str_equal);
 
         // initialize logging
-        log = FileStream.open (@"vls-$(new DateTime.now_local()).log", "a");
+        log = FileStream.open (@"$(Environment.get_tmp_dir())/vls-$(new DateTime.now_local()).log", "a");
         Posix.dup2 (log.fileno (), Posix.STDERR_FILENO);
         Timeout.add (3000, () => {
             log.printf (@"$(new DateTime.now_local()): listening...\n");
