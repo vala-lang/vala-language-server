@@ -367,13 +367,17 @@ class Vls.Server {
             }
             
             // test again
-            if (ninja != null)
+            if (ninja != null) {
+                log.printf ("Found meson project: %s\nninja: %s\n", meson, ninja);
                 meson_analyze_build_dir (client, root_path, Path.get_dirname (ninja));
+            } else {
+                log.printf ("Found meson.build but not build.ninja: %s\n", meson);
+            }
         } else {
             /* if this isn't a Meson project, we should 
              * just take every single file
              */
-            log.printf (@"No meson project found. Adding all Vala files in project directory\n");
+            log.printf ("No meson project found. Adding all Vala files in %s\n", root_path);
             default_analyze_build_dir (client, root_path);
         }
 
