@@ -24,8 +24,8 @@ class Vls.Context {
                 }
                 // generate a new code context 
                 _ctx = new Vala.CodeContext ();
+                Vala.CodeContext.push (_ctx);
                 dirty = false;
-
 
                 string version = "0.38.3"; //Config.libvala_version;
                 string[] parts = version.split(".");
@@ -73,6 +73,8 @@ class Vls.Context {
                     doc.file.get_nodes ().clear ();
                     assert (doc.file.get_nodes ().size == 0);
                 }
+
+                Vala.CodeContext.pop ();
             }
             return _ctx;
         }
