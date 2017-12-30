@@ -582,10 +582,10 @@ class Vls.Server {
         foreach (var document in docs) {
             var source = document.file;
             string uri = document.uri;
-            if (ctx.code_context.report.get_errors () + ctx.code_context.report.get_warnings () > 0) {
+            if (ctx.report.get_errors () + ctx.report.get_warnings () > 0) {
                 var array = new Json.Array ();
 
-                ((Vls.Reporter) ctx.code_context.report).errorlist.foreach (err => {
+                ctx.report.errorlist.foreach (err => {
                     if (err.loc.file != source)
                         return;
                     var from = new Position (err.loc.begin.line-1, err.loc.begin.column-1);
@@ -600,7 +600,7 @@ class Vls.Server {
                     array.add_element (node);
                 });
 
-                ((Vls.Reporter) ctx.code_context.report).warnlist.foreach (err => {
+                ctx.report.warnlist.foreach (err => {
                     if (err.loc.file != source)
                         return;
                     var from = new Position (err.loc.begin.line-1, err.loc.begin.column-1);

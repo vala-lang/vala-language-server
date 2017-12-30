@@ -208,6 +208,12 @@ class Vls.Context {
         Vala.CodeContext.pop ();
     }
 
+    public Reporter report {
+        get {
+            return (Reporter) this.code_context.report;
+        }
+    }
+
     public void check () {
         this.run (() => {
             if (report.get_errors () > 0) {
