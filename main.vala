@@ -269,8 +269,10 @@ class Vls.Server {
     }
 
     void cc_analyze (string root_dir) {
+        log.printf ("looking for compile_commands.json in %s\n", root_dir);
         string ccjson = findCompileCommands (root_dir);
         if (ccjson != null) {
+            log.printf ("found at %s\n", ccjson);
             var parser = new Json.Parser.immutable_new ();
             try {
                 parser.load_from_file (ccjson);
@@ -428,8 +430,8 @@ class Vls.Server {
     string findCompileCommands (string filename) {
         string r = null, p = filename;
         do {
-            p = Path.get_dirname (p);
             r = findFile (p, "compile_commands.json");
+            p = Path.get_dirname (p);
         } while (r == null && p != "/" && p != ".");
         return r;
     }
