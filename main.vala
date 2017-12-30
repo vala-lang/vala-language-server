@@ -316,6 +316,17 @@ class Vls.Server {
                         log.printf (@"regex match error: $(e.message)\n");
                     }
                 }
+
+                if (/--vapidir[= ](\S+)/.match (command.command, 0, out minfo)) {
+                    try {
+                        do {
+                            ctx.add_vapidir (minfo.fetch (1));
+                            log.printf (@"adding package $(minfo.fetch (1))\n");
+                        } while (minfo.next ());
+                    } catch (Error e) {
+                        log.printf (@"regex match error: $(e.message)\n");
+                    }
+                }
             }
         }
     }

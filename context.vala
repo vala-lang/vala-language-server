@@ -10,6 +10,7 @@ class Vls.Context {
     private HashSet<string> _usings;
     private HashMap<string, TextDocument> _sources;
     private HashSet<string> _csources;
+    private HashSet<string> _vapidirs;
 
     public bool dirty { get; private set; default = true; }
 
@@ -49,6 +50,8 @@ class Vls.Context {
                 _ctx.add_external_package ("glib-2.0");
                 _ctx.add_external_package ("gobject-2.0");
 
+                _ctx.vapi_directories = _vapidirs.to_array ();
+
                 foreach (var package in _packages)
                     _ctx.add_external_package (package);
 
@@ -86,6 +89,7 @@ class Vls.Context {
         _usings = new HashSet<string> (); 
         _sources = new HashMap<string, TextDocument> ();
         _csources = new HashSet<string> ();
+        _vapidirs = new HashSet<string> ();
     }
 
     public void add_define (string define) {
@@ -155,6 +159,11 @@ class Vls.Context {
                 col.add (Filename.from_uri (uri));
         } catch { /* ignore */ }
         return col;
+    }
+
+    public void add_vapidir (string dir) {
+        if (_vapidirs.add (dir))
+            dirty = true;
     }
 
     public void clear_defines () {
