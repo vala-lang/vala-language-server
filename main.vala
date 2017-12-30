@@ -44,6 +44,10 @@ class Vls.Server {
     MainLoop loop;
     HashTable<string, CompileCommand?> cc;
     Context ctx;
+    HashTable<string, NotificationHandler> notif_handlers;
+
+    [CCode (has_target = false)]
+    delegate void NotificationHandler (Vls.Server self, Jsonrpc.Client client, Variant @params);
 
     public Server (MainLoop loop) {
         this.loop = loop;
@@ -66,20 +70,21 @@ class Vls.Server {
         var stdout = new UnixOutputStream (Posix.STDOUT_FILENO, false);
         server.accept_io_stream (new SimpleIOStream (stdin, stdout));
 
+        notif_handlers = new HashTable <string, NotificationHandler> (str_hash, str_equal);
+
         server.notification.connect ((client, method, @params) => {
             log.printf (@"Got notification! $method\n");
-            if (method == "textDocument/didOpen")
-                this.textDocumentDidOpen(client, @params);
-            else if (method == "textDocument/didChange")
-                this.textDocumentDidChange(client, @params);
-            else if (method == "exit")
-                this.exit (client, @params);
+            if (notif_handlers.contains (method))
+                ((NotificationHandler) notif_handlers[method]) (this, client, @params);
             else
                 log.printf (@"no handler for $method\n");
         });
 
         server.add_handler ("initialize", this.initialize);
         server.add_handler ("shutdown", this.shutdown);
+        notif_handlers["textDocument/didOpen"] = textDocumentDidOpen;
+        notif_handlers["textDocument/didChange"] = textDocumentDidChange;
+        notif_handlers["exit"] = exit;
 
         log.printf ("Finished constructing\n");
     }
