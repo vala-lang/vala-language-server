@@ -33,6 +33,7 @@ class Vls.Context {
                 assert (parts[0] == "0");
                 var minor = int.parse (parts[1]);
 
+                _ctx.report = new Reporter ();
                 _ctx.profile = Vala.Profile.GOBJECT;
                 _ctx.add_define ("GOBJECT");
                 for (int i = 2; i <= minor; i += 2) {
@@ -45,7 +46,6 @@ class Vls.Context {
                 }
                 foreach (var define in _defines)
                     _ctx.add_define (define);
-                _ctx.report = new Reporter ();
                 _ctx.add_external_package ("glib-2.0");
                 _ctx.add_external_package ("gobject-2.0");
 
