@@ -499,6 +499,8 @@ class Vls.Server {
             }
 
             ctx.add_source_file (doc);
+        } else {
+            ctx.get_source_file (uri).file.content = fileContents;
         }
 
         // compile everything if context is dirty
