@@ -17,7 +17,7 @@ class Vls.Reporter : Vala.Report {
         ++warnings;
     }
     public override void err (Vala.SourceReference? source, string message) {
-        if (source == null) { // internal compiler error
+        if (source == null) { // non-source compiler error
             stderr.printf ("Error: %s\n", message);
         } else {
             errorlist.add (new SourceError (source, message));
