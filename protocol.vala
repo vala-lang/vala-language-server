@@ -43,7 +43,7 @@ class LanguageServer.Position : Object {
 	/**
 	 * Line position in a document (zero-based).
 	 */
-	public uint line { get; construct; default = -1; }
+	public uint line { get; set; default = -1; }
 
 	/**
 	 * Character offset on a line in a document (zero-based). Assuming that the line is
@@ -53,27 +53,19 @@ class LanguageServer.Position : Object {
 	 * If the character value is greater than the line length it defaults back to the
 	 * line length.
 	 */
-	public uint character { get; construct; default = -1; }
-
-	public Position (int line, int character) {
-		Object (line: line, character: character);
-	}
+	public uint character { get; set; default = -1; }
 }
 
 class LanguageServer.Range : Object {
 	/**
 	 * The range's start position.
 	 */
-	public Position start { get; construct; }
+	public Position start { get; set; }
 
 	/**
 	 * The range's end position.
 	 */
-	public Position end { get; construct; }
-
-	public Range (Position start, Position end) {
-		Object (start: start, end: end);
-	}
+	public Position end { get; set; }
 }
 
 class LanguageServer.Diagnostic : Object {

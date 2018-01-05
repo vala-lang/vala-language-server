@@ -588,13 +588,21 @@ class Vls.Server {
                 ctx.report.errorlist.foreach (err => {
                     if (err.loc.file != source)
                         return;
-                    var from = new Position (err.loc.begin.line-1, err.loc.begin.column-1);
-                    var to = new Position (err.loc.end.line-1, err.loc.end.column);
 
-                    var diag = new Diagnostic ();
-                    diag.range = new Range (from, to);
-                    diag.severity = DiagnosticSeverity.Error;
-                    diag.message = err.message;
+                    var diag = new Diagnostic () {
+                        range = new Range () {
+                            start = new Position () {
+                                line = err.loc.begin.line - 1,
+                                character = err.loc.begin.column - 1
+                            },
+                            end = new Position () {
+                                line = err.loc.end.line - 1,
+                                character = err.loc.end.column
+                            }
+                        },
+                        severity = DiagnosticSeverity.Error,
+                        message = err.message
+                    };
 
                     var node = Json.gobject_serialize (diag);
                     array.add_element (node);
@@ -603,13 +611,21 @@ class Vls.Server {
                 ctx.report.warnlist.foreach (err => {
                     if (err.loc.file != source)
                         return;
-                    var from = new Position (err.loc.begin.line-1, err.loc.begin.column-1);
-                    var to = new Position (err.loc.end.line-1, err.loc.end.column);
 
-                    var diag = new Diagnostic ();
-                    diag.range = new Range (from, to);
-                    diag.severity = DiagnosticSeverity.Warning;
-                    diag.message = err.message;
+                    var diag = new Diagnostic () {
+                        range = new Range () {
+                            start = new Position () {
+                                line = err.loc.begin.line - 1,
+                                character = err.loc.begin.column - 1
+                            },
+                            end = new Position () {
+                                line = err.loc.end.line - 1,
+                                character = err.loc.end.column
+                            }
+                        },
+                        severity = DiagnosticSeverity.Warning,
+                        message = err.message
+                    };
 
                     var node = Json.gobject_serialize (diag);
                     array.add_element (node);
