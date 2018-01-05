@@ -8,29 +8,30 @@ struct CompileCommand {
 }
 
 class Vls.TextDocument : Object {
-    private Context _ctx;
-    private Vala.SourceFileType _type;
-    private string _filename;
+    private Context ctx;
+    private string filename;
 
-    public Vala.SourceFile file { get; private set; }
-
-    public string uri { get; construct; }
-    public int version { get; construct set; }
+    public Vala.SourceFile file;
+    public string uri;
+    public int version;
 
     public TextDocument (Context ctx, 
                          string filename, 
                          string? content = null,
                          int version = 0) throws ConvertError {
-        Object (uri: Filename.to_uri (filename), version: version);
-        _ctx = ctx;
-        _type = Vala.SourceFileType.NONE;
+        uri = Filename.to_uri (filename);
+        filename = filename;
+        version = version;
+        ctx = ctx;
+
+        var type = Vala.SourceFileType.NONE;
         if (uri.has_suffix (".vala") || uri.has_suffix (".gs"))
-            _type = Vala.SourceFileType.SOURCE;
+            type = Vala.SourceFileType.SOURCE;
         else if (uri.has_suffix (".vapi"))
-            _type = Vala.SourceFileType.PACKAGE;
-        _filename = filename;
-        file = new Vala.SourceFile (ctx.code_context, _type, _filename, content);
-        if (_type == Vala.SourceFileType.SOURCE) {
+            type = Vala.SourceFileType.PACKAGE;
+
+        file = new Vala.SourceFile (ctx.code_context, type, filename, content);
+        if (type == Vala.SourceFileType.SOURCE) {
             var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib", null));
             file.add_using_directive (ns_ref);
             ctx.add_using ("GLib");
