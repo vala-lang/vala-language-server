@@ -19,10 +19,10 @@ class Vls.TextDocument : Object {
                          string filename, 
                          string? content = null,
                          int version = 0) throws ConvertError {
-        uri = Filename.to_uri (filename);
-        filename = filename;
-        version = version;
-        ctx = ctx;
+        this.uri = Filename.to_uri (filename);
+        this.filename = filename;
+        this.version = version;
+        this.ctx = ctx;
 
         var type = Vala.SourceFileType.NONE;
         if (uri.has_suffix (".vala") || uri.has_suffix (".gs"))
