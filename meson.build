@@ -1,7 +1,5 @@
 project('vala-language-server', 'vala', 'c')
 
-jsonrpc_sp = subproject('jsonrpc-glib')
-
 libvala = dependency('libvala-0.38')
 
 deps = [
@@ -9,9 +7,8 @@ deps = [
     dependency('gobject-2.0'),
     dependency('gio-unix-2.0'),
     dependency('gee-0.8'),
+    dependency('jsonrpc-glib-1.0'),
     libvala,
-    jsonrpc_sp.get_variable('libjsonrpc_glib_dep'),
-    jsonrpc_sp.get_variable('libjsonrpc_glib_vapi'),
 ]
 
 #conf = configuration_data()
@@ -26,10 +23,11 @@ src = files([
     'protocol.vala',
     'reporter.vala',
     'context.vala',
-    'vala038_workarounds.vala'
+    'vala038_workarounds.vala',
 ])
 
 executable('vala-language-server',
            dependencies: deps,
            sources: src,
-           vala_args: ['--pkg=posix', '--enable-gobject-tracing'])
+           vala_args: ['--pkg=posix', '--enable-gobject-tracing'],
+           install: true)

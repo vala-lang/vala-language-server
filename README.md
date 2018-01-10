@@ -1,5 +1,8 @@
 # Vala Language Server
 
+### Dependencies
+`jsonrpc-glib-1.0`
+
 ### Setup
 ```
 $ meson build
