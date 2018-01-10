@@ -83,9 +83,10 @@ class Vls.Server {
 
         server.add_handler ("initialize", this.initialize);
         server.add_handler ("shutdown", this.shutdown);
-        notif_handlers["textDocument/didOpen"] = textDocumentDidOpen;
-        notif_handlers["textDocument/didChange"] = textDocumentDidChange;
-        notif_handlers["exit"] = exit;
+        notif_handlers["exit"] = this.exit;
+
+        notif_handlers["textDocument/didOpen"] = this.textDocumentDidOpen;
+        notif_handlers["textDocument/didChange"] = this.textDocumentDidChange;
 
         log.printf ("Finished constructing\n");
     }
