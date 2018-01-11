@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<html>
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Vala.VersionAttribute &ndash; docs &ndash; Vala Binding Reference</title>
+    <link href="../style.css" rel="stylesheet" type="text/css"/><script src="../scripts.js" type="text/javascript">
+    </script>
+  </head>
+  <body>
+    <div class="site_header">Vala.VersionAttribute &ndash; docs Reference Manual</div>
+    <div class="site_body">
+      <div class="site_navigation">
+        <ul class="navi_main">
+          <li class="package_index"><a href="../index.html">Packages</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="package"><a href="index.htm">docs</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="namespace"><a href="Vala.html">Vala</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="class">VersionAttribute</li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="property"><a href="Vala.VersionAttribute.deprecated.html">deprecated</a></li>
+          <li class="property"><a href="Vala.VersionAttribute.deprecated_since.html">deprecated_since</a></li>
+          <li class="property"><a href="Vala.VersionAttribute.experimental.html">experimental</a></li>
+          <li class="property"><a href="Vala.VersionAttribute.experimental_until.html">experimental_until</a></li>
+          <li class="property"><a href="Vala.VersionAttribute.replacement.html">replacement</a></li>
+          <li class="property"><a href="Vala.VersionAttribute.since.html">since</a></li>
+          <li class="static_method"><a href="Vala.VersionAttribute.cmp_versions.html">cmp_versions</a></li>
+          <li class="creation_method"><a href="Vala.VersionAttribute.VersionAttribute.html">VersionAttribute</a></li>
+          <li class="method"><a href="Vala.VersionAttribute.check.html">check</a></li>
+        </ul>
+      </div>
+      <div class="site_content">
+        <h1 class="main_title">VersionAttribute</h1>
+        <hr class="main_hr"/>
+        <h2 class="main_title">Object Hierarchy:</h2>
+        <img class="main_diagram" usemap="#Vala.VersionAttribute" alt="Object hierarchy for VersionAttribute" src="img/Vala.VersionAttribute.png"/>
+
+      <map id="Vala.VersionAttribute" name="Vala.VersionAttribute">
+<area shape="rect" id="node1" href="Vala.VersionAttribute.html" title="Vala.VersionAttribute" alt="" coords="5,5,184,53"/>
+</map>
+
+        <h2 class="main_title">Description:</h2>
+        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">class</span> <b><span class="class">VersionAttribute</span></b>
+        </div>
+        <div class="description">
+          <p>Represents a [Version] attribute</p>
+        </div><br/>
+        <div class="namespace_note"><b>Namespace:</b> <a href="Vala.html">Vala</a>
+        </div>
+        <div class="package_note"><b>Package:</b> <a href="index.htm">docs</a>
+        </div>
+        <h2 class="main_title">Content:</h2>
+        <h3 class="main_title">Properties:</h3>
+        <ul class="navi_inline">
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.VersionAttribute.deprecated.html" class="property">deprecated</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Specifies whether this symbol has been deprecated.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Vala.VersionAttribute.deprecated_since.html" class="property">deprecated_since</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">owned</span> <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Specifies what version this symbol has been deprecated since.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.VersionAttribute.experimental.html" class="property">experimental</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Specifies whether this symbol is experimental.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Vala.VersionAttribute.experimental_until.html" class="property">experimental_until</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">owned</span> <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Specifies until which version this symbol is experimental.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Vala.VersionAttribute.replacement.html" class="property">replacement</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">owned</span> <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Specifies the replacement if this symbol has been deprecated.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Vala.VersionAttribute.since.html" class="property">since</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">owned</span> <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The minimum version for <code>Vala.VersionAttribute.symbol</code>
+              </span>
+            </div></li>
+        </ul>
+        <h3 class="main_title">Static methods:</h3>
+        <ul class="navi_inline">
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.VersionAttribute.cmp_versions.html" class="static_method">cmp_versions</a></b> (<span class="main_basic_type"><span class="class">string</span></span> v1str, <span class="main_basic_type"><span class="class">string</span></span> v2str)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">A simple version comparison function.</span>
+            </div></li>
+        </ul>
+        <h3 class="main_title">Creation methods:</h3>
+        <ul class="navi_inline">
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.VersionAttribute.VersionAttribute.html" class="creation_method">VersionAttribute</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> symbol)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Constructs a new VersionAttribute.</span>
+            </div></li>
+        </ul>
+        <h3 class="main_title">Methods:</h3>
+        <ul class="navi_inline">
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.VersionAttribute.check.html" class="method">check</a></b> (<span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? source_ref = <span class="main_literal">null</span>)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Check to see if the symbol is experimental, deprecated or not 
+                available and emit a warning if it is.</span>
+            </div></li>
+        </ul>
+      </div>
+    </div><br/>
+    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    </div>
+  </body>
+</html>
