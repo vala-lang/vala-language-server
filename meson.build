@@ -23,6 +23,7 @@ src = files([
     'protocol.vala',
     'reporter.vala',
     'context.vala',
+    'iterator.vala',
     'vala038_workarounds.vala',
 ])
 

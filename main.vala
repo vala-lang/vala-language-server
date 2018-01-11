@@ -85,6 +85,7 @@ class Vls.Server {
         server.add_handler ("shutdown", this.shutdown);
         notif_handlers["exit"] = this.exit;
 
+        server.add_handler ("textDocument/definition", this.textDocumentDefinition);
         notif_handlers["textDocument/didOpen"] = this.textDocumentDidOpen;
         notif_handlers["textDocument/didChange"] = this.textDocumentDidChange;
 
@@ -411,7 +412,8 @@ class Vls.Server {
         try {
             client.reply (id, buildDict(
                 capabilities: buildDict (
-                    textDocumentSync: new Variant.int16 (TextDocumentSyncKind.Full)
+                    textDocumentSync: new Variant.int16 (TextDocumentSyncKind.Full),
+                    definitionProvider: new Variant.boolean (true)
                 )
             ));
         } catch (Error e) {
@@ -457,7 +459,12 @@ class Vls.Server {
         return Json.gobject_deserialize(typeof(T), json);
     }
 
-    size_t get_string_pos (string str, uint lineno, uint charno) {
+    Variant object_to_variant (Object object) throws Error {
+        var json = Json.gobject_serialize (object);
+        return Json.gvariant_deserialize (json, null);
+    }
+
+    public static size_t get_string_pos (string str, uint lineno, uint charno) {
         int linepos = -1;
 
         for (uint lno = 0; lno < lineno; ++lno) {
@@ -656,6 +663,62 @@ class Vls.Server {
                 log.printf (@"textDocument/publishDiagnostics: $uri\n");
             }
         }
+    }
+
+    void textDocumentDefinition (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        var p = parse_variant <LanguageServer.TextDocumentPositionParams> (@params);
+        log.printf ("get definition in %s at %u,%u\n", p.textDocument.uri,
+            p.position.line, p.position.character);
+        var file = ctx.get_source_file (p.textDocument.uri).file;
+        var fs = new FindSymbol (file, p.position.to_libvala ());
+
+        if (fs.result.size == 0) {
+            client.reply (id, null);
+            return;
+        }
+
+        Vala.CodeNode best = null;
+
+        foreach (var node in fs.result) {
+            if (best == null) {
+                best = node;
+            } else if (best.source_reference.begin.column <= node.source_reference.begin.column &&
+                       node.source_reference.end.column <= best.source_reference.end.column) {
+                best = node;
+            }
+        }
+        {
+            var sr = best.source_reference;
+            var from = (long)Server.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
+            var to = (long)Server.get_string_pos (file.content, sr.end.line-1, sr.end.column);
+            string contents = file.content [from:to];
+            log.printf ("Got node: %s @ %s = %s\n", best.type_name, sr.to_string(), contents);
+        }
+
+        string uri = null;
+        foreach (var sourcefile in ctx.get_source_files ()) {
+            if (best.source_reference.file == sourcefile.file) {
+                uri = sourcefile.uri;
+                break;
+            }
+        }
+        if (uri == null) {
+            log.printf ("error: couldn't find source file for %s\n", best.source_reference.file.filename);
+        }
+
+        client.reply (id, object_to_variant (new LanguageServer.Location () {
+            uri = uri,
+            range = new Range () {
+                start = new Position () {
+                    line = best.source_reference.begin.line - 1,
+                    character = best.source_reference.begin.column - 1
+                },
+                end = new Position () {
+                    line = best.source_reference.end.line - 1,
+                    character = best.source_reference.end.column
+                }
+            }
+        }));
     }
 
     void shutdown (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {

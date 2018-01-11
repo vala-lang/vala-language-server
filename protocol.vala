@@ -54,6 +54,13 @@ class LanguageServer.Position : Object {
 	 * line length.
 	 */
 	public uint character { get; set; default = -1; }
+
+	public LanguageServer.Position to_libvala () {
+		return new Position () {
+			line = this.line + 1,
+			character = this.character
+		};
+	}
 }
 
 class LanguageServer.Range : Object {
@@ -124,4 +131,18 @@ enum LanguageServer.MessageType {
 	 * A log message.
 	 */
 	Log = 4
+}
+
+class LanguageServer.TextDocumentIdentifier : Object {
+	public string uri { get; set; }
+}
+
+class LanguageServer.TextDocumentPositionParams : Object {
+	public TextDocumentIdentifier textDocument { get; set; }
+	public Position position { get; set; }
+}
+
+class LanguageServer.Location : Object {
+	public string uri { get; set; }
+	public Range range { get; set; }
 }
