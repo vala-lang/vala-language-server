@@ -709,6 +709,7 @@ class Vls.Server {
         if (uri == null) {
             log.printf ("error: couldn't find source file for %s\n", best.source_reference.file.filename);
             client.reply (id, null);
+            return;
         }
 
         client.reply (id, object_to_variant (new LanguageServer.Location () {
