@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<html>
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Vala.GIRWriter.write_c_includes &ndash; codegen &ndash; Vala Binding Reference</title>
+    <link href="../style.css" rel="stylesheet" type="text/css"/><script src="../scripts.js" type="text/javascript">
+    </script>
+  </head>
+  <body>
+    <div class="site_header">Vala.GIRWriter.write_c_includes &ndash; codegen Reference Manual</div>
+    <div class="site_body">
+      <div class="site_navigation">
+        <ul class="navi_main">
+          <li class="package_index"><a href="../index.html">Packages</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="package"><a href="index.htm">codegen</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="namespace"><a href="Vala.html">Vala</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="class"><a href="Vala.GIRWriter.html">GIRWriter</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="struct"><a href="Vala.GIRWriter.GIRNamespace.html">GIRNamespace</a></li>
+          <li class="creation_method"><a href="Vala.GIRWriter.GIRWriter.html">GIRWriter</a></li>
+          <li class="method"><a href="Vala.GIRWriter.camel_case_to_canonical.html">camel_case_to_canonical</a></li>
+          <li class="method"><a href="Vala.GIRWriter.check_accessibility.html">check_accessibility</a></li>
+          <li class="method"><a href="Vala.GIRWriter.check_signature.html">check_signature</a></li>
+          <li class="method"><a href="Vala.GIRWriter.check_type.html">check_type</a></li>
+          <li class="method"><a href="Vala.GIRWriter.do_write_signature.html">do_write_signature</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.get_class_comment.html">get_class_comment</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.get_constant_comment.html">get_constant_comment</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.get_delegate_comment.html">get_delegate_comment</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.get_delegate_return_comment.html">get_delegate_return_comment</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.get_enum_comment.html">get_enum_comment</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.get_enum_value_comment.html">get_enum_value_comment</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.get_error_code_comment.html">get_error_code_comment</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.get_error_domain_comment.html">get_error_domain_comment</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.get_field_comment.html">get_field_comment</a></li>
+          <li class="method"><a href="Vala.GIRWriter.get_full_gir_name.html">get_full_gir_name</a></li>
+          <li class="method"><a href="Vala.GIRWriter.get_gir_name.html">get_gir_name</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.get_interface_comment.html">get_interface_comment</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.get_method_comment.html">get_method_comment</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.get_method_return_comment.html">get_method_return_comment</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.get_parameter_comment.html">get_parameter_comment</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.get_property_comment.html">get_property_comment</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.get_signal_comment.html">get_signal_comment</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.get_signal_return_comment.html">get_signal_return_comment</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.get_struct_comment.html">get_struct_comment</a></li>
+          <li class="method"><a href="Vala.GIRWriter.gi_type_name.html">gi_type_name</a></li>
+          <li class="method"><a href="Vala.GIRWriter.literal_expression_to_value_string.html">literal_expression_to_value_string</a></li>
+          <li class="method"><a href="Vala.GIRWriter.skip_implicit_params.html">skip_implicit_params</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.visit_class.html">visit_class</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.visit_constant.html">visit_constant</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.visit_creation_method.html">visit_creation_method</a></li>
+          <li class="method"><a href="Vala.GIRWriter.visit_deferred.html">visit_deferred</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.visit_delegate.html">visit_delegate</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.visit_enum.html">visit_enum</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.visit_enum_value.html">visit_enum_value</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.visit_error_code.html">visit_error_code</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.visit_error_domain.html">visit_error_domain</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.visit_field.html">visit_field</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.visit_interface.html">visit_interface</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.visit_method.html">visit_method</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.visit_namespace.html">visit_namespace</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.visit_property.html">visit_property</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.visit_signal.html">visit_signal</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.visit_struct.html">visit_struct</a></li>
+          <li class="method"><a href="Vala.GIRWriter.write_annotations.html">write_annotations</a></li>
+          <li class="method"><a href="Vala.GIRWriter.write_c_include.html">write_c_include</a></li>
+          <li class="method">write_c_includes</li>
+          <li class="method"><a href="Vala.GIRWriter.write_ctype_attributes.html">write_ctype_attributes</a></li>
+          <li class="method"><a href="Vala.GIRWriter.write_doc.html">write_doc</a></li>
+          <li class="method"><a href="Vala.GIRWriter.write_file.html">write_file</a></li>
+          <li class="method"><a href="Vala.GIRWriter.write_gtype_attributes.html">write_gtype_attributes</a></li>
+          <li class="method"><a href="Vala.GIRWriter.write_implicit_params.html">write_implicit_params</a></li>
+          <li class="method"><a href="Vala.GIRWriter.write_includes.html">write_includes</a></li>
+          <li class="method"><a href="Vala.GIRWriter.write_indent.html">write_indent</a></li>
+          <li class="method"><a href="Vala.GIRWriter.write_indent_stream.html">write_indent_stream</a></li>
+          <li class="method"><a href="Vala.GIRWriter.write_package.html">write_package</a></li>
+          <li class="method"><a href="Vala.GIRWriter.write_param_or_return.html">write_param_or_return</a></li>
+          <li class="method"><a href="Vala.GIRWriter.write_params_and_return.html">write_params_and_return</a></li>
+          <li class="method"><a href="Vala.GIRWriter.write_signature.html">write_signature</a></li>
+          <li class="method"><a href="Vala.GIRWriter.write_symbol_attributes.html">write_symbol_attributes</a></li>
+          <li class="method"><a href="Vala.GIRWriter.write_type.html">write_type</a></li>
+          <li class="field"><a href="Vala.GIRWriter.buffer.html">buffer</a></li>
+          <li class="field"><a href="Vala.GIRWriter.context.html">context</a></li>
+          <li class="field"><a href="Vala.GIRWriter.deferred.html">deferred</a></li>
+          <li class="field"><a href="Vala.GIRWriter.directory.html">directory</a></li>
+          <li class="field"><a href="Vala.GIRWriter.enum_value.html">enum_value</a></li>
+          <li class="field"><a href="Vala.GIRWriter.externals.html">externals</a></li>
+          <li class="field"><a href="Vala.GIRWriter.ginitiallyunowned_type.html">ginitiallyunowned_type</a></li>
+          <li class="field"><a href="Vala.GIRWriter.gir_namespace.html">gir_namespace</a></li>
+          <li class="field"><a href="Vala.GIRWriter.gir_shared_library.html">gir_shared_library</a></li>
+          <li class="field"><a href="Vala.GIRWriter.gir_version.html">gir_version</a></li>
+          <li class="field"><a href="Vala.GIRWriter.gobject_type.html">gobject_type</a></li>
+          <li class="field"><a href="Vala.GIRWriter.hierarchy.html">hierarchy</a></li>
+          <li class="field"><a href="Vala.GIRWriter.indent.html">indent</a></li>
+          <li class="field"><a href="Vala.GIRWriter.our_namespaces.html">our_namespaces</a></li>
+          <li class="field"><a href="Vala.GIRWriter.stream.html">stream</a></li>
+          <li class="field"><a href="Vala.GIRWriter.unannotated_namespaces.html">unannotated_namespaces</a></li>
+        </ul>
+      </div>
+      <div class="site_content">
+        <h1 class="main_title">write_c_includes</h1>
+        <hr class="main_hr"/>
+        <h2 class="main_title">Description:</h2>
+        <div class="main_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><span class="method">write_c_includes</span></b> (<span class="main_type"><span class="class">Namespace</span></span> ns)
+        </div>
+      </div>
+    </div><br/>
+    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    </div>
+  </body>
+</html>

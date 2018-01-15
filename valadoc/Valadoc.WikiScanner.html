@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8"?>
+<html>
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Valadoc.WikiScanner &ndash; valadoc &ndash; Vala Binding Reference</title>
+    <link href="../style.css" rel="stylesheet" type="text/css"/><script src="../scripts.js" type="text/javascript">
+    </script>
+  </head>
+  <body>
+    <div class="site_header">Valadoc.WikiScanner &ndash; valadoc Reference Manual</div>
+    <div class="site_body">
+      <div class="site_navigation">
+        <ul class="navi_main">
+          <li class="package_index"><a href="../index.html">Packages</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="package"><a href="index.htm">valadoc</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="namespace"><a href="Valadoc.html">Valadoc</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="class">WikiScanner</li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="creation_method"><a href="Valadoc.WikiScanner.WikiScanner.html">WikiScanner</a></li>
+          <li class="virtual_method"><a href="Valadoc.WikiScanner.accept.html">accept</a></li>
+          <li class="method"><a href="Valadoc.WikiScanner.append_char.html">append_char</a></li>
+          <li class="method"><a href="Valadoc.WikiScanner.emit_current_word.html">emit_current_word</a></li>
+          <li class="method"><a href="Valadoc.WikiScanner.emit_token.html">emit_token</a></li>
+          <li class="method"><a href="Valadoc.WikiScanner.end.html">end</a></li>
+          <li class="method"><a href="Valadoc.WikiScanner.get_begin.html">get_begin</a></li>
+          <li class="method"><a href="Valadoc.WikiScanner.get_end.html">get_end</a></li>
+          <li class="method"><a href="Valadoc.WikiScanner.get_line.html">get_line</a></li>
+          <li class="virtual_method"><a href="Valadoc.WikiScanner.get_line_content.html">get_line_content</a></li>
+          <li class="virtual_method"><a href="Valadoc.WikiScanner.get_line_start_column.html">get_line_start_column</a></li>
+          <li class="method"><a href="Valadoc.WikiScanner.get_next_char.html">get_next_char</a></li>
+          <li class="method"><a href="Valadoc.WikiScanner.look_for.html">look_for</a></li>
+          <li class="method"><a href="Valadoc.WikiScanner.look_for_five.html">look_for_five</a></li>
+          <li class="method"><a href="Valadoc.WikiScanner.look_for_three.html">look_for_three</a></li>
+          <li class="method"><a href="Valadoc.WikiScanner.look_for_two.html">look_for_two</a></li>
+          <li class="method"><a href="Valadoc.WikiScanner.look_for_two_or_append.html">look_for_two_or_append</a></li>
+          <li class="virtual_method"><a href="Valadoc.WikiScanner.reset.html">reset</a></li>
+          <li class="method"><a href="Valadoc.WikiScanner.scan.html">scan</a></li>
+          <li class="method"><a href="Valadoc.WikiScanner.set_code_escape_mode.html">set_code_escape_mode</a></li>
+          <li class="method"><a href="Valadoc.WikiScanner.set_parser.html">set_parser</a></li>
+          <li class="method"><a href="Valadoc.WikiScanner.set_url_escape_mode.html">set_url_escape_mode</a></li>
+          <li class="virtual_method"><a href="Valadoc.WikiScanner.stop.html">stop</a></li>
+          <li class="field"><a href="Valadoc.WikiScanner._code_escape_mode.html">_code_escape_mode</a></li>
+          <li class="field"><a href="Valadoc.WikiScanner._column.html">_column</a></li>
+          <li class="field"><a href="Valadoc.WikiScanner._content.html">_content</a></li>
+          <li class="field"><a href="Valadoc.WikiScanner._current_string.html">_current_string</a></li>
+          <li class="field"><a href="Valadoc.WikiScanner._index.html">_index</a></li>
+          <li class="field"><a href="Valadoc.WikiScanner._last_char.html">_last_char</a></li>
+          <li class="field"><a href="Valadoc.WikiScanner._last_column.html">_last_column</a></li>
+          <li class="field"><a href="Valadoc.WikiScanner._last_line.html">_last_line</a></li>
+          <li class="field"><a href="Valadoc.WikiScanner._line.html">_line</a></li>
+          <li class="field"><a href="Valadoc.WikiScanner._parser.html">_parser</a></li>
+          <li class="field"><a href="Valadoc.WikiScanner._settings.html">_settings</a></li>
+          <li class="field"><a href="Valadoc.WikiScanner._skip.html">_skip</a></li>
+          <li class="field"><a href="Valadoc.WikiScanner._stop.html">_stop</a></li>
+          <li class="field"><a href="Valadoc.WikiScanner._url_escape_mode.html">_url_escape_mode</a></li>
+        </ul>
+      </div>
+      <div class="site_content">
+        <h1 class="main_title">WikiScanner</h1>
+        <hr class="main_hr"/>
+        <h2 class="main_title">Object Hierarchy:</h2>
+        <img class="main_diagram" usemap="#Valadoc.WikiScanner" alt="Object hierarchy for WikiScanner" src="img/Valadoc.WikiScanner.svg"/>
+
+      <map id="Valadoc.WikiScanner" name="Valadoc.WikiScanner">
+<area shape="rect" id="node1" href="Valadoc.WikiScanner.html" title="Valadoc.WikiScanner" alt="" coords="48,101,228,149"/>
+<area shape="rect" id="node3" href="Valadoc.Scanner.html" title="Valadoc.Scanner" alt="" coords="143,5,285,53"/>
+</map>
+
+        <h2 class="main_title">Description:</h2>
+        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">class</span> <b><span class="class">WikiScanner</span></b> : <span class="main_type"><span class="class">Object</span></span>, <span class="main_type"><a href="Valadoc.Scanner.html" class="interface">Scanner</a></span>
+        </div>
+        <div class="box">
+          <div class="headline" onclick="toggle_box (this, 'box-content-39')">All known sub-classes:</div>
+          <div class="content" id="box-content-39">
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="class"><a href="Valadoc.CommentScanner.html">CommentScanner</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+              </ul>
+            </div>
+          </div>
+        </div><br/>
+        <div class="namespace_note"><b>Namespace:</b> <a href="Valadoc.html">Valadoc</a>
+        </div>
+        <div class="package_note"><b>Package:</b> <a href="index.htm">valadoc</a>
+        </div>
+        <h2 class="main_title">Content:</h2>
+        <h3 class="main_title">Creation methods:</h3>
+        <ul class="navi_inline">
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Valadoc.WikiScanner.WikiScanner.html" class="creation_method">WikiScanner</a></b> (<span class="main_type"><a href="Valadoc.Settings.html" class="class">Settings</a></span> settings)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+        </ul>
+        <h3 class="main_title">Methods:</h3>
+        <ul class="navi_inline">
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.WikiScanner.set_parser.html" class="method">set_parser</a></b> (<span class="main_type"><a href="Valadoc.Parser.html" class="class">Parser</a></span> parser)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.WikiScanner.reset.html" class="virtual_method">reset</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.WikiScanner.scan.html" class="method">scan</a></b> (<span class="main_basic_type"><span class="class">string</span></span> content) <span class="main_keyword">throws</span> <span class="main_type"><a href="Valadoc.ParserError.html" class="errordomain">ParserError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.WikiScanner.end.html" class="method">end</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Valadoc.ParserError.html" class="errordomain">ParserError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.WikiScanner.stop.html" class="virtual_method">stop</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.WikiScanner.set_url_escape_mode.html" class="method">set_url_escape_mode</a></b> (<span class="main_basic_type"><span class="struct">bool</span></span> escape_mode)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.WikiScanner.set_code_escape_mode.html" class="method">set_code_escape_mode</a></b> (<span class="main_basic_type"><span class="struct">bool</span></span> escape_mode)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.WikiScanner.get_line.html" class="method">get_line</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.WikiScanner.get_line_content.html" class="virtual_method">get_line_content</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="struct">unichar</span></span> <b><a href="Valadoc.WikiScanner.get_next_char.html" class="method">get_next_char</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> offset = <span class="main_literal">1</span>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.WikiScanner.accept.html" class="virtual_method">accept</a></b> (<span class="main_basic_type"><span class="struct">unichar</span></span> c) <span class="main_keyword">throws</span> <span class="main_type"><a href="Valadoc.ParserError.html" class="errordomain">ParserError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.WikiScanner.append_char.html" class="method">append_char</a></b> (<span class="main_basic_type"><span class="struct">unichar</span></span> c)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.WikiScanner.get_line_start_column.html" class="virtual_method">get_line_start_column</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="struct">SourceLocation</span></span> <b><a href="Valadoc.WikiScanner.get_begin.html" class="method">get_begin</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="struct">SourceLocation</span></span> <b><a href="Valadoc.WikiScanner.get_end.html" class="method">get_end</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> offset = <span class="main_literal">0</span>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.WikiScanner.emit_current_word.html" class="method">emit_current_word</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Valadoc.ParserError.html" class="errordomain">ParserError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.WikiScanner.emit_token.html" class="method">emit_token</a></b> (<span class="main_type"><a href="Valadoc.TokenType.html" class="class">TokenType</a></span> type) <span class="main_keyword">throws</span> <span class="main_type"><a href="Valadoc.ParserError.html" class="errordomain">ParserError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.WikiScanner.look_for_two_or_append.html" class="method">look_for_two_or_append</a></b> (<span class="main_basic_type"><span class="struct">unichar</span></span> c, <span class="main_type"><a href="Valadoc.TokenType.html" class="class">TokenType</a></span> type) <span class="main_keyword">throws</span> <span class="main_type"><a href="Valadoc.ParserError.html" class="errordomain">ParserError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.WikiScanner.look_for_two.html" class="method">look_for_two</a></b> (<span class="main_basic_type"><span class="struct">unichar</span></span> c, <span class="main_type"><a href="Valadoc.TokenType.html" class="class">TokenType</a></span> one, <span class="main_type"><a href="Valadoc.TokenType.html" class="class">TokenType</a></span> two) <span class="main_keyword">throws</span> <span class="main_type"><a href="Valadoc.ParserError.html" class="errordomain">ParserError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.WikiScanner.look_for_three.html" class="method">look_for_three</a></b> (<span class="main_basic_type"><span class="struct">unichar</span></span> c, <span class="main_type"><a href="Valadoc.TokenType.html" class="class">TokenType</a></span> one, <span class="main_type"><a href="Valadoc.TokenType.html" class="class">TokenType</a></span> two, <span class="main_type"><a href="Valadoc.TokenType.html" class="class">TokenType</a></span> three) <span class="main_keyword">throws</span> <span class="main_type"><a href="Valadoc.ParserError.html" class="errordomain">ParserError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.WikiScanner.look_for_five.html" class="method">look_for_five</a></b> (<span class="main_basic_type"><span class="struct">unichar</span></span> c, <span class="main_type"><a href="Valadoc.TokenType.html" class="class">TokenType</a></span> one, <span class="main_type"><a href="Valadoc.TokenType.html" class="class">TokenType</a></span> two, <span class="main_type"><a href="Valadoc.TokenType.html" class="class">TokenType</a></span> three, <span class="main_type"><a href="Valadoc.TokenType.html" class="class">TokenType</a></span> four, <span class="main_type"><a href="Valadoc.TokenType.html" class="class">TokenType</a></span> five) <span class="main_keyword">throws</span> <span class="main_type"><a href="Valadoc.ParserError.html" class="errordomain">ParserError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.WikiScanner.look_for.html" class="method">look_for</a></b> (<span class="main_basic_type"><span class="class">string</span></span> str, <span class="main_type"><a href="Valadoc.TokenType.html" class="class">TokenType</a></span> type) <span class="main_keyword">throws</span> <span class="main_type"><a href="Valadoc.ParserError.html" class="errordomain">ParserError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+        </ul>
+        <h3 class="main_title">Fields:</h3>
+        <ul class="navi_inline">
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Settings.html" class="class">Settings</a></span> <b><a href="Valadoc.WikiScanner._settings.html" class="field">_settings</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Parser.html" class="class">Parser</a></span> <b><a href="Valadoc.WikiScanner._parser.html" class="field">_parser</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.WikiScanner._content.html" class="field">_content</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.WikiScanner._index.html" class="field">_index</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.WikiScanner._stop.html" class="field">_stop</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.WikiScanner._last_line.html" class="field">_last_line</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.WikiScanner._last_column.html" class="field">_last_column</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.WikiScanner._line.html" class="field">_line</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.WikiScanner._column.html" class="field">_column</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.WikiScanner._url_escape_mode.html" class="field">_url_escape_mode</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.WikiScanner._code_escape_mode.html" class="field">_code_escape_mode</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">unichar</span></span> <b><a href="Valadoc.WikiScanner._last_char.html" class="field">_last_char</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.WikiScanner._skip.html" class="field">_skip</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="class">StringBuilder</span></span> <b><a href="Valadoc.WikiScanner._current_string.html" class="field">_current_string</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+        </ul>
+        <h3 class="main_title">Inherited Members:</h3>
+        <div class="box">
+          <div class="headline" onclick="toggle_box (this, 'box-content-40')">All known members inherited from class GLib.Object</div>
+          <div class="content" id="box-content-40">
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="static_method">@new</li>
+                <li class="static_method">new_valist</li>
+                <li class="static_method">newv</li>
+                <li class="static_method">new_with_properties</li>
+                <li class="method">add_toggle_ref</li>
+                <li class="method">add_weak_pointer</li>
+                <li class="method">bind_property</li>
+                <li class="method">connect</li>
+                <li class="virtual_method">constructed</li>
+                <li class="method">disconnect</li>
+                <li class="virtual_method">dispose</li>
+                <li class="method">dup_data</li>
+                <li class="method">dup_qdata</li>
+                <li class="method">freeze_notify</li>
+                <li class="method">@get</li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="method">get_class</li>
+                <li class="method">get_data</li>
+                <li class="method">get_property</li>
+                <li class="method">get_qdata</li>
+                <li class="method">get_type</li>
+                <li class="method">getv</li>
+                <li class="method">notify_property</li>
+                <li class="method">@ref</li>
+                <li class="method">ref_sink</li>
+                <li class="method">replace_data</li>
+                <li class="method">replace_qdata</li>
+                <li class="method">remove_toggle_ref</li>
+                <li class="method">remove_weak_pointer</li>
+                <li class="method">@set</li>
+                <li class="method">set_data</li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="method">set_data_full</li>
+                <li class="method">set_property</li>
+                <li class="method">set_qdata</li>
+                <li class="method">set_qdata_full</li>
+                <li class="method">setv</li>
+                <li class="method">steal_data</li>
+                <li class="method">steal_qdata</li>
+                <li class="method">thaw_notify</li>
+                <li class="method">unref</li>
+                <li class="method">watch_closure</li>
+                <li class="method">weak_ref</li>
+                <li class="method">weak_unref</li>
+                <li class="signal">notify</li>
+                <li class="field">ref_count</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="box">
+          <div class="headline" onclick="toggle_box (this, 'box-content-41')">All known members inherited from interface Valadoc.Scanner</div>
+          <div class="content" id="box-content-41">
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="abstract_method"><a href="Valadoc.Scanner.set_parser.html">set_parser</a></li>
+                <li class="abstract_method"><a href="Valadoc.Scanner.reset.html">reset</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="abstract_method"><a href="Valadoc.Scanner.scan.html">scan</a></li>
+                <li class="abstract_method"><a href="Valadoc.Scanner.end.html">end</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="abstract_method"><a href="Valadoc.Scanner.stop.html">stop</a></li>
+                <li class="abstract_method"><a href="Valadoc.Scanner.get_line_content.html">get_line_content</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><br/>
+    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    </div>
+  </body>
+</html>

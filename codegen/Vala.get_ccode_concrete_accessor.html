@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<html>
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Vala.get_ccode_concrete_accessor &ndash; codegen &ndash; Vala Binding Reference</title>
+    <link href="../style.css" rel="stylesheet" type="text/css"/><script src="../scripts.js" type="text/javascript">
+    </script>
+  </head>
+  <body>
+    <div class="site_header">Vala.get_ccode_concrete_accessor &ndash; codegen Reference Manual</div>
+    <div class="site_body">
+      <div class="site_navigation">
+        <ul class="navi_main">
+          <li class="package_index"><a href="../index.html">Packages</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="package"><a href="index.htm">codegen</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="namespace"><a href="Vala.html">Vala</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="class"><a href="Vala.CCodeArrayModule.html">CCodeArrayModule</a></li>
+          <li class="class"><a href="Vala.CCodeAssignmentModule.html">CCodeAssignmentModule</a></li>
+          <li class="class"><a href="Vala.CCodeAttribute.html">CCodeAttribute</a></li>
+          <li class="abstract_class"><a href="Vala.CCodeBaseModule.html">CCodeBaseModule</a></li>
+          <li class="class"><a href="Vala.CCodeCompiler.html">CCodeCompiler</a></li>
+          <li class="abstract_class"><a href="Vala.CCodeControlFlowModule.html">CCodeControlFlowModule</a></li>
+          <li class="class"><a href="Vala.CCodeDelegateModule.html">CCodeDelegateModule</a></li>
+          <li class="abstract_class"><a href="Vala.CCodeMemberAccessModule.html">CCodeMemberAccessModule</a></li>
+          <li class="class"><a href="Vala.CCodeMethodCallModule.html">CCodeMethodCallModule</a></li>
+          <li class="abstract_class"><a href="Vala.CCodeMethodModule.html">CCodeMethodModule</a></li>
+          <li class="abstract_class"><a href="Vala.CCodeStructModule.html">CCodeStructModule</a></li>
+          <li class="class"><a href="Vala.CType.html">CType</a></li>
+          <li class="class"><a href="Vala.ClassRegisterFunction.html">ClassRegisterFunction</a></li>
+          <li class="class"><a href="Vala.EnumRegisterFunction.html">EnumRegisterFunction</a></li>
+          <li class="class"><a href="Vala.GAsyncModule.html">GAsyncModule</a></li>
+          <li class="class"><a href="Vala.GDBusClientModule.html">GDBusClientModule</a></li>
+          <li class="class"><a href="Vala.GDBusModule.html">GDBusModule</a></li>
+          <li class="class"><a href="Vala.GDBusServerModule.html">GDBusServerModule</a></li>
+          <li class="class"><a href="Vala.GErrorModule.html">GErrorModule</a></li>
+          <li class="class"><a href="Vala.GIRWriter.html">GIRWriter</a></li>
+          <li class="class"><a href="Vala.GLibValue.html">GLibValue</a></li>
+          <li class="class"><a href="Vala.GObjectModule.html">GObjectModule</a></li>
+          <li class="class"><a href="Vala.GSignalModule.html">GSignalModule</a></li>
+          <li class="class"><a href="Vala.GTypeModule.html">GTypeModule</a></li>
+          <li class="class"><a href="Vala.GVariantModule.html">GVariantModule</a></li>
+          <li class="class"><a href="Vala.GtkModule.html">GtkModule</a></li>
+          <li class="class"><a href="Vala.InterfaceRegisterFunction.html">InterfaceRegisterFunction</a></li>
+          <li class="class"><a href="Vala.StructRegisterFunction.html">StructRegisterFunction</a></li>
+          <li class="abstract_class"><a href="Vala.TypeRegisterFunction.html">TypeRegisterFunction</a></li>
+          <li class="method"><a href="Vala.get_ccode_array_length.html">get_ccode_array_length</a></li>
+          <li class="method"><a href="Vala.get_ccode_array_length_expr.html">get_ccode_array_length_expr</a></li>
+          <li class="method"><a href="Vala.get_ccode_array_length_name.html">get_ccode_array_length_name</a></li>
+          <li class="method"><a href="Vala.get_ccode_array_length_pos.html">get_ccode_array_length_pos</a></li>
+          <li class="method"><a href="Vala.get_ccode_array_length_type.html">get_ccode_array_length_type</a></li>
+          <li class="method"><a href="Vala.get_ccode_array_null_terminated.html">get_ccode_array_null_terminated</a></li>
+          <li class="method"><a href="Vala.get_ccode_attribute.html">get_ccode_attribute</a></li>
+          <li class="method">get_ccode_concrete_accessor</li>
+          <li class="method"><a href="Vala.get_ccode_const_name.html">get_ccode_const_name</a></li>
+          <li class="method"><a href="Vala.get_ccode_constructv_name.html">get_ccode_constructv_name</a></li>
+          <li class="method"><a href="Vala.get_ccode_copy_function.html">get_ccode_copy_function</a></li>
+          <li class="method"><a href="Vala.get_ccode_default_value.html">get_ccode_default_value</a></li>
+          <li class="method"><a href="Vala.get_ccode_delegate_target.html">get_ccode_delegate_target</a></li>
+          <li class="method"><a href="Vala.get_ccode_delegate_target_name.html">get_ccode_delegate_target_name</a></li>
+          <li class="method"><a href="Vala.get_ccode_delegate_target_pos.html">get_ccode_delegate_target_pos</a></li>
+          <li class="method"><a href="Vala.get_ccode_destroy_function.html">get_ccode_destroy_function</a></li>
+          <li class="method"><a href="Vala.get_ccode_destroy_notify_pos.html">get_ccode_destroy_notify_pos</a></li>
+          <li class="method"><a href="Vala.get_ccode_dup_function.html">get_ccode_dup_function</a></li>
+          <li class="method"><a href="Vala.get_ccode_finish_instance.html">get_ccode_finish_instance</a></li>
+          <li class="method"><a href="Vala.get_ccode_finish_name.html">get_ccode_finish_name</a></li>
+          <li class="method"><a href="Vala.get_ccode_finish_real_name.html">get_ccode_finish_real_name</a></li>
+          <li class="method"><a href="Vala.get_ccode_finish_vfunc_name.html">get_ccode_finish_vfunc_name</a></li>
+          <li class="method"><a href="Vala.get_ccode_free_function.html">get_ccode_free_function</a></li>
+          <li class="method"><a href="Vala.get_ccode_free_function_address_of.html">get_ccode_free_function_address_of</a></li>
+          <li class="method"><a href="Vala.get_ccode_generic_type_pos.html">get_ccode_generic_type_pos</a></li>
+          <li class="method"><a href="Vala.get_ccode_get_value_function.html">get_ccode_get_value_function</a></li>
+          <li class="method"><a href="Vala.get_ccode_has_copy_function.html">get_ccode_has_copy_function</a></li>
+          <li class="method"><a href="Vala.get_ccode_has_destroy_function.html">get_ccode_has_destroy_function</a></li>
+          <li class="method"><a href="Vala.get_ccode_has_generic_type_parameter.html">get_ccode_has_generic_type_parameter</a></li>
+          <li class="method"><a href="Vala.get_ccode_has_new_function.html">get_ccode_has_new_function</a></li>
+          <li class="method"><a href="Vala.get_ccode_has_type_id.html">get_ccode_has_type_id</a></li>
+          <li class="method"><a href="Vala.get_ccode_header_filenames.html">get_ccode_header_filenames</a></li>
+          <li class="method"><a href="Vala.get_ccode_instance_pos.html">get_ccode_instance_pos</a></li>
+          <li class="method"><a href="Vala.get_ccode_is_gboxed.html">get_ccode_is_gboxed</a></li>
+          <li class="method"><a href="Vala.get_ccode_lower_case_name.html">get_ccode_lower_case_name</a></li>
+          <li class="method"><a href="Vala.get_ccode_lower_case_prefix.html">get_ccode_lower_case_prefix</a></li>
+          <li class="method"><a href="Vala.get_ccode_lower_case_suffix.html">get_ccode_lower_case_suffix</a></li>
+          <li class="method"><a href="Vala.get_ccode_marshaller_type_name.html">get_ccode_marshaller_type_name</a></li>
+          <li class="method"><a href="Vala.get_ccode_name.html">get_ccode_name</a></li>
+          <li class="method"><a href="Vala.get_ccode_no_accessor_method.html">get_ccode_no_accessor_method</a></li>
+          <li class="method"><a href="Vala.get_ccode_param_spec_function.html">get_ccode_param_spec_function</a></li>
+          <li class="method"><a href="Vala.get_ccode_pos.html">get_ccode_pos</a></li>
+          <li class="method"><a href="Vala.get_ccode_prefix.html">get_ccode_prefix</a></li>
+          <li class="method"><a href="Vala.get_ccode_quark_name.html">get_ccode_quark_name</a></li>
+          <li class="method"><a href="Vala.get_ccode_real_name.html">get_ccode_real_name</a></li>
+          <li class="method"><a href="Vala.get_ccode_ref_function.html">get_ccode_ref_function</a></li>
+          <li class="method"><a href="Vala.get_ccode_ref_function_void.html">get_ccode_ref_function_void</a></li>
+          <li class="method"><a href="Vala.get_ccode_ref_sink_function.html">get_ccode_ref_sink_function</a></li>
+          <li class="method"><a href="Vala.get_ccode_sentinel.html">get_ccode_sentinel</a></li>
+          <li class="method"><a href="Vala.get_ccode_set_value_function.html">get_ccode_set_value_function</a></li>
+          <li class="method"><a href="Vala.get_ccode_simple_generics.html">get_ccode_simple_generics</a></li>
+          <li class="method"><a href="Vala.get_ccode_take_value_function.html">get_ccode_take_value_function</a></li>
+          <li class="method"><a href="Vala.get_ccode_type.html">get_ccode_type</a></li>
+          <li class="method"><a href="Vala.get_ccode_type_check_function.html">get_ccode_type_check_function</a></li>
+          <li class="method"><a href="Vala.get_ccode_type_id.html">get_ccode_type_id</a></li>
+          <li class="method"><a href="Vala.get_ccode_type_name.html">get_ccode_type_name</a></li>
+          <li class="method"><a href="Vala.get_ccode_unref_function.html">get_ccode_unref_function</a></li>
+          <li class="method"><a href="Vala.get_ccode_upper_case_name.html">get_ccode_upper_case_name</a></li>
+          <li class="method"><a href="Vala.get_ccode_vfunc_name.html">get_ccode_vfunc_name</a></li>
+          <li class="method"><a href="Vala.is_reference_counting.html">is_reference_counting</a></li>
+          <li class="field"><a href="Vala.ccode_attribute_cache_index.html">ccode_attribute_cache_index</a></li>
+        </ul>
+      </div>
+      <div class="site_content">
+        <h1 class="main_title">get_ccode_concrete_accessor</h1>
+        <hr class="main_hr"/>
+        <h2 class="main_title">Description:</h2>
+        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><span class="method">get_ccode_concrete_accessor</span></b> (<span class="main_type"><span class="class">Property</span></span> p)
+        </div><br/>
+        <div class="namespace_note"><b>Namespace:</b> <a href="Vala.html">Vala</a>
+        </div>
+        <div class="package_note"><b>Package:</b> <a href="index.htm">codegen</a>
+        </div>
+      </div>
+    </div><br/>
+    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    </div>
+  </body>
+</html>

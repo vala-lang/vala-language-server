@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<html>
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Vala.Parser.parse_statements &ndash; vala &ndash; Vala Binding Reference</title>
+    <link href="../style.css" rel="stylesheet" type="text/css"/><script src="../scripts.js" type="text/javascript">
+    </script>
+  </head>
+  <body>
+    <div class="site_header">Vala.Parser.parse_statements &ndash; vala Reference Manual</div>
+    <div class="site_body">
+      <div class="site_navigation">
+        <ul class="navi_main">
+          <li class="package_index"><a href="../index.html">Packages</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="package"><a href="index.htm">vala</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="namespace"><a href="Vala.html">Vala</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="class"><a href="Vala.Parser.html">Parser</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="enum"><a href="Vala.Parser.ModifierFlags.html">ModifierFlags</a></li>
+          <li class="enum"><a href="Vala.Parser.RecoveryState.html">RecoveryState</a></li>
+          <li class="struct"><a href="Vala.Parser.TokenInfo.html">TokenInfo</a></li>
+          <li class="constant"><a href="Vala.Parser.BUFFER_SIZE.html">BUFFER_SIZE</a></li>
+          <li class="creation_method"><a href="Vala.Parser.Parser.html">Parser</a></li>
+          <li class="method"><a href="Vala.Parser.accept.html">accept</a></li>
+          <li class="method"><a href="Vala.Parser.current.html">current</a></li>
+          <li class="method"><a href="Vala.Parser.expect.html">expect</a></li>
+          <li class="method"><a href="Vala.Parser.get_assignment_operator.html">get_assignment_operator</a></li>
+          <li class="method"><a href="Vala.Parser.get_binary_operator.html">get_binary_operator</a></li>
+          <li class="method"><a href="Vala.Parser.get_current_src.html">get_current_src</a></li>
+          <li class="method"><a href="Vala.Parser.get_current_string.html">get_current_string</a></li>
+          <li class="method"><a href="Vala.Parser.get_last_src.html">get_last_src</a></li>
+          <li class="method"><a href="Vala.Parser.get_last_string.html">get_last_string</a></li>
+          <li class="method"><a href="Vala.Parser.get_location.html">get_location</a></li>
+          <li class="method"><a href="Vala.Parser.get_src.html">get_src</a></li>
+          <li class="method"><a href="Vala.Parser.get_unary_operator.html">get_unary_operator</a></li>
+          <li class="method"><a href="Vala.Parser.is_declaration_keyword.html">is_declaration_keyword</a></li>
+          <li class="method"><a href="Vala.Parser.is_expression.html">is_expression</a></li>
+          <li class="method"><a href="Vala.Parser.is_inner_array_type.html">is_inner_array_type</a></li>
+          <li class="method"><a href="Vala.Parser.is_lambda_expression.html">is_lambda_expression</a></li>
+          <li class="method"><a href="Vala.Parser.next.html">next</a></li>
+          <li class="method"><a href="Vala.Parser.parse.html">parse</a></li>
+          <li class="method"><a href="Vala.Parser.parse_access_modifier.html">parse_access_modifier</a></li>
+          <li class="method"><a href="Vala.Parser.parse_additive_expression.html">parse_additive_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_and_expression.html">parse_and_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_argument.html">parse_argument</a></li>
+          <li class="method"><a href="Vala.Parser.parse_argument_list.html">parse_argument_list</a></li>
+          <li class="method"><a href="Vala.Parser.parse_array_creation_expression.html">parse_array_creation_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_attribute_value.html">parse_attribute_value</a></li>
+          <li class="method"><a href="Vala.Parser.parse_attributes.html">parse_attributes</a></li>
+          <li class="method"><a href="Vala.Parser.parse_base_access.html">parse_base_access</a></li>
+          <li class="method"><a href="Vala.Parser.parse_block.html">parse_block</a></li>
+          <li class="method"><a href="Vala.Parser.parse_break_statement.html">parse_break_statement</a></li>
+          <li class="method"><a href="Vala.Parser.parse_catch_clauses.html">parse_catch_clauses</a></li>
+          <li class="method"><a href="Vala.Parser.parse_class_declaration.html">parse_class_declaration</a></li>
+          <li class="method"><a href="Vala.Parser.parse_coalescing_expression.html">parse_coalescing_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_conditional_and_expression.html">parse_conditional_and_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_conditional_expression.html">parse_conditional_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_conditional_or_expression.html">parse_conditional_or_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_constant_declaration.html">parse_constant_declaration</a></li>
+          <li class="method"><a href="Vala.Parser.parse_constructor_declaration.html">parse_constructor_declaration</a></li>
+          <li class="method"><a href="Vala.Parser.parse_continue_statement.html">parse_continue_statement</a></li>
+          <li class="method"><a href="Vala.Parser.parse_creation_method_declaration.html">parse_creation_method_declaration</a></li>
+          <li class="method"><a href="Vala.Parser.parse_declaration.html">parse_declaration</a></li>
+          <li class="method"><a href="Vala.Parser.parse_declarations.html">parse_declarations</a></li>
+          <li class="method"><a href="Vala.Parser.parse_delegate_declaration.html">parse_delegate_declaration</a></li>
+          <li class="method"><a href="Vala.Parser.parse_delete_statement.html">parse_delete_statement</a></li>
+          <li class="method"><a href="Vala.Parser.parse_destructor_declaration.html">parse_destructor_declaration</a></li>
+          <li class="method"><a href="Vala.Parser.parse_do_statement.html">parse_do_statement</a></li>
+          <li class="method"><a href="Vala.Parser.parse_element_access.html">parse_element_access</a></li>
+          <li class="method"><a href="Vala.Parser.parse_embedded_statement.html">parse_embedded_statement</a></li>
+          <li class="method"><a href="Vala.Parser.parse_embedded_statement_without_block.html">parse_embedded_statement_without_block</a></li>
+          <li class="method"><a href="Vala.Parser.parse_empty_statement.html">parse_empty_statement</a></li>
+          <li class="method"><a href="Vala.Parser.parse_enum_declaration.html">parse_enum_declaration</a></li>
+          <li class="method"><a href="Vala.Parser.parse_equality_expression.html">parse_equality_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_errordomain_declaration.html">parse_errordomain_declaration</a></li>
+          <li class="method"><a href="Vala.Parser.parse_exclusive_or_expression.html">parse_exclusive_or_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_expression.html">parse_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_expression_list.html">parse_expression_list</a></li>
+          <li class="method"><a href="Vala.Parser.parse_expression_statement.html">parse_expression_statement</a></li>
+          <li class="method"><a href="Vala.Parser.parse_field_declaration.html">parse_field_declaration</a></li>
+          <li class="method"><a href="Vala.Parser.parse_file.html">parse_file</a></li>
+          <li class="method"><a href="Vala.Parser.parse_file_comments.html">parse_file_comments</a></li>
+          <li class="method"><a href="Vala.Parser.parse_finally_clause.html">parse_finally_clause</a></li>
+          <li class="method"><a href="Vala.Parser.parse_for_statement.html">parse_for_statement</a></li>
+          <li class="method"><a href="Vala.Parser.parse_foreach_statement.html">parse_foreach_statement</a></li>
+          <li class="method"><a href="Vala.Parser.parse_identifier.html">parse_identifier</a></li>
+          <li class="method"><a href="Vala.Parser.parse_if_statement.html">parse_if_statement</a></li>
+          <li class="method"><a href="Vala.Parser.parse_in_expression.html">parse_in_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_inclusive_or_expression.html">parse_inclusive_or_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_initializer.html">parse_initializer</a></li>
+          <li class="method"><a href="Vala.Parser.parse_inline_array_type.html">parse_inline_array_type</a></li>
+          <li class="method"><a href="Vala.Parser.parse_interface_declaration.html">parse_interface_declaration</a></li>
+          <li class="method"><a href="Vala.Parser.parse_lambda_expression.html">parse_lambda_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_lambda_parameter.html">parse_lambda_parameter</a></li>
+          <li class="method"><a href="Vala.Parser.parse_literal.html">parse_literal</a></li>
+          <li class="method"><a href="Vala.Parser.parse_local_constant.html">parse_local_constant</a></li>
+          <li class="method"><a href="Vala.Parser.parse_local_constant_declarations.html">parse_local_constant_declarations</a></li>
+          <li class="method"><a href="Vala.Parser.parse_local_variable.html">parse_local_variable</a></li>
+          <li class="method"><a href="Vala.Parser.parse_local_variable_declarations.html">parse_local_variable_declarations</a></li>
+          <li class="method"><a href="Vala.Parser.parse_lock_statement.html">parse_lock_statement</a></li>
+          <li class="method"><a href="Vala.Parser.parse_main_block.html">parse_main_block</a></li>
+          <li class="method"><a href="Vala.Parser.parse_member_access.html">parse_member_access</a></li>
+          <li class="method"><a href="Vala.Parser.parse_member_declaration_modifiers.html">parse_member_declaration_modifiers</a></li>
+          <li class="method"><a href="Vala.Parser.parse_member_initializer.html">parse_member_initializer</a></li>
+          <li class="method"><a href="Vala.Parser.parse_member_name.html">parse_member_name</a></li>
+          <li class="method"><a href="Vala.Parser.parse_method_call.html">parse_method_call</a></li>
+          <li class="method"><a href="Vala.Parser.parse_method_declaration.html">parse_method_declaration</a></li>
+          <li class="method"><a href="Vala.Parser.parse_multiplicative_expression.html">parse_multiplicative_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_namespace_declaration.html">parse_namespace_declaration</a></li>
+          <li class="method"><a href="Vala.Parser.parse_object_creation_expression.html">parse_object_creation_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_object_initializer.html">parse_object_initializer</a></li>
+          <li class="method"><a href="Vala.Parser.parse_object_or_array_creation_expression.html">parse_object_or_array_creation_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_parameter.html">parse_parameter</a></li>
+          <li class="method"><a href="Vala.Parser.parse_pointer_member_access.html">parse_pointer_member_access</a></li>
+          <li class="method"><a href="Vala.Parser.parse_post_decrement_expression.html">parse_post_decrement_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_post_increment_expression.html">parse_post_increment_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_primary_expression.html">parse_primary_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_property_declaration.html">parse_property_declaration</a></li>
+          <li class="method"><a href="Vala.Parser.parse_regex_literal.html">parse_regex_literal</a></li>
+          <li class="method"><a href="Vala.Parser.parse_relational_expression.html">parse_relational_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_return_statement.html">parse_return_statement</a></li>
+          <li class="method"><a href="Vala.Parser.parse_shift_expression.html">parse_shift_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_signal_declaration.html">parse_signal_declaration</a></li>
+          <li class="method"><a href="Vala.Parser.parse_simple_name.html">parse_simple_name</a></li>
+          <li class="method"><a href="Vala.Parser.parse_sizeof_expression.html">parse_sizeof_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_statement_expression.html">parse_statement_expression</a></li>
+          <li class="method">parse_statements</li>
+          <li class="method"><a href="Vala.Parser.parse_struct_declaration.html">parse_struct_declaration</a></li>
+          <li class="method"><a href="Vala.Parser.parse_switch_statement.html">parse_switch_statement</a></li>
+          <li class="method"><a href="Vala.Parser.parse_symbol_name.html">parse_symbol_name</a></li>
+          <li class="method"><a href="Vala.Parser.parse_template.html">parse_template</a></li>
+          <li class="method"><a href="Vala.Parser.parse_this_access.html">parse_this_access</a></li>
+          <li class="method"><a href="Vala.Parser.parse_throw_statement.html">parse_throw_statement</a></li>
+          <li class="method"><a href="Vala.Parser.parse_try_statement.html">parse_try_statement</a></li>
+          <li class="method"><a href="Vala.Parser.parse_tuple.html">parse_tuple</a></li>
+          <li class="method"><a href="Vala.Parser.parse_type.html">parse_type</a></li>
+          <li class="method"><a href="Vala.Parser.parse_type_argument_list.html">parse_type_argument_list</a></li>
+          <li class="method"><a href="Vala.Parser.parse_type_declaration_modifiers.html">parse_type_declaration_modifiers</a></li>
+          <li class="method"><a href="Vala.Parser.parse_type_parameter_list.html">parse_type_parameter_list</a></li>
+          <li class="method"><a href="Vala.Parser.parse_typeof_expression.html">parse_typeof_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_unary_expression.html">parse_unary_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_using_directives.html">parse_using_directives</a></li>
+          <li class="method"><a href="Vala.Parser.parse_while_statement.html">parse_while_statement</a></li>
+          <li class="method"><a href="Vala.Parser.parse_yield_expression.html">parse_yield_expression</a></li>
+          <li class="method"><a href="Vala.Parser.parse_yield_statement.html">parse_yield_statement</a></li>
+          <li class="method"><a href="Vala.Parser.prev.html">prev</a></li>
+          <li class="method"><a href="Vala.Parser.recover.html">recover</a></li>
+          <li class="method"><a href="Vala.Parser.report_parse_error.html">report_parse_error</a></li>
+          <li class="method"><a href="Vala.Parser.rollback.html">rollback</a></li>
+          <li class="method"><a href="Vala.Parser.set_attributes.html">set_attributes</a></li>
+          <li class="method"><a href="Vala.Parser.skip_identifier.html">skip_identifier</a></li>
+          <li class="method"><a href="Vala.Parser.skip_symbol_name.html">skip_symbol_name</a></li>
+          <li class="method"><a href="Vala.Parser.skip_type.html">skip_type</a></li>
+          <li class="method"><a href="Vala.Parser.skip_type_argument_list.html">skip_type_argument_list</a></li>
+          <li class="virtual_method"><a href="Vala.Parser.visit_source_file.html">visit_source_file</a></li>
+          <li class="field"><a href="Vala.Parser._empty_type_parameter_list.html">_empty_type_parameter_list</a></li>
+          <li class="field"><a href="Vala.Parser.comment.html">comment</a></li>
+          <li class="field"><a href="Vala.Parser.context.html">context</a></li>
+          <li class="field"><a href="Vala.Parser.index.html">index</a></li>
+          <li class="field"><a href="Vala.Parser.scanner.html">scanner</a></li>
+          <li class="field"><a href="Vala.Parser.size.html">size</a></li>
+          <li class="field"><a href="Vala.Parser.tokens.html">tokens</a></li>
+        </ul>
+      </div>
+      <div class="site_content">
+        <h1 class="main_title">parse_statements</h1>
+        <hr class="main_hr"/>
+        <h2 class="main_title">Description:</h2>
+        <div class="main_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><span class="method">parse_statements</span></b> (<span class="main_type"><a href="Vala.Block.html" class="class">Block</a></span> block) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+        </div>
+      </div>
+    </div><br/>
+    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    </div>
+  </body>
+</html>

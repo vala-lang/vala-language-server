@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8"?>
+<html>
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Valadoc.GtkdocRenderer &ndash; valadoc &ndash; Vala Binding Reference</title>
+    <link href="../style.css" rel="stylesheet" type="text/css"/><script src="../scripts.js" type="text/javascript">
+    </script>
+  </head>
+  <body>
+    <div class="site_header">Valadoc.GtkdocRenderer &ndash; valadoc Reference Manual</div>
+    <div class="site_body">
+      <div class="site_navigation">
+        <ul class="navi_main">
+          <li class="package_index"><a href="../index.html">Packages</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="package"><a href="index.htm">valadoc</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="namespace"><a href="Valadoc.html">Valadoc</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="class">GtkdocRenderer</li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="property"><a href="Valadoc.GtkdocRenderer.content.html">content</a></li>
+          <li class="creation_method"><a href="Valadoc.GtkdocRenderer.GtkdocRenderer.html">GtkdocRenderer</a></li>
+          <li class="method"><a href="Valadoc.GtkdocRenderer.append_exceptions.html">append_exceptions</a></li>
+          <li class="method"><a href="Valadoc.GtkdocRenderer.append_see.html">append_see</a></li>
+          <li class="method"><a href="Valadoc.GtkdocRenderer.append_since.html">append_since</a></li>
+          <li class="method"><a href="Valadoc.GtkdocRenderer.get_cname.html">get_cname</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.render.html">render</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.render_children.html">render_children</a></li>
+          <li class="method"><a href="Valadoc.GtkdocRenderer.render_symbol.html">render_symbol</a></li>
+          <li class="method"><a href="Valadoc.GtkdocRenderer.reset.html">reset</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_comment.html">visit_comment</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_embedded.html">visit_embedded</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_headline.html">visit_headline</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_link.html">visit_link</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_list.html">visit_list</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_list_item.html">visit_list_item</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_note.html">visit_note</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_page.html">visit_page</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_paragraph.html">visit_paragraph</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_run.html">visit_run</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_source_code.html">visit_source_code</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_symbol_link.html">visit_symbol_link</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_table.html">visit_table</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_table_cell.html">visit_table_cell</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_table_row.html">visit_table_row</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_text.html">visit_text</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_warning.html">visit_warning</a></li>
+          <li class="virtual_method"><a href="Valadoc.GtkdocRenderer.visit_wiki_link.html">visit_wiki_link</a></li>
+          <li class="method"><a href="Valadoc.GtkdocRenderer.write_docbook_link.html">write_docbook_link</a></li>
+          <li class="method"><a href="Valadoc.GtkdocRenderer.write_string.html">write_string</a></li>
+          <li class="method"><a href="Valadoc.GtkdocRenderer.write_symbol_link.html">write_symbol_link</a></li>
+          <li class="field"><a href="Valadoc.GtkdocRenderer.separated.html">separated</a></li>
+          <li class="field"><a href="Valadoc.GtkdocRenderer.settings.html">settings</a></li>
+          <li class="field"><a href="Valadoc.GtkdocRenderer.writer.html">writer</a></li>
+        </ul>
+      </div>
+      <div class="site_content">
+        <h1 class="main_title">GtkdocRenderer</h1>
+        <hr class="main_hr"/>
+        <h2 class="main_title">Object Hierarchy:</h2>
+        <img class="main_diagram" usemap="#Valadoc.GtkdocRenderer" alt="Object hierarchy for GtkdocRenderer" src="img/Valadoc.GtkdocRenderer.svg"/>
+
+      <map id="Valadoc.GtkdocRenderer" name="Valadoc.GtkdocRenderer">
+<area shape="rect" id="node1" href="Valadoc.GtkdocRenderer.html" title="Valadoc.GtkdocRenderer" alt="" coords="39,293,243,341"/>
+<area shape="rect" id="node2" href="Valadoc.Content.ContentRenderer.html" title="Valadoc.Content.ContentRenderer" alt="" coords="5,197,276,245"/>
+<area shape="rect" id="node3" href="Valadoc.Content.ContentVisitor.html" title="Valadoc.Content.ContentVisitor" alt="" coords="13,101,268,149"/>
+</map>
+
+        <h2 class="main_title">Description:</h2>
+        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">class</span> <b><span class="class">GtkdocRenderer</span></b> : <span class="main_type"><a href="Valadoc.Content.ContentRenderer.html" class="abstract_class">ContentRenderer</a></span>
+        </div><br/>
+        <div class="namespace_note"><b>Namespace:</b> <a href="Valadoc.html">Valadoc</a>
+        </div>
+        <div class="package_note"><b>Package:</b> <a href="index.htm">valadoc</a>
+        </div>
+        <h2 class="main_title">Content:</h2>
+        <h3 class="main_title">Properties:</h3>
+        <ul class="navi_inline">
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.GtkdocRenderer.content.html" class="property">content</a></b> { <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+        </ul>
+        <h3 class="main_title">Creation methods:</h3>
+        <ul class="navi_inline">
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Valadoc.GtkdocRenderer.GtkdocRenderer.html" class="creation_method">GtkdocRenderer</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+        </ul>
+        <h3 class="main_title">Methods:</h3>
+        <ul class="navi_inline">
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.GtkdocRenderer.get_cname.html" class="method">get_cname</a></b> (<span class="main_type"><a href="Valadoc.Api.Item.html" class="abstract_class">Item</a></span> item)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.write_docbook_link.html" class="method">write_docbook_link</a></b> (<span class="main_type"><a href="Valadoc.Api.Item.html" class="abstract_class">Item</a></span> item)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.render.html" class="virtual_method">render</a></b> (<span class="main_type"><a href="Valadoc.Content.ContentElement.html" class="abstract_class">ContentElement</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.render_symbol.html" class="method">render_symbol</a></b> (<span class="main_type"><a href="Valadoc.Content.Comment.html" class="class">Comment</a></span>? documentation)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.render_children.html" class="virtual_method">render_children</a></b> (<span class="main_type"><a href="Valadoc.Content.ContentElement.html" class="abstract_class">ContentElement</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.reset.html" class="method">reset</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_comment.html" class="virtual_method">visit_comment</a></b> (<span class="main_type"><a href="Valadoc.Content.Comment.html" class="class">Comment</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_embedded.html" class="virtual_method">visit_embedded</a></b> (<span class="main_type"><a href="Valadoc.Content.Embedded.html" class="class">Embedded</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_headline.html" class="virtual_method">visit_headline</a></b> (<span class="main_type"><a href="Valadoc.Content.Headline.html" class="class">Headline</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_wiki_link.html" class="virtual_method">visit_wiki_link</a></b> (<span class="main_type"><a href="Valadoc.Content.WikiLink.html" class="class">WikiLink</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_link.html" class="virtual_method">visit_link</a></b> (<span class="main_type"><a href="Valadoc.Content.Link.html" class="class">Link</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_symbol_link.html" class="virtual_method">visit_symbol_link</a></b> (<span class="main_type"><a href="Valadoc.Content.SymbolLink.html" class="class">SymbolLink</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.write_symbol_link.html" class="method">write_symbol_link</a></b> (<span class="main_type"><a href="Valadoc.Content.SymbolLink.html" class="class">SymbolLink</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_list.html" class="virtual_method">visit_list</a></b> (<span class="main_type"><a href="Valadoc.Content.List.html" class="class">List</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_list_item.html" class="virtual_method">visit_list_item</a></b> (<span class="main_type"><a href="Valadoc.Content.ListItem.html" class="class">ListItem</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_page.html" class="virtual_method">visit_page</a></b> (<span class="main_type"><a href="Valadoc.Content.Page.html" class="class">Page</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_paragraph.html" class="virtual_method">visit_paragraph</a></b> (<span class="main_type"><a href="Valadoc.Content.Paragraph.html" class="class">Paragraph</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_warning.html" class="virtual_method">visit_warning</a></b> (<span class="main_type"><a href="Valadoc.Content.Warning.html" class="class">Warning</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_note.html" class="virtual_method">visit_note</a></b> (<span class="main_type"><a href="Valadoc.Content.Note.html" class="class">Note</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_run.html" class="virtual_method">visit_run</a></b> (<span class="main_type"><a href="Valadoc.Content.Run.html" class="class">Run</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_source_code.html" class="virtual_method">visit_source_code</a></b> (<span class="main_type"><a href="Valadoc.Content.SourceCode.html" class="class">SourceCode</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_table.html" class="virtual_method">visit_table</a></b> (<span class="main_type"><a href="Valadoc.Content.Table.html" class="class">Table</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_table_cell.html" class="virtual_method">visit_table_cell</a></b> (<span class="main_type"><a href="Valadoc.Content.TableCell.html" class="class">TableCell</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_table_row.html" class="virtual_method">visit_table_row</a></b> (<span class="main_type"><a href="Valadoc.Content.TableRow.html" class="class">TableRow</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.visit_text.html" class="virtual_method">visit_text</a></b> (<span class="main_type"><a href="Valadoc.Content.Text.html" class="class">Text</a></span> element)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.write_string.html" class="method">write_string</a></b> (<span class="main_basic_type"><span class="class">string</span></span> content)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.append_since.html" class="method">append_since</a></b> (<span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Taglet.html" class="interface">Taglet</a></span>&gt; taglets)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.append_see.html" class="method">append_see</a></b> (<span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Taglet.html" class="interface">Taglet</a></span>&gt; taglets)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.GtkdocRenderer.append_exceptions.html" class="method">append_exceptions</a></b> (<span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Taglet.html" class="interface">Taglet</a></span>&gt; taglets)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+        </ul>
+        <h3 class="main_title">Fields:</h3>
+        <ul class="navi_inline">
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.GtkDocMarkupWriter.html" class="class">GtkDocMarkupWriter</a></span> <b><a href="Valadoc.GtkdocRenderer.writer.html" class="field">writer</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_type"><a href="Valadoc.Settings.html" class="class">Settings</a></span> <b><a href="Valadoc.GtkdocRenderer.settings.html" class="field">settings</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.GtkdocRenderer.separated.html" class="field">separated</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+        </ul>
+        <h3 class="main_title">Inherited Members:</h3>
+        <div class="box">
+          <div class="headline" onclick="toggle_box (this, 'box-content-2')">All known members inherited from class Valadoc.Content.ContentRenderer
+          </div>
+          <div class="content" id="box-content-2">
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="abstract_method"><a href="Valadoc.Content.ContentRenderer.render.html">render</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="abstract_method"><a href="Valadoc.Content.ContentRenderer.render_children.html">render_children</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="box">
+          <div class="headline" onclick="toggle_box (this, 'box-content-3')">All known members inherited from class Valadoc.Content.ContentVisitor
+          </div>
+          <div class="content" id="box-content-3">
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_comment.html">visit_comment</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_embedded.html">visit_embedded</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_headline.html">visit_headline</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_link.html">visit_link</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_wiki_link.html">visit_wiki_link</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_symbol_link.html">visit_symbol_link</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_list.html">visit_list</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_list_item.html">visit_list_item</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_paragraph.html">visit_paragraph</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_warning.html">visit_warning</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_note.html">visit_note</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_page.html">visit_page</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_run.html">visit_run</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_source_code.html">visit_source_code</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_table.html">visit_table</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_table_cell.html">visit_table_cell</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_table_row.html">visit_table_row</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_taglet.html">visit_taglet</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentVisitor.visit_text.html">visit_text</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="box">
+          <div class="headline" onclick="toggle_box (this, 'box-content-4')">All known members inherited from class GLib.Object</div>
+          <div class="content" id="box-content-4">
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="static_method">@new</li>
+                <li class="static_method">new_valist</li>
+                <li class="static_method">newv</li>
+                <li class="static_method">new_with_properties</li>
+                <li class="method">add_toggle_ref</li>
+                <li class="method">add_weak_pointer</li>
+                <li class="method">bind_property</li>
+                <li class="method">connect</li>
+                <li class="virtual_method">constructed</li>
+                <li class="method">disconnect</li>
+                <li class="virtual_method">dispose</li>
+                <li class="method">dup_data</li>
+                <li class="method">dup_qdata</li>
+                <li class="method">freeze_notify</li>
+                <li class="method">@get</li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="method">get_class</li>
+                <li class="method">get_data</li>
+                <li class="method">get_property</li>
+                <li class="method">get_qdata</li>
+                <li class="method">get_type</li>
+                <li class="method">getv</li>
+                <li class="method">notify_property</li>
+                <li class="method">@ref</li>
+                <li class="method">ref_sink</li>
+                <li class="method">replace_data</li>
+                <li class="method">replace_qdata</li>
+                <li class="method">remove_toggle_ref</li>
+                <li class="method">remove_weak_pointer</li>
+                <li class="method">@set</li>
+                <li class="method">set_data</li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="method">set_data_full</li>
+                <li class="method">set_property</li>
+                <li class="method">set_qdata</li>
+                <li class="method">set_qdata_full</li>
+                <li class="method">setv</li>
+                <li class="method">steal_data</li>
+                <li class="method">steal_qdata</li>
+                <li class="method">thaw_notify</li>
+                <li class="method">unref</li>
+                <li class="method">watch_closure</li>
+                <li class="method">weak_ref</li>
+                <li class="method">weak_unref</li>
+                <li class="signal">notify</li>
+                <li class="field">ref_count</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><br/>
+    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    </div>
+  </body>
+</html>

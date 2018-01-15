@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<html>
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Vala.ForeachStatement.ForeachStatement &ndash; vala &ndash; Vala Binding Reference</title>
+    <link href="../style.css" rel="stylesheet" type="text/css"/><script src="../scripts.js" type="text/javascript">
+    </script>
+  </head>
+  <body>
+    <div class="site_header">Vala.ForeachStatement.ForeachStatement &ndash; vala Reference Manual</div>
+    <div class="site_body">
+      <div class="site_navigation">
+        <ul class="navi_main">
+          <li class="package_index"><a href="../index.html">Packages</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="package"><a href="index.htm">vala</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="namespace"><a href="Vala.html">Vala</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="class"><a href="Vala.ForeachStatement.html">ForeachStatement</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="property"><a href="Vala.ForeachStatement.body.html">body</a></li>
+          <li class="property"><a href="Vala.ForeachStatement.collection.html">collection</a></li>
+          <li class="property"><a href="Vala.ForeachStatement.collection_variable.html">collection_variable</a></li>
+          <li class="property"><a href="Vala.ForeachStatement.element_variable.html">element_variable</a></li>
+          <li class="property"><a href="Vala.ForeachStatement.iterator_variable.html">iterator_variable</a></li>
+          <li class="property"><a href="Vala.ForeachStatement.type_reference.html">type_reference</a></li>
+          <li class="property"><a href="Vala.ForeachStatement.use_iterator.html">use_iterator</a></li>
+          <li class="property"><a href="Vala.ForeachStatement.variable_name.html">variable_name</a></li>
+          <li class="creation_method">ForeachStatement</li>
+          <li class="virtual_method"><a href="Vala.ForeachStatement.accept.html">accept</a></li>
+          <li class="virtual_method"><a href="Vala.ForeachStatement.accept_children.html">accept_children</a></li>
+          <li class="method"><a href="Vala.ForeachStatement.analyze_element_type.html">analyze_element_type</a></li>
+          <li class="virtual_method"><a href="Vala.ForeachStatement.check.html">check</a></li>
+          <li class="method"><a href="Vala.ForeachStatement.check_with_index.html">check_with_index</a></li>
+          <li class="method"><a href="Vala.ForeachStatement.check_with_iterator.html">check_with_iterator</a></li>
+          <li class="method"><a href="Vala.ForeachStatement.check_without_iterator.html">check_without_iterator</a></li>
+          <li class="virtual_method"><a href="Vala.ForeachStatement.emit.html">emit</a></li>
+          <li class="virtual_method"><a href="Vala.ForeachStatement.get_defined_variables.html">get_defined_variables</a></li>
+          <li class="virtual_method"><a href="Vala.ForeachStatement.replace_expression.html">replace_expression</a></li>
+          <li class="virtual_method"><a href="Vala.ForeachStatement.replace_type.html">replace_type</a></li>
+          <li class="field"><a href="Vala.ForeachStatement._body.html">_body</a></li>
+          <li class="field"><a href="Vala.ForeachStatement._collection.html">_collection</a></li>
+          <li class="field"><a href="Vala.ForeachStatement._collection_variable.html">_collection_variable</a></li>
+          <li class="field"><a href="Vala.ForeachStatement._data_type.html">_data_type</a></li>
+          <li class="field"><a href="Vala.ForeachStatement._element_variable.html">_element_variable</a></li>
+          <li class="field"><a href="Vala.ForeachStatement._iterator_variable.html">_iterator_variable</a></li>
+          <li class="field"><a href="Vala.ForeachStatement._use_iterator.html">_use_iterator</a></li>
+          <li class="field"><a href="Vala.ForeachStatement._variable_name.html">_variable_name</a></li>
+        </ul>
+      </div>
+      <div class="site_content">
+        <h1 class="main_title">ForeachStatement</h1>
+        <hr class="main_hr"/>
+        <h2 class="main_title">Description:</h2>
+        <div class="main_code_definition"><span class="main_keyword">public</span> <b><span class="creation_method">ForeachStatement</span></b> (<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>? type_reference, <span class="main_basic_type"><span class="class">string</span></span> variable_name, <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> collection, <span class="main_type"><a href="Vala.Block.html" class="class">Block</a></span> body, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span> source_reference)
+        </div>
+        <div class="description">
+          <p>Creates a new foreach statement.</p>
+          <h2 class="main_title">Parameters:</h2>
+          <table class="main_parameter_table">
+            <tr>
+              <td class="main_parameter_table_name">type_reference</td>
+              <td>
+                <p>element type </p>
+              </td>
+            </tr>
+            <tr>
+              <td class="main_parameter_table_name">variable_name</td>
+              <td>
+                <p>element variable name </p>
+              </td>
+            </tr>
+            <tr>
+              <td class="main_parameter_table_name">collection</td>
+              <td>
+                <p>container </p>
+              </td>
+            </tr>
+            <tr>
+              <td class="main_parameter_table_name">body</td>
+              <td>
+                <p>loop body </p>
+              </td>
+            </tr>
+            <tr>
+              <td class="main_parameter_table_name">source_reference</td>
+              <td>
+                <p>reference to source code </p>
+              </td>
+            </tr>
+          </table>
+          <h2 class="main_title">Returns:</h2>
+          <table class="main_parameter_table">
+            <tr>
+              <td>
+                <p>newly created foreach statement </p>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div><br/>
+    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    </div>
+  </body>
+</html>

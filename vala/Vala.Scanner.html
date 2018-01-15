@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<html>
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Vala.Scanner &ndash; vala &ndash; Vala Binding Reference</title>
+    <link href="../style.css" rel="stylesheet" type="text/css"/><script src="../scripts.js" type="text/javascript">
+    </script>
+  </head>
+  <body>
+    <div class="site_header">Vala.Scanner &ndash; vala Reference Manual</div>
+    <div class="site_body">
+      <div class="site_navigation">
+        <ul class="navi_main">
+          <li class="package_index"><a href="../index.html">Packages</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="package"><a href="index.htm">vala</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="namespace"><a href="Vala.html">Vala</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="class">Scanner</li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="enum"><a href="Vala.Scanner.State.html">State</a></li>
+          <li class="struct"><a href="Vala.Scanner.Conditional.html">Conditional</a></li>
+          <li class="property"><a href="Vala.Scanner.source_file.html">source_file</a></li>
+          <li class="static_method"><a href="Vala.Scanner.get_identifier_or_keyword.html">get_identifier_or_keyword</a></li>
+          <li class="static_method"><a href="Vala.Scanner.matches.html">matches</a></li>
+          <li class="creation_method"><a href="Vala.Scanner.Scanner.html">Scanner</a></li>
+          <li class="method"><a href="Vala.Scanner.comment.html">comment</a></li>
+          <li class="method"><a href="Vala.Scanner.get_source_reference.html">get_source_reference</a></li>
+          <li class="method"><a href="Vala.Scanner.in_regex_literal.html">in_regex_literal</a></li>
+          <li class="method"><a href="Vala.Scanner.in_template.html">in_template</a></li>
+          <li class="method"><a href="Vala.Scanner.in_template_part.html">in_template_part</a></li>
+          <li class="method"><a href="Vala.Scanner.is_ident_char.html">is_ident_char</a></li>
+          <li class="method"><a href="Vala.Scanner.parse_file_comments.html">parse_file_comments</a></li>
+          <li class="method"><a href="Vala.Scanner.parse_pp_and_expression.html">parse_pp_and_expression</a></li>
+          <li class="method"><a href="Vala.Scanner.parse_pp_elif.html">parse_pp_elif</a></li>
+          <li class="method"><a href="Vala.Scanner.parse_pp_else.html">parse_pp_else</a></li>
+          <li class="method"><a href="Vala.Scanner.parse_pp_endif.html">parse_pp_endif</a></li>
+          <li class="method"><a href="Vala.Scanner.parse_pp_equality_expression.html">parse_pp_equality_expression</a></li>
+          <li class="method"><a href="Vala.Scanner.parse_pp_expression.html">parse_pp_expression</a></li>
+          <li class="method"><a href="Vala.Scanner.parse_pp_if.html">parse_pp_if</a></li>
+          <li class="method"><a href="Vala.Scanner.parse_pp_or_expression.html">parse_pp_or_expression</a></li>
+          <li class="method"><a href="Vala.Scanner.parse_pp_primary_expression.html">parse_pp_primary_expression</a></li>
+          <li class="method"><a href="Vala.Scanner.parse_pp_symbol.html">parse_pp_symbol</a></li>
+          <li class="method"><a href="Vala.Scanner.parse_pp_unary_expression.html">parse_pp_unary_expression</a></li>
+          <li class="method"><a href="Vala.Scanner.pop_comment.html">pop_comment</a></li>
+          <li class="method"><a href="Vala.Scanner.pp_directive.html">pp_directive</a></li>
+          <li class="method"><a href="Vala.Scanner.pp_eol.html">pp_eol</a></li>
+          <li class="method"><a href="Vala.Scanner.pp_space.html">pp_space</a></li>
+          <li class="method"><a href="Vala.Scanner.pp_whitespace.html">pp_whitespace</a></li>
+          <li class="method"><a href="Vala.Scanner.push_comment.html">push_comment</a></li>
+          <li class="method"><a href="Vala.Scanner.read_number.html">read_number</a></li>
+          <li class="method"><a href="Vala.Scanner.read_regex_token.html">read_regex_token</a></li>
+          <li class="method"><a href="Vala.Scanner.read_template_token.html">read_template_token</a></li>
+          <li class="method"><a href="Vala.Scanner.read_token.html">read_token</a></li>
+          <li class="method"><a href="Vala.Scanner.seek.html">seek</a></li>
+          <li class="method"><a href="Vala.Scanner.space.html">space</a></li>
+          <li class="method"><a href="Vala.Scanner.whitespace.html">whitespace</a></li>
+          <li class="field"><a href="Vala.Scanner._comment.html">_comment</a></li>
+          <li class="field"><a href="Vala.Scanner._source_file.html">_source_file</a></li>
+          <li class="field"><a href="Vala.Scanner.column.html">column</a></li>
+          <li class="field"><a href="Vala.Scanner.conditional_stack.html">conditional_stack</a></li>
+          <li class="field"><a href="Vala.Scanner.current.html">current</a></li>
+          <li class="field"><a href="Vala.Scanner.end.html">end</a></li>
+          <li class="field"><a href="Vala.Scanner.line.html">line</a></li>
+          <li class="field"><a href="Vala.Scanner.previous.html">previous</a></li>
+          <li class="field"><a href="Vala.Scanner.state_stack.html">state_stack</a></li>
+        </ul>
+      </div>
+      <div class="site_content">
+        <h1 class="main_title">Scanner</h1>
+        <hr class="main_hr"/>
+        <h2 class="main_title">Object Hierarchy:</h2>
+        <img class="main_diagram" usemap="#Vala.Scanner" alt="Object hierarchy for Scanner" src="img/Vala.Scanner.svg"/>
+
+      <map id="Vala.Scanner" name="Vala.Scanner">
+<area shape="rect" id="node1" href="Vala.Scanner.html" title="Vala.Scanner" alt="" coords="5,5,123,53"/>
+</map>
+
+        <h2 class="main_title">Description:</h2>
+        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">class</span> <b><span class="class">Scanner</span></b>
+        </div>
+        <div class="description">
+          <p>Lexical scanner for Vala source files.</p>
+        </div><br/>
+        <div class="namespace_note"><b>Namespace:</b> <a href="Vala.html">Vala</a>
+        </div>
+        <div class="package_note"><b>Package:</b> <a href="index.htm">vala</a>
+        </div>
+        <h2 class="main_title">Content:</h2>
+        <h3 class="main_title">Structs:</h3>
+        <ul class="navi_inline">
+          <li class="struct"><a href="Vala.Scanner.Conditional.html">Conditional</a></li>
+        </ul>
+        <h3 class="main_title">Enums:</h3>
+        <ul class="navi_inline">
+          <li class="enum"><a href="Vala.Scanner.State.html">State</a></li>
+        </ul>
+        <h3 class="main_title">Properties:</h3>
+        <ul class="navi_inline">
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.SourceFile.html" class="class">SourceFile</a></span> <b><a href="Vala.Scanner.source_file.html" class="property">source_file</a></b> { <span class="main_keyword">private</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+        </ul>
+        <h3 class="main_title">Static methods:</h3>
+        <ul class="navi_inline">
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> <b><a href="Vala.Scanner.get_identifier_or_keyword.html" class="static_method">get_identifier_or_keyword</a></b> (<span class="main_basic_type"><span class="struct">char</span></span>* begin, <span class="main_basic_type"><span class="struct">int</span></span> len)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Scanner.matches.html" class="static_method">matches</a></b> (<span class="main_basic_type"><span class="struct">char</span></span>* begin, <span class="main_basic_type"><span class="class">string</span></span> keyword)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+        </ul>
+        <h3 class="main_title">Creation methods:</h3>
+        <ul class="navi_inline">
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.Scanner.Scanner.html" class="creation_method">Scanner</a></b> (<span class="main_type"><a href="Vala.SourceFile.html" class="class">SourceFile</a></span> source_file)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+        </ul>
+        <h3 class="main_title">Methods:</h3>
+        <ul class="navi_inline">
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.Scanner.seek.html" class="method">seek</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> location)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Scanner.in_template.html" class="method">in_template</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Scanner.in_template_part.html" class="method">in_template_part</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Scanner.in_regex_literal.html" class="method">in_regex_literal</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Scanner.is_ident_char.html" class="method">is_ident_char</a></b> (<span class="main_basic_type"><span class="struct">char</span></span> c)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span> <b><a href="Vala.Scanner.get_source_reference.html" class="method">get_source_reference</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> offset, <span class="main_basic_type"><span class="struct">int</span></span> length = <span class="main_literal">0</span>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> <b><a href="Vala.Scanner.read_regex_token.html" class="method">read_regex_token</a></b> (<span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_begin, <span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_end)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> <b><a href="Vala.Scanner.read_number.html" class="method">read_number</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> <b><a href="Vala.Scanner.read_template_token.html" class="method">read_template_token</a></b> (<span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_begin, <span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_end)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> <b><a href="Vala.Scanner.read_token.html" class="method">read_token</a></b> (<span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_begin, <span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_end)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Scanner.pp_whitespace.html" class="method">pp_whitespace</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Scanner.pp_space.html" class="method">pp_space</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Scanner.pp_directive.html" class="method">pp_directive</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Scanner.pp_eol.html" class="method">pp_eol</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Scanner.parse_pp_if.html" class="method">parse_pp_if</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Scanner.parse_pp_elif.html" class="method">parse_pp_elif</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Scanner.parse_pp_else.html" class="method">parse_pp_else</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Scanner.parse_pp_endif.html" class="method">parse_pp_endif</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Scanner.parse_pp_symbol.html" class="method">parse_pp_symbol</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Scanner.parse_pp_primary_expression.html" class="method">parse_pp_primary_expression</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Scanner.parse_pp_unary_expression.html" class="method">parse_pp_unary_expression</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Scanner.parse_pp_equality_expression.html" class="method">parse_pp_equality_expression</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Scanner.parse_pp_and_expression.html" class="method">parse_pp_and_expression</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Scanner.parse_pp_or_expression.html" class="method">parse_pp_or_expression</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Scanner.parse_pp_expression.html" class="method">parse_pp_expression</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Scanner.whitespace.html" class="method">whitespace</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Scanner.comment.html" class="method">comment</a></b> (<span class="main_basic_type"><span class="struct">bool</span></span> file_comment = <span class="main_literal">false</span>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Scanner.space.html" class="method">space</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.Scanner.parse_file_comments.html" class="method">parse_file_comments</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Scanner.push_comment.html" class="method">push_comment</a></b> (<span class="main_basic_type"><span class="class">string</span></span> comment_item, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span> source_reference, <span class="main_basic_type"><span class="struct">bool</span></span> file_comment)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Comment.html" class="class">Comment</a></span>? <b><a href="Vala.Scanner.pop_comment.html" class="method">pop_comment</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Clears and returns the content of the comment stack.</span>
+            </div></li>
+        </ul>
+        <h3 class="main_title">Fields:</h3>
+        <ul class="navi_inline">
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.SourceFile.html" class="class">SourceFile</a></span> <b><a href="Vala.Scanner._source_file.html" class="field">_source_file</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> <b><a href="Vala.Scanner.previous.html" class="field">previous</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">char</span></span>* <b><a href="Vala.Scanner.current.html" class="field">current</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">char</span></span>* <b><a href="Vala.Scanner.end.html" class="field">end</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.Scanner.line.html" class="field">line</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.Scanner.column.html" class="field">column</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Comment.html" class="class">Comment</a></span> <b><a href="Vala.Scanner._comment.html" class="field">_comment</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Scanner.Conditional.html" class="struct">Conditional</a></span>[] <b><a href="Vala.Scanner.conditional_stack.html" class="field">conditional_stack</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Scanner.State.html" class="enum">State</a></span>[] <b><a href="Vala.Scanner.state_stack.html" class="field">state_stack</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+        </ul>
+      </div>
+    </div><br/>
+    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    </div>
+  </body>
+</html>

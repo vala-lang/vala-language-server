@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<html>
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Vala.GirParser.get_current_src &ndash; vala &ndash; Vala Binding Reference</title>
+    <link href="../style.css" rel="stylesheet" type="text/css"/><script src="../scripts.js" type="text/javascript">
+    </script>
+  </head>
+  <body>
+    <div class="site_header">Vala.GirParser.get_current_src &ndash; vala Reference Manual</div>
+    <div class="site_body">
+      <div class="site_navigation">
+        <ul class="navi_main">
+          <li class="package_index"><a href="../index.html">Packages</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="package"><a href="index.htm">vala</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="namespace"><a href="Vala.html">Vala</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="class"><a href="Vala.GirParser.html">GirParser</a></li>
+        </ul>
+        <hr class="navi_hr"/>
+        <ul class="navi_main">
+          <li class="enum"><a href="Vala.GirParser.ArgumentType.html">ArgumentType</a></li>
+          <li class="class"><a href="Vala.GirParser.Argument.html">Argument</a></li>
+          <li class="class"><a href="Vala.GirParser.Metadata.html">Metadata</a></li>
+          <li class="class"><a href="Vala.GirParser.MetadataParser.html">MetadataParser</a></li>
+          <li class="class"><a href="Vala.GirParser.MetadataSet.html">MetadataSet</a></li>
+          <li class="class"><a href="Vala.GirParser.Node.html">Node</a></li>
+          <li class="class"><a href="Vala.GirParser.ParameterInfo.html">ParameterInfo</a></li>
+          <li class="constant"><a href="Vala.GirParser.GIR_VERSION.html">GIR_VERSION</a></li>
+          <li class="static_method"><a href="Vala.GirParser.add_symbol_to_container.html">add_symbol_to_container</a></li>
+          <li class="static_method"><a href="Vala.GirParser.is_container.html">is_container</a></li>
+          <li class="static_method"><a href="Vala.GirParser.unresolved_symbol_equal.html">unresolved_symbol_equal</a></li>
+          <li class="static_method"><a href="Vala.GirParser.unresolved_symbol_hash.html">unresolved_symbol_hash</a></li>
+          <li class="creation_method"><a href="Vala.GirParser.GirParser.html">GirParser</a></li>
+          <li class="method"><a href="Vala.GirParser.assume_parameter_names.html">assume_parameter_names</a></li>
+          <li class="method"><a href="Vala.GirParser.base_interface_property.html">base_interface_property</a></li>
+          <li class="method"><a href="Vala.GirParser.calculate_common_prefix.html">calculate_common_prefix</a></li>
+          <li class="method"><a href="Vala.GirParser.create_new_namespaces.html">create_new_namespaces</a></li>
+          <li class="method"><a href="Vala.GirParser.element_get_name.html">element_get_name</a></li>
+          <li class="method"><a href="Vala.GirParser.element_get_string.html">element_get_string</a></li>
+          <li class="method"><a href="Vala.GirParser.element_get_type.html">element_get_type</a></li>
+          <li class="method"><a href="Vala.GirParser.element_get_type_id.html">element_get_type_id</a></li>
+          <li class="method"><a href="Vala.GirParser.end_element.html">end_element</a></li>
+          <li class="method"><a href="Vala.GirParser.find_invoker.html">find_invoker</a></li>
+          <li class="method"><a href="Vala.GirParser.find_parent.html">find_parent</a></li>
+          <li class="method"><a href="Vala.GirParser.get_current_metadata.html">get_current_metadata</a></li>
+          <li class="method">get_current_src</li>
+          <li class="method"><a href="Vala.GirParser.map_vala_to_gir.html">map_vala_to_gir</a></li>
+          <li class="method"><a href="Vala.GirParser.next.html">next</a></li>
+          <li class="method"><a href="Vala.GirParser.parse.html">parse</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_alias.html">parse_alias</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_bitfield.html">parse_bitfield</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_boxed.html">parse_boxed</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_c_include.html">parse_c_include</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_callback.html">parse_callback</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_class.html">parse_class</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_constant.html">parse_constant</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_constructor.html">parse_constructor</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_doc.html">parse_doc</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_enumeration.html">parse_enumeration</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_enumeration_member.html">parse_enumeration_member</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_error_domain.html">parse_error_domain</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_error_member.html">parse_error_member</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_field.html">parse_field</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_file.html">parse_file</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_function.html">parse_function</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_include.html">parse_include</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_interface.html">parse_interface</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_method.html">parse_method</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_namespace.html">parse_namespace</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_package.html">parse_package</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_parameter.html">parse_parameter</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_property.html">parse_property</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_record.html">parse_record</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_repository.html">parse_repository</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_return_value.html">parse_return_value</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_signal.html">parse_signal</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_symbol_doc.html">parse_symbol_doc</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_symbol_from_string.html">parse_symbol_from_string</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_type.html">parse_type</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_type_arguments_from_string.html">parse_type_arguments_from_string</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_type_from_gir_name.html">parse_type_from_gir_name</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_type_from_string.html">parse_type_from_string</a></li>
+          <li class="method"><a href="Vala.GirParser.parse_union.html">parse_union</a></li>
+          <li class="method"><a href="Vala.GirParser.pop_metadata.html">pop_metadata</a></li>
+          <li class="method"><a href="Vala.GirParser.pop_node.html">pop_node</a></li>
+          <li class="method"><a href="Vala.GirParser.process_alias.html">process_alias</a></li>
+          <li class="method"><a href="Vala.GirParser.process_async_method.html">process_async_method</a></li>
+          <li class="method"><a href="Vala.GirParser.process_callable.html">process_callable</a></li>
+          <li class="method"><a href="Vala.GirParser.process_interface.html">process_interface</a></li>
+          <li class="method"><a href="Vala.GirParser.process_namespace_method.html">process_namespace_method</a></li>
+          <li class="method"><a href="Vala.GirParser.process_virtual_method_field.html">process_virtual_method_field</a></li>
+          <li class="method"><a href="Vala.GirParser.push_metadata.html">push_metadata</a></li>
+          <li class="method"><a href="Vala.GirParser.push_node.html">push_node</a></li>
+          <li class="method"><a href="Vala.GirParser.report_unused_metadata.html">report_unused_metadata</a></li>
+          <li class="method"><a href="Vala.GirParser.resolve_gir_symbols.html">resolve_gir_symbols</a></li>
+          <li class="method"><a href="Vala.GirParser.resolve_node.html">resolve_node</a></li>
+          <li class="method"><a href="Vala.GirParser.resolve_symbol.html">resolve_symbol</a></li>
+          <li class="method"><a href="Vala.GirParser.resolve_type_arguments.html">resolve_type_arguments</a></li>
+          <li class="method"><a href="Vala.GirParser.same_gir.html">same_gir</a></li>
+          <li class="method"><a href="Vala.GirParser.set_array_ccode.html">set_array_ccode</a></li>
+          <li class="method"><a href="Vala.GirParser.set_symbol_mapping.html">set_symbol_mapping</a></li>
+          <li class="method"><a href="Vala.GirParser.set_type_id_ccode.html">set_type_id_ccode</a></li>
+          <li class="method"><a href="Vala.GirParser.skip_element.html">skip_element</a></li>
+          <li class="method"><a href="Vala.GirParser.start_element.html">start_element</a></li>
+          <li class="virtual_method"><a href="Vala.GirParser.visit_source_file.html">visit_source_file</a></li>
+          <li class="field"><a href="Vala.GirParser.begin.html">begin</a></li>
+          <li class="field"><a href="Vala.GirParser.cheader_filenames.html">cheader_filenames</a></li>
+          <li class="field"><a href="Vala.GirParser.context.html">context</a></li>
+          <li class="field"><a href="Vala.GirParser.current.html">current</a></li>
+          <li class="field"><a href="Vala.GirParser.current_source_file.html">current_source_file</a></li>
+          <li class="field"><a href="Vala.GirParser.current_token.html">current_token</a></li>
+          <li class="field"><a href="Vala.GirParser.end.html">end</a></li>
+          <li class="field"><a href="Vala.GirParser.glib_ns.html">glib_ns</a></li>
+          <li class="field"><a href="Vala.GirParser.metadata.html">metadata</a></li>
+          <li class="field"><a href="Vala.GirParser.metadata_roots.html">metadata_roots</a></li>
+          <li class="field"><a href="Vala.GirParser.metadata_stack.html">metadata_stack</a></li>
+          <li class="field"><a href="Vala.GirParser.old_current.html">old_current</a></li>
+          <li class="field"><a href="Vala.GirParser.provided_namespaces.html">provided_namespaces</a></li>
+          <li class="field"><a href="Vala.GirParser.reader.html">reader</a></li>
+          <li class="field"><a href="Vala.GirParser.root.html">root</a></li>
+          <li class="field"><a href="Vala.GirParser.tree_stack.html">tree_stack</a></li>
+          <li class="field"><a href="Vala.GirParser.type_from_string_regex.html">type_from_string_regex</a></li>
+          <li class="field"><a href="Vala.GirParser.unresolved_gir_symbols.html">unresolved_gir_symbols</a></li>
+          <li class="field"><a href="Vala.GirParser.unresolved_symbols_map.html">unresolved_symbols_map</a></li>
+          <li class="field"><a href="Vala.GirParser.unresolved_type_arguments.html">unresolved_type_arguments</a></li>
+        </ul>
+      </div>
+      <div class="site_content">
+        <h1 class="main_title">get_current_src</h1>
+        <hr class="main_hr"/>
+        <h2 class="main_title">Description:</h2>
+        <div class="main_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span> <b><span class="method">get_current_src</span></b> ()
+        </div>
+      </div>
+    </div><br/>
+    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    </div>
+  </body>
+</html>
