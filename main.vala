@@ -695,6 +695,10 @@ class Vls.Server {
             log.printf ("Got node: %s @ %s = %s\n", best.type_name, sr.to_string(), contents);
         }
 
+        if (best is Vala.MemberAccess) {
+            best = ((Vala.MemberAccess)best).symbol_reference;
+        }
+
         string uri = null;
         foreach (var sourcefile in ctx.get_source_files ()) {
             if (best.source_reference.file == sourcefile.file) {
@@ -704,6 +708,7 @@ class Vls.Server {
         }
         if (uri == null) {
             log.printf ("error: couldn't find source file for %s\n", best.source_reference.file.filename);
+            client.reply (id, null);
         }
 
         client.reply (id, object_to_variant (new LanguageServer.Location () {
