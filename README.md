@@ -10,7 +10,7 @@ $ ninja -C build
 ```
 
 ### libvala docs
-https://benwaffle.github.io/vala-language-server/docs/index.htm
+https://benwaffle.github.io/vala-language-server/index.htm
 
 ### Workflow
 - Clone this repo: https://github.com/benwaffle/vala-code
