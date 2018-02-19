@@ -69,7 +69,6 @@ namespace Vls {
         var fake_ctx = new Vala.CodeContext ();
         ctx.resolver.resolve (fake_ctx);
         ctx.flow_analyzer.analyze (fake_ctx);
-        ctx.analyzer.context = null;
 
         // break namespace references
         break_symbol_refs (ctx.root);
