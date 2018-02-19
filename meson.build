@@ -1,6 +1,6 @@
 project('vala-language-server', 'vala', 'c')
 
-libvala = dependency('libvala-0.38')
+libvala = dependency('libvala-0.40')
 
 deps = [
     dependency('glib-2.0'),
