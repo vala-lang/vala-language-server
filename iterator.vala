@@ -6,12 +6,12 @@ class Vls.FindSymbol : Vala.CodeVisitor {
     bool match (Vala.CodeNode node) {
         var sr = node.source_reference;
         if (sr == null) {
-            stderr.printf ("node %s has no source reference\n", node.type_name);
+            message ("node %s has no source reference", node.type_name);
             return false;
         }
 
         if (sr.begin.line > sr.end.line) {
-            stderr.printf (@"wtf vala: $(node.type_name): $sr\n");
+            warning (@"wtf vala: $(node.type_name): $sr");
             return false;
         }
 
@@ -27,18 +27,20 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         }
 
         if (sr.begin.line != pos.line) {
-            //  stderr.printf ("%s @ %s not on line %u\n", node.type_name, sr.to_string (), pos.line);
             return false;
         }
         if (sr.begin.column <= pos.character && pos.character <= sr.end.column) {
             message ("Got node: %s (%s) @ %s", node.type_name, node.to_string (), sr.to_string ());
             return true;
         } else {
-            //  message ("%s @ %s not around char %u\n", node.type_name, sr.to_string (), pos.character);
             return false;
         }
     }
 
+    /*
+     * TODO: are children of a CodeNode guaranteed to have a source_reference within the parent?
+     * if so, this can be much faster
+     */
     public FindSymbol (Vala.SourceFile file, LanguageServer.Position pos) {
         this.pos = pos;
         this.file = file;
