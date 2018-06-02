@@ -509,6 +509,20 @@ class Vls.Server {
             return;
         }
 
+        var file = File.new_for_uri (uri);
+        foreach (string vapidir in ctx.code_context.vapi_directories) {
+            if (file.get_path ().has_prefix (vapidir)) {
+                message ("%s is in vapidir %s. Not adding", filename, vapidir);
+                return;
+            }
+        }
+        if (file.get_path ().has_prefix ("/usr/share/vala")
+         || file.get_path ().has_prefix ("/usr/share/vala-0.40")) { // TODO: don't hardcode these
+            message ("%s is in system vapidir. Not adding", filename);
+            return;
+        }
+
+
         if (ctx.get_source_file (uri) == null) {
             TextDocument doc;
             try {
@@ -683,7 +697,13 @@ class Vls.Server {
         var p = parse_variant <LanguageServer.TextDocumentPositionParams> (@params);
         message ("get definition in %s at %u,%u", p.textDocument.uri,
             p.position.line, p.position.character);
-        var file = ctx.get_source_file (p.textDocument.uri).file;
+        var sourcefile = ctx.get_source_file (p.textDocument.uri);
+        if (sourcefile == null) {
+            message ("unknown file %s", p.textDocument.uri);
+            client.reply (id, null);
+            return;
+        }
+        var file = sourcefile.file;
         var fs = new FindSymbol (file, p.position.to_libvala ());
 
         if (fs.result.size == 0) {
@@ -701,7 +721,9 @@ class Vls.Server {
                 best = node;
             }
         }
+
         {
+            assert (best != null);
             var sr = best.source_reference;
             var from = (long)Server.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
             var to = (long)Server.get_string_pos (file.content, sr.end.line-1, sr.end.column);
@@ -710,13 +732,19 @@ class Vls.Server {
         }
 
         if (best is Vala.MemberAccess) {
-            best = ((Vala.MemberAccess)best).symbol_reference;
+            var b = (Vala.MemberAccess)best;
+            message ("best (%p) is a MemberAccess", best);
+            if (b.symbol_reference != null) {
+                best = b.symbol_reference;
+                message ("best is now the symbol_referenece => %p", best);
+            }
         }
 
+        /*
         string uri = null;
-        foreach (var sourcefile in ctx.get_source_files ()) {
-            if (best.source_reference.file == sourcefile.file) {
-                uri = sourcefile.uri;
+        foreach (var sourcefile in ctx.code_context.get_source_files ()) {
+            if (best.source_reference.file == sourcefile) {
+                uri = "file://" + sourcefile.filename;
                 break;
             }
         }
@@ -725,10 +753,11 @@ class Vls.Server {
             client.reply (id, null);
             return;
         }
+        */
 
         message (@"replying... $(best.source_reference.file.filename)");
         client.reply (id, object_to_variant (new LanguageServer.Location () {
-            uri = uri,
+            uri = "file://" + best.source_reference.file.filename,
             range = new Range () {
                 start = new Position () {
                     line = best.source_reference.begin.line - 1,
