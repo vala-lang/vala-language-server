@@ -75,6 +75,7 @@
           <li class="method"><a href="Vala.Method.get_required_arguments.html">get_required_arguments</a></li>
           <li class="method"><a href="Vala.Method.get_type_parameter_index.html">get_type_parameter_index</a></li>
           <li class="method"><a href="Vala.Method.get_type_parameters.html">get_type_parameters</a></li>
+          <li class="method"><a href="Vala.Method.has_error_type_parameter.html">has_error_type_parameter</a></li>
           <li class="method"><a href="Vala.Method.is_possible_entry_point.html">is_possible_entry_point</a></li>
           <li class="method"><a href="Vala.Method.is_variadic.html">is_variadic</a></li>
           <li class="virtual_method"><a href="Vala.Method.replace_type.html">replace_type</a></li>
@@ -112,11 +113,11 @@
         <img class="main_diagram" usemap="#Vala.Method" alt="Object hierarchy for Method" src="img/Vala.Method.svg"/>
 
       <map id="Vala.Method" name="Vala.Method">
-<area shape="rect" id="node1" href="Vala.Method.html" title="Vala.Method" alt="" coords="93,293,209,341"/>
-<area shape="rect" id="node2" href="Vala.Subroutine.html" title="Vala.Subroutine" alt="" coords="5,197,144,245"/>
-<area shape="rect" id="node3" href="Vala.Symbol.html" title="Vala.Symbol" alt="" coords="17,101,133,149"/>
-<area shape="rect" id="node4" href="Vala.CodeNode.html" title="Vala.CodeNode" alt="" coords="7,5,143,53"/>
-<area shape="rect" id="node5" href="Vala.Callable.html" title="Vala.Callable" alt="" coords="169,197,287,245"/>
+<area shape="rect" id="node1" href="Vala.Method.html" title="Vala.Method" alt="" coords="105,293,231,341"/>
+<area shape="rect" id="node2" href="Vala.Subroutine.html" title="Vala.Subroutine" alt="" coords="5,197,163,245"/>
+<area shape="rect" id="node3" href="Vala.Symbol.html" title="Vala.Symbol" alt="" coords="21,101,147,149"/>
+<area shape="rect" id="node4" href="Vala.CodeNode.html" title="Vala.CodeNode" alt="" coords="9,5,159,53"/>
+<area shape="rect" id="node5" href="Vala.Callable.html" title="Vala.Callable" alt="" coords="187,197,317,245"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -126,23 +127,23 @@
           <p>Represents a type or namespace method.</p>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-72')">All known sub-classes:</div>
-          <div class="content" id="box-content-72">
+          <div class="headline" onclick="toggle_box (this, 'box-content-84')">All known sub-classes:</div>
+          <div class="content" id="box-content-84">
             <div class="column">
               <ul class="navi_inline">
-                <li class="class"><a href="Vala.CreationMethod.html">CreationMethod</a></li>
                 <li class="class"><a href="Vala.DynamicMethod.html">DynamicMethod</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
                 <li class="class"><a href="Vala.ArrayCopyMethod.html">ArrayCopyMethod</a></li>
-                <li class="class"><a href="Vala.ArrayResizeMethod.html">ArrayResizeMethod</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
                 <li class="class"><a href="Vala.ArrayMoveMethod.html">ArrayMoveMethod</a></li>
+                <li class="class"><a href="Vala.CreationMethod.html">CreationMethod</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="class"><a href="Vala.ArrayResizeMethod.html">ArrayResizeMethod</a></li>
               </ul>
             </div>
           </div>
@@ -374,6 +375,10 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Method.has_error_type_parameter.html" class="method">has_error_type_parameter</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
@@ -480,8 +485,8 @@
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-73')">All known members inherited from class Vala.Subroutine</div>
-          <div class="content" id="box-content-73">
+          <div class="headline" onclick="toggle_box (this, 'box-content-85')">All known members inherited from class Vala.Subroutine</div>
+          <div class="content" id="box-content-85">
             <div class="column">
               <ul class="navi_inline">
                 <li class="property"><a href="Vala.Subroutine.entry_block.html">entry_block</a></li>
@@ -508,8 +513,8 @@
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-74')">All known members inherited from class Vala.Symbol</div>
-          <div class="content" id="box-content-74">
+          <div class="headline" onclick="toggle_box (this, 'box-content-86')">All known members inherited from class Vala.Symbol</div>
+          <div class="content" id="box-content-86">
             <div class="column">
               <ul class="navi_inline">
                 <li class="property"><a href="Vala.Symbol.parent_symbol.html">parent_symbol</a></li>
@@ -517,6 +522,7 @@
                 <li class="property"><a href="Vala.Symbol.name.html">name</a></li>
                 <li class="property"><a href="Vala.Symbol.active.html">active</a></li>
                 <li class="property"><a href="Vala.Symbol.used.html">used</a></li>
+                <li class="property"><a href="Vala.Symbol.anonymous.html">anonymous</a></li>
                 <li class="property"><a href="Vala.Symbol.access.html">access</a></li>
                 <li class="property"><a href="Vala.Symbol.comment.html">comment</a></li>
                 <li class="property"><a href="Vala.Symbol.version.html">version</a></li>
@@ -548,11 +554,11 @@
                 <li class="virtual_method"><a href="Vala.Symbol.add_error_domain.html">add_error_domain</a></li>
                 <li class="virtual_method"><a href="Vala.Symbol.add_delegate.html">add_delegate</a></li>
                 <li class="virtual_method"><a href="Vala.Symbol.add_constant.html">add_constant</a></li>
+                <li class="virtual_method"><a href="Vala.Symbol.add_field.html">add_field</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="virtual_method"><a href="Vala.Symbol.add_field.html">add_field</a></li>
                 <li class="virtual_method"><a href="Vala.Symbol.add_method.html">add_method</a></li>
                 <li class="virtual_method"><a href="Vala.Symbol.add_property.html">add_property</a></li>
                 <li class="virtual_method"><a href="Vala.Symbol.add_signal.html">add_signal</a></li>
@@ -561,6 +567,7 @@
                 <li class="field"><a href="Vala.Symbol._name.html">_name</a></li>
                 <li class="field"><a href="Vala.Symbol._active.html">_active</a></li>
                 <li class="field"><a href="Vala.Symbol._used.html">_used</a></li>
+                <li class="field"><a href="Vala.Symbol._anonymous.html">_anonymous</a></li>
                 <li class="field"><a href="Vala.Symbol._access.html">_access</a></li>
                 <li class="field"><a href="Vala.Symbol._comment.html">_comment</a></li>
                 <li class="field"><a href="Vala.Symbol._version.html">_version</a></li>
@@ -573,8 +580,8 @@
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-75')">All known members inherited from class Vala.CodeNode</div>
-          <div class="content" id="box-content-75">
+          <div class="headline" onclick="toggle_box (this, 'box-content-87')">All known members inherited from class Vala.CodeNode</div>
+          <div class="content" id="box-content-87">
             <div class="column">
               <ul class="navi_inline">
                 <li class="property"><a href="Vala.CodeNode.parent_node.html">parent_node</a></li>
@@ -600,6 +607,7 @@
                 <li class="virtual_method"><a href="Vala.CodeNode.replace_type.html">replace_type</a></li>
                 <li class="virtual_method"><a href="Vala.CodeNode.replace_expression.html">replace_expression</a></li>
                 <li class="method"><a href="Vala.CodeNode.get_attribute.html">get_attribute</a></li>
+                <li class="method"><a href="Vala.CodeNode.get_or_create_attribute.html">get_or_create_attribute</a></li>
                 <li class="method"><a href="Vala.CodeNode.has_attribute_argument.html">has_attribute_argument</a></li>
                 <li class="method"><a href="Vala.CodeNode.set_attribute.html">set_attribute</a></li>
                 <li class="method"><a href="Vala.CodeNode.remove_attribute_argument.html">remove_attribute_argument</a></li>
@@ -636,8 +644,8 @@
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-76')">All known members inherited from interface Vala.Callable</div>
-          <div class="content" id="box-content-76">
+          <div class="headline" onclick="toggle_box (this, 'box-content-88')">All known members inherited from interface Vala.Callable</div>
+          <div class="content" id="box-content-88">
             <div class="column">
               <ul class="navi_inline">
                 <li class="abstract_property"><a href="Vala.Callable.return_type.html">return_type</a></li>

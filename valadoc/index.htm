@@ -30,6 +30,9 @@
           <li class="namespace"><a href="Valadoc.Importer.html">Valadoc.Importer</a></li>
           <li class="namespace"><a href="Valadoc.ImporterHelper.html">Valadoc.ImporterHelper</a></li>
           <li class="namespace"><a href="Valadoc.Taglets.html">Valadoc.Taglets</a></li>
+          <li class="method"><a href="valadoc_gvc_graph_create_node.html">valadoc_gvc_graph_create_node</a></li>
+          <li class="method"><a href="valadoc_gvc_graph_new.html">valadoc_gvc_graph_new</a></li>
+          <li class="method"><a href="valadoc_gvc_init.html">valadoc_gvc_init</a></li>
         </ul>
       </div>
       <div class="site_content">
@@ -44,11 +47,11 @@
           <ul class="navi_inline">
             <li class="interface"><a href="Valadoc.Doclet.html">Doclet</a> - <span class="brief_description">Provides a mechanism to inspect the API 
                 &amp; documentation of programs and libraries</span></li>
-            <li class="interface"><a href="Valadoc.Scanner.html">Scanner</a></li>
+            <li class="interface"><a href="Valadoc.ResourceLocator.html">ResourceLocator</a></li>
             <li class="interface"><a href="Valadoc.ParserCallback.html">ParserCallback</a></li>
+            <li class="interface"><a href="Valadoc.Scanner.html">Scanner</a></li>
             <li class="interface"><a href="Valadoc.Driver.html">Driver</a></li>
             <li class="interface"><a href="Valadoc.Documentation.html">Documentation</a></li>
-            <li class="interface"><a href="Valadoc.ResourceLocator.html">ResourceLocator</a></li>
           </ul>
           <h3 class="main_title">Classes:</h3>
           <ul class="navi_inline">
@@ -67,10 +70,10 @@
             <li class="class"><a href="Valadoc.OptionalRule.html">OptionalRule</a></li>
             <li class="class"><a href="Valadoc.TokenType.html">TokenType</a></li>
             <li class="class"><a href="Valadoc.OneOfRule.html">OneOfRule</a></li>
-            <li class="class"><a href="Valadoc.Token.html">Token</a></li>
             <li class="class"><a href="Valadoc.SequenceRule.html">SequenceRule</a></li>
             <li class="class"><a href="Valadoc.ManyRule.html">ManyRule</a></li>
             <li class="class"><a href="Valadoc.Parser.html">Parser</a></li>
+            <li class="class"><a href="Valadoc.Token.html">Token</a></li>
             <li class="class"><a href="Valadoc.CommentScanner.html">CommentScanner</a></li>
             <li class="class"><a href="Valadoc.DocumentationParser.html">DocumentationParser</a></li>
             <li class="class"><a href="Valadoc.GirMetaData.html">GirMetaData</a> - <span class="brief_description">Metadata reader for GIR files
@@ -127,10 +130,10 @@
           <li class="namespace"><a href="Valadoc.Api.html">Api</a></li>
           <h3 class="main_title">Interfaces:</h3>
           <ul class="navi_inline">
-            <li class="interface"><a href="Valadoc.Api.Callable.html">Callable</a> - <span class="brief_description">Used to translate imported C-
-                documentation</span></li>
             <li class="interface"><a href="Valadoc.Api.Browsable.html">Browsable</a> - <span class="brief_description">Specifies whether users are 
                 able to browse the item.</span></li>
+            <li class="interface"><a href="Valadoc.Api.Callable.html">Callable</a> - <span class="brief_description">Used to translate imported C-
+                documentation</span></li>
           </ul>
           <h3 class="main_title">Classes:</h3>
           <ul class="navi_inline">
@@ -138,14 +141,16 @@
                 data type.</span></li>
             <li class="class"><a href="Valadoc.Api.FormalParameter.html">FormalParameter</a> - <span class="brief_description">Represents a formal 
                 parameter in method, signal and delegate signatures.</span></li>
-            <li class="class"><a href="Valadoc.Api.Pointer.html">Pointer</a> - <span class="brief_description">Represents a pointer declaration.
-              </span></li>
             <li class="class"><a href="Valadoc.Api.Array.html">Array</a> - <span class="brief_description">Represents an array declaration.</span>
             </li>
             <li class="class"><a href="Valadoc.Api.TypeParameter.html">TypeParameter</a> - <span class="brief_description">Represents a generic type 
                 parameter in the source code.</span></li>
             <li class="abstract_class"><a href="Valadoc.Api.Member.html">Member</a></li>
             <li class="class"><a href="Valadoc.Api.Package.html">Package</a></li>
+            <li class="class"><a href="Valadoc.Api.Struct.html">Struct</a> - <span class="brief_description">Represents a struct declaration.</span>
+            </li>
+            <li class="abstract_class"><a href="Valadoc.Api.Symbol.html">Symbol</a> - <span class="brief_description">Represents a node in the symbol 
+                tree.</span></li>
             <li class="class"><a href="Valadoc.Api.ErrorDomain.html">ErrorDomain</a> - <span class="brief_description">Represents an error domain 
                 declaration.</span></li>
             <li class="abstract_class"><a href="Valadoc.Api.Item.html">Item</a> - <span class="brief_description">Represents a node in the api tree.
@@ -153,16 +158,17 @@
             <li class="class"><a href="Valadoc.Api.SourceComment.html">SourceComment</a> - <span class="brief_description">A documentation comment 
                 used by valadoc</span></li>
             <li class="class"><a href="Valadoc.Api.Delegate.html">Delegate</a> - <span class="brief_description">Represents a Delegate.</span></li>
-            <li class="class"><a href="Valadoc.Api.TypeReference.html">TypeReference</a> - <span class="brief_description">A reference to a data type.
-              </span></li>
             <li class="class"><a href="Valadoc.Api.EnumValue.html">EnumValue</a> - <span class="brief_description">Represents an enum member.</span>
             </li>
-            <li class="class"><a href="Valadoc.Api.Struct.html">Struct</a> - <span class="brief_description">Represents a struct declaration.</span>
-            </li>
-            <li class="class"><a href="Valadoc.Api.Property.html">Property</a> - <span class="brief_description">Represents a property declaration.
+            <li class="class"><a href="Valadoc.Api.Pointer.html">Pointer</a> - <span class="brief_description">Represents a pointer declaration.
+              </span></li>
+            <li class="class"><a href="Valadoc.Api.TypeReference.html">TypeReference</a> - <span class="brief_description">A reference to a data type.
               </span></li>
             <li class="class"><a href="Valadoc.Api.Method.html">Method</a> - <span class="brief_description">Represents a function or a method.</span>
             </li>
+            <li class="class"><a href="Valadoc.Api.Property.html">Property</a> - <span class="brief_description">Represents a property declaration.
+              </span></li>
+            <li class="class"><a href="Valadoc.Api.Field.html">Field</a> - <span class="brief_description">Represents a field.</span></li>
             <li class="class"><a href="Valadoc.Api.Attribute.html">Attribute</a></li>
             <li class="class"><a href="Valadoc.Api.Enum.html">Enum</a> - <span class="brief_description">Represents an enum declaration.</span></li>
             <li class="class"><a href="Valadoc.Api.ErrorCode.html">ErrorCode</a> - <span class="brief_description">Represents an errordomain member in
@@ -171,21 +177,18 @@
             <li class="class"><a href="Valadoc.Api.Tree.html">Tree</a> - <span class="brief_description">The root of the code tree.</span></li>
             <li class="class"><a href="Valadoc.Api.PropertyAccessor.html">PropertyAccessor</a> - <span class="brief_description">Represents a get or 
                 set accessor of a property.</span></li>
-            <li class="class"><a href="Valadoc.Api.Interface.html">Interface</a> - <span class="brief_description">Represents a interface declaration 
-                in the source code.</span></li>
             <li class="class"><a href="Valadoc.Api.SignatureBuilder.html">SignatureBuilder</a> - <span class="brief_description">Builds up a signature
                 from the given items.</span></li>
             <li class="class"><a href="Valadoc.Api.SourceFile.html">SourceFile</a> - <span class="brief_description">Represents a source file</span>
             </li>
             <li class="abstract_class"><a href="Valadoc.Api.Visitor.html">Visitor</a> - <span class="brief_description">Abstract visitor for 
                 traversing API.</span></li>
-            <li class="class"><a href="Valadoc.Api.Field.html">Field</a> - <span class="brief_description">Represents a field.</span></li>
-            <li class="class"><a href="Valadoc.Api.AttributeArgument.html">AttributeArgument</a></li>
+            <li class="class"><a href="Valadoc.Api.Interface.html">Interface</a> - <span class="brief_description">Represents a interface declaration 
+                in the source code.</span></li>
             <li class="class"><a href="Valadoc.Api.GirSourceComment.html">GirSourceComment</a> - <span class="brief_description">A documentation 
                 comment used by valadoc</span></li>
+            <li class="class"><a href="Valadoc.Api.AttributeArgument.html">AttributeArgument</a></li>
             <li class="class"><a href="Valadoc.Api.Class.html">Class</a> - <span class="brief_description">Represents a class declaration.</span></li>
-            <li class="abstract_class"><a href="Valadoc.Api.Symbol.html">Symbol</a> - <span class="brief_description">Represents a node in the symbol 
-                tree.</span></li>
             <li class="abstract_class"><a href="Valadoc.Api.Node.html">Node</a> - <span class="brief_description">Represents a node in the api tree.
               </span></li>
             <li class="class"><a href="Valadoc.Api.Constant.html">Constant</a> - <span class="brief_description">Represents a type member with a 
@@ -198,11 +201,11 @@
           <ul class="navi_inline">
             <li class="enum"><a href="Valadoc.Api.NodeType.html">NodeType</a> - <span class="brief_description">Specifies the context of a node.
               </span></li>
+            <li class="enum"><a href="Valadoc.Api.SymbolAccessibility.html">SymbolAccessibility</a> - <span class="brief_description">The access 
+                modifier</span></li>
             <li class="enum"><a href="Valadoc.Api.FormalParameterType.html">FormalParameterType</a></li>
             <li class="enum"><a href="Valadoc.Api.Ownership.html">Ownership</a></li>
             <li class="enum"><a href="Valadoc.Api.PropertyBindingType.html">PropertyBindingType</a></li>
-            <li class="enum"><a href="Valadoc.Api.SymbolAccessibility.html">SymbolAccessibility</a> - <span class="brief_description">The access 
-                modifier</span></li>
             <li class="enum"><a href="Valadoc.Api.PropertyAccessorType.html">PropertyAccessorType</a></li>
           </ul>
           <li class="namespace"><a href="Valadoc.Charts.html">Charts</a></li>
@@ -216,38 +219,38 @@
           <li class="namespace"><a href="Valadoc.Content.html">Content</a></li>
           <h3 class="main_title">Interfaces:</h3>
           <ul class="navi_inline">
-            <li class="interface"><a href="Valadoc.Content.Inline.html">Inline</a></li>
             <li class="interface"><a href="Valadoc.Content.Taglet.html">Taglet</a></li>
+            <li class="interface"><a href="Valadoc.Content.Inline.html">Inline</a></li>
             <li class="interface"><a href="Valadoc.Content.Block.html">Block</a></li>
             <li class="interface"><a href="Valadoc.Content.StyleAttributes.html">StyleAttributes</a></li>
           </ul>
           <h3 class="main_title">Classes:</h3>
           <ul class="navi_inline">
-            <li class="class"><a href="Valadoc.Content.ContentFactory.html">ContentFactory</a></li>
-            <li class="class"><a href="Valadoc.Content.Embedded.html">Embedded</a></li>
-            <li class="abstract_class"><a href="Valadoc.Content.InlineTaglet.html">InlineTaglet</a></li>
-            <li class="class"><a href="Valadoc.Content.SymbolLink.html">SymbolLink</a></li>
+            <li class="class"><a href="Valadoc.Content.Note.html">Note</a></li>
             <li class="abstract_class"><a href="Valadoc.Content.ContentVisitor.html">ContentVisitor</a></li>
+            <li class="abstract_class"><a href="Valadoc.Content.InlineTaglet.html">InlineTaglet</a></li>
+            <li class="class"><a href="Valadoc.Content.Run.html">Run</a></li>
+            <li class="class"><a href="Valadoc.Content.SourceCode.html">SourceCode</a></li>
+            <li class="class"><a href="Valadoc.Content.SymbolLink.html">SymbolLink</a></li>
+            <li class="class"><a href="Valadoc.Content.ContentFactory.html">ContentFactory</a></li>
+            <li class="abstract_class"><a href="Valadoc.Content.ContentElement.html">ContentElement</a></li>
             <li class="class"><a href="Valadoc.Content.Page.html">Page</a></li>
             <li class="class"><a href="Valadoc.Content.Paragraph.html">Paragraph</a></li>
             <li class="abstract_class"><a href="Valadoc.Content.InlineContent.html">InlineContent</a></li>
-            <li class="class"><a href="Valadoc.Content.Text.html">Text</a></li>
             <li class="class"><a href="Valadoc.Content.WikiLink.html">WikiLink</a></li>
             <li class="abstract_class"><a href="Valadoc.Content.ContentRenderer.html">ContentRenderer</a></li>
             <li class="class"><a href="Valadoc.Content.TableRow.html">TableRow</a></li>
             <li class="abstract_class"><a href="Valadoc.Content.BlockContent.html">BlockContent</a></li>
             <li class="class"><a href="Valadoc.Content.ListItem.html">ListItem</a></li>
-            <li class="class"><a href="Valadoc.Content.Comment.html">Comment</a></li>
-            <li class="class"><a href="Valadoc.Content.Link.html">Link</a></li>
-            <li class="class"><a href="Valadoc.Content.Warning.html">Warning</a></li>
-            <li class="class"><a href="Valadoc.Content.List.html">List</a></li>
-            <li class="class"><a href="Valadoc.Content.Run.html">Run</a></li>
-            <li class="class"><a href="Valadoc.Content.TableCell.html">TableCell</a></li>
-            <li class="class"><a href="Valadoc.Content.Note.html">Note</a></li>
-            <li class="class"><a href="Valadoc.Content.SourceCode.html">SourceCode</a></li>
-            <li class="class"><a href="Valadoc.Content.Table.html">Table</a></li>
             <li class="class"><a href="Valadoc.Content.Headline.html">Headline</a></li>
-            <li class="abstract_class"><a href="Valadoc.Content.ContentElement.html">ContentElement</a></li>
+            <li class="class"><a href="Valadoc.Content.Text.html">Text</a></li>
+            <li class="class"><a href="Valadoc.Content.Embedded.html">Embedded</a></li>
+            <li class="class"><a href="Valadoc.Content.Link.html">Link</a></li>
+            <li class="class"><a href="Valadoc.Content.List.html">List</a></li>
+            <li class="class"><a href="Valadoc.Content.Warning.html">Warning</a></li>
+            <li class="class"><a href="Valadoc.Content.TableCell.html">TableCell</a></li>
+            <li class="class"><a href="Valadoc.Content.Table.html">Table</a></li>
+            <li class="class"><a href="Valadoc.Content.Comment.html">Comment</a></li>
           </ul>
           <h3 class="main_title">Enums:</h3>
           <ul class="navi_inline">
@@ -351,9 +354,9 @@
           <ul class="navi_inline">
             <li class="class"><a href="Valadoc.Taglets.See.html">See</a></li>
             <li class="class"><a href="Valadoc.Taglets.Throws.html">Throws</a></li>
+            <li class="class"><a href="Valadoc.Taglets.Link.html">Link</a></li>
             <li class="class"><a href="Valadoc.Taglets.Deprecated.html">Deprecated</a></li>
             <li class="class"><a href="Valadoc.Taglets.Since.html">Since</a></li>
-            <li class="class"><a href="Valadoc.Taglets.Link.html">Link</a></li>
             <li class="class"><a href="Valadoc.Taglets.InheritDoc.html">InheritDoc</a></li>
             <li class="class"><a href="Valadoc.Taglets.Param.html">Param</a></li>
             <li class="class"><a href="Valadoc.Taglets.Return.html">Return</a></li>
@@ -365,6 +368,21 @@
               <div class="leaf_brief_description">
               </div></li>
           </ul>
+        </ul>
+        <h3 class="main_title">Functions:</h3>
+        <ul class="navi_inline">
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">internal</span> <span class="main_type"><span class="class">Graph</span></span> <b><a href="valadoc_gvc_graph_new.html" class="method">valadoc_gvc_graph_new</a></b> (<span class="main_basic_type"><span class="class">string</span></span> name)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">internal</span> <span class="main_type"><span class="class">Node</span></span> <b><a href="valadoc_gvc_graph_create_node.html" class="method">valadoc_gvc_graph_create_node</a></b> (<span class="main_type"><span class="class">Graph</span></span> graph, <span class="main_basic_type"><span class="class">string</span></span> name)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">internal</span> <span class="main_keyword">void</span> <b><a href="valadoc_gvc_init.html" class="method">valadoc_gvc_init</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
         </ul>
       </div>
     </div><br/>

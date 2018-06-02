@@ -31,6 +31,7 @@
           <li class="property"><a href="Vala.Struct.base_type.html">base_type</a></li>
           <li class="property"><a href="Vala.Struct.default_construction_method.html">default_construction_method</a></li>
           <li class="property"><a href="Vala.Struct.is_immutable.html">is_immutable</a></li>
+          <li class="property">rank</li>
           <li class="property"><a href="Vala.Struct.signed.html">signed</a></li>
           <li class="property"><a href="Vala.Struct.width.html">width</a></li>
           <li class="creation_method"><a href="Vala.Struct.Struct.html">Struct</a></li>
@@ -46,7 +47,6 @@
           <li class="method"><a href="Vala.Struct.get_fields.html">get_fields</a></li>
           <li class="method"><a href="Vala.Struct.get_methods.html">get_methods</a></li>
           <li class="method"><a href="Vala.Struct.get_properties.html">get_properties</a></li>
-          <li class="method"><a href="Vala.Struct.get_rank.html">get_rank</a></li>
           <li class="virtual_method"><a href="Vala.Struct.get_type_parameter_index.html">get_type_parameter_index</a></li>
           <li class="method"><a href="Vala.Struct.get_type_parameters.html">get_type_parameters</a></li>
           <li class="method"><a href="Vala.Struct.is_boolean_type.html">is_boolean_type</a></li>
@@ -58,11 +58,11 @@
           <li class="method"><a href="Vala.Struct.is_simple_type.html">is_simple_type</a></li>
           <li class="virtual_method"><a href="Vala.Struct.is_subtype_of.html">is_subtype_of</a></li>
           <li class="virtual_method"><a href="Vala.Struct.replace_type.html">replace_type</a></li>
-          <li class="method"><a href="Vala.Struct.set_rank.html">set_rank</a></li>
           <li class="method"><a href="Vala.Struct.set_simple_type.html">set_simple_type</a></li>
           <li class="field"><a href="Vala.Struct._base_type.html">_base_type</a></li>
           <li class="field"><a href="Vala.Struct._default_construction_method.html">_default_construction_method</a></li>
           <li class="field"><a href="Vala.Struct._is_immutable.html">_is_immutable</a></li>
+          <li class="field"><a href="Vala.Struct._rank.html">_rank</a></li>
           <li class="field"><a href="Vala.Struct._signed.html">_signed</a></li>
           <li class="field"><a href="Vala.Struct._width.html">_width</a></li>
           <li class="field"><a href="Vala.Struct.boolean_type.html">boolean_type</a></li>
@@ -73,7 +73,6 @@
           <li class="field"><a href="Vala.Struct.integer_type.html">integer_type</a></li>
           <li class="field"><a href="Vala.Struct.methods.html">methods</a></li>
           <li class="field"><a href="Vala.Struct.properties.html">properties</a></li>
-          <li class="field">rank</li>
           <li class="field"><a href="Vala.Struct.simple_type.html">simple_type</a></li>
           <li class="field"><a href="Vala.Struct.type_parameters.html">type_parameters</a></li>
         </ul>
@@ -82,7 +81,10 @@
         <h1 class="main_title">rank</h1>
         <hr class="main_hr"/>
         <h2 class="main_title">Description:</h2>
-        <div class="main_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span>? <b><span class="field">rank</span></b>
+        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><span class="property">rank</span></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+        </div>
+        <div class="description">
+          <p>Specifies the rank of this integer or floating point type.</p>
         </div>
       </div>
     </div><br/>

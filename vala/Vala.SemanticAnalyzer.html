@@ -45,7 +45,6 @@
           <li class="static_method"><a href="Vala.SemanticAnalyzer.get_symbol_for_data_type.html">get_symbol_for_data_type</a></li>
           <li class="static_method"><a href="Vala.SemanticAnalyzer.symbol_lookup_inherited.html">symbol_lookup_inherited</a></li>
           <li class="creation_method"><a href="Vala.SemanticAnalyzer.SemanticAnalyzer.html">SemanticAnalyzer</a></li>
-          <li class="method"><a href="Vala.SemanticAnalyzer.add_replaced_node.html">add_replaced_node</a></li>
           <li class="method"><a href="Vala.SemanticAnalyzer.analyze.html">analyze</a></li>
           <li class="method"><a href="Vala.SemanticAnalyzer.check_argument.html">check_argument</a></li>
           <li class="method"><a href="Vala.SemanticAnalyzer.check_arguments.html">check_arguments</a></li>
@@ -69,7 +68,6 @@
           <li class="field"><a href="Vala.SemanticAnalyzer.bool_type.html">bool_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.context.html">context</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.double_type.html">double_type</a></li>
-          <li class="field"><a href="Vala.SemanticAnalyzer.error_type.html">error_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.garray_type.html">garray_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.gerror_type.html">gerror_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.glist_type.html">glist_type</a></li>
@@ -108,8 +106,8 @@
         <img class="main_diagram" usemap="#Vala.SemanticAnalyzer" alt="Object hierarchy for SemanticAnalyzer" src="img/Vala.SemanticAnalyzer.svg"/>
 
       <map id="Vala.SemanticAnalyzer" name="Vala.SemanticAnalyzer">
-<area shape="rect" id="node1" href="Vala.SemanticAnalyzer.html" title="Vala.SemanticAnalyzer" alt="" coords="5,101,199,149"/>
-<area shape="rect" id="node2" href="Vala.CodeVisitor.html" title="Vala.CodeVisitor" alt="" coords="29,5,175,53"/>
+<area shape="rect" id="node1" href="Vala.SemanticAnalyzer.html" title="Vala.SemanticAnalyzer" alt="" coords="5,101,223,149"/>
+<area shape="rect" id="node2" href="Vala.CodeVisitor.html" title="Vala.CodeVisitor" alt="" coords="33,5,195,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -209,10 +207,6 @@
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.SemanticAnalyzer.analyze.html" class="method">analyze</a></b> (<span class="main_type"><a href="Vala.CodeContext.html" class="class">CodeContext</a></span> context)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Analyze and check code in the specified context.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.SemanticAnalyzer.add_replaced_node.html" class="method">add_replaced_node</a></b> (<span class="main_type"><a href="Vala.CodeNode.html" class="abstract_class">CodeNode</a></span> node)
-            </span>
-            <div class="leaf_brief_description">
             </div></li>
           <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SemanticAnalyzer.visit_source_file.html" class="virtual_method">visit_source_file</a></b> (<span class="main_type"><a href="Vala.SourceFile.html" class="class">SourceFile</a></span> file)
             </span>
@@ -409,23 +403,19 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span> <b><a href="Vala.SemanticAnalyzer.error_type.html" class="field">error_type</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Class.html" class="class">Class</a></span> <b><a href="Vala.SemanticAnalyzer.gsource_type.html" class="field">gsource_type</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.CodeNode.html" class="abstract_class">CodeNode</a></span>&gt; <b><a href="Vala.SemanticAnalyzer.replaced_nodes.html" class="field">replaced_nodes</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.CodeNode.html" class="abstract_class">CodeNode</a></span>&gt; <b><a href="Vala.SemanticAnalyzer.replaced_nodes.html" class="field">replaced_nodes</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-205')">All known members inherited from class Vala.CodeVisitor</div>
-          <div class="content" id="box-content-205">
+          <div class="headline" onclick="toggle_box (this, 'box-content-197')">All known members inherited from class Vala.CodeVisitor</div>
+          <div class="content" id="box-content-197">
             <div class="column">
               <ul class="navi_inline">
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_source_file.html">visit_source_file</a></li>

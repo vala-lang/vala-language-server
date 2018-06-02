@@ -48,7 +48,6 @@
           <li class="property"><a href="Vala.CCodeBaseModule.temp_ref_values.html">temp_ref_values</a></li>
           <li class="property"><a href="Vala.CCodeBaseModule.variable_name_map.html">variable_name_map</a></li>
           <li class="static_method"><a href="Vala.CCodeBaseModule.get_data_type_for_symbol.html">get_data_type_for_symbol</a></li>
-          <li class="static_method"><a href="Vala.CCodeBaseModule.get_enum_value_canonical_cconstant.html">get_enum_value_canonical_cconstant</a></li>
           <li class="creation_method"><a href="Vala.CCodeBaseModule.CCodeBaseModule.html">CCodeBaseModule</a></li>
           <li class="method"><a href="Vala.CCodeBaseModule.add_generated_external_symbol.html">add_generated_external_symbol</a></li>
           <li class="method"><a href="Vala.CCodeBaseModule.add_generic_type_arguments.html">add_generic_type_arguments</a></li>
@@ -68,6 +67,7 @@
           <li class="method"><a href="Vala.CCodeBaseModule.check_type.html">check_type</a></li>
           <li class="method"><a href="Vala.CCodeBaseModule.check_type_argument.html">check_type_argument</a></li>
           <li class="method"><a href="Vala.CCodeBaseModule.check_type_arguments.html">check_type_arguments</a></li>
+          <li class="method"><a href="Vala.CCodeBaseModule.constant_array_ranks_sizes.html">constant_array_ranks_sizes</a></li>
           <li class="method"><a href="Vala.CCodeBaseModule.convert_from_generic_pointer.html">convert_from_generic_pointer</a></li>
           <li class="method"><a href="Vala.CCodeBaseModule.convert_to_generic_pointer.html">convert_to_generic_pointer</a></li>
           <li class="virtual_method"><a href="Vala.CCodeBaseModule.copy_value.html">copy_value</a></li>
@@ -88,6 +88,7 @@
           <li class="method"><a href="Vala.CCodeBaseModule.generate_array_contains_wrapper.html">generate_array_contains_wrapper</a></li>
           <li class="virtual_method"><a href="Vala.CCodeBaseModule.generate_class_declaration.html">generate_class_declaration</a></li>
           <li class="virtual_method"><a href="Vala.CCodeBaseModule.generate_class_struct_declaration.html">generate_class_struct_declaration</a></li>
+          <li class="method"><a href="Vala.CCodeBaseModule.generate_cmp_wrapper.html">generate_cmp_wrapper</a></li>
           <li class="method"><a href="Vala.CCodeBaseModule.generate_collection_free_wrapper.html">generate_collection_free_wrapper</a></li>
           <li class="method"><a href="Vala.CCodeBaseModule.generate_constant_declaration.html">generate_constant_declaration</a></li>
           <li class="virtual_method"><a href="Vala.CCodeBaseModule.generate_cparameters.html">generate_cparameters</a></li>
@@ -363,7 +364,7 @@
         <img class="main_diagram" usemap="#Vala.CCodeBaseModule" alt="Object hierarchy for CCodeBaseModule" src="img/Vala.CCodeBaseModule.svg"/>
 
       <map id="Vala.CCodeBaseModule" name="Vala.CCodeBaseModule">
-<area shape="rect" id="node1" href="Vala.CCodeBaseModule.html" title="Vala.CCodeBaseModule" alt="" coords="5,197,207,245"/>
+<area shape="rect" id="node1" href="Vala.CCodeBaseModule.html" title="Vala.CCodeBaseModule" alt="" coords="5,197,228,245"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -373,36 +374,36 @@
           <p>Code visitor generating C Code.</p>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-158')">All known sub-classes:</div>
-          <div class="content" id="box-content-158">
+          <div class="headline" onclick="toggle_box (this, 'box-content-229')">All known sub-classes:</div>
+          <div class="content" id="box-content-229">
             <div class="column">
               <ul class="navi_inline">
-                <li class="class"><a href="Vala.GDBusClientModule.html">GDBusClientModule</a></li>
-                <li class="class"><a href="Vala.CCodeMethodCallModule.html">CCodeMethodCallModule</a></li>
-                <li class="abstract_class"><a href="Vala.CCodeStructModule.html">CCodeStructModule</a></li>
-                <li class="class"><a href="Vala.GErrorModule.html">GErrorModule</a></li>
-                <li class="abstract_class"><a href="Vala.CCodeMemberAccessModule.html">CCodeMemberAccessModule</a></li>
-                <li class="class"><a href="Vala.GDBusModule.html">GDBusModule</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="abstract_class"><a href="Vala.CCodeControlFlowModule.html">CCodeControlFlowModule</a></li>
-                <li class="class"><a href="Vala.CCodeArrayModule.html">CCodeArrayModule</a></li>
-                <li class="class"><a href="Vala.GTypeModule.html">GTypeModule</a></li>
-                <li class="class"><a href="Vala.CCodeDelegateModule.html">CCodeDelegateModule</a></li>
                 <li class="class"><a href="Vala.GSignalModule.html">GSignalModule</a></li>
-                <li class="class"><a href="Vala.GtkModule.html">GtkModule</a></li>
+                <li class="class"><a href="Vala.GObjectModule.html">GObjectModule</a></li>
+                <li class="class"><a href="Vala.GDBusClientModule.html">GDBusClientModule</a></li>
+                <li class="class"><a href="Vala.GTypeModule.html">GTypeModule</a></li>
+                <li class="class"><a href="Vala.CCodeMethodCallModule.html">CCodeMethodCallModule</a></li>
+                <li class="class"><a href="Vala.CCodeDelegateModule.html">CCodeDelegateModule</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
+                <li class="class"><a href="Vala.GtkModule.html">GtkModule</a></li>
+                <li class="class"><a href="Vala.CCodeArrayModule.html">CCodeArrayModule</a></li>
+                <li class="abstract_class"><a href="Vala.CCodeMethodModule.html">CCodeMethodModule</a></li>
+                <li class="abstract_class"><a href="Vala.CCodeMemberAccessModule.html">CCodeMemberAccessModule</a></li>
+                <li class="class"><a href="Vala.GDBusServerModule.html">GDBusServerModule</a></li>
+                <li class="abstract_class"><a href="Vala.CCodeControlFlowModule.html">CCodeControlFlowModule</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="class"><a href="Vala.GErrorModule.html">GErrorModule</a></li>
+                <li class="class"><a href="Vala.GVariantModule.html">GVariantModule</a></li>
+                <li class="abstract_class"><a href="Vala.CCodeStructModule.html">CCodeStructModule</a></li>
                 <li class="class"><a href="Vala.GAsyncModule.html">GAsyncModule</a></li>
                 <li class="class"><a href="Vala.CCodeAssignmentModule.html">CCodeAssignmentModule</a></li>
-                <li class="class"><a href="Vala.GObjectModule.html">GObjectModule</a></li>
-                <li class="abstract_class"><a href="Vala.CCodeMethodModule.html">CCodeMethodModule</a></li>
-                <li class="class"><a href="Vala.GVariantModule.html">GVariantModule</a></li>
-                <li class="class"><a href="Vala.GDBusServerModule.html">GDBusServerModule</a></li>
+                <li class="class"><a href="Vala.GDBusModule.html">GDBusModule</a></li>
               </ul>
             </div>
           </div>
@@ -498,10 +499,6 @@
         <h3 class="main_title">Static methods:</h3>
         <ul class="navi_inline">
           <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_type"><span class="abstract_class">DataType</span></span> <b><a href="Vala.CCodeBaseModule.get_data_type_for_symbol.html" class="static_method">get_data_type_for_symbol</a></b> (<span class="main_type"><span class="abstract_class">TypeSymbol</span></span> sym)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_type"><span class="class">CCodeConstant</span></span> <b><a href="Vala.CCodeBaseModule.get_enum_value_canonical_cconstant.html" class="static_method">get_enum_value_canonical_cconstant</a></b> (<span class="main_type"><span class="class">EnumValue</span></span> ev)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -604,6 +601,10 @@
             <div class="leaf_brief_description">
             </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeBaseModule.visit_member.html" class="method">visit_member</a></b> (<span class="main_type"><span class="abstract_class">Symbol</span></span> m)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeBaseModule.constant_array_ranks_sizes.html" class="method">constant_array_ranks_sizes</a></b> (<span class="main_type"><span class="class">InitializerList</span></span> initializer_list, <span class="main_basic_type"><span class="struct">int</span></span>[] sizes, <span class="main_basic_type"><span class="struct">int</span></span> rank = <span class="main_literal">0</span>)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -802,7 +803,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CCodeBaseModule.generate_collection_free_wrapper.html" class="method">generate_collection_free_wrapper</a></b> (<span class="main_type"><span class="abstract_class">DataType</span></span> collection_type, <span class="main_type"><span class="class">CCodeIdentifier</span></span> element_destroy_func_expression)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CCodeBaseModule.generate_collection_free_wrapper.html" class="method">generate_collection_free_wrapper</a></b> (<span class="main_type"><span class="abstract_class">DataType</span></span> collection_type, <span class="main_type"><span class="class">CCodeIdentifier</span></span>? element_destroy_func_expression)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -1107,6 +1108,10 @@
             <div class="leaf_brief_description">
             </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CCodeBaseModule.generate_array_contains_wrapper.html" class="method">generate_array_contains_wrapper</a></b> (<span class="main_type"><span class="class">ArrayType</span></span> array_type)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CCodeBaseModule.generate_cmp_wrapper.html" class="method">generate_cmp_wrapper</a></b> (<span class="main_type"><span class="class">CCodeIdentifier</span></span> cmpid)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -1708,8 +1713,8 @@
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-159')">All known members inherited from class Vala.CodeGenerator</div>
-          <div class="content" id="box-content-159">
+          <div class="headline" onclick="toggle_box (this, 'box-content-230')">All known members inherited from class Vala.CodeGenerator</div>
+          <div class="content" id="box-content-230">
             <div class="column">
               <ul class="navi_inline">
                 <li class="virtual_method">emit</li>
@@ -1732,8 +1737,8 @@
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-160')">All known members inherited from class Vala.CodeVisitor</div>
-          <div class="content" id="box-content-160">
+          <div class="headline" onclick="toggle_box (this, 'box-content-231')">All known members inherited from class Vala.CodeVisitor</div>
+          <div class="content" id="box-content-231">
             <div class="column">
               <ul class="navi_inline">
                 <li class="virtual_method">visit_addressof_expression</li>

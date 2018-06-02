@@ -33,6 +33,7 @@
           <li class="method"><a href="Vala.CCodeFile.add_comment.html">add_comment</a></li>
           <li class="method"><a href="Vala.CCodeFile.add_constant_declaration.html">add_constant_declaration</a></li>
           <li class="method"><a href="Vala.CCodeFile.add_declaration.html">add_declaration</a></li>
+          <li class="method"><a href="Vala.CCodeFile.add_feature_test_macro.html">add_feature_test_macro</a></li>
           <li class="method"><a href="Vala.CCodeFile.add_function.html">add_function</a></li>
           <li class="method"><a href="Vala.CCodeFile.add_function_declaration.html">add_function_declaration</a></li>
           <li class="method"><a href="Vala.CCodeFile.add_include.html">add_include</a></li>
@@ -47,6 +48,8 @@
           <li class="field"><a href="Vala.CCodeFile.comments.html">comments</a></li>
           <li class="field"><a href="Vala.CCodeFile.constant_declaration.html">constant_declaration</a></li>
           <li class="field"><a href="Vala.CCodeFile.declarations.html">declarations</a></li>
+          <li class="field"><a href="Vala.CCodeFile.feature_test_macros.html">feature_test_macros</a></li>
+          <li class="field"><a href="Vala.CCodeFile.features.html">features</a></li>
           <li class="field"><a href="Vala.CCodeFile.include_directives.html">include_directives</a></li>
           <li class="field"><a href="Vala.CCodeFile.includes.html">includes</a></li>
           <li class="field"><a href="Vala.CCodeFile.type_declaration.html">type_declaration</a></li>
@@ -62,7 +65,7 @@
         <img class="main_diagram" usemap="#Vala.CCodeFile" alt="Object hierarchy for CCodeFile" src="img/Vala.CCodeFile.svg"/>
 
       <map id="Vala.CCodeFile" name="Vala.CCodeFile">
-<area shape="rect" id="node1" href="Vala.CCodeFile.html" title="Vala.CCodeFile" alt="" coords="5,5,143,53"/>
+<area shape="rect" id="node1" href="Vala.CCodeFile.html" title="Vala.CCodeFile" alt="" coords="5,5,153,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -101,6 +104,10 @@
             <div class="leaf_brief_description">
             </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFile.add_comment.html" class="method">add_comment</a></b> (<span class="main_type"><a href="Vala.CCodeComment.html" class="class">CCodeComment</a></span> comment)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFile.add_feature_test_macro.html" class="method">add_feature_test_macro</a></b> (<span class="main_basic_type"><span class="class">string</span></span> feature_test_macro)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -155,6 +162,10 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">Set</span></span>&lt;<span class="main_basic_type"><span class="class">string</span></span>&gt; <b><a href="Vala.CCodeFile.features.html" class="field">features</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">Set</span></span>&lt;<span class="main_basic_type"><span class="class">string</span></span>&gt; <b><a href="Vala.CCodeFile.declarations.html" class="field">declarations</a></b>
             </span>
             <div class="leaf_brief_description">
@@ -164,6 +175,10 @@
             <div class="leaf_brief_description">
             </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.CCodeFragment.html" class="class">CCodeFragment</a></span> <b><a href="Vala.CCodeFile.comments.html" class="field">comments</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.CCodeFragment.html" class="class">CCodeFragment</a></span> <b><a href="Vala.CCodeFile.feature_test_macros.html" class="field">feature_test_macros</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
