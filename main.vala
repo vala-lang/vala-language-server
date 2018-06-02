@@ -731,13 +731,15 @@ class Vls.Server {
             message ("Got node: %s @ %s = %s", best.type_name, sr.to_string(), contents);
         }
 
-        if (best is Vala.MemberAccess) {
-            var b = (Vala.MemberAccess)best;
-            message ("best (%p) is a MemberAccess", best);
+        if (best is Vala.Expression) {
+            var b = (Vala.Expression)best;
+            message ("best (%p) is a Expression", best);
             if (b.symbol_reference != null) {
                 best = b.symbol_reference;
                 message ("best is now the symbol_referenece => %p", best);
             }
+        } else {
+            client.reply (id, null);
         }
 
         /*
