@@ -9,11 +9,8 @@ $ meson build
 $ ninja -C build
 ```
 
-### Build JsonRpc valadocs
-```
-$ cd util
-$ make jsonrpc_docs
-```
+### libvala docs
+https://benwaffle.github.io/vala-language-server/index.html
 
 ### Workflow
 - Clone this repo: https://github.com/benwaffle/vala-code
