@@ -30,7 +30,7 @@ class Vls.Context {
                 Vala.CodeContext.push (_ctx);
                 dirty = false;
 
-                string version = "0.38.3"; //Config.libvala_version;
+                string version = "0.40.4"; //Config.libvala_version;
                 string[] parts = version.split(".");
                 assert (parts.length == 3);
                 assert (parts[0] == "0");
@@ -43,7 +43,7 @@ class Vls.Context {
                     _ctx.add_define ("VALA_0_%d".printf (i));
                 }
                 _ctx.target_glib_major = 2;
-                _ctx.target_glib_minor = 38;
+                _ctx.target_glib_minor = 56;
                 for (int i = 16; i <= _ctx.target_glib_minor; i += 2) {
                     _ctx.add_define ("GLIB_2_%d".printf (i));
                 }
