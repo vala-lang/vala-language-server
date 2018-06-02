@@ -19,7 +19,7 @@ class Vls.Context {
     public Vala.CodeContext code_context {
         get {
             if (dirty) {
-                stderr.printf ("dirty context, rebuilding\n");
+                message ("dirty context, rebuilding");
 
                 if (_ctx != null) {
                     // stupid workaround for memory leaks in Vala 0.38

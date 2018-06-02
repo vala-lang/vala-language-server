@@ -40,7 +40,6 @@ class Vls.TextDocument : Object {
 }
 
 class Vls.Server {
-    FileStream log;
     Jsonrpc.Server server;
     MainLoop loop;
     HashTable<string, CompileCommand?> cc;
@@ -55,12 +54,9 @@ class Vls.Server {
 
         this.cc = new HashTable<string, CompileCommand?> (str_hash, str_equal);
 
-        // initialize logging
-        log = FileStream.open (@"$(Environment.get_tmp_dir())/vls-$(new DateTime.now_local()).log", "a");
-        Posix.dup2 (log.fileno (), Posix.STDERR_FILENO);
-        Timeout.add (3000, () => {
-            log.printf (@"$(new DateTime.now_local()): listening...\n");
-            return log.flush() != Posix.FILE.EOF;
+        Timeout.add (10000, () => {
+            message (@"listening...");
+            return true;
         });
 
         // libvala setup
@@ -74,11 +70,11 @@ class Vls.Server {
         notif_handlers = new HashTable <string, NotificationHandler> (str_hash, str_equal);
 
         server.notification.connect ((client, method, @params) => {
-            log.printf (@"Got notification! $method\n");
+            message (@"Got notification! $method");
             if (notif_handlers.contains (method))
                 ((NotificationHandler) notif_handlers[method]) (this, client, @params);
             else
-                log.printf (@"no handler for $method\n");
+                message (@"no notification handler for $method");
         });
 
         server.add_handler ("initialize", this.initialize);
@@ -114,7 +110,7 @@ class Vls.Server {
                 message: new Variant.string (message)
             ));
         } catch (Error e) {
-            log.printf (@"showMessage: failed to notify client: $(e.message)\n");
+            GLib.message (@"showMessage: failed to notify client: $(e.message)");
         }
     }
 
@@ -134,7 +130,7 @@ class Vls.Server {
         string proc_stderr;
         int proc_status;
 
-        log.printf (@"analyzing build directory $rootdir ...\n");
+        message (@"analyzing build directory $rootdir ...");
         try {
             Process.spawn_sync (rootdir, 
                 spawn_args, spawn_env,
@@ -146,7 +142,7 @@ class Vls.Server {
             );
         } catch (SpawnError e) {
             showMessage (client, @"Failed to spawn $(spawn_args[0]): $(e.message)", MessageType.Error);
-            log.printf (@"failed to spawn process: $(e.message)\n");
+            message (@"failed to spawn process: $(e.message)");
             return;
         }
 
@@ -154,7 +150,7 @@ class Vls.Server {
             showMessage (client, 
                 @"Failed to analyze build dir: meson terminated with error code $proc_status. Output:\n $proc_stderr", 
                 MessageType.Error);
-            log.printf (@"failed to analyze build dir: meson terminated with error code $proc_status. Output:\n $proc_stderr\n");
+            message (@"failed to analyze build dir: meson terminated with error code $proc_status. Output:\n $proc_stderr");
             return;
         }
 
@@ -164,7 +160,7 @@ class Vls.Server {
         try {
             targets_parser.load_from_data (targets_json);
         } catch (Error e) {
-            log.printf (@"failed to load targets for build dir $(builddir): $(e.message)\n");
+            message (@"failed to load targets for build dir $(builddir): $(e.message)");
             return;
         }
 
@@ -183,9 +179,9 @@ class Vls.Server {
                 try {
                     var doc = new TextDocument (ctx, fname);
                     ctx.add_source_file (doc);
-                    log.printf (@"Adding text document: $fname\n");
+                    message (@"Adding text document: $fname");
                 } catch (Error e) {
-                    log.printf (@"Failed to create text document: $(e.message)\n");
+                    message (@"Failed to create text document: $(e.message)");
                 }
             }
             
@@ -199,7 +195,7 @@ class Vls.Server {
                     out proc_status
                 );
             } catch (SpawnError e) {
-                log.printf (@"Failed to analyze target $id: $(e.message)\n");
+                message (@"Failed to analyze target $id: $(e.message)");
                 return;
             }
 
@@ -210,7 +206,7 @@ class Vls.Server {
             try {
                 files_parser.load_from_data (files_json);
             } catch (Error e) {
-                log.printf (@"failed to get target files for $id (ID): $(e.message)\n");
+                message (@"failed to get target files for $id (ID): $(e.message)");
                 return;
             }
             var fnode = files_parser.get_root ().get_array ();
@@ -223,19 +219,19 @@ class Vls.Server {
                     try {
                         var doc = new TextDocument (ctx, filename);
                         ctx.add_source_file (doc);
-                        log.printf (@"Adding text document: $filename\n");
+                        message (@"Adding text document: $filename");
                     } catch (Error e) {
-                        log.printf (@"Failed to create text document: $(e.message)\n");
+                        message (@"Failed to create text document: $(e.message)");
                     }
                 } else if (is_c_source_file (filename)) {
                     try {
                         ctx.add_c_source_file (Filename.to_uri (filename));
-                        log.printf (@"Adding C source file: $filename\n");
+                        message (@"Adding C source file: $filename");
                     } catch (Error e) {
-                        log.printf (@"Failed to add C source file: $(e.message)\n");
+                        message (@"Failed to add C source file: $(e.message)");
                     }
                 } else {
-                    log.printf (@"Unknown file type: $filename\n");
+                    message (@"Unknown file type: $filename");
                 }
             });
         });
@@ -253,7 +249,7 @@ class Vls.Server {
             );
         } catch (SpawnError e) {
             showMessage (client, e.message, MessageType.Error);
-            log.printf (@"failed to spawn process: $(e.message)\n");
+            message (@"failed to spawn process: $(e.message)");
             return;
         }
 
@@ -263,7 +259,7 @@ class Vls.Server {
         try {
             deps_parser.load_from_data (deps_json);
         } catch (Error e) {
-            log.printf (@"failed to load dependencies for build dir $(builddir): $(e.message)\n");
+            message (@"failed to load dependencies for build dir $(builddir): $(e.message)");
             return;
         }
 
@@ -272,15 +268,15 @@ class Vls.Server {
             var o = node.get_object ();
             var name = o.get_string_member ("name");
             ctx.add_package (name);
-            log.printf (@"adding package $name\n");
+            message (@"adding package $name");
         });
     }
 
     void cc_analyze (string root_dir) {
-        log.printf ("looking for compile_commands.json in %s\n", root_dir);
+        message ("looking for compile_commands.json in %s", root_dir);
         string ccjson = findCompileCommands (root_dir);
         if (ccjson != null) {
-            log.printf ("found at %s\n", ccjson);
+            message ("found at %s", ccjson);
             var parser = new Json.Parser.immutable_new ();
             try {
                 parser.load_from_file (ccjson);
@@ -291,7 +287,7 @@ class Vls.Server {
                     string file = o.get_string_member ("file");
                     string path = File.new_for_path (Path.build_filename (dir, file)).get_path ();
                     string cmd = o.get_string_member ("command");
-                    log.printf ("got args for %s\n", path);
+                    message ("got args for %s", path);
                     cc.insert (path, CompileCommand() {
                         path = path,
                         directory = dir,
@@ -299,13 +295,13 @@ class Vls.Server {
                     });
                 });
             } catch (Error e) {
-                log.printf ("failed to parse %s: %s\n", ccjson, e.message);
+                message ("failed to parse %s: %s", ccjson, e.message);
             }
         }
 
         // analyze compile_commands.json
         foreach (string filename in ctx.get_filenames ()) {
-            log.printf ("analyzing args for %s\n", filename);
+            message ("analyzing args for %s", filename);
             CompileCommand? command = cc[filename];
             if (command != null) {
                 MatchInfo minfo;
@@ -313,10 +309,10 @@ class Vls.Server {
                     try {
                         do {
                             ctx.add_package (minfo.fetch (1));
-                            log.printf (@"adding package $(minfo.fetch (1))\n");
+                            message (@"adding package $(minfo.fetch (1))");
                         } while (minfo.next ());
                     } catch (Error e) {
-                        log.printf (@"regex match error: $(e.message)\n");
+                        message (@"regex match error: $(e.message)");
                     }
                 }
 
@@ -324,10 +320,10 @@ class Vls.Server {
                     try {
                         do {
                             ctx.add_vapidir (minfo.fetch (1));
-                            log.printf (@"adding package $(minfo.fetch (1))\n");
+                            message (@"adding package $(minfo.fetch (1))");
                         } while (minfo.next ());
                     } catch (Error e) {
-                        log.printf (@"regex match error: $(e.message)\n");
+                        message (@"regex match error: $(e.message)");
                     }
                 }
             }
@@ -349,15 +345,15 @@ class Vls.Server {
                         try {
                             var doc = new TextDocument (ctx, fname);
                             ctx.add_source_file (doc);
-                            log.printf (@"Adding text document: $fname\n");
+                            message (@"Adding text document: $fname");
                         } catch (Error e) {
-                            log.printf (@"Failed to create text document: $(e.message)\n");
+                            message (@"Failed to create text document: $(e.message)");
                         }
                     }
                 }
             }
         } catch (Error e) {
-            log.printf (@"Error adding files: $(e.message)\n");
+            message (@"Error adding files: $(e.message)");
         }
     }
 
@@ -365,7 +361,7 @@ class Vls.Server {
         try {
             add_vala_files (File.new_for_path (root_dir));
         } catch (Error e) {
-            log.printf (@"Error adding files $(e.message)\n");
+            message (@"Error adding files $(e.message)n");
         }
     }
 
@@ -389,16 +385,16 @@ class Vls.Server {
             
             // test again
             if (ninja != null) {
-                log.printf ("Found meson project: %s\nninja: %s\n", meson, ninja);
+                message ("Found meson project: %s\nninja: %s", meson, ninja);
                 meson_analyze_build_dir (client, root_path, Path.get_dirname (ninja));
             } else {
-                log.printf ("Found meson.build but not build.ninja: %s\n", meson);
+                message ("Found meson.build but not build.ninja: %s", meson);
             }
         } else {
             /* if this isn't a Meson project, we should 
              * just take every single file
              */
-            log.printf ("No meson project found. Adding all Vala files in %s\n", root_path);
+            message ("No meson project found. Adding all Vala files in %s", root_path);
             default_analyze_build_dir (client, root_path);
         }
 
@@ -417,7 +413,7 @@ class Vls.Server {
                 )
             ));
         } catch (Error e) {
-            log.printf (@"initialize: failed to reply to client: $(e.message)\n");
+            message (@"initialize: failed to reply to client: $(e.message)");
         }
     }
 
@@ -426,7 +422,7 @@ class Vls.Server {
         try {
             dir = Dir.open (dirname, 0);
         } catch (FileError e) {
-            log.printf ("dirname=%s, target=%s, error=%s\n", dirname, target, e.message);
+            message ("dirname=%s, target=%s, error=%s", dirname, target, e.message);
             return null;
         }
 
@@ -493,7 +489,7 @@ class Vls.Server {
         try {
             filename = Filename.from_uri (uri);
         } catch (Error e) {
-            log.printf (@"failed to convert URI $uri to filename: $(e.message)\n");
+            message (@"failed to convert URI $uri to filename: $(e.message)");
             return;
         }
 
@@ -502,12 +498,14 @@ class Vls.Server {
             try {
                 doc = new TextDocument (ctx, filename, fileContents);
             } catch (Error e) {
-                log.printf (@"failed to create text document: $(e.message)\n");
+                message (@"failed to create text document: $(e.message)");
                 return;
             }
 
+            message ("adding source file %s", uri);
             ctx.add_source_file (doc);
         } else {
+            message ("updating contents of %s", uri);
             ctx.get_source_file (uri).file.content = fileContents;
         }
 
@@ -528,7 +526,7 @@ class Vls.Server {
         TextDocument? source = ctx.get_source_file (uri);
 
         if (source == null) {
-            log.printf (@"no document found for $uri\n");
+            message (@"no document found for $uri");
             return;
         }
 
@@ -536,18 +534,18 @@ class Vls.Server {
             char* ptr = source.file.get_mapped_contents ();
 
             if (ptr == null) {
-                log.printf (@"$uri: get_mapped_contents() failed\n");
+                message (@"$uri: get_mapped_contents() failed");
             }
             source.file.content = (string) ptr;
 
             if (source.file.content == null) {
-                log.printf (@"$uri: content is NULL\n");
+                message (@"$uri: content is NULL");
                 return;
             }
         }
 
         if (source.version > version) {
-            log.printf (@"rejecting outdated version of $uri\n");
+            message (@"rejecting outdated version of $uri");
             return;
         }
 
@@ -646,7 +644,7 @@ class Vls.Server {
                 try {
                     result = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (array), null);
                 } catch (Error e) {
-                    log.printf (@"failed to create diagnostics: $(e.message)");
+                    message (@"failed to create diagnostics: $(e.message)");
                     continue;
                 }
 
@@ -656,18 +654,18 @@ class Vls.Server {
                         diagnostics: result
                     ));
                 } catch (Error e) {
-                    log.printf (@"publishDiagnostics: failed to notify client: $(e.message)\n");
+                    message (@"publishDiagnostics: failed to notify client: $(e.message)");
                     continue;
                 }
 
-                log.printf (@"textDocument/publishDiagnostics: $uri\n");
+                message (@"textDocument/publishDiagnostics: $uri");
             }
         }
     }
 
     void textDocumentDefinition (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = parse_variant <LanguageServer.TextDocumentPositionParams> (@params);
-        log.printf ("get definition in %s at %u,%u\n", p.textDocument.uri,
+        message ("get definition in %s at %u,%u", p.textDocument.uri,
             p.position.line, p.position.character);
         var file = ctx.get_source_file (p.textDocument.uri).file;
         var fs = new FindSymbol (file, p.position.to_libvala ());
@@ -692,7 +690,7 @@ class Vls.Server {
             var from = (long)Server.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
             var to = (long)Server.get_string_pos (file.content, sr.end.line-1, sr.end.column);
             string contents = file.content [from:to];
-            log.printf ("Got node: %s @ %s = %s\n", best.type_name, sr.to_string(), contents);
+            message ("Got node: %s @ %s = %s", best.type_name, sr.to_string(), contents);
         }
 
         if (best is Vala.MemberAccess) {
@@ -707,11 +705,12 @@ class Vls.Server {
             }
         }
         if (uri == null) {
-            log.printf ("error: couldn't find source file for %s\n", best.source_reference.file.filename);
+            message ("error: couldn't find source file for %s", best.source_reference.file.filename);
             client.reply (id, null);
             return;
         }
 
+        message (@"replying... $(best.source_reference.file.filename)");
         client.reply (id, object_to_variant (new LanguageServer.Location () {
             uri = uri,
             range = new Range () {
@@ -732,9 +731,9 @@ class Vls.Server {
         try {
             client.reply (id, buildDict(null));
         } catch (Error e) {
-            log.printf (@"shutdown: failed to reply to client: $(e.message)\n");
+            message (@"shutdown: failed to reply to client: $(e.message)");
         }
-        log.printf ("shutting down...\n");
+        message ("shutting down...n");
     }
 
     void exit (Jsonrpc.Client client, Variant @params) {
