@@ -45,9 +45,13 @@ class Vls.Server {
     HashTable<string, CompileCommand?> cc;
     Context ctx;
     HashTable<string, NotificationHandler> notif_handlers;
+    HashTable<string, CallHandler> call_handlers;
 
     [CCode (has_target = false)]
     delegate void NotificationHandler (Vls.Server self, Jsonrpc.Client client, Variant @params);
+
+    [CCode (has_target = false)]
+    delegate void CallHandler (Vls.Server self, Jsonrpc.Server server, Jsonrpc.Client client, string method, Variant id, Variant @params);
 
     public Server (MainLoop loop) {
         this.loop = loop;
@@ -68,6 +72,7 @@ class Vls.Server {
         server.accept_io_stream (new SimpleIOStream (stdin, stdout));
 
         notif_handlers = new HashTable <string, NotificationHandler> (str_hash, str_equal);
+        call_handlers = new HashTable <string, CallHandler> (str_hash, str_equal);
 
         server.notification.connect ((client, method, @params) => {
             message (@"Got notification! $method");
@@ -77,15 +82,26 @@ class Vls.Server {
                 message (@"no notification handler for $method");
         });
 
-        server.add_handler ("initialize", this.initialize);
-        server.add_handler ("shutdown", this.shutdown);
+        server.handle_call.connect ((client, method, id, @params) => {
+            message (@"Got call! $method");
+            if (call_handlers.contains (method)) {
+                ((CallHandler) call_handlers[method]) (this, server, client, method, id, @params);
+                return true;
+            } else {
+                message (@"no call handler for $method");
+                return false;
+            }
+        });
+
+        call_handlers["initialize"] = this.initialize;
+        call_handlers["shutdown"] = this.shutdown;
         notif_handlers["exit"] = this.exit;
 
-        server.add_handler ("textDocument/definition", this.textDocumentDefinition);
+        call_handlers["textDocument/definition"] = this.textDocumentDefinition;
         notif_handlers["textDocument/didOpen"] = this.textDocumentDidOpen;
         notif_handlers["textDocument/didChange"] = this.textDocumentDidChange;
 
-        log.printf ("Finished constructing\n");
+        message ("Finished constructing");
     }
 
     // a{sv} only
