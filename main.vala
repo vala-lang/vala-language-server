@@ -731,7 +731,7 @@ class Vls.Server {
             message ("Got node: %s @ %s = %s", best.type_name, sr.to_string(), contents);
         }
 
-        if (best is Vala.Expression) {
+        if (best is Vala.Expression && !(best is Vala.Literal)) {
             var b = (Vala.Expression)best;
             message ("best (%p) is a Expression", best);
             if (b.symbol_reference != null) {
@@ -740,6 +740,7 @@ class Vls.Server {
             }
         } else {
             client.reply (id, null);
+            return;
         }
 
         /*
