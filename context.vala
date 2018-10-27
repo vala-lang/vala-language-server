@@ -30,7 +30,7 @@ class Vls.Context {
                 Vala.CodeContext.push (_ctx);
                 dirty = false;
 
-                string version = "0.40.4"; //Config.libvala_version;
+                string version = "0.42.1"; //Config.libvala_version;
                 string[] parts = version.split(".");
                 assert (parts.length == 3);
                 assert (parts[0] == "0");
