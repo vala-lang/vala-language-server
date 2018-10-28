@@ -18,7 +18,12 @@ class Vls.TextDocument : Object {
     public TextDocument (Context ctx, 
                          string filename, 
                          string? content = null,
-                         int version = 0) throws ConvertError {
+                         int version = 0) throws ConvertError, FileError {
+
+        if (!FileUtils.test (filename, FileTest.EXISTS)) {
+            throw new FileError.NOENT ("file %s does not exist".printf (filename));
+        }
+
         this.uri = Filename.to_uri (filename);
         this.filename = filename;
         this.version = version;
