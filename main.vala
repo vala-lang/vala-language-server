@@ -68,12 +68,20 @@ class Vls.Server {
             return true;
         });
 
+        // hack to prevent other things from corrupting JSON-RPC pipe:
+        // create a new handle to stdin/stdout, and close the old ones (or move them to stderr)
+        var new_stdin_fd = Posix.dup(Posix.STDIN_FILENO);
+        var new_stdout_fd = Posix.dup(Posix.STDOUT_FILENO);
+
+        Posix.close(Posix.STDIN_FILENO);
+        Posix.dup2(Posix.STDERR_FILENO, Posix.STDOUT_FILENO);
+
         // libvala setup
         this.ctx = new Vls.Context ();
 
         this.server = new Jsonrpc.Server ();
-        var stdin = new UnixInputStream (Posix.STDIN_FILENO, false);
-        var stdout = new UnixOutputStream (Posix.STDOUT_FILENO, false);
+        var stdin = new UnixInputStream (new_stdin_fd, false);
+        var stdout = new UnixOutputStream (new_stdout_fd, false);
         server.accept_io_stream (new SimpleIOStream (stdin, stdout));
 
         notif_handlers = new HashTable <string, NotificationHandler> (str_hash, str_equal);
