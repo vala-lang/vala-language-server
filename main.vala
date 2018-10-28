@@ -384,9 +384,6 @@ class Vls.Server {
     void initialize (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var dict = new VariantDict (@params);
 
-        int64 pid;
-        dict.lookup ("processId", "x", out pid);
-
         string? root_path;
         dict.lookup ("rootPath", "s", out root_path);
 
