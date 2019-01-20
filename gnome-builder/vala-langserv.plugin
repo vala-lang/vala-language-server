@@ -1,0 +1,15 @@
+[Plugin]
+Name=Vala
+Description=Vala language server
+Authors=Princeton Ferro, Ben Iofel
+Copyright=Copyright © 2018
+
+Loader=python3
+Module=vala-langserv
+X-Completion-Provider-Languages=vala
+X-Diagnostic-Provider-Languages=vala
+X-Formatter-Languages=vala
+X-Highlighter-Languages=vala
+X-Hover-Provider-Languages=vala
+X-Rename-Provider-Languages=vala
+X-Symbol-Resolver-Languages=vala

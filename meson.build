@@ -21,6 +21,8 @@ conf_file = configure_file(input: 'config.vala.in',
                            output: 'config.vala',
                            configuration: conf)
 
+subdir('gnome-builder')
+
 src = files([
     'main.vala',
     'protocol.vala',
