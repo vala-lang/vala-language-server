@@ -54,19 +54,19 @@ class ValaService(Ide.Object, Ide.Service):
     def do_context_loaded(self):
         """
         After the context has been loaded, we want to watch the project
-        Cargo.toml for changes if we find one. That will allow us to
+        meson.build for changes if we find one. That will allow us to
         restart the process as necessary to pick up changes.
         """
         context = self.get_context()
         project_file = context.get_project_file()
         if project_file is not None:
-            if project_file.get_basename() == 'Cargo.toml':
+            if project_file.get_basename() == 'meson.build':
                 try:
                     self._monitor = project_file.monitor(0, None)
                     self._monitor.set_rate_limit(5 * 1000) # 5 Seconds
                     self._monitor.connect('changed', self._monitor_changed_cb)
                 except Exception as ex:
-                    Ide.debug('Failed to monitor Cargo.toml for changes:', repr(ex))
+                    Ide.debug('Failed to monitor meson.build for changes:', repr(ex))
 
     def _monitor_changed_cb(self, monitor, file, other_file, event_type):
         """
@@ -179,7 +179,7 @@ class ValaService(Ide.Object, Ide.Service):
         launcher.set_run_on_host(True)
         return launcher
 
-    def _discover_sysroot(self):
+    def _discover_sysroot(self):            # currently unused
         """
         The Rust Language Server needs to know where the sysroot is of
         the Rust installation we are using. This is simple enough to
@@ -207,37 +207,38 @@ class ValaService(Ide.Object, Ide.Service):
         self._ensure_started()
         self.bind_property('client', provider, 'client', GObject.BindingFlags.SYNC_CREATE)
 
+# TODO: get it to work with just this
 class ValaDiagnosticProvider(Ide.LangservDiagnosticProvider):
     def do_load(self):
         ValaService.bind_client(self)
 
-class ValaCompletionProvider(Ide.LangservCompletionProvider):
-    def do_load(self, context):
-        ValaService.bind_client(self)
-
-    def do_get_priority(self, context):
-        # This provider only activates when it is very likely that we
-        # want the results. So use high priority (negative is better).
-        return -1000
-
-class ValaRenameProvider(Ide.LangservRenameProvider):
-    def do_load(self):
-        ValaService.bind_client(self)
-
-class ValaSymbolResolver(Ide.LangservSymbolResolver):
-    def do_load(self):
-        ValaService.bind_client(self)
-
-class ValaHighlighter(Ide.LangservHighlighter):
-    def do_load(self):
-        ValaService.bind_client(self)
-
-class ValaFormatter(Ide.LangservFormatter):
-    def do_load(self):
-        ValaService.bind_client(self)
-
-class ValaHoverProvider(Ide.LangservHoverProvider):
-    def do_prepare(self):
-        self.props.category = 'Vala'
-        self.props.priority = 200
-        ValaService.bind_client(self)
+# class ValaCompletionProvider(Ide.LangservCompletionProvider):
+#     def do_load(self, context):
+#         ValaService.bind_client(self)
+# 
+#     def do_get_priority(self, context):
+#         # This provider only activates when it is very likely that we
+#         # want the results. So use high priority (negative is better).
+#         return -1000
+# 
+# class ValaRenameProvider(Ide.LangservRenameProvider):
+#     def do_load(self):
+#         ValaService.bind_client(self)
+# 
+# class ValaSymbolResolver(Ide.LangservSymbolResolver):
+#     def do_load(self):
+#         ValaService.bind_client(self)
+# 
+# class ValaHighlighter(Ide.LangservHighlighter):
+#     def do_load(self):
+#         ValaService.bind_client(self)
+# 
+# class ValaFormatter(Ide.LangservFormatter):
+#     def do_load(self):
+#         ValaService.bind_client(self)
+# 
+# class ValaHoverProvider(Ide.LangservHoverProvider):
+#     def do_prepare(self):
+#         self.props.category = 'Vala'
+#         self.props.priority = 200
+#         ValaService.bind_client(self)
