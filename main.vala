@@ -87,6 +87,7 @@ class Vls.Server {
          error ("could not set pipes to nonblocking.\n");
 
 
+
         // capture logging
         Log.set_handler (null, LogLevelFlags.LEVEL_MASK, this.log_handler);
         Log.set_handler ("jsonrpc-server", LogLevelFlags.LEVEL_MASK, this.log_handler);
@@ -597,7 +598,7 @@ class Vls.Server {
             }
         }
 
-        if (source.version > version) {
+        if (source.version >= version) {
             debug (@"rejecting outdated version of $uri");
             return;
         }
