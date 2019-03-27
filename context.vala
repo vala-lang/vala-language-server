@@ -39,9 +39,9 @@ class Vls.Context {
                 _ctx.report = new Reporter ();
                 _ctx.profile = Vala.Profile.GOBJECT;
                 _ctx.add_define ("GOBJECT");
-                for (int i = 2; i <= minor; i += 2) {
-                    _ctx.add_define ("VALA_0_%d".printf (i));
-                }
+                // for (int i = 2; i <= minor; i += 2) {
+                //     _ctx.add_define ("VALA_0_%d".printf (i));
+                // }
                 // _ctx.target_glib_major = 2;
                 // _ctx.target_glib_minor = 56;
                 // for (int i = 16; i <= _ctx.target_glib_minor; i += 2) {
