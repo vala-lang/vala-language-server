@@ -6,7 +6,7 @@ class Vls.FindSymbol : Vala.CodeVisitor {
     bool match (Vala.CodeNode node) {
         var sr = node.source_reference;
         if (sr == null) {
-            message ("node %s has no source reference", node.type_name);
+            debug ("node %s has no source reference", node.type_name);
             return false;
         }
 
@@ -30,7 +30,7 @@ class Vls.FindSymbol : Vala.CodeVisitor {
             return false;
         }
         if (sr.begin.column <= pos.character && pos.character <= sr.end.column) {
-            message ("Got node: %s (%s) @ %s", node.type_name, node.to_string (), sr.to_string ());
+            debug ("Got node: %s (%s) @ %s", node.type_name, node.to_string (), sr.to_string ());
             return true;
         } else {
             return false;

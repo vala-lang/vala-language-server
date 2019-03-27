@@ -64,7 +64,7 @@ class Vls.Server {
         this.cc = new HashTable<string, CompileCommand?> (str_hash, str_equal);
 
         Timeout.add (10000, () => {
-            message (@"listening...");
+            debug (@"listening...");
             return true;
         });
 
@@ -88,20 +88,20 @@ class Vls.Server {
         call_handlers = new HashTable <string, CallHandler> (str_hash, str_equal);
 
         server.notification.connect ((client, method, @params) => {
-            message (@"Got notification! $method");
+            debug (@"Got notification! $method");
             if (notif_handlers.contains (method))
                 ((NotificationHandler) notif_handlers[method]) (this, client, @params);
             else
-                message (@"no notification handler for $method");
+                debug (@"no notification handler for $method");
         });
 
         server.handle_call.connect ((client, method, id, @params) => {
-            message (@"Got call! $method");
+            debug (@"Got call! $method");
             if (call_handlers.contains (method)) {
                 ((CallHandler) call_handlers[method]) (this, server, client, method, id, @params);
                 return true;
             } else {
-                message (@"no call handler for $method");
+                debug (@"no call handler for $method");
                 return false;
             }
         });
@@ -114,7 +114,7 @@ class Vls.Server {
         notif_handlers["textDocument/didOpen"] = this.textDocumentDidOpen;
         notif_handlers["textDocument/didChange"] = this.textDocumentDidChange;
 
-        message ("Finished constructing");
+        debug ("Finished constructing");
     }
 
     // a{sv} only
@@ -139,7 +139,7 @@ class Vls.Server {
                 message: new Variant.string (message)
             ));
         } catch (Error e) {
-            GLib.message (@"showMessage: failed to notify client: $(e.message)");
+            GLib.debug (@"showMessage: failed to notify client: $(e.message)");
         }
     }
 
@@ -159,7 +159,7 @@ class Vls.Server {
         string proc_stderr;
         int proc_status;
 
-        message (@"analyzing build directory $rootdir ...");
+        debug (@"analyzing build directory $rootdir ...");
         try {
             Process.spawn_sync (rootdir, 
                 spawn_args, spawn_env,
@@ -171,7 +171,7 @@ class Vls.Server {
             );
         } catch (SpawnError e) {
             showMessage (client, @"Failed to spawn $(spawn_args[0]): $(e.message)", MessageType.Error);
-            message (@"failed to spawn process: $(e.message)");
+            debug (@"failed to spawn process: $(e.message)");
             return;
         }
 
@@ -179,7 +179,7 @@ class Vls.Server {
             showMessage (client, 
                 @"Failed to analyze build dir: meson terminated with error code $proc_status. Output:\n $proc_stderr", 
                 MessageType.Error);
-            message (@"failed to analyze build dir: meson terminated with error code $proc_status. Output:\n $proc_stderr");
+            debug (@"failed to analyze build dir: meson terminated with error code $proc_status. Output:\n $proc_stderr");
             return;
         }
 
@@ -189,7 +189,7 @@ class Vls.Server {
         try {
             targets_parser.load_from_data (targets_json);
         } catch (Error e) {
-            message (@"failed to load targets for build dir $(builddir): $(e.message)");
+            debug (@"failed to load targets for build dir $(builddir): $(e.message)");
             return;
         }
 
@@ -208,9 +208,9 @@ class Vls.Server {
                 try {
                     var doc = new TextDocument (ctx, fname);
                     ctx.add_source_file (doc);
-                    message (@"Adding text document: $fname");
+                    debug (@"Adding text document: $fname");
                 } catch (Error e) {
-                    message (@"Failed to create text document: $(e.message)");
+                    debug (@"Failed to create text document: $(e.message)");
                 }
             }
             
@@ -224,7 +224,7 @@ class Vls.Server {
                     out proc_status
                 );
             } catch (SpawnError e) {
-                message (@"Failed to analyze target $id: $(e.message)");
+                debug (@"Failed to analyze target $id: $(e.message)");
                 return;
             }
 
@@ -235,7 +235,7 @@ class Vls.Server {
             try {
                 files_parser.load_from_data (files_json);
             } catch (Error e) {
-                message (@"failed to get target files for $id (ID): $(e.message)");
+                debug (@"failed to get target files for $id (ID): $(e.message)");
                 return;
             }
             var fnode = files_parser.get_root ().get_array ();
@@ -248,19 +248,19 @@ class Vls.Server {
                     try {
                         var doc = new TextDocument (ctx, filename);
                         ctx.add_source_file (doc);
-                        message (@"Adding text document: $filename");
+                        debug (@"Adding text document: $filename");
                     } catch (Error e) {
-                        message (@"Failed to create text document: $(e.message)");
+                        debug (@"Failed to create text document: $(e.message)");
                     }
                 } else if (is_c_source_file (filename)) {
                     try {
                         ctx.add_c_source_file (Filename.to_uri (filename));
-                        message (@"Adding C source file: $filename");
+                        debug (@"Adding C source file: $filename");
                     } catch (Error e) {
-                        message (@"Failed to add C source file: $(e.message)");
+                        debug (@"Failed to add C source file: $(e.message)");
                     }
                 } else {
-                    message (@"Unknown file type: $filename");
+                    debug (@"Unknown file type: $filename");
                 }
             });
         });
@@ -278,7 +278,7 @@ class Vls.Server {
             );
         } catch (SpawnError e) {
             showMessage (client, e.message, MessageType.Error);
-            message (@"failed to spawn process: $(e.message)");
+            debug (@"failed to spawn process: $(e.message)");
             return;
         }
 
@@ -288,7 +288,7 @@ class Vls.Server {
         try {
             deps_parser.load_from_data (deps_json);
         } catch (Error e) {
-            message (@"failed to load dependencies for build dir $(builddir): $(e.message)");
+            debug (@"failed to load dependencies for build dir $(builddir): $(e.message)");
             return;
         }
 
@@ -297,15 +297,15 @@ class Vls.Server {
             var o = node.get_object ();
             var name = o.get_string_member ("name");
             ctx.add_package (name);
-            message (@"adding package $name");
+            debug (@"adding package $name");
         });
     }
 
     void cc_analyze (string root_dir) {
-        message ("looking for compile_commands.json in %s", root_dir);
+        debug ("looking for compile_commands.json in %s", root_dir);
         string ccjson = findCompileCommands (root_dir);
         if (ccjson != null) {
-            message ("found at %s", ccjson);
+            debug ("found at %s", ccjson);
             var parser = new Json.Parser.immutable_new ();
             try {
                 parser.load_from_file (ccjson);
@@ -316,7 +316,7 @@ class Vls.Server {
                     string file = o.get_string_member ("file");
                     string path = File.new_for_path (Path.build_filename (dir, file)).get_path ();
                     string cmd = o.get_string_member ("command");
-                    message ("got args for %s", path);
+                    debug ("got args for %s", path);
                     cc.insert (path, CompileCommand() {
                         path = path,
                         directory = dir,
@@ -324,13 +324,13 @@ class Vls.Server {
                     });
                 });
             } catch (Error e) {
-                message ("failed to parse %s: %s", ccjson, e.message);
+                debug ("failed to parse %s: %s", ccjson, e.message);
             }
         }
 
         // analyze compile_commands.json
         foreach (string filename in ctx.get_filenames ()) {
-            message ("analyzing args for %s", filename);
+            debug ("analyzing args for %s", filename);
             CompileCommand? command = cc[filename];
             if (command != null) {
                 MatchInfo minfo;
@@ -338,10 +338,10 @@ class Vls.Server {
                     try {
                         do {
                             ctx.add_package (minfo.fetch (1));
-                            message (@"adding package $(minfo.fetch (1))");
+                            debug (@"adding package $(minfo.fetch (1))");
                         } while (minfo.next ());
                     } catch (Error e) {
-                        message (@"regex match error: $(e.message)");
+                        debug (@"regex match error: $(e.message)");
                     }
                 }
 
@@ -349,10 +349,10 @@ class Vls.Server {
                     try {
                         do {
                             ctx.add_vapidir (minfo.fetch (1));
-                            message (@"adding package $(minfo.fetch (1))");
+                            debug (@"adding package $(minfo.fetch (1))");
                         } while (minfo.next ());
                     } catch (Error e) {
-                        message (@"regex match error: $(e.message)");
+                        debug (@"regex match error: $(e.message)");
                     }
                 }
             }
@@ -374,15 +374,15 @@ class Vls.Server {
                         try {
                             var doc = new TextDocument (ctx, fname);
                             ctx.add_source_file (doc);
-                            message (@"Adding text document: $fname");
+                            debug (@"Adding text document: $fname");
                         } catch (Error e) {
-                            message (@"Failed to create text document: $(e.message)");
+                            debug (@"Failed to create text document: $(e.message)");
                         }
                     }
                 }
             }
         } catch (Error e) {
-            message (@"Error adding files: $(e.message)");
+            debug (@"Error adding files: $(e.message)");
         }
     }
 
@@ -390,7 +390,7 @@ class Vls.Server {
         try {
             add_vala_files (File.new_for_path (root_dir));
         } catch (Error e) {
-            message (@"Error adding files $(e.message)n");
+            debug (@"Error adding files $(e.message)n");
         }
     }
 
@@ -411,16 +411,16 @@ class Vls.Server {
             
             // test again
             if (ninja != null) {
-                message ("Found meson project: %s\nninja: %s", meson, ninja);
+                debug ("Found meson project: %s\nninja: %s", meson, ninja);
                 meson_analyze_build_dir (client, root_path, Path.get_dirname (ninja));
             } else {
-                message ("Found meson.build but not build.ninja: %s", meson);
+                debug ("Found meson.build but not build.ninja: %s", meson);
             }
         } else {
             /* if this isn't a Meson project, we should 
              * just take every single file
              */
-            message ("No meson project found. Adding all Vala files in %s", root_path);
+            debug ("No meson project found. Adding all Vala files in %s", root_path);
             default_analyze_build_dir (client, root_path);
         }
 
@@ -439,7 +439,7 @@ class Vls.Server {
                 )
             ));
         } catch (Error e) {
-            message (@"initialize: failed to reply to client: $(e.message)");
+            debug (@"initialize: failed to reply to client: $(e.message)");
         }
     }
 
@@ -448,7 +448,7 @@ class Vls.Server {
         try {
             dir = Dir.open (dirname, 0);
         } catch (FileError e) {
-            message ("dirname=%s, target=%s, error=%s", dirname, target, e.message);
+            debug ("dirname=%s, target=%s, error=%s", dirname, target, e.message);
             return null;
         }
 
@@ -515,20 +515,20 @@ class Vls.Server {
         try {
             filename = Filename.from_uri (uri);
         } catch (Error e) {
-            message (@"failed to convert URI $uri to filename: $(e.message)");
+            debug (@"failed to convert URI $uri to filename: $(e.message)");
             return;
         }
 
         var file = File.new_for_uri (uri);
         foreach (string vapidir in ctx.code_context.vapi_directories) {
             if (file.get_path ().has_prefix (vapidir)) {
-                message ("%s is in vapidir %s. Not adding", filename, vapidir);
+                debug ("%s is in vapidir %s. Not adding", filename, vapidir);
                 return;
             }
         }
         if (file.get_path ().has_prefix ("/usr/share/vala")
          || file.get_path ().has_prefix ("/usr/share/vala-0.40")) { // TODO: don't hardcode these
-            message ("%s is in system vapidir. Not adding", filename);
+            debug ("%s is in system vapidir. Not adding", filename);
             return;
         }
 
@@ -538,14 +538,14 @@ class Vls.Server {
             try {
                 doc = new TextDocument (ctx, filename, fileContents);
             } catch (Error e) {
-                message (@"failed to create text document: $(e.message)");
+                debug (@"failed to create text document: $(e.message)");
                 return;
             }
 
-            message ("adding source file %s", uri);
+            debug ("adding source file %s", uri);
             ctx.add_source_file (doc);
         } else {
-            message ("updating contents of %s", uri);
+            debug ("updating contents of %s", uri);
             ctx.get_source_file (uri).file.content = fileContents;
         }
 
@@ -566,7 +566,7 @@ class Vls.Server {
         TextDocument? source = ctx.get_source_file (uri);
 
         if (source == null) {
-            message (@"no document found for $uri");
+            debug (@"no document found for $uri");
             return;
         }
 
@@ -574,18 +574,18 @@ class Vls.Server {
             char* ptr = source.file.get_mapped_contents ();
 
             if (ptr == null) {
-                message (@"$uri: get_mapped_contents() failed");
+                debug (@"$uri: get_mapped_contents() failed");
             }
             source.file.content = (string) ptr;
 
             if (source.file.content == null) {
-                message (@"$uri: content is NULL");
+                debug (@"$uri: content is NULL");
                 return;
             }
         }
 
         if (source.version > version) {
-            message (@"rejecting outdated version of $uri");
+            debug (@"rejecting outdated version of $uri");
             return;
         }
 
@@ -684,7 +684,7 @@ class Vls.Server {
                 try {
                     result = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (array), null);
                 } catch (Error e) {
-                    message (@"failed to create diagnostics: $(e.message)");
+                    debug (@"failed to create diagnostics: $(e.message)");
                     continue;
                 }
 
@@ -694,22 +694,22 @@ class Vls.Server {
                         diagnostics: result
                     ));
                 } catch (Error e) {
-                    message (@"publishDiagnostics: failed to notify client: $(e.message)");
+                    debug (@"publishDiagnostics: failed to notify client: $(e.message)");
                     continue;
                 }
 
-                message (@"textDocument/publishDiagnostics: $uri");
+                debug (@"textDocument/publishDiagnostics: $uri");
             }
         }
     }
 
     void textDocumentDefinition (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = parse_variant <LanguageServer.TextDocumentPositionParams> (@params);
-        message ("get definition in %s at %u,%u", p.textDocument.uri,
+        debug ("get definition in %s at %u,%u", p.textDocument.uri,
             p.position.line, p.position.character);
         var sourcefile = ctx.get_source_file (p.textDocument.uri);
         if (sourcefile == null) {
-            message ("unknown file %s", p.textDocument.uri);
+            debug ("unknown file %s", p.textDocument.uri);
             client.reply (id, null);
             return;
         }
@@ -738,15 +738,15 @@ class Vls.Server {
             var from = (long)Server.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
             var to = (long)Server.get_string_pos (file.content, sr.end.line-1, sr.end.column);
             string contents = file.content [from:to];
-            message ("Got node: %s @ %s = %s", best.type_name, sr.to_string(), contents);
+            debug ("Got node: %s @ %s = %s", best.type_name, sr.to_string(), contents);
         }
 
         if (best is Vala.Expression && !(best is Vala.Literal)) {
             var b = (Vala.Expression)best;
-            message ("best (%p) is a Expression", best);
+            debug ("best (%p) is a Expression", best);
             if (b.symbol_reference != null) {
                 best = b.symbol_reference;
-                message ("best is now the symbol_referenece => %p", best);
+                debug ("best is now the symbol_referenece => %p", best);
             }
         } else {
             client.reply (id, null);
@@ -762,13 +762,13 @@ class Vls.Server {
             }
         }
         if (uri == null) {
-            message ("error: couldn't find source file for %s", best.source_reference.file.filename);
+            debug ("error: couldn't find source file for %s", best.source_reference.file.filename);
             client.reply (id, null);
             return;
         }
         */
 
-        message (@"replying... $(best.source_reference.file.filename)");
+        debug (@"replying... $(best.source_reference.file.filename)");
         client.reply (id, object_to_variant (new LanguageServer.Location () {
             uri = "file://" + best.source_reference.file.filename,
             range = new Range () {
@@ -789,9 +789,9 @@ class Vls.Server {
         try {
             client.reply (id, buildDict(null));
         } catch (Error e) {
-            message (@"shutdown: failed to reply to client: $(e.message)");
+            debug (@"shutdown: failed to reply to client: $(e.message)");
         }
-        message ("shutting down...n");
+        debug ("shutting down...n");
     }
 
     void exit (Jsonrpc.Client client, Variant @params) {
