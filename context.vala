@@ -19,7 +19,7 @@ class Vls.Context {
     public Vala.CodeContext code_context {
         get {
             if (dirty) {
-                message ("dirty context, rebuilding");
+                debug ("dirty context, rebuilding");
 
                 if (_ctx != null) {
                     // stupid workaround for memory leaks in Vala 0.38
@@ -42,11 +42,11 @@ class Vls.Context {
                 for (int i = 2; i <= minor; i += 2) {
                     _ctx.add_define ("VALA_0_%d".printf (i));
                 }
-                _ctx.target_glib_major = 2;
-                _ctx.target_glib_minor = 56;
-                for (int i = 16; i <= _ctx.target_glib_minor; i += 2) {
-                    _ctx.add_define ("GLIB_2_%d".printf (i));
-                }
+                // _ctx.target_glib_major = 2;
+                // _ctx.target_glib_minor = 56;
+                // for (int i = 16; i <= _ctx.target_glib_minor; i += 2) {
+                //     _ctx.add_define ("GLIB_2_%d".printf (i));
+                // }
                 foreach (var define in _defines)
                     _ctx.add_define (define);
                 _ctx.add_external_package ("glib-2.0");
