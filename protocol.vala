@@ -110,7 +110,7 @@ class LanguageServer.Diagnostic : Object {
  */
 class LanguageServer.TextDocumentContentChangeEvent : Object {
 	public Range? range 		{ get; set; }
-	public int? rangeLength 	{ get; set; }
+	public int rangeLength 	{ get; set; }
 	public string text 			{ get; set; }
 }
 

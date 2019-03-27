@@ -29,6 +29,7 @@ class Vls.TextDocument : Object {
         this.version = version;
         this.ctx = ctx;
 
+
         var type = Vala.SourceFileType.NONE;
         if (uri.has_suffix (".vala") || uri.has_suffix (".gs"))
             type = Vala.SourceFileType.SOURCE;
@@ -41,6 +42,7 @@ class Vls.TextDocument : Object {
             file.add_using_directive (ns_ref);
             ctx.add_using ("GLib");
         }
+
     }
 }
 
@@ -562,7 +564,7 @@ class Vls.Server {
         var changes = @params.lookup_value ("contentChanges", VariantType.ARRAY);
 
         var uri = (string) document.lookup_value ("uri", VariantType.STRING);
-        var version = (int) document.lookup_value ("version", VariantType.INT64);
+        var version = (int64) document.lookup_value ("version", VariantType.INT64);
         TextDocument? source = ctx.get_source_file (uri);
 
         if (source == null) {
@@ -589,7 +591,7 @@ class Vls.Server {
             return;
         }
 
-        source.version = version;
+        source.version = (int) version;
 
         var iter = changes.iterator ();
         Variant? elem = null;
@@ -597,7 +599,7 @@ class Vls.Server {
         while ((elem = iter.next_value ()) != null) {
             var changeEvent = parse_variant<TextDocumentContentChangeEvent> (elem);
 
-            if (changeEvent.range == null && changeEvent.rangeLength == null) {
+            if (changeEvent.range == null && changeEvent.rangeLength == 0) {
                 sb.assign (changeEvent.text);
             } else {
                 var start = changeEvent.range.start;
