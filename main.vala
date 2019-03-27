@@ -635,49 +635,61 @@ class Vls.Server {
                 var array = new Json.Array ();
 
                 ctx.report.errorlist.foreach (err => {
-                    if (err.loc.file != source)
-                        return;
+                    if (err.loc != null) {
+                        if (err.loc.file != source)
+                            return;
 
-                    var diag = new Diagnostic () {
-                        range = new Range () {
-                            start = new Position () {
-                                line = err.loc.begin.line - 1,
-                                character = err.loc.begin.column - 1
+                        var diag = new Diagnostic () {
+                            range = new Range () {
+                                start = new Position () {
+                                    line = err.loc.begin.line - 1,
+                                    character = err.loc.begin.column - 1
+                                },
+                                end = new Position () {
+                                    line = err.loc.end.line - 1,
+                                    character = err.loc.end.column
+                                }
                             },
-                            end = new Position () {
-                                line = err.loc.end.line - 1,
-                                character = err.loc.end.column
-                            }
-                        },
-                        severity = DiagnosticSeverity.Error,
-                        message = err.message
-                    };
+                            severity = DiagnosticSeverity.Error,
+                            message = err.message
+                        };
 
-                    var node = Json.gobject_serialize (diag);
-                    array.add_element (node);
+                        var node = Json.gobject_serialize (diag);
+                        array.add_element (node);
+                    } else
+                        array.add_element (Json.gobject_serialize (new Diagnostic() {
+                            severity = DiagnosticSeverity.Error,
+                            message = err.message
+                        }));
                 });
 
                 ctx.report.warnlist.foreach (err => {
-                    if (err.loc.file != source)
-                        return;
+                    if (err.loc != null) {
+                        if (err.loc.file != source)
+                            return;
 
-                    var diag = new Diagnostic () {
-                        range = new Range () {
-                            start = new Position () {
-                                line = err.loc.begin.line - 1,
-                                character = err.loc.begin.column - 1
+                        var diag = new Diagnostic () {
+                            range = new Range () {
+                                start = new Position () {
+                                    line = err.loc.begin.line - 1,
+                                    character = err.loc.begin.column - 1
+                                },
+                                end = new Position () {
+                                    line = err.loc.end.line - 1,
+                                    character = err.loc.end.column
+                                }
                             },
-                            end = new Position () {
-                                line = err.loc.end.line - 1,
-                                character = err.loc.end.column
-                            }
-                        },
-                        severity = DiagnosticSeverity.Warning,
-                        message = err.message
-                    };
+                            severity = DiagnosticSeverity.Warning,
+                            message = err.message
+                        };
 
-                    var node = Json.gobject_serialize (diag);
-                    array.add_element (node);
+                        var node = Json.gobject_serialize (diag);
+                        array.add_element (node);
+                    } else
+                        array.add_element (Json.gobject_serialize (new Diagnostic() {
+                            severity = DiagnosticSeverity.Warning,
+                            message = err.message
+                        }));
                 });
 
                 Variant result;
