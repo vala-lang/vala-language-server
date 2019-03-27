@@ -36,13 +36,13 @@ class Vls.TextDocument : Object {
         else if (uri.has_suffix (".vapi"))
             type = Vala.SourceFileType.PACKAGE;
 
+
         file = new Vala.SourceFile (ctx.code_context, type, filename, content);
         if (type == Vala.SourceFileType.SOURCE) {
             var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib", null));
             file.add_using_directive (ns_ref);
             ctx.add_using ("GLib");
         }
-
     }
 }
 
@@ -60,6 +60,10 @@ class Vls.Server {
     [CCode (has_target = false)]
     delegate void CallHandler (Vls.Server self, Jsonrpc.Server server, Jsonrpc.Client client, string method, Variant id, Variant @params);
 
+    private void log_handler (string? log_domain, LogLevelFlags log_levels, string message) {
+        stderr.printf ("%s: %s\n", log_domain == null ? "vls" : log_domain, message);
+    }
+
     public Server (MainLoop loop) {
         this.loop = loop;
 
@@ -70,20 +74,27 @@ class Vls.Server {
             return true;
         });
 
-        // hack to prevent other things from corrupting JSON-RPC pipe:
-        // create a new handle to stdin/stdout, and close the old ones (or move them to stderr)
-        var new_stdin_fd = Posix.dup(Posix.STDIN_FILENO);
-        var new_stdout_fd = Posix.dup(Posix.STDOUT_FILENO);
-
-        Posix.close(Posix.STDIN_FILENO);
-        Posix.dup2(Posix.STDERR_FILENO, Posix.STDOUT_FILENO);
-
         // libvala setup
         this.ctx = new Vls.Context ();
 
         this.server = new Jsonrpc.Server ();
-        var stdin = new UnixInputStream (new_stdin_fd, false);
-        var stdout = new UnixOutputStream (new_stdout_fd, false);
+        var stdin = new UnixInputStream (Posix.STDIN_FILENO, false);
+        var stdout = new UnixOutputStream (Posix.STDOUT_FILENO, false);
+
+        // set nonblocking
+        if (!Unix.set_fd_nonblocking (Posix.STDIN_FILENO, true)
+         || !Unix.set_fd_nonblocking (Posix.STDOUT_FILENO, true))
+         error ("could not set pipes to nonblocking.\n");
+
+
+        // capture logging
+        Log.set_handler (null, LogLevelFlags.LEVEL_MASK, this.log_handler);
+        Log.set_handler ("jsonrpc-server", LogLevelFlags.LEVEL_MASK, this.log_handler);
+
+        // disable SIGPIPE?
+        // Process.@signal (ProcessSignal.PIPE, signum => {} );
+
+
         server.accept_io_stream (new SimpleIOStream (stdin, stdout));
 
         notif_handlers = new HashTable <string, NotificationHandler> (str_hash, str_equal);
@@ -599,12 +610,13 @@ class Vls.Server {
         while ((elem = iter.next_value ()) != null) {
             var changeEvent = parse_variant<TextDocumentContentChangeEvent> (elem);
 
-            if (changeEvent.range == null && changeEvent.rangeLength == 0) {
+            if (changeEvent.range == null /* && changeEvent.rangeLength == 0*/) {
                 sb.assign (changeEvent.text);
             } else {
                 var start = changeEvent.range.start;
                 size_t pos = get_string_pos (sb.str, start.line, start.character);
-                sb.overwrite (pos, changeEvent.text);
+                sb.erase ((ssize_t) pos, changeEvent.rangeLength);
+                sb.insert ((ssize_t) pos, changeEvent.text);
             }
         }
         source.file.content = sb.str;
