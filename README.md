@@ -18,6 +18,8 @@ https://benwaffle.github.io/vala-language-server/index.html
 - Run `npm install`
 - open this folder in VS Code
 - `git submodule update --init`
-- cd to vala-language-server and checkout master
-- compile the language server (see above)
+- `cd vala-lanugage-server`
+- `git checkout master`
+- `meson build`
+- `ninja -C build`
 - Hit F5 in VS Code to run a new instance with the VLS
