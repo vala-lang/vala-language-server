@@ -42,11 +42,7 @@ class Vls.Context {
                 for (int i = 2; i <= minor; i += 2) {
                     _ctx.add_define ("VALA_0_%d".printf (i));
                 }
-                _ctx.target_glib_major = 2;
-                _ctx.target_glib_minor = 56;
-                for (int i = 16; i <= _ctx.target_glib_minor; i += 2) {
-                    _ctx.add_define ("GLIB_2_%d".printf (i));
-                }
+                _ctx.set_target_glib_version("2.56");
                 foreach (var define in _defines)
                     _ctx.add_define (define);
                 _ctx.add_external_package ("glib-2.0");
