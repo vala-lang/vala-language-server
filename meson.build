@@ -8,7 +8,6 @@ libvala = dependency('libvala-@0@'.format(libvala_version))
 deps = [
     dependency('glib-2.0'),
     dependency('gobject-2.0'),
-    dependency('gio-unix-2.0'),
     dependency('gee-0.8'),
     dependency('jsonrpc-glib-1.0'),
     libvala,
