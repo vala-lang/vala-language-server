@@ -44,50 +44,6 @@ class Vls.TextDocument : Object {
     }
 }
 
-public class InputStreamFromFileStream
-	: InputStream
-{
-	private unowned FileStream? target;
-
-	public InputStreamFromFileStream(FileStream fs)
-	{
-		target = fs;
-	}
-
-	public override bool close(Cancellable? cancellable = null) throws IOError
-	{
-		target = null;
-		return true;
-	}
-
-	public override ssize_t read(uint8[] buffer, Cancellable? cancellable = null) throws IOError
-	{
-		return (ssize_t)target.read(buffer, 1);
-	}
-}
-
-public class OutputStreamFromFileStream
-	: OutputStream
-{
-	private unowned FileStream? target;
-
-	public OutputStreamFromFileStream(FileStream fs)
-	{
-		target = fs;
-	}
-
-	public override bool close(Cancellable? cancellable = null) throws IOError
-	{
-		target = null;
-		return true;
-	}
-
-	public override ssize_t write(uint8[] buffer, Cancellable? cancellable = null) throws IOError
-	{
-		return (ssize_t)target.write(buffer, 1);
-	}
-}
-
 class Vls.Server {
     Jsonrpc.Server server;
     MainLoop loop;
@@ -124,8 +80,13 @@ class Vls.Server {
         this.ctx = new Vls.Context ();
 
         this.server = new Jsonrpc.Server ();
-        var _stdin = new InputStreamFromFileStream(stdin);
-        var _stdout = new OutputStreamFromFileStream(stdout);
+    #if WINDOWS
+        var _stdin = new Win32InputStream(Win.GetFileHandle(new_stdin_fd), false);
+        var _stdout = new Win32OutputStream(Win.GetFileHandle(new_stdout_fd), false);
+    #else
+        var _stdin = new UnixInputStream(new_stdin_fd, false);
+        var _stdout = new UnixOutputStream(new_stdout_fd, false);
+    #endif
         server.accept_io_stream (new SimpleIOStream (_stdin, _stdout));
 
         notif_handlers = new HashTable <string, NotificationHandler> (str_hash, str_equal);
