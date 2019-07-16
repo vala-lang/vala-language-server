@@ -1,7 +1,8 @@
 # Vala Language Server
 
 ### Dependencies
-`jsonrpc-glib-1.0`
+- `jsonrpc-glib-1.0`
+- `libvala-0.40-dev`
 
 ### Setup
 ```
