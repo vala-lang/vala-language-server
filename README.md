@@ -2,7 +2,7 @@
 
 ### Dependencies
 - `jsonrpc-glib-1.0`
-- `libvala-0.40-dev`
+- `libvala-dev`
 
 ### Setup
 ```
