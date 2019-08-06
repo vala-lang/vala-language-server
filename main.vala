@@ -7,6 +7,22 @@ struct CompileCommand {
     string command;
 }
 
+class Meson.TargetSource : Object {
+    public string language { get; set; }
+    public string[] compiler { get; set; }
+    public string[] parameters { get; set; }
+    public string[] sources { get; set; }
+}
+
+// currently unused
+class Meson.Target : Object {
+    public string name { get; set; }
+    public string id { get; set; }
+    public string defined_in { get; set; }
+    public string[] filename { get; set; }
+    public bool build_by_default { get; set; }
+}
+
 class Vls.TextDocument : Object {
     private Context ctx;
     private string filename;
@@ -207,115 +223,52 @@ class Vls.Server {
             return;
         }
 
-        // for every target, get all files
-        var node = targets_parser.get_root ().get_array ();
-        node.foreach_element ((arr, index, node) => {
-            var o = node.get_object ();
-            string id = o.get_string_member ("id");
-            string fname = o.get_string_member ("filename");
-            string[] args = {"meson", "introspect", builddir, "--target-files", id};
-
-            if (fname.has_suffix (".vapi")) {
-                if (!Path.is_absolute (fname)) {
-                    fname = Path.build_filename (builddir, fname);
-                }
-                try {
-                    var doc = new TextDocument (ctx, fname);
-                    ctx.add_source_file (doc);
-                    debug (@"Adding text document: $fname");
-                } catch (Error e) {
-                    debug (@"Failed to create text document: $(e.message)");
-                }
-            }
-            
-            try {
-                Process.spawn_sync (rootdir, 
-                    args, spawn_env,
-                    SpawnFlags.SEARCH_PATH,
-                    null,
-                    out proc_stdout,
-                    out proc_stderr,
-                    out proc_status
-                );
-            } catch (SpawnError e) {
-                debug (@"Failed to analyze target $id: $(e.message)");
+        // for every target, get all target_files
+        targets_parser.get_root ().get_array().foreach_element ((_1, _2, node) => {
+            var target_obj = node.get_object ();
+            Json.Node target_sources_array = target_obj.get_member ("target_sources");
+            if (target_sources_array == null)
                 return;
-            }
+            target_sources_array.get_array ().foreach_element ((_1, _2, node) => {
+                var target_source = Json.gobject_deserialize (typeof (Meson.TargetSource), node) as Meson.TargetSource;
+                if (target_source.language != "vala") return;
 
-            // proc_stdout is a collection of files
-            // add all source files to the project
-            string files_json = proc_stdout;
-            var files_parser = new Json.Parser.immutable_new ();
-            try {
-                files_parser.load_from_data (files_json);
-            } catch (Error e) {
-                debug (@"failed to get target files for $id (ID): $(e.message)");
-                return;
-            }
-            var fnode = files_parser.get_root ().get_array ();
-            fnode.foreach_element ((arr, index, node) => {
-                var filename = node.get_string ();
-                if (!Path.is_absolute (filename)) {
-                    filename = Path.build_filename (rootdir, filename);
+                // get all packages
+                for (int i=0; i<target_source.parameters.length; i++) {
+                    string param = target_source.parameters[i];
+                    if (param.index_of ("--pkg") == 0) {
+                        if (param == "--pkg") {
+                            if (i+1 < target_source.parameters.length) {
+                                // the next argument is the package name
+                                ctx.add_package (target_source.parameters[i+1]);
+                                i++;
+                            }
+                        } else {
+                            int idx = param.index_of ("=");
+                            if (idx != -1) {
+                                // --pkg={package}
+                                ctx.add_package (param.substring (idx + 1));
+                            }
+                        }
+                    }
                 }
-                if (is_source_file (filename)) {
+
+                // get all source files
+                foreach (string source in target_source.sources) {
+                    if (!Path.is_absolute (source))
+                        source = Path.build_filename (builddir, source);
                     try {
-                        var doc = new TextDocument (ctx, filename);
-                        ctx.add_source_file (doc);
-                        debug (@"Adding text document: $filename");
+                        ctx.add_source_file (new TextDocument (ctx, source));
+                        debug (@"Adding text document: $source");
                     } catch (Error e) {
                         debug (@"Failed to create text document: $(e.message)");
                     }
-                } else if (is_c_source_file (filename)) {
-                    try {
-                        ctx.add_c_source_file (Filename.to_uri (filename));
-                        debug (@"Adding C source file: $filename");
-                    } catch (Error e) {
-                        debug (@"Failed to add C source file: $(e.message)");
-                    }
-                } else {
-                    debug (@"Unknown file type: $filename");
                 }
             });
         });
-
-        // get all dependencies
-        spawn_args = {"meson", "introspect", builddir, "--dependencies"};
-        try {
-            Process.spawn_sync (rootdir, 
-                spawn_args, spawn_env,
-                SpawnFlags.SEARCH_PATH,
-                null,
-                out proc_stdout,
-                out proc_stderr,
-                out proc_status
-            );
-        } catch (SpawnError e) {
-            showMessage (client, e.message, MessageType.Error);
-            debug (@"failed to spawn process: $(e.message)");
-            return;
-        }
-
-        // we should have a list of dependencies in JSON format
-        string deps_json = proc_stdout;
-        var deps_parser = new Json.Parser.immutable_new ();
-        try {
-            deps_parser.load_from_data (deps_json);
-        } catch (Error e) {
-            debug (@"failed to load dependencies for build dir $(builddir): $(e.message)");
-            return;
-        }
-
-        var deps_node = deps_parser.get_root ().get_array ();
-        deps_node.foreach_element ((arr, index, node) => {
-            var o = node.get_object ();
-            var name = o.get_string_member ("name");
-            ctx.add_package (name);
-            debug (@"adding package $name");
-        });
     }
 
-    void cc_analyze (string root_dir) {
+    bool cc_analyze (string root_dir) {
         debug ("looking for compile_commands.json in %s", root_dir);
         string ccjson = findCompileCommands (root_dir);
         if (ccjson != null) {
@@ -339,8 +292,10 @@ class Vls.Server {
                 });
             } catch (Error e) {
                 debug ("failed to parse %s: %s", ccjson, e.message);
+                return false;
             }
-        }
+        } else
+            return false;
 
         // analyze compile_commands.json
         foreach (string filename in ctx.get_filenames ()) {
@@ -371,6 +326,8 @@ class Vls.Server {
                 }
             }
         }
+
+        return true;
     }
 
     void add_vala_files (File dir) throws Error {
@@ -413,6 +370,8 @@ class Vls.Server {
 
         string? root_path;
         dict.lookup ("rootPath", "s", out root_path);
+        if (root_path != null)
+            debug (@"Root path is $root_path");
 
         string? meson = findFile (root_path, "meson.build");
         if (meson != null) {
@@ -431,14 +390,13 @@ class Vls.Server {
                 debug ("Found meson.build but not build.ninja: %s", meson);
             }
         } else {
-            /* if this isn't a Meson project, we should 
-             * just take every single file
-             */
-            debug ("No meson project found. Adding all Vala files in %s", root_path);
-            default_analyze_build_dir (client, root_path);
+            // this isn't a Meson project
+            // 1. but do we have compiler_commands.json?
+            if (!cc_analyze (root_path)) {
+                debug ("No meson project and compile_commands found. Adding all Vala files in %s", root_path);
+                default_analyze_build_dir (client, root_path);
+            }
         }
-
-        cc_analyze (root_path);
 
         // compile everything ahead of time
         if (ctx.dirty) {
@@ -457,6 +415,7 @@ class Vls.Server {
         }
     }
 
+    // BFS for file
     string? findFile (string dirname, string target) {
         Dir dir = null;
         try {
@@ -467,16 +426,20 @@ class Vls.Server {
         }
 
         string name;
+        var dirs_to_search = new GLib.List<string>();
         while ((name = dir.read_name ()) != null) {
             string path = Path.build_filename (dirname, name);
             if (name == target)
                 return path;
 
-            if (FileUtils.test (path, FileTest.IS_DIR)) {
-                string r = findFile (path, target);
-                if (r != null)
-                    return r;
-            }
+            if (FileUtils.test (path, FileTest.IS_DIR))
+                dirs_to_search.append (path);
+        }
+
+        foreach (string path in dirs_to_search) {
+            string r = findFile(path, target);
+            if (r != null)
+                return r;
         }
         return null;
     }
