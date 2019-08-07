@@ -1,5 +1,19 @@
 # Vala Language Server
 
+### Features
+- [x] diagnostics
+- [ ] code completion (in progress)
+- [ ] document symbol outline (in progress)
+- [x] goto definition
+- [ ] symbol references
+- [ ] goto implementation
+- [ ] hover
+
+#### build systems / environments:
+- [x] meson
+- [ ] cmake
+- [x] `compiler_commands.json`
+
 ### Dependencies
 - `jsonrpc-glib-1.0`
 - `libvala-dev`
@@ -26,10 +40,7 @@ if executable('vala-language-server')
 endif
 ```
 
-### libvala docs
-https://benwaffle.github.io/vala-language-server/index.html
-
-### Workflow
+#### With VSCode
 - Clone this repo: https://github.com/benwaffle/vala-code
 - Check out the `language-server` branch
 - Run `npm install`
@@ -40,3 +51,14 @@ https://benwaffle.github.io/vala-language-server/index.html
 - `meson build`
 - `ninja -C build`
 - Hit F5 in VS Code to run a new instance with the VLS
+
+#### With GNOME Builder (experimental)
+- In progress. See [this issue](#12)
+- if you really want to try it out:
+
+1. open a Vala project in GNOME Builder
+2. make sure Vala plugin is installed and enabled, and Vala Pack is disabled
+3. open a file and run `kill <pidof vala-language-server>`. The server should restart and from then on you should be able to type and get diagnostics.
+
+### libvala docs
+https://benwaffle.github.io/vala-language-server/index.html
