@@ -93,13 +93,20 @@ class Vls.Server {
         this.ctx = new Vls.Context ();
 
         this.server = new Jsonrpc.Server ();
+
+        // hack to prevent other things from corrupting JSON-RPC pipe:
+        // create a new handle to stdout, and close the old one (or move it to stderr)
+        var new_stdout_fd = Posix.dup(Posix.STDOUT_FILENO);
+        Posix.close(Posix.STDOUT_FILENO);
+        Posix.dup2(logfs != null ? logfs.fileno() : Posix.STDERR_FILENO, Posix.STDOUT_FILENO);
+
         var stdin = new UnixInputStream (Posix.STDIN_FILENO, false);
-        var stdout = new UnixOutputStream (Posix.STDOUT_FILENO, false);
+        var stdout = new UnixOutputStream (new_stdout_fd, false);
 
         // set nonblocking
         try {
             if (!Unix.set_fd_nonblocking (Posix.STDIN_FILENO, true)
-             || !Unix.set_fd_nonblocking (Posix.STDOUT_FILENO, true))
+             || !Unix.set_fd_nonblocking (new_stdout_fd, true))
              error ("could not set pipes to nonblocking.\n");
         } catch (Error e) {
             debug ("failed to set FDs to nonblocking");
