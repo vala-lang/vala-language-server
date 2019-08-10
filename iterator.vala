@@ -685,7 +685,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
     public override void visit_signal (Vala.Signal sig) {
         if (sig.source_reference.file == file)
             results[new Range.from_sourceref (sig.source_reference)] 
-                = new Result(Function, sig, containers.is_empty ? null : containers.peek_head ());
+                = new Result(Event, sig, containers.is_empty ? null : containers.peek_head ());
         sig.accept_children (this);
     }
 
@@ -702,7 +702,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
     }
 
     public override void visit_struct (Vala.Struct st) {
-        var result = new Result(Class, st, containers.is_empty ? null : containers.peek_head ());
+        var result = new Result(Struct, st, containers.is_empty ? null : containers.peek_head ());
         containers.offer_head (result);
         if (st.source_reference.file == file)
             results[new Range.from_sourceref (st.source_reference)] = result;
