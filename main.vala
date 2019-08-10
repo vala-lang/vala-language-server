@@ -611,87 +611,85 @@ class Vls.Server {
         foreach (var document in docs) {
             var source = document.file;
             string uri = document.uri;
-            if (ctx.report.get_errors () + ctx.report.get_warnings () > 0) {
-                var array = new Json.Array ();
+            var array = new Json.Array ();
 
-                ctx.report.errorlist.foreach (err => {
-                    if (err.loc != null) {
-                        if (err.loc.file != source)
-                            return;
+            ctx.report.errorlist.foreach (err => {
+                if (err.loc != null) {
+                    if (err.loc.file != source)
+                        return;
 
-                        var diag = new Diagnostic () {
-                            range = new Range () {
-                                start = new Position () {
-                                    line = err.loc.begin.line - 1,
-                                    character = err.loc.begin.column - 1
-                                },
-                                end = new Position () {
-                                    line = err.loc.end.line - 1,
-                                    character = err.loc.end.column
-                                }
+                    var diag = new Diagnostic () {
+                        range = new Range () {
+                            start = new Position () {
+                                line = err.loc.begin.line - 1,
+                                character = err.loc.begin.column - 1
                             },
-                            severity = DiagnosticSeverity.Error,
-                            message = err.message
-                        };
+                            end = new Position () {
+                                line = err.loc.end.line - 1,
+                                character = err.loc.end.column
+                            }
+                        },
+                        severity = DiagnosticSeverity.Error,
+                        message = err.message
+                    };
 
-                        var node = Json.gobject_serialize (diag);
-                        array.add_element (node);
-                    } else
-                        array.add_element (Json.gobject_serialize (new Diagnostic() {
-                            severity = DiagnosticSeverity.Error,
-                            message = err.message
-                        }));
-                });
+                    var node = Json.gobject_serialize (diag);
+                    array.add_element (node);
+                } else
+                    array.add_element (Json.gobject_serialize (new Diagnostic() {
+                        severity = DiagnosticSeverity.Error,
+                        message = err.message
+                    }));
+            });
 
-                ctx.report.warnlist.foreach (err => {
-                    if (err.loc != null) {
-                        if (err.loc.file != source)
-                            return;
+            ctx.report.warnlist.foreach (err => {
+                if (err.loc != null) {
+                    if (err.loc.file != source)
+                        return;
 
-                        var diag = new Diagnostic () {
-                            range = new Range () {
-                                start = new Position () {
-                                    line = err.loc.begin.line - 1,
-                                    character = err.loc.begin.column - 1
-                                },
-                                end = new Position () {
-                                    line = err.loc.end.line - 1,
-                                    character = err.loc.end.column
-                                }
+                    var diag = new Diagnostic () {
+                        range = new Range () {
+                            start = new Position () {
+                                line = err.loc.begin.line - 1,
+                                character = err.loc.begin.column - 1
                             },
-                            severity = DiagnosticSeverity.Warning,
-                            message = err.message
-                        };
+                            end = new Position () {
+                                line = err.loc.end.line - 1,
+                                character = err.loc.end.column
+                            }
+                        },
+                        severity = DiagnosticSeverity.Warning,
+                        message = err.message
+                    };
 
-                        var node = Json.gobject_serialize (diag);
-                        array.add_element (node);
-                    } else
-                        array.add_element (Json.gobject_serialize (new Diagnostic() {
-                            severity = DiagnosticSeverity.Warning,
-                            message = err.message
-                        }));
-                });
+                    var node = Json.gobject_serialize (diag);
+                    array.add_element (node);
+                } else
+                    array.add_element (Json.gobject_serialize (new Diagnostic() {
+                        severity = DiagnosticSeverity.Warning,
+                        message = err.message
+                    }));
+            });
 
-                Variant result;
-                try {
-                    result = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (array), null);
-                } catch (Error e) {
-                    debug (@"failed to create diagnostics: $(e.message)");
-                    continue;
-                }
-
-                try {
-                    client.send_notification ("textDocument/publishDiagnostics", buildDict(
-                        uri: new Variant.string (uri),
-                        diagnostics: result
-                    ));
-                } catch (Error e) {
-                    debug (@"publishDiagnostics: failed to notify client: $(e.message)");
-                    continue;
-                }
-
-                debug (@"textDocument/publishDiagnostics: $uri");
+            Variant result;
+            try {
+                result = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (array), null);
+            } catch (Error e) {
+                debug (@"failed to create diagnostics: $(e.message)");
+                continue;
             }
+
+            try {
+                client.send_notification ("textDocument/publishDiagnostics", buildDict(
+                    uri: new Variant.string (uri),
+                    diagnostics: result
+                ));
+            } catch (Error e) {
+                debug (@"publishDiagnostics: failed to notify client: $(e.message)");
+                continue;
+            }
+
+            debug (@"textDocument/publishDiagnostics: $uri");
         }
     }
 
