@@ -413,21 +413,25 @@ class Vls.FindSymbol : Vala.CodeVisitor {
 
 class Vls.ListSymbols : Vala.CodeVisitor {
     private Vala.SourceFile file;
+    private Gee.Deque<Result> containers;
     public Gee.TreeMap<Range, Result> results;
 
     public class Result {
         public SymbolKind symbol_kind { get; private set; }
         public Vala.Symbol symbol { get; private set; }
+        public Result? container { get; private set; }
 
-        public Result(SymbolKind symbol_kind, Vala.Symbol symbol) {
+        public Result(SymbolKind symbol_kind, Vala.Symbol symbol, Result? container) {
             this.symbol_kind = symbol_kind;
             this.symbol = symbol;
+            this.container = container;
         }
     }
 
     public ListSymbols (Vala.SourceFile file) {
         this.file = file;
         this.results = new Gee.TreeMap<Range, Result> ((r1, r2) => r1.start.compare(r2.start));
+        this.containers = new Gee.LinkedList<Result> ();
         this.visit_source_file (file);
     }
 
@@ -484,9 +488,12 @@ class Vls.ListSymbols : Vala.CodeVisitor {
     }
 
     public override void visit_class (Vala.Class cl) {
+        var result = new Result(Class, cl, containers.is_empty ? null : containers.peek_head ());
+        containers.offer_head (result);
         if (cl.source_reference.file == file)
-            results[new Range.from_sourceref (cl.source_reference)] = new Result(Class, cl);
+            results[new Range.from_sourceref (cl.source_reference)] = result;
         cl.accept_children (this);
+        containers.poll_head ();
     }
 
     public override void visit_conditional_expression (Vala.ConditionalExpression expr) {
@@ -495,13 +502,15 @@ class Vls.ListSymbols : Vala.CodeVisitor {
 
     public override void visit_constant (Vala.Constant c) {
         if (c.source_reference.file == file)
-            results[new Range.from_sourceref (c.source_reference)] = new Result(Constant, c);
+            results[new Range.from_sourceref (c.source_reference)] 
+                = new Result(Constant, c, containers.is_empty ? null : containers.peek_head ());
         c.accept_children (this);
     }
 
     public override void visit_constructor (Vala.Constructor c) {
         if (c.source_reference.file == file)
-            results[new Range.from_sourceref (c.source_reference)] = new Result(Constructor, c);
+            results[new Range.from_sourceref (c.source_reference)] 
+                = new Result(Constructor, c, containers.is_empty ? null : containers.peek_head ());
         c.accept_children (this);
     }
 
@@ -515,7 +524,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
             // When there is no explicit constructor, the constructor will be defined in the same
             // place as the class was defined. When that happens, we prefer the class definition.
             if (!results.has_key (range))
-                results[range] = new Result(Constructor, m);
+                results[range] = new Result(Constructor, m, containers.is_empty ? null : containers.peek_head ());
         }
         m.accept_children (this);
     }
@@ -525,7 +534,8 @@ class Vls.ListSymbols : Vala.CodeVisitor {
     }
 
     public override void visit_delegate (Vala.Delegate cb) {
-        results[new Range.from_sourceref (cb.source_reference)] = new Result(Interface, cb);
+        results[new Range.from_sourceref (cb.source_reference)] 
+            = new Result(Interface, cb, containers.is_empty ? null : containers.peek_head ());
         cb.accept_children (this);
     }
 
@@ -547,13 +557,15 @@ class Vls.ListSymbols : Vala.CodeVisitor {
 
     public override void visit_enum (Vala.Enum en) {
         if (en.source_reference.file == file)
-            results[new Range.from_sourceref (en.source_reference)] = new Result(Enum, en);
+            results[new Range.from_sourceref (en.source_reference)] 
+                = new Result(Enum, en, containers.is_empty ? null : containers.peek_head ());
         en.accept_children (this);
     }
 
     public override void visit_error_domain (Vala.ErrorDomain edomain) {
         if (edomain.source_reference.file == file)
-            results[new Range.from_sourceref (edomain.source_reference)] = new Result(Enum, edomain);
+            results[new Range.from_sourceref (edomain.source_reference)] 
+                = new Result(Enum, edomain, containers.is_empty ? null : containers.peek_head ());
         edomain.accept_children (this);
     }
 
@@ -563,7 +575,8 @@ class Vls.ListSymbols : Vala.CodeVisitor {
 
     public override void visit_field (Vala.Field f) {
         if (f.source_reference.file == file)
-            results[new Range.from_sourceref (f.source_reference)] = new Result(Field, f);
+            results[new Range.from_sourceref (f.source_reference)] 
+                = new Result(Field, f, containers.is_empty ? null : containers.peek_head ());
         f.accept_children (this);
     }
 
@@ -589,7 +602,8 @@ class Vls.ListSymbols : Vala.CodeVisitor {
 
     public override void visit_interface (Vala.Interface iface) {
         if (iface.source_reference.file == file)
-            results[new Range.from_sourceref (iface.source_reference)] = new Result(Interface, iface);
+            results[new Range.from_sourceref (iface.source_reference)] 
+                = new Result(Interface, iface, containers.is_empty ? null : containers.peek_head ());
         iface.accept_children (this);
     }
 
@@ -615,7 +629,8 @@ class Vls.ListSymbols : Vala.CodeVisitor {
 
     public override void visit_method (Vala.Method m) {
         if (m.source_reference.file == file)
-            results[new Range.from_sourceref (m.source_reference)] = new Result(Method, m);
+            results[new Range.from_sourceref (m.source_reference)] 
+                = new Result(Method, m, containers.is_empty ? null : containers.peek_head ());
         m.accept_children (this);
     }
 
@@ -624,9 +639,12 @@ class Vls.ListSymbols : Vala.CodeVisitor {
     }
 
     public override void visit_namespace (Vala.Namespace ns) {
+        var result = new Result(Namespace, ns, containers.is_empty ? null : containers.peek_head ());
+        containers.offer_head (result);
         if (ns.source_reference.file == file)
-            results[new Range.from_sourceref (ns.source_reference)] = new Result(Namespace, ns);
+            results[new Range.from_sourceref (ns.source_reference)] = result;
         ns.accept_children (this);
+        containers.poll_head ();
     }
 
     public override void visit_null_literal (Vala.NullLiteral lit) {
@@ -647,7 +665,8 @@ class Vls.ListSymbols : Vala.CodeVisitor {
 
     public override void visit_property (Vala.Property prop) {
         if (prop.source_reference.file == file)
-            results[new Range.from_sourceref (prop.source_reference)] = new Result(Property, prop);
+            results[new Range.from_sourceref (prop.source_reference)] 
+                = new Result(Property, prop, containers.is_empty ? null : containers.peek_head ());
         prop.accept_children (this);
     }
 
@@ -665,7 +684,8 @@ class Vls.ListSymbols : Vala.CodeVisitor {
 
     public override void visit_signal (Vala.Signal sig) {
         if (sig.source_reference.file == file)
-            results[new Range.from_sourceref (sig.source_reference)] = new Result(Function, sig);
+            results[new Range.from_sourceref (sig.source_reference)] 
+                = new Result(Function, sig, containers.is_empty ? null : containers.peek_head ());
         sig.accept_children (this);
     }
 
@@ -682,9 +702,12 @@ class Vls.ListSymbols : Vala.CodeVisitor {
     }
 
     public override void visit_struct (Vala.Struct st) {
+        var result = new Result(Class, st, containers.is_empty ? null : containers.peek_head ());
+        containers.offer_head (result);
         if (st.source_reference.file == file)
-            results[new Range.from_sourceref (st.source_reference)] = new Result(Class, st);
+            results[new Range.from_sourceref (st.source_reference)] = result;
         st.accept_children (this);
+        containers.poll_head ();
     }
 
     public override void visit_switch_label (Vala.SwitchLabel label) {

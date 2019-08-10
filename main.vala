@@ -816,7 +816,8 @@ class Vls.Server {
                 location = new LanguageServer.Location() {
                     uri = p.textDocument.uri,
                     range = range
-                }
+                },
+                containerName = result.container != null ? result.container.symbol.name : null
             }));
         }
 
