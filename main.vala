@@ -62,6 +62,7 @@ class Vls.Server {
     Context ctx;
     HashTable<string, NotificationHandler> notif_handlers;
     HashTable<string, CallHandler> call_handlers;
+    GLib.FileStream logfs;
 
     [CCode (has_target = false)]
     delegate void NotificationHandler (Vls.Server self, Jsonrpc.Client client, Variant @params);
@@ -70,10 +71,15 @@ class Vls.Server {
     delegate void CallHandler (Vls.Server self, Jsonrpc.Server server, Jsonrpc.Client client, string method, Variant id, Variant @params);
 
     private void log_handler (string? log_domain, LogLevelFlags log_levels, string message) {
-        stderr.printf ("%s: %s\n", log_domain == null ? "vls" : log_domain, message);
+        (logfs == null ? stderr : logfs).printf ("%s: %s\n", log_domain == null ? "vls" : log_domain, message);
     }
 
     public Server (MainLoop loop) {
+        // capture logging
+        logfs = FileStream.open (@"/tmp/vls-$((uint) Posix.getpid()).log", "w");
+        Log.set_handler (null, LogLevelFlags.LEVEL_MASK, log_handler);
+        Log.set_handler ("jsonrpc-server", LogLevelFlags.LEVEL_MASK, log_handler);
+
         this.loop = loop;
 
         this.cc = new HashTable<string, string> (str_hash, str_equal);
@@ -100,12 +106,6 @@ class Vls.Server {
             loop.quit ();
             return;
         }
-
-
-
-        // capture logging
-        Log.set_handler (null, LogLevelFlags.LEVEL_MASK, this.log_handler);
-        Log.set_handler ("jsonrpc-server", LogLevelFlags.LEVEL_MASK, this.log_handler);
 
         // disable SIGPIPE?
         // Process.@signal (ProcessSignal.PIPE, signum => {} );
