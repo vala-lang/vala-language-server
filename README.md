@@ -3,7 +3,7 @@
 ### Features
 - [x] diagnostics
 - [ ] code completion (in progress)
-- [ ] document symbol outline (in progress)
+- [x] document symbol outline
 - [x] goto definition
 - [ ] symbol references
 - [ ] goto implementation

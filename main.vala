@@ -39,7 +39,6 @@ class Vls.TextDocument : Object {
         this.version = version;
         this.ctx = ctx;
 
-
         var type = Vala.SourceFileType.NONE;
         if (uri.has_suffix (".vala") || uri.has_suffix (".gs"))
             type = Vala.SourceFileType.SOURCE;
@@ -143,6 +142,7 @@ class Vls.Server {
         call_handlers["textDocument/definition"] = this.textDocumentDefinition;
         notif_handlers["textDocument/didOpen"] = this.textDocumentDidOpen;
         notif_handlers["textDocument/didChange"] = this.textDocumentDidChange;
+        call_handlers["textDocument/documentSymbol"] = this.textDocumentDocumentSymbol;
 
         debug ("Finished constructing");
     }
@@ -403,7 +403,8 @@ class Vls.Server {
             client.reply (id, buildDict(
                 capabilities: buildDict (
                     textDocumentSync: new Variant.int16 (TextDocumentSyncKind.Full),
-                    definitionProvider: new Variant.boolean (true)
+                    definitionProvider: new Variant.boolean (true),
+                    documentSymbolProvider: new Variant.boolean (true)
                 )
             ));
         } catch (Error e) {
@@ -527,7 +528,7 @@ class Vls.Server {
             ctx.check ();
         }
 
-        publishDiagnostics (client, uri);
+        publishDiagnostics (client);
     }
 
     void textDocumentDidChange (Jsonrpc.Client client, Variant @params) {
@@ -783,6 +784,47 @@ class Vls.Server {
             }));
         } catch (Error e) {
             debug("[textDocument/definition] failed to reply to client: %s", e.message);
+        }
+    }
+
+    void textDocumentDocumentSymbol (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        var p = parse_variant<LanguageServer.DocumentSymbolParams> (@params);
+
+        if (ctx.dirty)
+            ctx.check ();
+
+        var sourcefile = ctx.get_source_file (p.textDocument.uri);
+        if (sourcefile == null) {
+            debug ("unknown file %s", p.textDocument.uri);
+            try {
+                client.reply (id, null);
+            } catch (Error e) {
+                debug("[textDocument/documentSymbol] failed to reply to client: %s", e.message);
+            }
+            return;
+        }
+
+        var array = new Json.Array ();
+        foreach (var entry in (new ListSymbols (sourcefile.file))) {
+            var range = entry.key;
+            var result = entry.value;
+
+            debug(@"found $(result.symbol.name)");
+            array.add_element (Json.gobject_serialize (new LanguageServer.SymbolInformation () {
+                name = result.symbol.name,
+                kind = result.symbol_kind,
+                location = new LanguageServer.Location() {
+                    uri = p.textDocument.uri,
+                    range = range
+                }
+            }));
+        }
+
+        try {
+            Variant result = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (array), null);
+            client.reply (id, result);
+        } catch (Error e) {
+            debug (@"[textDocument/documentSymbol] failed to reply to client: $(e.message)");
         }
     }
 

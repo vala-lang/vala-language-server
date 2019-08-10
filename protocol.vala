@@ -55,15 +55,29 @@ class LanguageServer.Position : Object {
 	 */
 	public uint character { get; set; default = -1; }
 
+        public int compare(Position other) {
+            return line > other.line ? 1 : 
+                (line == other.line ? 
+                    (character > other.character ? 1 : 
+                        (character == other.character ? 0 : -1)) : -1);
+        }
+
+        public string to_string() { return @"$line:$character"; }
+
 	public LanguageServer.Position to_libvala () {
 		return new Position () {
 			line = this.line + 1,
 			character = this.character
 		};
 	}
+
+        public Position.from_libvala (Vala.SourceLocation sloc) {
+            line = sloc.line - 1;
+            character = sloc.column;
+        }
 }
 
-class LanguageServer.Range : Object {
+class LanguageServer.Range : Object, Gee.Hashable<Range> {
 	/**
 	 * The range's start position.
 	 */
@@ -73,6 +87,20 @@ class LanguageServer.Range : Object {
 	 * The range's end position.
 	 */
 	public Position end { get; set; }
+
+        public string to_string() { return @"$start -> $end"; }
+
+        public Range.from_sourceref (Vala.SourceReference sref) {
+            this.start = new Position.from_libvala (sref.begin);
+            this.end = new Position.from_libvala (sref.end);
+        }
+
+        public uint hash() { 
+            debug ("computing hash");
+            return this.to_string().hash();
+        }
+
+        public bool equal_to(Range other) { return this.to_string() == other.to_string(); }
 }
 
 class LanguageServer.Diagnostic : Object {
@@ -145,4 +173,37 @@ class LanguageServer.TextDocumentPositionParams : Object {
 class LanguageServer.Location : Object {
 	public string uri { get; set; }
 	public Range range { get; set; }
+}
+
+class LanguageServer.DocumentSymbolParams: Object {
+    public TextDocumentIdentifier textDocument { get; set; }
+}
+
+class LanguageServer.SymbolInformation : Object {
+    public string name { get; set; }
+    public SymbolKind kind { get; set; }
+    public Location location { get; set; }
+    public string? containerName { get; set; }
+}
+
+[CCode (default_value = "LANGUAGE_SERVER_SYMBOL_KIND_Variable")]
+enum LanguageServer.SymbolKind {
+	File = 1,
+	Module = 2,
+	Namespace = 3,
+	Package = 4,
+	Class = 5,
+	Method = 6,
+	Property = 7,
+	Field = 8,
+	Constructor = 9,
+	Enum = 10,
+	Interface = 11,
+	Function = 12,
+	Variable = 13,
+	Constant = 14,
+	String = 15,
+	Number = 16,
+	Boolean = 17,
+	Array = 18,
 }
