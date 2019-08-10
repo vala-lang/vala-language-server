@@ -62,7 +62,6 @@ class Vls.Server {
     Context ctx;
     HashTable<string, NotificationHandler> notif_handlers;
     HashTable<string, CallHandler> call_handlers;
-    GLib.FileStream logfs;
 
     [CCode (has_target = false)]
     delegate void NotificationHandler (Vls.Server self, Jsonrpc.Client client, Variant @params);
@@ -71,12 +70,11 @@ class Vls.Server {
     delegate void CallHandler (Vls.Server self, Jsonrpc.Server server, Jsonrpc.Client client, string method, Variant id, Variant @params);
 
     private void log_handler (string? log_domain, LogLevelFlags log_levels, string message) {
-        (logfs == null ? stderr : logfs).printf ("%s: %s\n", log_domain == null ? "vls" : log_domain, message);
+        stderr.printf ("%s: %s\n", log_domain == null ? "vls" : log_domain, message);
     }
 
     public Server (MainLoop loop) {
         // capture logging
-        logfs = FileStream.open (@"/tmp/vls-$((uint) Posix.getpid()).log", "w");
         Log.set_handler (null, LogLevelFlags.LEVEL_MASK, log_handler);
         Log.set_handler ("jsonrpc-server", LogLevelFlags.LEVEL_MASK, log_handler);
 
@@ -98,7 +96,7 @@ class Vls.Server {
         // create a new handle to stdout, and close the old one (or move it to stderr)
         var new_stdout_fd = Posix.dup(Posix.STDOUT_FILENO);
         Posix.close(Posix.STDOUT_FILENO);
-        Posix.dup2(logfs != null ? logfs.fileno() : Posix.STDERR_FILENO, Posix.STDOUT_FILENO);
+        Posix.dup2(Posix.STDERR_FILENO, Posix.STDOUT_FILENO);
 
         var stdin = new UnixInputStream (Posix.STDIN_FILENO, false);
         var stdout = new UnixOutputStream (new_stdout_fd, false);
