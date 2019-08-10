@@ -31,7 +31,7 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         if (sr.begin.line != pos.line) {
             return false;
         }
-        if (sr.begin.column <= pos.character && pos.character <= sr.end.column) {
+        if (sr.begin.column - 1 <= pos.character && pos.character <= sr.end.column) {
             debug ("Got node: %s (%s) @ %s", node.type_name, node.to_string (), sr.to_string ());
             return true;
         } else {

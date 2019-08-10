@@ -739,9 +739,9 @@ class Vls.Server {
         if (best is Vala.Expression && !(best is Vala.Literal)) {
             var b = (Vala.Expression)best;
             debug ("best (%p) is a Expression", best);
-            if (b.symbol_reference != null) {
+            if (b.symbol_reference != null && b.symbol_reference.source_reference != null) {
                 best = b.symbol_reference;
-                debug ("best is now the symbol_referenece => %p", best);
+                debug ("best is now the symbol_referenece => %p (%s)", best, best.to_string ());
             }
         } else {
             try {
