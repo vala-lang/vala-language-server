@@ -35,5 +35,5 @@ src = files([
 executable('vala-language-server',
            dependencies: deps,
            sources: [src, conf_file],
-           vala_args: ['--pkg=posix', '--enable-gobject-tracing'],
+           vala_args: ['--pkg=posix', '--enable-gobject-tracing', '--fatal-warnings'],
            install: true)

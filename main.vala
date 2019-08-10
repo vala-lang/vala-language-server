@@ -1,12 +1,6 @@
 using LanguageServer;
 using Gee;
 
-struct CompileCommand {
-    string path;
-    string directory;
-    string command;
-}
-
 class Meson.TargetSource : Object {
     public string language { get; set; }
     public string[] compiler { get; set; }
@@ -65,7 +59,7 @@ class Vls.TextDocument : Object {
 class Vls.Server {
     Jsonrpc.Server server;
     MainLoop loop;
-    HashTable<string, CompileCommand?> cc;
+    HashTable<string, string> cc;
     Context ctx;
     HashTable<string, NotificationHandler> notif_handlers;
     HashTable<string, CallHandler> call_handlers;
@@ -83,7 +77,7 @@ class Vls.Server {
     public Server (MainLoop loop) {
         this.loop = loop;
 
-        this.cc = new HashTable<string, CompileCommand?> (str_hash, str_equal);
+        this.cc = new HashTable<string, string> (str_hash, str_equal);
 
         Timeout.add (10000, () => {
             debug (@"listening...");
@@ -98,9 +92,15 @@ class Vls.Server {
         var stdout = new UnixOutputStream (Posix.STDOUT_FILENO, false);
 
         // set nonblocking
-        if (!Unix.set_fd_nonblocking (Posix.STDIN_FILENO, true)
-         || !Unix.set_fd_nonblocking (Posix.STDOUT_FILENO, true))
-         error ("could not set pipes to nonblocking.\n");
+        try {
+            if (!Unix.set_fd_nonblocking (Posix.STDIN_FILENO, true)
+             || !Unix.set_fd_nonblocking (Posix.STDOUT_FILENO, true))
+             error ("could not set pipes to nonblocking.\n");
+        } catch (Error e) {
+            debug ("failed to set FDs to nonblocking");
+            loop.quit ();
+            return;
+        }
 
 
 
@@ -178,9 +178,9 @@ class Vls.Server {
             || filename.has_suffix (".gs");
     }
 
-    bool is_c_source_file (string filename) {
-        return filename.has_suffix (".c") || filename.has_suffix (".h");
-    }
+//    bool is_c_source_file (string filename) {
+//        return filename.has_suffix (".c") || filename.has_suffix (".h");
+//    }
 
     void meson_analyze_build_dir (Jsonrpc.Client client, string rootdir, string builddir) {
         string[] spawn_args = {"meson", "introspect", builddir, "--targets"};
@@ -284,11 +284,7 @@ class Vls.Server {
                     string path = File.new_for_path (Path.build_filename (dir, file)).get_path ();
                     string cmd = o.get_string_member ("command");
                     debug ("got args for %s", path);
-                    cc.insert (path, CompileCommand() {
-                        path = path,
-                        directory = dir,
-                        command = cmd
-                    });
+                    cc.insert (path, cmd);
                 });
             } catch (Error e) {
                 debug ("failed to parse %s: %s", ccjson, e.message);
@@ -300,10 +296,10 @@ class Vls.Server {
         // analyze compile_commands.json
         foreach (string filename in ctx.get_filenames ()) {
             debug ("analyzing args for %s", filename);
-            CompileCommand? command = cc[filename];
+            string command = cc[filename];
             if (command != null) {
                 MatchInfo minfo;
-                if (/--pkg[= ](\S+)/.match (command.command, 0, out minfo)) {
+                if (/--pkg[= ](\S+)/.match (command, 0, out minfo)) {
                     try {
                         do {
                             ctx.add_package (minfo.fetch (1));
@@ -314,7 +310,7 @@ class Vls.Server {
                     }
                 }
 
-                if (/--vapidir[= ](\S+)/.match (command.command, 0, out minfo)) {
+                if (/--vapidir[= ](\S+)/.match (command, 0, out minfo)) {
                     try {
                         do {
                             ctx.add_vapidir (minfo.fetch (1));
@@ -700,14 +696,22 @@ class Vls.Server {
         var sourcefile = ctx.get_source_file (p.textDocument.uri);
         if (sourcefile == null) {
             debug ("unknown file %s", p.textDocument.uri);
-            client.reply (id, null);
+            try {
+                client.reply (id, null);
+            } catch (Error e) {
+                debug("[textDocument/definition] failed to reply to client: %s", e.message);
+            }
             return;
         }
         var file = sourcefile.file;
         var fs = new FindSymbol (file, p.position.to_libvala ());
 
         if (fs.result.size == 0) {
-            client.reply (id, null);
+            try {
+                client.reply (id, null);
+            } catch (Error e) {
+                debug("[textDocument/definition] failed to reply to client: %s", e.message);
+            }
             return;
         }
 
@@ -739,7 +743,11 @@ class Vls.Server {
                 debug ("best is now the symbol_referenece => %p", best);
             }
         } else {
-            client.reply (id, null);
+            try {
+                client.reply (id, null);
+            } catch (Error e) {
+                debug("[textDocument/definition] failed to reply to client: %s", e.message);
+            }
             return;
         }
 
@@ -759,19 +767,23 @@ class Vls.Server {
         */
 
         debug (@"replying... $(best.source_reference.file.filename)");
-        client.reply (id, object_to_variant (new LanguageServer.Location () {
-            uri = "file://" + best.source_reference.file.filename,
-            range = new Range () {
-                start = new Position () {
-                    line = best.source_reference.begin.line - 1,
-                    character = best.source_reference.begin.column - 1
-                },
-                end = new Position () {
-                    line = best.source_reference.end.line - 1,
-                    character = best.source_reference.end.column
+        try {
+            client.reply (id, object_to_variant (new LanguageServer.Location () {
+                uri = "file://" + best.source_reference.file.filename,
+                range = new Range () {
+                    start = new Position () {
+                        line = best.source_reference.begin.line - 1,
+                        character = best.source_reference.begin.column - 1
+                    },
+                    end = new Position () {
+                        line = best.source_reference.end.line - 1,
+                        character = best.source_reference.end.column
+                    }
                 }
-            }
-        }));
+            }));
+        } catch (Error e) {
+            debug("[textDocument/definition] failed to reply to client: %s", e.message);
+        }
     }
 
     void shutdown (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {

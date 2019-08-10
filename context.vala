@@ -34,7 +34,7 @@ class Vls.Context {
                 string[] parts = version.split(".");
                 assert (parts.length == 3);
                 assert (parts[0] == "0");
-                var minor = int.parse (parts[1]);
+                // var minor = int.parse (parts[1]);
 
                 _ctx.report = new Reporter ();
                 _ctx.profile = Vala.Profile.GOBJECT;
@@ -94,20 +94,20 @@ class Vls.Context {
         _vapidirs = new HashSet<string> ();
     }
 
-    public void add_define (string define) {
-        if (_defines.add (define))
-            dirty = true;
-    }
+//    public void add_define (string define) {
+//        if (_defines.add (define))
+//            dirty = true;
+//    }
 
     public void add_package (string pkgname) {
         if (_packages.add (pkgname))
             dirty = true;
     }
 
-    public void remove_package (string pkgname) {
-        if (_packages.remove (pkgname))
-            dirty = true;
-    }
+//    public void remove_package (string pkgname) {
+//        if (_packages.remove (pkgname))
+//            dirty = true;
+//    }
 
     public void add_using (string using_directive) {
         if (_usings.add (using_directive))
@@ -135,22 +135,22 @@ class Vls.Context {
         return _sources.values;
     }
 
-    public void remove_source_file (string uri) {
-        if (_sources.unset (uri))
-            dirty = true;
-    }
-
-    public bool add_c_source_file (string uri) {
-        return _csources.add (uri);
-    }
-
-    public bool remove_c_source_file (string uri) {
-        return _csources.remove (uri);
-    }
-
-    public void clear_c_sources () {
-        _csources.clear ();
-    }
+//    public void remove_source_file (string uri) {
+//        if (_sources.unset (uri))
+//            dirty = true;
+//    }
+//
+//    public bool add_c_source_file (string uri) {
+//        return _csources.add (uri);
+//    }
+//
+//    public bool remove_c_source_file (string uri) {
+//        return _csources.remove (uri);
+//    }
+//
+//    public void clear_c_sources () {
+//        _csources.clear ();
+//    }
 
     public Collection<string> get_filenames () {
         var col = new HashSet<string> ();
