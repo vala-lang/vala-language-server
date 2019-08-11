@@ -62,6 +62,7 @@ class Vls.Server {
     Context ctx;
     HashTable<string, NotificationHandler> notif_handlers;
     HashTable<string, CallHandler> call_handlers;
+    InitializeParams init_params;
 
     [CCode (has_target = false)]
     delegate void NotificationHandler (Vls.Server self, Jsonrpc.Client client, Variant @params);
@@ -367,12 +368,10 @@ class Vls.Server {
     }
 
     void initialize (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var dict = new VariantDict (@params);
+        init_params = parse_variant<InitializeParams> (@params);
 
-        string? root_path;
-        dict.lookup ("rootPath", "s", out root_path);
-        if (root_path != null)
-            debug (@"Root path is $root_path");
+        string root_path = init_params.rootPath != null ? init_params.rootPath : init_params.rootUri;
+        debug (@"Root path is $root_path");
 
         string? meson = findFile (root_path, "meson.build");
         if (meson != null) {
@@ -808,20 +807,17 @@ class Vls.Server {
         }
 
         var array = new Json.Array ();
-        foreach (var entry in (new ListSymbols (sourcefile.file))) {
-            var range = entry.key;
-            var result = entry.value;
-
-            debug(@"found $(result.symbol.name)");
-            array.add_element (Json.gobject_serialize (new LanguageServer.SymbolInformation () {
-                name = result.symbol.name,
-                kind = result.symbol_kind,
-                location = new LanguageServer.Location() {
-                    uri = p.textDocument.uri,
-                    range = range
-                },
-                containerName = result.container != null ? result.container.symbol.name : null
-            }));
+        var syms = new ListSymbols (sourcefile.file);
+        if (init_params.capabilities.textDocument.documentSymbol.hierarchicalDocumentSymbolSupport)
+            foreach (var dsym in syms) {
+                debug(@"found $(dsym.name)");
+                array.add_element (Json.gobject_serialize (dsym));
+            }
+        else {
+            foreach (var dsym in syms.flattened ()) {
+                debug(@"found $(dsym.name)");
+                array.add_element (Json.gobject_serialize (new SymbolInformation.from_document_symbol (dsym, p.textDocument.uri)));
+            }
         }
 
         try {

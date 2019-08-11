@@ -56,9 +56,9 @@ class LanguageServer.Position : Object {
 	public uint character { get; set; default = -1; }
 
         public int compare(Position other) {
-            return line > other.line ? 1 : 
-                (line == other.line ? 
-                    (character > other.character ? 1 : 
+            return line > other.line ? 1 :
+                (line == other.line ?
+                    (character > other.character ? 1 :
                         (character == other.character ? 0 : -1)) : -1);
         }
 
@@ -96,7 +96,6 @@ class LanguageServer.Range : Object, Gee.Hashable<Range> {
         }
 
         public uint hash() { 
-            debug ("computing hash");
             return this.to_string().hash();
         }
 
@@ -179,11 +178,66 @@ class LanguageServer.DocumentSymbolParams: Object {
     public TextDocumentIdentifier textDocument { get; set; }
 }
 
+class LanguageServer.DocumentSymbol : Object, Json.Serializable {
+    public string name { get; set; }
+    public string? detail { get; set; }
+    public SymbolKind kind { get; set; }
+    public bool deprecated { get; set; }
+    public Range range { get; set; }
+    public Range selectionRange { get; set; }
+    public Gee.List<DocumentSymbol> children { get; private set; default = new Gee.LinkedList<DocumentSymbol> (); }
+
+    public DocumentSymbol.from_vala_symbol (Vala.Symbol sym, SymbolKind kind) {
+        this.name = sym.name;
+        this.kind = kind;
+        this.range = new Range.from_sourceref (sym.source_reference);
+        this.selectionRange = this.range;
+    }
+
+    public new void Json.Serializable.set_property (ParamSpec pspec, Value value) {
+        base.set_property (pspec.get_name (), value);
+    }
+
+    public new Value Json.Serializable.get_property (ParamSpec pspec) {
+        Value val = Value(pspec.value_type);
+        base.get_property (pspec.get_name (), ref val);
+        return val;
+    }
+
+    public unowned ParamSpec? find_property (string name) {
+        return this.get_class ().find_property (name);
+    }
+
+    public Json.Node serialize_property (string property_name, Value value, ParamSpec pspec) {
+        if (property_name != "children")
+            return default_serialize_property (property_name, value, pspec);
+        var node = new Json.Node (Json.NodeType.ARRAY);
+        node.init_array (new Json.Array ());
+        var array = node.get_array ();
+        foreach (var child in children)
+            array.add_element (Json.gobject_serialize (child));
+        return node;
+    }
+
+    public bool deserialize_property (string property_name, out Value value, ParamSpec pspec, Json.Node property_node) {
+        error ("deserialization not supported");
+    }
+}
+
 class LanguageServer.SymbolInformation : Object {
     public string name { get; set; }
     public SymbolKind kind { get; set; }
     public Location location { get; set; }
     public string? containerName { get; set; }
+
+    public SymbolInformation.from_document_symbol (DocumentSymbol dsym, string uri) {
+        this.name = dsym.name;
+        this.kind = dsym.kind;
+        this.location = new Location () {
+            uri = uri,
+            range = dsym.range
+        };
+    }
 }
 
 [CCode (default_value = "LANGUAGE_SERVER_SYMBOL_KIND_Variable")]
@@ -214,4 +268,22 @@ enum LanguageServer.SymbolKind {
 	Event = 24,
 	Operator = 25,
 	TypeParameter = 26
+}
+
+class LanguageServer.TextDocumentClientCapabilities : Object {
+    public class DocumentSymbolCapabilities : Object {
+        public bool hierarchicalDocumentSymbolSupport { get; set; }
+    }
+    public DocumentSymbolCapabilities documentSymbol { get; set; default = new DocumentSymbolCapabilities ();}
+}
+
+class LanguageServer.ClientCapabilities : Object {
+    public TextDocumentClientCapabilities textDocument { get; set; default = new TextDocumentClientCapabilities (); }
+}
+
+class LanguageServer.InitializeParams : Object {
+    public int processId { get; set; }
+    public string? rootPath { get; set; }
+    public string? rootUri { get; set; }
+    public ClientCapabilities capabilities { get; set; default = new ClientCapabilities (); }
 }
