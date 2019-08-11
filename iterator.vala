@@ -459,8 +459,12 @@ class Vls.ListSymbols : Vala.CodeVisitor {
             if (current_sym != null && (current_sym.kind == Class || current_sym.kind == Struct)) {
                 if (dsym.name == ".new")
                     dsym.name = current_sym.name;
-                else
-                    dsym.name = @"$(current_sym.name).$(dsym.name)";
+                else {
+                    if (dsym.name == null)
+                        dsym.name = @"$(current_sym.name) (construct block)";
+                    else
+                        dsym.name = @"$(current_sym.name).$(dsym.name)";
+                }
             }
         }
         
@@ -552,14 +556,20 @@ class Vls.ListSymbols : Vala.CodeVisitor {
 
     public override void visit_constant (Vala.Constant c) {
         if (c.source_reference != null && c.source_reference.file != file) return;
+        if (!containers.is_empty) {
+            var kind = containers.peek_head ().kind;
+            if (kind == Method || kind == Function || kind == Constructor) return;
+        }
         add_symbol (c, Constant);
         c.accept_children (this);
     }
 
     public override void visit_constructor (Vala.Constructor c) {
         if (c.source_reference != null && c.source_reference.file != file) return;
-        add_symbol (c, Constructor);
+        var dsym = add_symbol (c, Constructor);
+        containers.offer_head (dsym);
         c.accept_children (this);
+        containers.poll_head ();
     }
 
     public override void visit_continue_statement (Vala.ContinueStatement stmt) {
@@ -591,7 +601,11 @@ class Vls.ListSymbols : Vala.CodeVisitor {
 
     public override void visit_destructor (Vala.Destructor dtor) {
         if (dtor.source_reference != null && dtor.source_reference.file != file) return;
-        add_symbol (dtor, Method);
+        var dsym = add_symbol (dtor, Method);
+        if (!containers.is_empty) {
+            var csym = containers.peek_head ();
+            dsym.name = @"~$(csym.name)";
+        }
         dtor.accept_children (this);
     }
 
@@ -701,8 +715,14 @@ class Vls.ListSymbols : Vala.CodeVisitor {
 
     public override void visit_method (Vala.Method m) {
         if (m.source_reference != null && m.source_reference.file != file) return;
-        add_symbol (m, Method);
+        if (!containers.is_empty) {
+            var kind = containers.peek_head ().kind;
+            if (kind == Method || kind == Function || kind == Constructor) return;
+        }
+        var dsym = add_symbol (m, containers.is_empty ? SymbolKind.Function : SymbolKind.Method);
+        containers.offer_head (dsym);
         m.accept_children (this);
+        containers.poll_head ();
     }
 
     public override void visit_method_call (Vala.MethodCall expr) {
@@ -737,8 +757,10 @@ class Vls.ListSymbols : Vala.CodeVisitor {
 
     public override void visit_property (Vala.Property prop) {
         if (prop.source_reference != null && prop.source_reference.file != file) return;
-        add_symbol (prop, Property);
+        var dsym = add_symbol (prop, Property);
+        containers.offer_head (dsym);
         prop.accept_children (this);
+        containers.poll_head ();
     }
 
     public override void visit_real_literal (Vala.RealLiteral lit) {
