@@ -25,8 +25,8 @@ class Vls.TextDocument : Object {
     public string uri;
     public int version;
 
-    public TextDocument (Context ctx, 
-                         string filename, 
+    public TextDocument (Context ctx,
+                         string filename,
                          string? content = null,
                          int version = 0) throws ConvertError, FileError {
 
@@ -44,7 +44,6 @@ class Vls.TextDocument : Object {
             type = Vala.SourceFileType.SOURCE;
         else if (uri.has_suffix (".vapi"))
             type = Vala.SourceFileType.PACKAGE;
-
 
         file = new Vala.SourceFile (ctx.code_context, type, filename, content);
         if (type == Vala.SourceFileType.SOURCE) {
@@ -197,7 +196,7 @@ class Vls.Server {
 
         debug (@"analyzing build directory $rootdir ...");
         try {
-            Process.spawn_sync (rootdir, 
+            Process.spawn_sync (rootdir,
                 spawn_args, spawn_env,
                 SpawnFlags.SEARCH_PATH,
                 null,
@@ -212,8 +211,8 @@ class Vls.Server {
         }
 
         if (proc_status != 0) {
-            showMessage (client, 
-                @"Failed to analyze build dir: meson terminated with error code $proc_status. Output:\n $proc_stderr", 
+            showMessage (client,
+                @"Failed to analyze build dir: meson terminated with error code $proc_status. Output:\n $proc_stderr",
                 MessageType.Error);
             debug (@"failed to analyze build dir: meson terminated with error code $proc_status. Output:\n $proc_stderr");
             return;
@@ -272,6 +271,44 @@ class Vls.Server {
                 }
             });
         });
+    }
+
+    string? mesonConfigure (Jsonrpc.Client client, string mesonBuild) {
+        string configDir;
+        try {
+            configDir = DirUtils.make_tmp ("vls-meson-XXXXXX");
+        } catch (FileError e) {
+            debug (@"error: $(e.message)");
+            return null;
+        }
+
+        string[] spawn_args = {"meson", "setup", ".", Path.get_dirname (mesonBuild)};
+        string[]? spawn_env = null; // Environ.get ();
+        string proc_stdout;
+        string proc_stderr;
+        int proc_status;
+
+        debug (@"Running meson for $mesonBuild in dir $configDir");
+
+        try {
+            Process.spawn_sync (configDir, spawn_args, spawn_env, SpawnFlags.SEARCH_PATH, null,
+                                out proc_stdout, out proc_stderr, out proc_status);
+        } catch (SpawnError e) {
+            debug (@"error: $(e.message)");
+            return null;
+        }
+
+        if (proc_status != 0) {
+            showMessage (client,
+                @"Failed to set up build dir: meson terminated with error code $proc_status. Output:\n$proc_stdout\n$proc_stderr",
+                MessageType.Error);
+            debug (@"failed to set up build dir: meson terminated with error code $proc_status. Output:\n$proc_stdout\n$proc_stderr");
+            return null;
+        }
+
+        debug (@"meson exited with 0. stdout:\n$proc_stdout\n\nstderr:\n$proc_stderr");
+
+        return configDir;
     }
 
     bool cc_analyze (string root_dir) {
@@ -381,13 +418,17 @@ class Vls.Server {
                 // TODO: build again
                 // ninja = findFile (root_path, "build.ninja");
             }
-            
+
             // test again
             if (ninja != null) {
                 debug ("Found meson project: %s\nninja: %s", meson, ninja);
                 meson_analyze_build_dir (client, root_path, Path.get_dirname (ninja));
             } else {
                 debug ("Found meson.build but not build.ninja: %s", meson);
+                string? configDir = mesonConfigure (client, meson);
+                if (configDir != null) {
+                    meson_analyze_build_dir (client, root_path, configDir);
+                }
             }
         } else {
             // this isn't a Meson project
