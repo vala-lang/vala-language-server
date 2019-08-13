@@ -1,0 +1,14 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@master # check out code
+    - run: sudo apt install vala
+    - run: meson build
+    - run: ninja -C build
