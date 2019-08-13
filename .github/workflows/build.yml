@@ -9,6 +9,6 @@ jobs:
     
     steps:
     - uses: actions/checkout@master # check out code
-    - run: sudo apt install vala
+    - run: sudo apt-get update && sudo apt-get install vala
     - run: meson build
     - run: ninja -C build
