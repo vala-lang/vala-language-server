@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@master # check out code
     - run: sudo apt-get update
-    - run: sudo apt-get install python3-setuptools valac ninja
+    - run: sudo apt-get install python3-setuptools valac ninja-build
     - run: sudo pip3 install meson
     - run: meson build
     - run: ninja -C build
