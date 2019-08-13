@@ -9,6 +9,6 @@ jobs:
     
     steps:
     - uses: actions/checkout@master # check out code
-    - run: sudo apt-get update && sudo apt-get install valac
+    - run: sudo apt-get update && sudo apt-get install valac meson
     - run: meson build
     - run: ninja -C build
