@@ -741,7 +741,7 @@ class Vls.Server {
         if (sourcefile == null) {
             debug ("unknown file %s", p.textDocument.uri);
             try {
-                client.reply (id, null);
+                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
             } catch (Error e) {
                 debug("[textDocument/definition] failed to reply to client: %s", e.message);
             }
@@ -752,7 +752,7 @@ class Vls.Server {
 
         if (fs.result.size == 0) {
             try {
-                client.reply (id, null);
+                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
             } catch (Error e) {
                 debug("[textDocument/definition] failed to reply to client: %s", e.message);
             }
@@ -788,7 +788,7 @@ class Vls.Server {
             }
         } else {
             try {
-                client.reply (id, null);
+                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
             } catch (Error e) {
                 debug("[textDocument/definition] failed to reply to client: %s", e.message);
             }
@@ -805,7 +805,7 @@ class Vls.Server {
         }
         if (uri == null) {
             debug ("error: couldn't find source file for %s", best.source_reference.file.filename);
-            client.reply (id, null);
+            client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
             return;
         }
         */
@@ -840,7 +840,7 @@ class Vls.Server {
         if (sourcefile == null) {
             debug ("unknown file %s", p.textDocument.uri);
             try {
-                client.reply (id, null);
+                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
             } catch (Error e) {
                 debug("[textDocument/documentSymbol] failed to reply to client: %s", e.message);
             }
