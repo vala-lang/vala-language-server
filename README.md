@@ -53,7 +53,7 @@ endif
 - Hit F5 in VS Code to run a new instance with the VLS
 
 #### With GNOME Builder (experimental)
-- In progress. See [this issue](#12)
+- In progress. See [this issue](https://github.com/benwaffle/vala-language-server/issues/12)
 - if you really want to try it out:
 
 1. open a Vala project in GNOME Builder
