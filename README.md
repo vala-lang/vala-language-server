@@ -1,4 +1,4 @@
-# Vala Language Server [![Gitter](https://badges.gitter.im/vala-language-server/community.svg)](https://gitter.im/vala-language-server/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+# Vala Language Server [![Gitter](https://badges.gitter.im/vala-language-server/community.svg)](https://gitter.im/vala-language-server/community)
 
 ### Features
 - [x] diagnostics
