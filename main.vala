@@ -255,6 +255,19 @@ class Vls.Server {
                                 ctx.add_package (param.substring (idx + 1));
                             }
                         }
+                    } else if (param.index_of ("--vapidir") == 0) {
+                        if (param == "--vapidir") {
+                            if (i+1 < target_source.parameters.length) {
+                                ctx.add_vapidir (target_source.parameters[i+1]);
+                                i++;
+                            }
+                        } else {
+                            int idx = param.index_of ("=");
+                            if (idx != -1) {
+                                // --vapidir={vapidir}
+                                ctx.add_vapidir (param.substring (idx + 1));
+                            }
+                        }
                     }
                 }
 
