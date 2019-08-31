@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -181,8 +181,8 @@
         <img class="main_diagram" usemap="#Vala.Parser" alt="Object hierarchy for Parser" src="img/Vala.Parser.svg"/>
 
       <map id="Vala.Parser" name="Vala.Parser">
-<area shape="rect" id="node1" href="Vala.Parser.html" title="Vala.Parser" alt="" coords="27,101,146,149"/>
-<area shape="rect" id="node2" href="Vala.CodeVisitor.html" title="Vala.CodeVisitor" alt="" coords="5,5,168,53"/>
+<area shape="rect" id="node1" href="Vala.Parser.html" title="Vala.Parser" alt="" coords="27,101,132,149"/>
+<area shape="rect" id="node2" href="Vala.CodeVisitor.html" title="Vala.CodeVisitor" alt="" coords="5,5,153,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -207,7 +207,7 @@
         </ul>
         <h3 class="main_title">Constants:</h3>
         <ul class="navi_inline">
-          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.Parser.BUFFER_SIZE.html" class="constant">BUFFER_SIZE</a></b>
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.Parser.BUFFER_SIZE.html" class="constant">BUFFER_SIZE</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -221,20 +221,7 @@
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse.html" class="method">parse</a></b> (<span class="main_type"><a href="Vala.CodeContext.html" class="class">CodeContext</a></span> context)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Parses all .vala and .vapi source files in the specified code context 
-                and builds a code tree.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.visit_source_file.html" class="virtual_method">visit_source_file</a></b> (<span class="main_type"><a href="Vala.SourceFile.html" class="class">SourceFile</a></span> source_file)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Parser.next.html" class="method">next</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.prev.html" class="method">prev</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Parser.accept.html" class="method">accept</a></b> (<span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> type)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -242,31 +229,15 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Parser.accept.html" class="method">accept</a></b> (<span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> type)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Parser.expect.html" class="method">expect</a></b> (<span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> type) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.report_parse_error.html" class="method">report_parse_error</a></b> (<span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span> e)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.AssignmentOperator.html" class="enum">AssignmentOperator</a></span> <b><a href="Vala.Parser.get_assignment_operator.html" class="method">get_assignment_operator</a></b> (<span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> token_type)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Parser.expect.html" class="method">expect</a></b> (<span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> type) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> <b><a href="Vala.Parser.get_location.html" class="method">get_location</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.Parser.get_current_string.html" class="method">get_current_string</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.Parser.get_last_string.html" class="method">get_last_string</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span> <b><a href="Vala.Parser.get_src.html" class="method">get_src</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> begin)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.BinaryOperator.html" class="enum">BinaryOperator</a></span> <b><a href="Vala.Parser.get_binary_operator.html" class="method">get_binary_operator</a></b> (<span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> token_type)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -274,23 +245,208 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.Parser.get_current_string.html" class="method">get_current_string</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span> <b><a href="Vala.Parser.get_last_src.html" class="method">get_last_src</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.rollback.html" class="method">rollback</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> location)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.Parser.get_last_string.html" class="method">get_last_string</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.skip_identifier.html" class="method">skip_identifier</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> <b><a href="Vala.Parser.get_location.html" class="method">get_location</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.Parser.parse_identifier.html" class="method">parse_identifier</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span> <b><a href="Vala.Parser.get_src.html" class="method">get_src</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> begin)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_literal.html" class="method">parse_literal</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.UnaryOperator.html" class="enum">UnaryOperator</a></span> <b><a href="Vala.Parser.get_unary_operator.html" class="method">get_unary_operator</a></b> (<span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> token_type)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Parser.is_declaration_keyword.html" class="method">is_declaration_keyword</a></b> (<span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> type)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Parser.is_expression.html" class="method">is_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Parser.is_inner_array_type.html" class="method">is_inner_array_type</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Parser.is_lambda_expression.html" class="method">is_lambda_expression</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Parser.next.html" class="method">next</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse.html" class="method">parse</a></b> (<span class="main_type"><a href="Vala.CodeContext.html" class="class">CodeContext</a></span> context)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Parses all .vala and .vapi source files in the specified code context 
+                and builds a code tree.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.SymbolAccessibility.html" class="enum">SymbolAccessibility</a></span> <b><a href="Vala.Parser.parse_access_modifier.html" class="method">parse_access_modifier</a></b> (<span class="main_type"><a href="Vala.SymbolAccessibility.html" class="enum">SymbolAccessibility</a></span> default_access = <b><a href="Vala.SymbolAccessibility.PRIVATE.html" class="enumvalue">PRIVATE</a></b>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_additive_expression.html" class="method">parse_additive_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_and_expression.html" class="method">parse_and_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_argument.html" class="method">parse_argument</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span>&gt; <b><a href="Vala.Parser.parse_argument_list.html" class="method">parse_argument_list</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_array_creation_expression.html" class="method">parse_array_creation_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.Parser.parse_attribute_value.html" class="method">parse_attribute_value</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? <b><a href="Vala.Parser.parse_attributes.html" class="method">parse_attributes</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_base_access.html" class="method">parse_base_access</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Block.html" class="class">Block</a></span> <b><a href="Vala.Parser.parse_block.html" class="method">parse_block</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_break_statement.html" class="method">parse_break_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_catch_clauses.html" class="method">parse_catch_clauses</a></b> (<span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.CatchClause.html" class="class">CatchClause</a></span>&gt; catch_clauses) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_class_declaration.html" class="method">parse_class_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_coalescing_expression.html" class="method">parse_coalescing_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_conditional_and_expression.html" class="method">parse_conditional_and_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_conditional_expression.html" class="method">parse_conditional_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_conditional_or_expression.html" class="method">parse_conditional_or_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_constant_declaration.html" class="method">parse_constant_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_constructor_declaration.html" class="method">parse_constructor_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_continue_statement.html" class="method">parse_continue_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_creation_method_declaration.html" class="method">parse_creation_method_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_declaration.html" class="method">parse_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> root = <span class="main_literal">false</span>) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_declarations.html" class="method">parse_declarations</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> root = <span class="main_literal">false</span>) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_delegate_declaration.html" class="method">parse_delegate_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_delete_statement.html" class="method">parse_delete_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_destructor_declaration.html" class="method">parse_destructor_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_do_statement.html" class="method">parse_do_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_element_access.html" class="method">parse_element_access</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> begin, <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> inner) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Block.html" class="class">Block</a></span> <b><a href="Vala.Parser.parse_embedded_statement.html" class="method">parse_embedded_statement</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> statement_name, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> accept_empty_body = <span class="main_literal">true</span>) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_embedded_statement_without_block.html" class="method">parse_embedded_statement_without_block</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> statement_name, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> accept_empty_body) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_empty_statement.html" class="method">parse_empty_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_enum_declaration.html" class="method">parse_enum_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_equality_expression.html" class="method">parse_equality_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_errordomain_declaration.html" class="method">parse_errordomain_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_exclusive_or_expression.html" class="method">parse_exclusive_or_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_expression.html" class="method">parse_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span>&gt; <b><a href="Vala.Parser.parse_expression_list.html" class="method">parse_expression_list</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_expression_statement.html" class="method">parse_expression_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_field_declaration.html" class="method">parse_field_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -302,271 +458,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.skip_symbol_name.html" class="method">skip_symbol_name</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.UnresolvedSymbol.html" class="class">UnresolvedSymbol</a></span> <b><a href="Vala.Parser.parse_symbol_name.html" class="method">parse_symbol_name</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.skip_type.html" class="method">skip_type</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Parser.is_inner_array_type.html" class="method">is_inner_array_type</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span> <b><a href="Vala.Parser.parse_type.html" class="method">parse_type</a></b> (<span class="main_basic_type"><span class="struct">bool</span></span> owned_by_default, <span class="main_basic_type"><span class="struct">bool</span></span> can_weak_ref, <span class="main_basic_type"><span class="struct">bool</span></span> require_unowned = <span class="main_literal">false</span>) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>? <b><a href="Vala.Parser.parse_inline_array_type.html" class="method">parse_inline_array_type</a></b> (<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>? type) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span>&gt; <b><a href="Vala.Parser.parse_argument_list.html" class="method">parse_argument_list</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_argument.html" class="method">parse_argument</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_primary_expression.html" class="method">parse_primary_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_simple_name.html" class="method">parse_simple_name</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_tuple.html" class="method">parse_tuple</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_template.html" class="method">parse_template</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_regex_literal.html" class="method">parse_regex_literal</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_member_access.html" class="method">parse_member_access</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> begin, <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> inner) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_pointer_member_access.html" class="method">parse_pointer_member_access</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> begin, <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> inner) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_method_call.html" class="method">parse_method_call</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> begin, <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> inner) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_element_access.html" class="method">parse_element_access</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> begin, <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> inner) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span>&gt; <b><a href="Vala.Parser.parse_expression_list.html" class="method">parse_expression_list</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_this_access.html" class="method">parse_this_access</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_base_access.html" class="method">parse_base_access</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_post_increment_expression.html" class="method">parse_post_increment_expression</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> begin, <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> inner) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_post_decrement_expression.html" class="method">parse_post_decrement_expression</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> begin, <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> inner) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_object_or_array_creation_expression.html" class="method">parse_object_or_array_creation_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_object_creation_expression.html" class="method">parse_object_creation_expression</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> begin, <span class="main_type"><a href="Vala.MemberAccess.html" class="class">MemberAccess</a></span> member) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_array_creation_expression.html" class="method">parse_array_creation_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.MemberInitializer.html" class="class">MemberInitializer</a></span>&gt; <b><a href="Vala.Parser.parse_object_initializer.html" class="method">parse_object_initializer</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.MemberInitializer.html" class="class">MemberInitializer</a></span> <b><a href="Vala.Parser.parse_member_initializer.html" class="method">parse_member_initializer</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_yield_expression.html" class="method">parse_yield_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_sizeof_expression.html" class="method">parse_sizeof_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_typeof_expression.html" class="method">parse_typeof_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.UnaryOperator.html" class="enum">UnaryOperator</a></span> <b><a href="Vala.Parser.get_unary_operator.html" class="method">get_unary_operator</a></b> (<span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> token_type)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_unary_expression.html" class="method">parse_unary_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.BinaryOperator.html" class="enum">BinaryOperator</a></span> <b><a href="Vala.Parser.get_binary_operator.html" class="method">get_binary_operator</a></b> (<span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> token_type)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_multiplicative_expression.html" class="method">parse_multiplicative_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_additive_expression.html" class="method">parse_additive_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_shift_expression.html" class="method">parse_shift_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_relational_expression.html" class="method">parse_relational_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_equality_expression.html" class="method">parse_equality_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_and_expression.html" class="method">parse_and_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_exclusive_or_expression.html" class="method">parse_exclusive_or_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_inclusive_or_expression.html" class="method">parse_inclusive_or_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_in_expression.html" class="method">parse_in_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_conditional_and_expression.html" class="method">parse_conditional_and_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_conditional_or_expression.html" class="method">parse_conditional_or_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_coalescing_expression.html" class="method">parse_coalescing_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_conditional_expression.html" class="method">parse_conditional_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Parameter.html" class="class">Parameter</a></span> <b><a href="Vala.Parser.parse_lambda_parameter.html" class="method">parse_lambda_parameter</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_lambda_expression.html" class="method">parse_lambda_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.AssignmentOperator.html" class="enum">AssignmentOperator</a></span> <b><a href="Vala.Parser.get_assignment_operator.html" class="method">get_assignment_operator</a></b> (<span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> token_type)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_expression.html" class="method">parse_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_statements.html" class="method">parse_statements</a></b> (<span class="main_type"><a href="Vala.Block.html" class="class">Block</a></span> block) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Parser.is_expression.html" class="method">is_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Parser.is_lambda_expression.html" class="method">is_lambda_expression</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Block.html" class="class">Block</a></span> <b><a href="Vala.Parser.parse_embedded_statement.html" class="method">parse_embedded_statement</a></b> (<span class="main_basic_type"><span class="class">string</span></span> statement_name, <span class="main_basic_type"><span class="struct">bool</span></span> accept_empty_body = <span class="main_literal">true</span>) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_embedded_statement_without_block.html" class="method">parse_embedded_statement_without_block</a></b> (<span class="main_basic_type"><span class="class">string</span></span> statement_name, <span class="main_basic_type"><span class="struct">bool</span></span> accept_empty_body) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Block.html" class="class">Block</a></span> <b><a href="Vala.Parser.parse_block.html" class="method">parse_block</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_empty_statement.html" class="method">parse_empty_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_local_variable_declarations.html" class="method">parse_local_variable_declarations</a></b> (<span class="main_type"><a href="Vala.Block.html" class="class">Block</a></span> block) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.LocalVariable.html" class="class">LocalVariable</a></span> <b><a href="Vala.Parser.parse_local_variable.html" class="method">parse_local_variable</a></b> (<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>? variable_type) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_local_constant_declarations.html" class="method">parse_local_constant_declarations</a></b> (<span class="main_type"><a href="Vala.Block.html" class="class">Block</a></span> block) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Constant.html" class="class">Constant</a></span> <b><a href="Vala.Parser.parse_local_constant.html" class="method">parse_local_constant</a></b> (<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span> constant_type) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_expression_statement.html" class="method">parse_expression_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_statement_expression.html" class="method">parse_statement_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_if_statement.html" class="method">parse_if_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_switch_statement.html" class="method">parse_switch_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_while_statement.html" class="method">parse_while_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_do_statement.html" class="method">parse_do_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Block.html" class="class">Block</a></span> <b><a href="Vala.Parser.parse_finally_clause.html" class="method">parse_finally_clause</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -578,11 +470,143 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_break_statement.html" class="method">parse_break_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.Parser.parse_identifier.html" class="method">parse_identifier</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_continue_statement.html" class="method">parse_continue_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_if_statement.html" class="method">parse_if_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_in_expression.html" class="method">parse_in_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_inclusive_or_expression.html" class="method">parse_inclusive_or_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.InitializerList.html" class="class">InitializerList</a></span> <b><a href="Vala.Parser.parse_initializer.html" class="method">parse_initializer</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>? <b><a href="Vala.Parser.parse_inline_array_type.html" class="method">parse_inline_array_type</a></b> (<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>? type) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_interface_declaration.html" class="method">parse_interface_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_lambda_expression.html" class="method">parse_lambda_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Parameter.html" class="class">Parameter</a></span> <b><a href="Vala.Parser.parse_lambda_parameter.html" class="method">parse_lambda_parameter</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_literal.html" class="method">parse_literal</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Constant.html" class="class">Constant</a></span> <b><a href="Vala.Parser.parse_local_constant.html" class="method">parse_local_constant</a></b> (<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span> constant_type) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_local_constant_declarations.html" class="method">parse_local_constant_declarations</a></b> (<span class="main_type"><a href="Vala.Block.html" class="class">Block</a></span> block) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.LocalVariable.html" class="class">LocalVariable</a></span> <b><a href="Vala.Parser.parse_local_variable.html" class="method">parse_local_variable</a></b> (<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>? variable_type) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_local_variable_declarations.html" class="method">parse_local_variable_declarations</a></b> (<span class="main_type"><a href="Vala.Block.html" class="class">Block</a></span> block) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_lock_statement.html" class="method">parse_lock_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_main_block.html" class="method">parse_main_block</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_member_access.html" class="method">parse_member_access</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> begin, <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> inner) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Parser.ModifierFlags.html" class="enum">ModifierFlags</a></span> <b><a href="Vala.Parser.parse_member_declaration_modifiers.html" class="method">parse_member_declaration_modifiers</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.MemberInitializer.html" class="class">MemberInitializer</a></span> <b><a href="Vala.Parser.parse_member_initializer.html" class="method">parse_member_initializer</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.MemberAccess.html" class="class">MemberAccess</a></span> <b><a href="Vala.Parser.parse_member_name.html" class="method">parse_member_name</a></b> (<span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span>? base_expr = <span class="main_literal">null</span>) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_method_call.html" class="method">parse_method_call</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> begin, <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> inner) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_method_declaration.html" class="method">parse_method_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_multiplicative_expression.html" class="method">parse_multiplicative_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_namespace_declaration.html" class="method">parse_namespace_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_object_creation_expression.html" class="method">parse_object_creation_expression</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> begin, <span class="main_type"><a href="Vala.MemberAccess.html" class="class">MemberAccess</a></span> member) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.MemberInitializer.html" class="class">MemberInitializer</a></span>&gt; <b><a href="Vala.Parser.parse_object_initializer.html" class="method">parse_object_initializer</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_object_or_array_creation_expression.html" class="method">parse_object_or_array_creation_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Parameter.html" class="class">Parameter</a></span> <b><a href="Vala.Parser.parse_parameter.html" class="method">parse_parameter</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_pointer_member_access.html" class="method">parse_pointer_member_access</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> begin, <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> inner) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_post_decrement_expression.html" class="method">parse_post_decrement_expression</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> begin, <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> inner) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_post_increment_expression.html" class="method">parse_post_increment_expression</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> begin, <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> inner) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_primary_expression.html" class="method">parse_primary_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_property_declaration.html" class="method">parse_property_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_regex_literal.html" class="method">parse_regex_literal</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_relational_expression.html" class="method">parse_relational_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -590,7 +614,47 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_yield_statement.html" class="method">parse_yield_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_shift_expression.html" class="method">parse_shift_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_signal_declaration.html" class="method">parse_signal_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_simple_name.html" class="method">parse_simple_name</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_sizeof_expression.html" class="method">parse_sizeof_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_statement_expression.html" class="method">parse_statement_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_statements.html" class="method">parse_statements</a></b> (<span class="main_type"><a href="Vala.Block.html" class="class">Block</a></span> block) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_struct_declaration.html" class="method">parse_struct_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_switch_statement.html" class="method">parse_switch_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.UnresolvedSymbol.html" class="class">UnresolvedSymbol</a></span> <b><a href="Vala.Parser.parse_symbol_name.html" class="method">parse_symbol_name</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_template.html" class="method">parse_template</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_this_access.html" class="method">parse_this_access</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -602,115 +666,15 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_catch_clauses.html" class="method">parse_catch_clauses</a></b> (<span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.CatchClause.html" class="class">CatchClause</a></span>&gt; catch_clauses) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_tuple.html" class="method">parse_tuple</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Block.html" class="class">Block</a></span> <b><a href="Vala.Parser.parse_finally_clause.html" class="method">parse_finally_clause</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span> <b><a href="Vala.Parser.parse_type.html" class="method">parse_type</a></b> (<span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> owned_by_default, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> can_weak_ref, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> require_unowned = <span class="main_literal">false</span>) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_lock_statement.html" class="method">parse_lock_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_unlock_statement.html" class="method">parse_unlock_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_delete_statement.html" class="method">parse_delete_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.Parser.parse_attribute_value.html" class="method">parse_attribute_value</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? <b><a href="Vala.Parser.parse_attributes.html" class="method">parse_attributes</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.set_attributes.html" class="method">set_attributes</a></b> (<span class="main_type"><a href="Vala.CodeNode.html" class="abstract_class">CodeNode</a></span> node, <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attributes)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_main_block.html" class="method">parse_main_block</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_declaration.html" class="method">parse_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_basic_type"><span class="struct">bool</span></span> root = <span class="main_literal">false</span>) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_declarations.html" class="method">parse_declarations</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_basic_type"><span class="struct">bool</span></span> root = <span class="main_literal">false</span>) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Parser.RecoveryState.html" class="enum">RecoveryState</a></span> <b><a href="Vala.Parser.recover.html" class="method">recover</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_namespace_declaration.html" class="method">parse_namespace_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_using_directives.html" class="method">parse_using_directives</a></b> (<span class="main_type"><a href="Vala.Namespace.html" class="class">Namespace</a></span> ns) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_class_declaration.html" class="method">parse_class_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_constant_declaration.html" class="method">parse_constant_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_field_declaration.html" class="method">parse_field_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.InitializerList.html" class="class">InitializerList</a></span> <b><a href="Vala.Parser.parse_initializer.html" class="method">parse_initializer</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_method_declaration.html" class="method">parse_method_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_property_declaration.html" class="method">parse_property_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_signal_declaration.html" class="method">parse_signal_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_constructor_declaration.html" class="method">parse_constructor_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_destructor_declaration.html" class="method">parse_destructor_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_struct_declaration.html" class="method">parse_struct_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_interface_declaration.html" class="method">parse_interface_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_enum_declaration.html" class="method">parse_enum_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_errordomain_declaration.html" class="method">parse_errordomain_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.SymbolAccessibility.html" class="enum">SymbolAccessibility</a></span> <b><a href="Vala.Parser.parse_access_modifier.html" class="method">parse_access_modifier</a></b> (<span class="main_type"><a href="Vala.SymbolAccessibility.html" class="enum">SymbolAccessibility</a></span> default_access = <b><a href="Vala.SymbolAccessibility.PRIVATE.html" class="enumvalue">PRIVATE</a></b>)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>&gt;? <b><a href="Vala.Parser.parse_type_argument_list.html" class="method">parse_type_argument_list</a></b> (<span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> maybe_expression) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -718,23 +682,67 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Parser.ModifierFlags.html" class="enum">ModifierFlags</a></span> <b><a href="Vala.Parser.parse_member_declaration_modifiers.html" class="method">parse_member_declaration_modifiers</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.TypeParameter.html" class="class">TypeParameter</a></span>&gt; <b><a href="Vala.Parser.parse_type_parameter_list.html" class="method">parse_type_parameter_list</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Parameter.html" class="class">Parameter</a></span> <b><a href="Vala.Parser.parse_parameter.html" class="method">parse_parameter</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_typeof_expression.html" class="method">parse_typeof_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_creation_method_declaration.html" class="method">parse_creation_method_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_unary_expression.html" class="method">parse_unary_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_delegate_declaration.html" class="method">parse_delegate_declaration</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span> parent, <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attrs) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_unlock_statement.html" class="method">parse_unlock_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.TypeParameter.html" class="class">TypeParameter</a></span>&gt; <b><a href="Vala.Parser.parse_type_parameter_list.html" class="method">parse_type_parameter_list</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.parse_using_directives.html" class="method">parse_using_directives</a></b> (<span class="main_type"><a href="Vala.Namespace.html" class="class">Namespace</a></span> ns) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_while_statement.html" class="method">parse_while_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> <b><a href="Vala.Parser.parse_yield_expression.html" class="method">parse_yield_expression</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Statement.html" class="interface">Statement</a></span> <b><a href="Vala.Parser.parse_yield_statement.html" class="method">parse_yield_statement</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.prev.html" class="method">prev</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Parser.RecoveryState.html" class="enum">RecoveryState</a></span> <b><a href="Vala.Parser.recover.html" class="method">recover</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.report_parse_error.html" class="method">report_parse_error</a></b> (<span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span> e)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.rollback.html" class="method">rollback</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> location)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.set_attributes.html" class="method">set_attributes</a></b> (<span class="main_type"><a href="Vala.CodeNode.html" class="abstract_class">CodeNode</a></span> node, <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt;? attributes)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.skip_identifier.html" class="method">skip_identifier</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.skip_symbol_name.html" class="method">skip_symbol_name</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.skip_type.html" class="method">skip_type</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -742,38 +750,14 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>&gt;? <b><a href="Vala.Parser.parse_type_argument_list.html" class="method">parse_type_argument_list</a></b> (<span class="main_basic_type"><span class="struct">bool</span></span> maybe_expression) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.MemberAccess.html" class="class">MemberAccess</a></span> <b><a href="Vala.Parser.parse_member_name.html" class="method">parse_member_name</a></b> (<span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span>? base_expr = <span class="main_literal">null</span>) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Parser.is_declaration_keyword.html" class="method">is_declaration_keyword</a></b> (<span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> type)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.visit_source_file.html" class="virtual_method">visit_source_file</a></b> (<span class="main_type"><a href="Vala.SourceFile.html" class="class">SourceFile</a></span> source_file)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Scanner.html" class="class">Scanner</a></span> <b><a href="Vala.Parser.scanner.html" class="field">scanner</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.CodeContext.html" class="class">CodeContext</a></span> <b><a href="Vala.Parser.context.html" class="field">context</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Parser.TokenInfo.html" class="struct">TokenInfo</a></span>[] <b><a href="Vala.Parser.tokens.html" class="field">tokens</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.Parser.index.html" class="field">index</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.Parser.size.html" class="field">size</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.TypeParameter.html" class="class">TypeParameter</a></span>&gt; <b><a href="Vala.Parser._empty_type_parameter_list.html" class="field">_empty_type_parameter_list</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -781,113 +765,129 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.TypeParameter.html" class="class">TypeParameter</a></span>&gt; <b><a href="Vala.Parser._empty_type_parameter_list.html" class="field">_empty_type_parameter_list</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.CodeContext.html" class="class">CodeContext</a></span> <b><a href="Vala.Parser.context.html" class="field">context</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.Parser.index.html" class="field">index</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Scanner.html" class="class">Scanner</a></span> <b><a href="Vala.Parser.scanner.html" class="field">scanner</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.Parser.size.html" class="field">size</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Parser.TokenInfo.html" class="struct">TokenInfo</a></span>[] <b><a href="Vala.Parser.tokens.html" class="field">tokens</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-175')">All known members inherited from class Vala.CodeVisitor</div>
-          <div class="content" id="box-content-175">
+          <div class="headline" onclick="toggle_box (this, 'box-content-181')">All known members inherited from class Vala.CodeVisitor</div>
+          <div class="content" id="box-content-181">
             <div class="column">
               <ul class="navi_inline">
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_source_file.html">visit_source_file</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_namespace.html">visit_namespace</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_class.html">visit_class</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_struct.html">visit_struct</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_interface.html">visit_interface</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_enum.html">visit_enum</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_enum_value.html">visit_enum_value</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_error_domain.html">visit_error_domain</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_error_code.html">visit_error_code</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_delegate.html">visit_delegate</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_constant.html">visit_constant</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_field.html">visit_field</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_method.html">visit_method</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_creation_method.html">visit_creation_method</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_formal_parameter.html">visit_formal_parameter</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_property.html">visit_property</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_property_accessor.html">visit_property_accessor</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_signal.html">visit_signal</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_constructor.html">visit_constructor</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_destructor.html">visit_destructor</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_type_parameter.html">visit_type_parameter</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_using_directive.html">visit_using_directive</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_data_type.html">visit_data_type</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_addressof_expression.html">visit_addressof_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_array_creation_expression.html">visit_array_creation_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_assignment.html">visit_assignment</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_base_access.html">visit_base_access</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_binary_expression.html">visit_binary_expression</a></li>
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_block.html">visit_block</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_empty_statement.html">visit_empty_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_boolean_literal.html">visit_boolean_literal</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_break_statement.html">visit_break_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_cast_expression.html">visit_cast_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_catch_clause.html">visit_catch_clause</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_character_literal.html">visit_character_literal</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_class.html">visit_class</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_conditional_expression.html">visit_conditional_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_constant.html">visit_constant</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_constructor.html">visit_constructor</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_continue_statement.html">visit_continue_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_creation_method.html">visit_creation_method</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_data_type.html">visit_data_type</a></li>
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_declaration_statement.html">visit_declaration_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_local_variable.html">visit_local_variable</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_delegate.html">visit_delegate</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_delete_statement.html">visit_delete_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_destructor.html">visit_destructor</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_do_statement.html">visit_do_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_element_access.html">visit_element_access</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_empty_statement.html">visit_empty_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_end_full_expression.html">visit_end_full_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_enum.html">visit_enum</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_initializer_list.html">visit_initializer_list</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_enum_value.html">visit_enum_value</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_error_code.html">visit_error_code</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_error_domain.html">visit_error_domain</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_expression.html">visit_expression</a></li>
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_expression_statement.html">visit_expression_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_if_statement.html">visit_if_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_switch_statement.html">visit_switch_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_switch_section.html">visit_switch_section</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_switch_label.html">visit_switch_label</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_loop.html">visit_loop</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_while_statement.html">visit_while_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_do_statement.html">visit_do_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_field.html">visit_field</a></li>
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_for_statement.html">visit_for_statement</a></li>
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_foreach_statement.html">visit_foreach_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_break_statement.html">visit_break_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_continue_statement.html">visit_continue_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_return_statement.html">visit_return_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_yield_statement.html">visit_yield_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_throw_statement.html">visit_throw_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_try_statement.html">visit_try_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_catch_clause.html">visit_catch_clause</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_lock_statement.html">visit_lock_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_unlock_statement.html">visit_unlock_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_delete_statement.html">visit_delete_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_expression.html">visit_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_array_creation_expression.html">visit_array_creation_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_boolean_literal.html">visit_boolean_literal</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_character_literal.html">visit_character_literal</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_formal_parameter.html">visit_formal_parameter</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_if_statement.html">visit_if_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_initializer_list.html">visit_initializer_list</a></li>
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_integer_literal.html">visit_integer_literal</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_real_literal.html">visit_real_literal</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_interface.html">visit_interface</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_lambda_expression.html">visit_lambda_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_local_variable.html">visit_local_variable</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_lock_statement.html">visit_lock_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_loop.html">visit_loop</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_member_access.html">visit_member_access</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_method.html">visit_method</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_method_call.html">visit_method_call</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_named_argument.html">visit_named_argument</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_namespace.html">visit_namespace</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_null_literal.html">visit_null_literal</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_object_creation_expression.html">visit_object_creation_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_pointer_indirection.html">visit_pointer_indirection</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_postfix_expression.html">visit_postfix_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_property.html">visit_property</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_regex_literal.html">visit_regex_literal</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_string_literal.html">visit_string_literal</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_template.html">visit_template</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_tuple.html">visit_tuple</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_null_literal.html">visit_null_literal</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_member_access.html">visit_member_access</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_method_call.html">visit_method_call</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_element_access.html">visit_element_access</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_slice_expression.html">visit_slice_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_base_access.html">visit_base_access</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_postfix_expression.html">visit_postfix_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_object_creation_expression.html">visit_object_creation_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_sizeof_expression.html">visit_sizeof_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_typeof_expression.html">visit_typeof_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_unary_expression.html">visit_unary_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_cast_expression.html">visit_cast_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_named_argument.html">visit_named_argument</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_pointer_indirection.html">visit_pointer_indirection</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_addressof_expression.html">visit_addressof_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_property_accessor.html">visit_property_accessor</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_real_literal.html">visit_real_literal</a></li>
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_reference_transfer_expression.html">visit_reference_transfer_expression</a>
                 </li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_binary_expression.html">visit_binary_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_regex_literal.html">visit_regex_literal</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_return_statement.html">visit_return_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_signal.html">visit_signal</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_sizeof_expression.html">visit_sizeof_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_slice_expression.html">visit_slice_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_source_file.html">visit_source_file</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_string_literal.html">visit_string_literal</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_struct.html">visit_struct</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_switch_label.html">visit_switch_label</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_switch_section.html">visit_switch_section</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_switch_statement.html">visit_switch_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_template.html">visit_template</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_throw_statement.html">visit_throw_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_try_statement.html">visit_try_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_tuple.html">visit_tuple</a></li>
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_type_check.html">visit_type_check</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_conditional_expression.html">visit_conditional_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_lambda_expression.html">visit_lambda_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_assignment.html">visit_assignment</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_end_full_expression.html">visit_end_full_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_type_parameter.html">visit_type_parameter</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_typeof_expression.html">visit_typeof_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_unary_expression.html">visit_unary_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_unlock_statement.html">visit_unlock_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_using_directive.html">visit_using_directive</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_while_statement.html">visit_while_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_yield_statement.html">visit_yield_statement</a></li>
               </ul>
             </div>
           </div>
         </div>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

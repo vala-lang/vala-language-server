@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -99,7 +99,7 @@
         <img class="main_diagram" usemap="#Vala.Genie.Scanner" alt="Object hierarchy for Scanner" src="img/Vala.Genie.Scanner.svg"/>
 
       <map id="Vala.Genie.Scanner" name="Vala.Genie.Scanner">
-<area shape="rect" id="node1" href="Vala.Genie.Scanner.html" title="Vala.Genie.Scanner" alt="" coords="5,5,192,53"/>
+<area shape="rect" id="node1" href="Vala.Genie.Scanner.html" title="Vala.Genie.Scanner" alt="" coords="5,5,172,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -123,22 +123,22 @@
         </ul>
         <h3 class="main_title">Properties:</h3>
         <ul class="navi_inline">
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.SourceFile.html" class="class">SourceFile</a></span> <b><a href="Vala.Genie.Scanner.source_file.html" class="property">source_file</a></b> { <span class="main_keyword">private</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.Genie.Scanner.indent_spaces.html" class="property">indent_spaces</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.Genie.Scanner.indent_spaces.html" class="property">indent_spaces</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.SourceFile.html" class="class">SourceFile</a></span> <b><a href="Vala.Genie.Scanner.source_file.html" class="property">source_file</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">private</span> <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Static methods:</h3>
         <ul class="navi_inline">
-          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_type"><a href="Vala.Genie.TokenType.html" class="enum">TokenType</a></span> <b><a href="Vala.Genie.Scanner.get_identifier_or_keyword.html" class="static_method">get_identifier_or_keyword</a></b> (<span class="main_basic_type"><span class="struct">char</span></span>* begin, <span class="main_basic_type"><span class="struct">int</span></span> len)
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_type"><a href="Vala.Genie.TokenType.html" class="enum">TokenType</a></span> <b><a href="Vala.Genie.Scanner.get_identifier_or_keyword.html" class="static_method">get_identifier_or_keyword</a></b> (<span class="main_basic_type"><a href="../glib-2.0/char.html" class="struct">char</a></span>* begin, <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> len)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.matches.html" class="static_method">matches</a></b> (<span class="main_basic_type"><span class="struct">char</span></span>* begin, <span class="main_basic_type"><span class="class">string</span></span> keyword)
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.matches.html" class="static_method">matches</a></b> (<span class="main_basic_type"><a href="../glib-2.0/char.html" class="struct">char</a></span>* begin, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> keyword)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -152,71 +152,35 @@
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.in_template.html" class="method">in_template</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.comment.html" class="method">comment</a></b> (<span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> file_comment = <span class="main_literal">false</span>)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.in_template_part.html" class="method">in_template_part</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.Genie.Scanner.count_tabs.html" class="method">count_tabs</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.is_ident_char.html" class="method">is_ident_char</a></b> (<span class="main_basic_type"><span class="struct">char</span></span> c)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span> <b><a href="Vala.Genie.Scanner.get_source_reference.html" class="method">get_source_reference</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> offset, <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> length = <span class="main_literal">0</span>)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.in_regex_literal.html" class="method">in_regex_literal</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.in_regex_literal.html" class="method">in_regex_literal</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span> <b><a href="Vala.Genie.Scanner.get_source_reference.html" class="method">get_source_reference</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> offset, <span class="main_basic_type"><span class="struct">int</span></span> length = <span class="main_literal">0</span>)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.in_template.html" class="method">in_template</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Genie.TokenType.html" class="enum">TokenType</a></span> <b><a href="Vala.Genie.Scanner.read_regex_token.html" class="method">read_regex_token</a></b> (<span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_begin, <span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_end)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.in_template_part.html" class="method">in_template_part</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.Genie.Scanner.seek.html" class="method">seek</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> location)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.is_ident_char.html" class="method">is_ident_char</a></b> (<span class="main_basic_type"><a href="../glib-2.0/char.html" class="struct">char</a></span> c)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Genie.TokenType.html" class="enum">TokenType</a></span> <b><a href="Vala.Genie.Scanner.read_template_token.html" class="method">read_template_token</a></b> (<span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_begin, <span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_end)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Genie.TokenType.html" class="enum">TokenType</a></span> <b><a href="Vala.Genie.Scanner.read_token.html" class="method">read_token</a></b> (<span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_begin, <span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_end)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.Genie.Scanner.count_tabs.html" class="method">count_tabs</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.whitespace.html" class="method">whitespace</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.newline.html" class="method">newline</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.skip_newlines.html" class="method">skip_newlines</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.comment.html" class="method">comment</a></b> (<span class="main_basic_type"><span class="struct">bool</span></span> file_comment = <span class="main_literal">false</span>)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.skip_tabs.html" class="method">skip_tabs</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Genie.Scanner.skip_space_tabs.html" class="method">skip_space_tabs</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Genie.Scanner.space.html" class="method">space</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.newline.html" class="method">newline</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -224,31 +188,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Genie.Scanner.push_comment.html" class="method">push_comment</a></b> (<span class="main_basic_type"><span class="class">string</span></span> comment_item, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span> source_reference, <span class="main_basic_type"><span class="struct">bool</span></span> file_comment)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Comment.html" class="class">Comment</a></span>? <b><a href="Vala.Genie.Scanner.pop_comment.html" class="method">pop_comment</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Clears and returns the content of the comment stack.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.pp_whitespace.html" class="method">pp_whitespace</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Genie.Scanner.pp_space.html" class="method">pp_space</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Genie.Scanner.pp_directive.html" class="method">pp_directive</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Genie.Scanner.pp_eol.html" class="method">pp_eol</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Genie.Scanner.parse_pp_if.html" class="method">parse_pp_if</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.parse_pp_and_expression.html" class="method">parse_pp_and_expression</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -264,82 +204,134 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.parse_pp_symbol.html" class="method">parse_pp_symbol</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.parse_pp_equality_expression.html" class="method">parse_pp_equality_expression</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.parse_pp_primary_expression.html" class="method">parse_pp_primary_expression</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.parse_pp_expression.html" class="method">parse_pp_expression</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.parse_pp_unary_expression.html" class="method">parse_pp_unary_expression</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Genie.Scanner.parse_pp_if.html" class="method">parse_pp_if</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.parse_pp_equality_expression.html" class="method">parse_pp_equality_expression</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.parse_pp_or_expression.html" class="method">parse_pp_or_expression</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.parse_pp_and_expression.html" class="method">parse_pp_and_expression</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.parse_pp_primary_expression.html" class="method">parse_pp_primary_expression</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.parse_pp_or_expression.html" class="method">parse_pp_or_expression</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.parse_pp_symbol.html" class="method">parse_pp_symbol</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.parse_pp_expression.html" class="method">parse_pp_expression</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.parse_pp_unary_expression.html" class="method">parse_pp_unary_expression</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Comment.html" class="class">Comment</a></span>? <b><a href="Vala.Genie.Scanner.pop_comment.html" class="method">pop_comment</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Clears and returns the content of the comment stack.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Genie.Scanner.pp_directive.html" class="method">pp_directive</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Genie.Scanner.pp_eol.html" class="method">pp_eol</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Genie.Scanner.pp_space.html" class="method">pp_space</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.pp_whitespace.html" class="method">pp_whitespace</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Genie.Scanner.push_comment.html" class="method">push_comment</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> comment_item, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span> source_reference, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> file_comment)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Genie.TokenType.html" class="enum">TokenType</a></span> <b><a href="Vala.Genie.Scanner.read_regex_token.html" class="method">read_regex_token</a></b> (<span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_begin, <span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_end)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Genie.TokenType.html" class="enum">TokenType</a></span> <b><a href="Vala.Genie.Scanner.read_template_token.html" class="method">read_template_token</a></b> (<span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_begin, <span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_end)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Genie.TokenType.html" class="enum">TokenType</a></span> <b><a href="Vala.Genie.Scanner.read_token.html" class="method">read_token</a></b> (<span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_begin, <span class="main_keyword">out</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> token_end)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.Genie.Scanner.seek.html" class="method">seek</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> location)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.skip_newlines.html" class="method">skip_newlines</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Genie.Scanner.skip_space_tabs.html" class="method">skip_space_tabs</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.skip_tabs.html" class="method">skip_tabs</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Genie.Scanner.space.html" class="method">space</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.whitespace.html" class="method">whitespace</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Comment.html" class="class">Comment</a></span> <b><a href="Vala.Genie.Scanner._comment.html" class="field">_comment</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.Genie.Scanner._indent_spaces.html" class="field">_indent_spaces</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.SourceFile.html" class="class">SourceFile</a></span> <b><a href="Vala.Genie.Scanner._source_file.html" class="field">_source_file</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.Genie.Scanner._indent_spaces.html" class="field">_indent_spaces</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/char.html" class="struct">char</a></span>* <b><a href="Vala.Genie.Scanner.begin.html" class="field">begin</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">char</span></span>* <b><a href="Vala.Genie.Scanner.begin.html" class="field">begin</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.Genie.Scanner.column.html" class="field">column</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">char</span></span>* <b><a href="Vala.Genie.Scanner.current.html" class="field">current</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Genie.Scanner.Conditional.html" class="struct">Conditional</a></span>[] <b><a href="Vala.Genie.Scanner.conditional_stack.html" class="field">conditional_stack</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">char</span></span>* <b><a href="Vala.Genie.Scanner.end.html" class="field">end</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/char.html" class="struct">char</a></span>* <b><a href="Vala.Genie.Scanner.current.html" class="field">current</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.Genie.Scanner.line.html" class="field">line</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.Genie.Scanner.current_indent_level.html" class="field">current_indent_level</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.Genie.Scanner.column.html" class="field">column</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/char.html" class="struct">char</a></span>* <b><a href="Vala.Genie.Scanner.end.html" class="field">end</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.Genie.Scanner.current_indent_level.html" class="field">current_indent_level</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.Genie.Scanner.indent_level.html" class="field">indent_level</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.Genie.Scanner.pending_dedents.html" class="field">pending_dedents</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.Genie.Scanner.open_parens_count.html" class="field">open_parens_count</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.Genie.Scanner.open_brace_count.html" class="field">open_brace_count</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.Genie.Scanner.indent_level.html" class="field">indent_level</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -347,15 +339,23 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Genie.Scanner.parse_started.html" class="field">parse_started</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.Genie.Scanner.line.html" class="field">line</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Comment.html" class="class">Comment</a></span> <b><a href="Vala.Genie.Scanner._comment.html" class="field">_comment</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.Genie.Scanner.open_brace_count.html" class="field">open_brace_count</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Genie.Scanner.Conditional.html" class="struct">Conditional</a></span>[] <b><a href="Vala.Genie.Scanner.conditional_stack.html" class="field">conditional_stack</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.Genie.Scanner.open_parens_count.html" class="field">open_parens_count</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Genie.Scanner.parse_started.html" class="field">parse_started</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.Genie.Scanner.pending_dedents.html" class="field">pending_dedents</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -366,7 +366,7 @@
         </ul>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -66,8 +66,8 @@
         <img class="main_diagram" usemap="#Vala.HashMap" alt="Object hierarchy for HashMap" src="img/Vala.HashMap.svg"/>
 
       <map id="Vala.HashMap" name="Vala.HashMap">
-<area shape="rect" id="node1" href="Vala.HashMap.html" title="Vala.HashMap" alt="" coords="5,101,147,149"/>
-<area shape="rect" id="node2" href="Vala.Map.html" title="Vala.Map" alt="" coords="27,5,125,53"/>
+<area shape="rect" id="node1" href="Vala.HashMap.html" title="Vala.HashMap" alt="" coords="5,101,136,149"/>
+<area shape="rect" id="node2" href="Vala.Map.html" title="Vala.Map" alt="" coords="23,5,118,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -83,72 +83,52 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Classes:</h3>
         <ul class="navi_inline">
-          <li class="class"><a href="Vala.HashMap.Node.html">Node</a></li>
+          <li class="class"><a href="Vala.HashMap.KeyIterator.html">KeyIterator</a></li>
           <li class="class"><a href="Vala.HashMap.KeySet.html">KeySet</a></li>
           <li class="class"><a href="Vala.HashMap.MapIterator.html">MapIterator</a></li>
-          <li class="class"><a href="Vala.HashMap.KeyIterator.html">KeyIterator</a></li>
+          <li class="class"><a href="Vala.HashMap.Node.html">Node</a></li>
           <li class="class"><a href="Vala.HashMap.ValueCollection.html">ValueCollection</a></li>
           <li class="class"><a href="Vala.HashMap.ValueIterator.html">ValueIterator</a></li>
         </ul>
         <h3 class="main_title">Constants:</h3>
         <ul class="navi_inline">
-          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.HashMap.MIN_SIZE.html" class="constant">MIN_SIZE</a></b>
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.HashMap.MAX_SIZE.html" class="constant">MAX_SIZE</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.HashMap.MAX_SIZE.html" class="constant">MAX_SIZE</a></b>
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.HashMap.MIN_SIZE.html" class="constant">MIN_SIZE</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Properties:</h3>
         <ul class="navi_inline">
-          <li class="virtual_property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.HashMap.size.html" class="virtual_property">size</a></b> { <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../glib-2.0/GLib.EqualFunc.html" class="delegate">EqualFunc</a></span>&lt;<span class="main_type"><span>K</span></span>&gt; <b><a href="Vala.HashMap.key_equal_func.html" class="property">key_equal_func</a></b> { <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="delegate">HashFunc</span></span>&lt;<span class="main_type"><span>K</span></span>&gt; <b><a href="Vala.HashMap.key_hash_func.html" class="property">key_hash_func</a></b> { <span class="main_keyword">set</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../glib-2.0/GLib.HashFunc.html" class="delegate">HashFunc</a></span>&lt;<span class="main_type"><span>K</span></span>&gt; <b><a href="Vala.HashMap.key_hash_func.html" class="property">key_hash_func</a></b> { <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="delegate">EqualFunc</span></span>&lt;<span class="main_type"><span>K</span></span>&gt; <b><a href="Vala.HashMap.key_equal_func.html" class="property">key_equal_func</a></b> { <span class="main_keyword">set</span>; }
+          <li class="virtual_property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.HashMap.size.html" class="virtual_property">size</a></b> { <span class="main_keyword">get</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="delegate">EqualFunc</span></span>&lt;<span class="main_type"><span>V</span></span>&gt; <b><a href="Vala.HashMap.value_equal_func.html" class="property">value_equal_func</a></b> { <span class="main_keyword">set</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../glib-2.0/GLib.EqualFunc.html" class="delegate">EqualFunc</a></span>&lt;<span class="main_type"><span>V</span></span>&gt; <b><a href="Vala.HashMap.value_equal_func.html" class="property">value_equal_func</a></b> { <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
-          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.HashMap.HashMap.html" class="creation_method">HashMap</a></b> (<span class="main_type"><span class="delegate">HashFunc</span></span>&lt;<span class="main_type"><span>K</span></span>&gt; key_hash_func = <b><span class="field">direct_hash</span></b>, <span class="main_type"><span class="delegate">EqualFunc</span></span>&lt;<span class="main_type"><span>K</span></span>&gt; key_equal_func = <b><span class="field">direct_equal</span></b>, <span class="main_type"><span class="delegate">EqualFunc</span></span>&lt;<span class="main_type"><span>V</span></span>&gt; value_equal_func = <b><span class="field">direct_equal</span></b>)
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.HashMap.HashMap.html" class="creation_method">HashMap</a></b> (<span class="main_type"><a href="../glib-2.0/GLib.HashFunc.html" class="delegate">HashFunc</a></span>&lt;<span class="main_type"><span>K</span></span>&gt; key_hash_func = <b><a href="../glib-2.0/GLib.direct_hash.html" class="field">direct_hash</a></b>, <span class="main_type"><a href="../glib-2.0/GLib.EqualFunc.html" class="delegate">EqualFunc</a></span>&lt;<span class="main_type"><span>K</span></span>&gt; key_equal_func = <b><a href="../glib-2.0/GLib.direct_equal.html" class="field">direct_equal</a></b>, <span class="main_type"><a href="../glib-2.0/GLib.EqualFunc.html" class="delegate">EqualFunc</a></span>&lt;<span class="main_type"><span>V</span></span>&gt; value_equal_func = <b><a href="../glib-2.0/GLib.direct_equal.html" class="field">direct_equal</a></b>)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><a href="Vala.Set.html" class="abstract_class">Set</a></span>&lt;<span class="main_type"><span>K</span></span>&gt; <b><a href="Vala.HashMap.get_keys.html" class="virtual_method">get_keys</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><a href="Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><span>V</span></span>&gt; <b><a href="Vala.HashMap.get_values.html" class="virtual_method">get_values</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><a href="Vala.MapIterator.html" class="abstract_class">MapIterator</a></span>&lt;<span class="main_type"><span>K</span></span>,<span class="main_type"><span>V</span></span>&gt; <b><a href="Vala.HashMap.map_iterator.html" class="virtual_method">map_iterator</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.HashMap.Node.html" class="class">Node</a></span>&lt;<span class="main_type"><span>K</span></span>,<span class="main_type"><span>V</span></span>&gt;** <b><a href="Vala.HashMap.lookup_node.html" class="method">lookup_node</a></b> (<span class="main_type"><span>K</span></span> key)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.HashMap.contains.html" class="virtual_method">contains</a></b> (<span class="main_type"><span>K</span></span> key)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
           <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><span>V</span></span> <b><a href="Vala.HashMap.@get.html" class="virtual_method">@get</a></b> (<span class="main_type"><span>K</span></span> key)
             </span>
             <div class="leaf_brief_description">
@@ -157,11 +137,31 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.HashMap.remove.html" class="virtual_method">remove</a></b> (<span class="main_type"><span>K</span></span> key)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.HashMap.clear.html" class="virtual_method">clear</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.HashMap.clear.html" class="virtual_method">clear</a></b> ()
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.HashMap.contains.html" class="virtual_method">contains</a></b> (<span class="main_type"><span>K</span></span> key)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><a href="Vala.Set.html" class="abstract_class">Set</a></span>&lt;<span class="main_type"><span>K</span></span>&gt; <b><a href="Vala.HashMap.get_keys.html" class="virtual_method">get_keys</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><a href="Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><span>V</span></span>&gt; <b><a href="Vala.HashMap.get_values.html" class="virtual_method">get_values</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.HashMap.Node.html" class="class">Node</a></span>&lt;<span class="main_type"><span>K</span></span>,<span class="main_type"><span>V</span></span>&gt;** <b><a href="Vala.HashMap.lookup_node.html" class="method">lookup_node</a></b> (<span class="main_type"><span>K</span></span> key)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><a href="Vala.MapIterator.html" class="abstract_class">MapIterator</a></span>&lt;<span class="main_type"><span>K</span></span>,<span class="main_type"><span>V</span></span>&gt; <b><a href="Vala.HashMap.map_iterator.html" class="virtual_method">map_iterator</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.HashMap.remove.html" class="virtual_method">remove</a></b> (<span class="main_type"><span>K</span></span> key)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -172,11 +172,19 @@
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.HashMap._array_size.html" class="field">_array_size</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.HashMap._array_size.html" class="field">_array_size</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.HashMap._nnodes.html" class="field">_nnodes</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../glib-2.0/GLib.EqualFunc.html" class="delegate">EqualFunc</a></span>&lt;<span class="main_type"><span>K</span></span>&gt; <b><a href="Vala.HashMap._key_equal_func.html" class="field">_key_equal_func</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../glib-2.0/GLib.HashFunc.html" class="delegate">HashFunc</a></span>&lt;<span class="main_type"><span>K</span></span>&gt; <b><a href="Vala.HashMap._key_hash_func.html" class="field">_key_hash_func</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.HashMap._nnodes.html" class="field">_nnodes</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -184,53 +192,45 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.HashMap._stamp.html" class="field">_stamp</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.HashMap._stamp.html" class="field">_stamp</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="delegate">HashFunc</span></span>&lt;<span class="main_type"><span>K</span></span>&gt; <b><a href="Vala.HashMap._key_hash_func.html" class="field">_key_hash_func</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="delegate">EqualFunc</span></span>&lt;<span class="main_type"><span>K</span></span>&gt; <b><a href="Vala.HashMap._key_equal_func.html" class="field">_key_equal_func</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="delegate">EqualFunc</span></span>&lt;<span class="main_type"><span>V</span></span>&gt; <b><a href="Vala.HashMap._value_equal_func.html" class="field">_value_equal_func</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../glib-2.0/GLib.EqualFunc.html" class="delegate">EqualFunc</a></span>&lt;<span class="main_type"><span>V</span></span>&gt; <b><a href="Vala.HashMap._value_equal_func.html" class="field">_value_equal_func</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-3')">All known members inherited from class Vala.Map</div>
-          <div class="content" id="box-content-3">
+          <div class="headline" onclick="toggle_box (this, 'box-content-59')">All known members inherited from class Vala.Map</div>
+          <div class="content" id="box-content-59">
             <div class="column">
               <ul class="navi_inline">
-                <li class="abstract_property"><a href="Vala.Map.size.html">size</a></li>
+                <li class="abstract_method"><a href="Vala.Map.@get.html">@get</a></li>
+                <li class="abstract_method"><a href="Vala.Map.@set.html">@set</a></li>
+                <li class="abstract_method"><a href="Vala.Map.clear.html">clear</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="abstract_method"><a href="Vala.Map.contains.html">contains</a></li>
                 <li class="abstract_method"><a href="Vala.Map.get_keys.html">get_keys</a></li>
                 <li class="abstract_method"><a href="Vala.Map.get_values.html">get_values</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="abstract_method"><a href="Vala.Map.contains.html">contains</a></li>
-                <li class="abstract_method"><a href="Vala.Map.@get.html">@get</a></li>
-                <li class="abstract_method"><a href="Vala.Map.@set.html">@set</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="abstract_method"><a href="Vala.Map.remove.html">remove</a></li>
-                <li class="abstract_method"><a href="Vala.Map.clear.html">clear</a></li>
                 <li class="abstract_method"><a href="Vala.Map.map_iterator.html">map_iterator</a></li>
+                <li class="abstract_method"><a href="Vala.Map.remove.html">remove</a></li>
+                <li class="abstract_property"><a href="Vala.Map.size.html">size</a></li>
               </ul>
             </div>
           </div>
         </div>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

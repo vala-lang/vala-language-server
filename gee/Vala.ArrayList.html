@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -58,10 +58,10 @@
         <img class="main_diagram" usemap="#Vala.ArrayList" alt="Object hierarchy for ArrayList" src="img/Vala.ArrayList.svg"/>
 
       <map id="Vala.ArrayList" name="Vala.ArrayList">
-<area shape="rect" id="node1" href="Vala.ArrayList.html" title="Vala.ArrayList" alt="" coords="9,293,151,341"/>
-<area shape="rect" id="node2" href="Vala.List.html" title="Vala.List" alt="" coords="33,197,127,245"/>
-<area shape="rect" id="node3" href="Vala.Collection.html" title="Vala.Collection" alt="" coords="5,101,155,149"/>
-<area shape="rect" id="node4" href="Vala.Iterable.html" title="Vala.Iterable" alt="" coords="15,5,145,53"/>
+<area shape="rect" id="node1" href="Vala.ArrayList.html" title="Vala.ArrayList" alt="" coords="7,293,138,341"/>
+<area shape="rect" id="node2" href="Vala.List.html" title="Vala.List" alt="" coords="29,197,117,245"/>
+<area shape="rect" id="node3" href="Vala.Collection.html" title="Vala.Collection" alt="" coords="5,101,140,149"/>
+<area shape="rect" id="node4" href="Vala.Iterable.html" title="Vala.Iterable" alt="" coords="15,5,130,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -81,61 +81,33 @@
         </ul>
         <h3 class="main_title">Properties:</h3>
         <ul class="navi_inline">
-          <li class="virtual_property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.ArrayList.size.html" class="virtual_property">size</a></b> { <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../glib-2.0/GLib.EqualFunc.html" class="delegate">EqualFunc</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.ArrayList.equal_func.html" class="property">equal_func</a></b> { <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="delegate">EqualFunc</span></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.ArrayList.equal_func.html" class="property">equal_func</a></b> { <span class="main_keyword">set</span>; }
+          <li class="virtual_property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.ArrayList.size.html" class="virtual_property">size</a></b> { <span class="main_keyword">get</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
-          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.ArrayList.ArrayList.html" class="creation_method">ArrayList</a></b> (<span class="main_type"><span class="delegate">EqualFunc</span></span>&lt;<span class="main_type"><span>G</span></span>&gt; equal_func = <b><span class="field">direct_equal</span></b>)
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.ArrayList.ArrayList.html" class="creation_method">ArrayList</a></b> (<span class="main_type"><a href="../glib-2.0/GLib.EqualFunc.html" class="delegate">EqualFunc</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; equal_func = <b><a href="../glib-2.0/GLib.direct_equal.html" class="field">direct_equal</a></b>)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><span class="struct">Type</span></span> <b><a href="Vala.ArrayList.get_element_type.html" class="virtual_method">get_element_type</a></b> ()
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><span>G</span></span> <b><a href="Vala.ArrayList.@get.html" class="virtual_method">@get</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> index)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><a href="Vala.Iterator.html" class="abstract_class">Iterator</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.ArrayList.iterator.html" class="virtual_method">iterator</a></b> ()
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.ArrayList.@set.html" class="virtual_method">@set</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> index, <span class="main_type"><span>G</span></span> item)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.ArrayList.contains.html" class="virtual_method">contains</a></b> (<span class="main_type"><span>G</span></span> item)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.ArrayList.index_of.html" class="virtual_method">index_of</a></b> (<span class="main_type"><span>G</span></span> item)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><span>G</span></span> <b><a href="Vala.ArrayList.@get.html" class="virtual_method">@get</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> index)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.ArrayList.@set.html" class="virtual_method">@set</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> index, <span class="main_type"><span>G</span></span> item)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.ArrayList.add.html" class="virtual_method">add</a></b> (<span class="main_type"><span>G</span></span> item)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.ArrayList.insert.html" class="virtual_method">insert</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> index, <span class="main_type"><span>G</span></span> item)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.ArrayList.remove.html" class="virtual_method">remove</a></b> (<span class="main_type"><span>G</span></span> item)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><span>G</span></span> <b><a href="Vala.ArrayList.remove_at.html" class="virtual_method">remove_at</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> index)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.ArrayList.add.html" class="virtual_method">add</a></b> (<span class="main_type"><span>G</span></span> item)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -143,104 +115,132 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.ArrayList.shift.html" class="method">shift</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> start, <span class="main_basic_type"><span class="struct">int</span></span> delta)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.ArrayList.contains.html" class="virtual_method">contains</a></b> (<span class="main_type"><span>G</span></span> item)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.ArrayList.grow_if_needed.html" class="method">grow_if_needed</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> new_count)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><a href="../gobject-2.0/GLib.Type.html" class="struct">Type</a></span> <b><a href="Vala.ArrayList.get_element_type.html" class="virtual_method">get_element_type</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.ArrayList.set_capacity.html" class="method">set_capacity</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> value)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.ArrayList.grow_if_needed.html" class="method">grow_if_needed</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> new_count)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.ArrayList.index_of.html" class="virtual_method">index_of</a></b> (<span class="main_type"><span>G</span></span> item)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.ArrayList.insert.html" class="virtual_method">insert</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> index, <span class="main_type"><span>G</span></span> item)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><a href="Vala.Iterator.html" class="abstract_class">Iterator</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.ArrayList.iterator.html" class="virtual_method">iterator</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.ArrayList.remove.html" class="virtual_method">remove</a></b> (<span class="main_type"><span>G</span></span> item)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><span>G</span></span> <b><a href="Vala.ArrayList.remove_at.html" class="virtual_method">remove_at</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> index)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.ArrayList.set_capacity.html" class="method">set_capacity</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> value)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.ArrayList.shift.html" class="method">shift</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> start, <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> delta)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../glib-2.0/GLib.EqualFunc.html" class="delegate">EqualFunc</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.ArrayList._equal_func.html" class="field">_equal_func</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">internal</span> <span class="main_type"><span>G</span></span>[] <b><a href="Vala.ArrayList._items.html" class="field">_items</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">internal</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.ArrayList._size.html" class="field">_size</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">internal</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.ArrayList._size.html" class="field">_size</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="delegate">EqualFunc</span></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.ArrayList._equal_func.html" class="field">_equal_func</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.ArrayList._stamp.html" class="field">_stamp</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.ArrayList._stamp.html" class="field">_stamp</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-18')">All known members inherited from class Vala.List</div>
-          <div class="content" id="box-content-18">
+          <div class="headline" onclick="toggle_box (this, 'box-content-74')">All known members inherited from class Vala.List</div>
+          <div class="content" id="box-content-74">
             <div class="column">
               <ul class="navi_inline">
                 <li class="abstract_method"><a href="Vala.List.@get.html">@get</a></li>
                 <li class="abstract_method"><a href="Vala.List.@set.html">@set</a></li>
-                <li class="abstract_method"><a href="Vala.List.index_of.html">index_of</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="abstract_method"><a href="Vala.List.insert.html">insert</a></li>
-                <li class="abstract_method"><a href="Vala.List.remove_at.html">remove_at</a></li>
                 <li class="virtual_method"><a href="Vala.List.first.html">first</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="virtual_method"><a href="Vala.List.last.html">last</a></li>
+                <li class="abstract_method"><a href="Vala.List.index_of.html">index_of</a></li>
+                <li class="abstract_method"><a href="Vala.List.insert.html">insert</a></li>
                 <li class="virtual_method"><a href="Vala.List.insert_all.html">insert_all</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="virtual_method"><a href="Vala.List.last.html">last</a></li>
+                <li class="abstract_method"><a href="Vala.List.remove_at.html">remove_at</a></li>
                 <li class="virtual_method"><a href="Vala.List.sort.html">sort</a></li>
               </ul>
             </div>
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-19')">All known members inherited from class Vala.Collection</div>
-          <div class="content" id="box-content-19">
+          <div class="headline" onclick="toggle_box (this, 'box-content-75')">All known members inherited from class Vala.Collection</div>
+          <div class="content" id="box-content-75">
             <div class="column">
               <ul class="navi_inline">
-                <li class="abstract_property"><a href="Vala.Collection.size.html">size</a></li>
+                <li class="abstract_method"><a href="Vala.Collection.add.html">add</a></li>
+                <li class="virtual_method"><a href="Vala.Collection.add_all.html">add_all</a></li>
+                <li class="abstract_method"><a href="Vala.Collection.clear.html">clear</a></li>
+                <li class="abstract_method"><a href="Vala.Collection.contains.html">contains</a></li>
                 <li class="virtual_property"><a href="Vala.Collection.is_empty.html">is_empty</a></li>
+                <li class="abstract_method"><a href="Vala.Collection.remove.html">remove</a></li>
+                <li class="abstract_property"><a href="Vala.Collection.size.html">size</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="virtual_method"><a href="Vala.Collection.to_array.html">to_array</a></li>
                 <li class="static_method"><a href="Vala.Collection.to_bool_array.html">to_bool_array</a></li>
                 <li class="static_method"><a href="Vala.Collection.to_char_array.html">to_char_array</a></li>
-                <li class="static_method"><a href="Vala.Collection.to_uchar_array.html">to_uchar_array</a></li>
-                <li class="static_method"><a href="Vala.Collection.to_int_array.html">to_int_array</a></li>
-                <li class="static_method"><a href="Vala.Collection.to_uint_array.html">to_uint_array</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="static_method"><a href="Vala.Collection.to_int64_array.html">to_int64_array</a></li>
-                <li class="static_method"><a href="Vala.Collection.to_uint64_array.html">to_uint64_array</a></li>
-                <li class="static_method"><a href="Vala.Collection.to_long_array.html">to_long_array</a></li>
-                <li class="static_method"><a href="Vala.Collection.to_ulong_array.html">to_ulong_array</a></li>
-                <li class="static_method"><a href="Vala.Collection.to_float_array.html">to_float_array</a></li>
                 <li class="static_method"><a href="Vala.Collection.to_double_array.html">to_double_array</a></li>
+                <li class="static_method"><a href="Vala.Collection.to_float_array.html">to_float_array</a></li>
+                <li class="static_method"><a href="Vala.Collection.to_int64_array.html">to_int64_array</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="abstract_method"><a href="Vala.Collection.contains.html">contains</a></li>
-                <li class="abstract_method"><a href="Vala.Collection.add.html">add</a></li>
-                <li class="abstract_method"><a href="Vala.Collection.remove.html">remove</a></li>
-                <li class="abstract_method"><a href="Vala.Collection.clear.html">clear</a></li>
-                <li class="virtual_method"><a href="Vala.Collection.add_all.html">add_all</a></li>
-                <li class="virtual_method"><a href="Vala.Collection.to_array.html">to_array</a></li>
+                <li class="static_method"><a href="Vala.Collection.to_int_array.html">to_int_array</a></li>
+                <li class="static_method"><a href="Vala.Collection.to_long_array.html">to_long_array</a></li>
+                <li class="static_method"><a href="Vala.Collection.to_uchar_array.html">to_uchar_array</a></li>
+                <li class="static_method"><a href="Vala.Collection.to_uint64_array.html">to_uint64_array</a></li>
+                <li class="static_method"><a href="Vala.Collection.to_uint_array.html">to_uint_array</a></li>
+                <li class="static_method"><a href="Vala.Collection.to_ulong_array.html">to_ulong_array</a></li>
               </ul>
             </div>
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-20')">All known members inherited from class Vala.Iterable</div>
-          <div class="content" id="box-content-20">
+          <div class="headline" onclick="toggle_box (this, 'box-content-76')">All known members inherited from class Vala.Iterable</div>
+          <div class="content" id="box-content-76">
             <div class="column">
               <ul class="navi_inline">
                 <li class="abstract_method"><a href="Vala.Iterable.get_element_type.html">get_element_type</a></li>
@@ -259,7 +259,7 @@
         </div>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

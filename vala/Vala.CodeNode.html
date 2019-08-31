@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -39,9 +39,11 @@
           <li class="creation_method"><a href="Vala.CodeNode.CodeNode.html">CodeNode</a></li>
           <li class="virtual_method"><a href="Vala.CodeNode.accept.html">accept</a></li>
           <li class="virtual_method"><a href="Vala.CodeNode.accept_children.html">accept_children</a></li>
-          <li class="method"><a href="Vala.CodeNode.add_error_type.html">add_error_type</a></li>
-          <li class="method"><a href="Vala.CodeNode.add_error_types.html">add_error_types</a></li>
           <li class="virtual_method"><a href="Vala.CodeNode.check.html">check</a></li>
+          <li class="method"><a href="Vala.CodeNode.copy_attribute_bool.html">copy_attribute_bool</a></li>
+          <li class="method"><a href="Vala.CodeNode.copy_attribute_double.html">copy_attribute_double</a></li>
+          <li class="method"><a href="Vala.CodeNode.copy_attribute_integer.html">copy_attribute_integer</a></li>
+          <li class="method"><a href="Vala.CodeNode.copy_attribute_string.html">copy_attribute_string</a></li>
           <li class="virtual_method"><a href="Vala.CodeNode.emit.html">emit</a></li>
           <li class="method"><a href="Vala.CodeNode.get_attribute.html">get_attribute</a></li>
           <li class="method"><a href="Vala.CodeNode.get_attribute_bool.html">get_attribute_bool</a></li>
@@ -50,7 +52,7 @@
           <li class="method"><a href="Vala.CodeNode.get_attribute_integer.html">get_attribute_integer</a></li>
           <li class="method"><a href="Vala.CodeNode.get_attribute_string.html">get_attribute_string</a></li>
           <li class="virtual_method"><a href="Vala.CodeNode.get_defined_variables.html">get_defined_variables</a></li>
-          <li class="method"><a href="Vala.CodeNode.get_error_types.html">get_error_types</a></li>
+          <li class="virtual_method"><a href="Vala.CodeNode.get_error_types.html">get_error_types</a></li>
           <li class="method"><a href="Vala.CodeNode.get_or_create_attribute.html">get_or_create_attribute</a></li>
           <li class="virtual_method"><a href="Vala.CodeNode.get_used_variables.html">get_used_variables</a></li>
           <li class="method"><a href="Vala.CodeNode.has_attribute_argument.html">has_attribute_argument</a></li>
@@ -65,9 +67,7 @@
           <li class="method"><a href="Vala.CodeNode.set_attribute_string.html">set_attribute_string</a></li>
           <li class="virtual_method"><a href="Vala.CodeNode.to_string.html">to_string</a></li>
           <li class="field"><a href="Vala.CodeNode._checked.html">_checked</a></li>
-          <li class="field"><a href="Vala.CodeNode._empty_type_list.html">_empty_type_list</a></li>
           <li class="field"><a href="Vala.CodeNode._error.html">_error</a></li>
-          <li class="field"><a href="Vala.CodeNode._error_types.html">_error_types</a></li>
           <li class="field"><a href="Vala.CodeNode._parent_node.html">_parent_node</a></li>
           <li class="field"><a href="Vala.CodeNode._source_reference.html">_source_reference</a></li>
           <li class="field"><a href="Vala.CodeNode._unreachable.html">_unreachable</a></li>
@@ -84,7 +84,7 @@
         <img class="main_diagram" usemap="#Vala.CodeNode" alt="Object hierarchy for CodeNode" src="img/Vala.CodeNode.svg"/>
 
       <map id="Vala.CodeNode" name="Vala.CodeNode">
-<area shape="rect" id="node1" href="Vala.CodeNode.html" title="Vala.CodeNode" alt="" coords="5,5,156,53"/>
+<area shape="rect" id="node1" href="Vala.CodeNode.html" title="Vala.CodeNode" alt="" coords="5,5,143,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -95,143 +95,144 @@
           <p>Code nodes get created by the parser and are used throughout the whole compilation process.</p>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-93')">All known sub-classes:</div>
-          <div class="content" id="box-content-93">
+          <div class="headline" onclick="toggle_box (this, 'box-content-96')">All known sub-classes:</div>
+          <div class="content" id="box-content-96">
             <div class="column">
               <ul class="navi_inline">
-                <li class="class"><a href="Vala.DynamicMethod.html">DynamicMethod</a></li>
-                <li class="class"><a href="Vala.DoStatement.html">DoStatement</a></li>
-                <li class="class"><a href="Vala.Class.html">Class</a></li>
-                <li class="class"><a href="Vala.Constant.html">Constant</a></li>
-                <li class="class"><a href="Vala.ForStatement.html">ForStatement</a></li>
-                <li class="class"><a href="Vala.NullType.html">NullType</a></li>
-                <li class="class"><a href="Vala.Template.html">Template</a></li>
-                <li class="class"><a href="Vala.StatementList.html">StatementList</a></li>
-                <li class="class"><a href="Vala.MemberAccess.html">MemberAccess</a></li>
-                <li class="class"><a href="Vala.MethodCall.html">MethodCall</a></li>
-                <li class="class"><a href="Vala.SizeofExpression.html">SizeofExpression</a></li>
-                <li class="class"><a href="Vala.EmptyStatement.html">EmptyStatement</a></li>
-                <li class="class"><a href="Vala.SwitchSection.html">SwitchSection</a></li>
-                <li class="class"><a href="Vala.ConditionalExpression.html">ConditionalExpression</a></li>
-                <li class="class"><a href="Vala.TypeofExpression.html">TypeofExpression</a></li>
-                <li class="class"><a href="Vala.Destructor.html">Destructor</a></li>
-                <li class="class"><a href="Vala.UnaryExpression.html">UnaryExpression</a></li>
-                <li class="class"><a href="Vala.ExpressionStatement.html">ExpressionStatement</a></li>
-                <li class="class"><a href="Vala.Assignment.html">Assignment</a></li>
-                <li class="class"><a href="Vala.LockStatement.html">LockStatement</a></li>
-                <li class="class"><a href="Vala.ArrayResizeMethod.html">ArrayResizeMethod</a></li>
-                <li class="class"><a href="Vala.CastExpression.html">CastExpression</a></li>
-                <li class="class"><a href="Vala.EnumValue.html">EnumValue</a></li>
-                <li class="class"><a href="Vala.SliceExpression.html">SliceExpression</a></li>
-                <li class="class"><a href="Vala.ErrorType.html">ErrorType</a></li>
-                <li class="class"><a href="Vala.ReturnStatement.html">ReturnStatement</a></li>
-                <li class="class"><a href="Vala.Delegate.html">Delegate</a></li>
-                <li class="class"><a href="Vala.ObjectCreationExpression.html">ObjectCreationExpression</a></li>
-                <li class="class"><a href="Vala.BinaryExpression.html">BinaryExpression</a></li>
-                <li class="class"><a href="Vala.ThrowStatement.html">ThrowStatement</a></li>
-                <li class="class"><a href="Vala.StringLiteral.html">StringLiteral</a></li>
-                <li class="class"><a href="Vala.MethodType.html">MethodType</a></li>
-                <li class="class"><a href="Vala.CatchClause.html">CatchClause</a></li>
-                <li class="class"><a href="Vala.SignalType.html">SignalType</a></li>
-                <li class="class"><a href="Vala.BooleanLiteral.html">BooleanLiteral</a></li>
-                <li class="class"><a href="Vala.DynamicSignal.html">DynamicSignal</a></li>
-                <li class="class"><a href="Vala.Block.html">Block</a></li>
-                <li class="abstract_class"><a href="Vala.DataType.html">DataType</a></li>
-                <li class="class"><a href="Vala.CreationMethod.html">CreationMethod</a></li>
-                <li class="class"><a href="Vala.ErrorDomain.html">ErrorDomain</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="class"><a href="Vala.UnresolvedType.html">UnresolvedType</a></li>
-                <li class="class"><a href="Vala.TypeCheck.html">TypeCheck</a></li>
-                <li class="class"><a href="Vala.RealLiteral.html">RealLiteral</a></li>
-                <li class="class"><a href="Vala.ArrayType.html">ArrayType</a></li>
-                <li class="class"><a href="Vala.ForeachStatement.html">ForeachStatement</a></li>
-                <li class="abstract_class"><a href="Vala.Symbol.html">Symbol</a></li>
-                <li class="class"><a href="Vala.InterfaceType.html">InterfaceType</a></li>
-                <li class="abstract_class"><a href="Vala.ReferenceType.html">ReferenceType</a></li>
-                <li class="class"><a href="Vala.BooleanType.html">BooleanType</a></li>
-                <li class="class"><a href="Vala.Struct.html">Struct</a></li>
-                <li class="class"><a href="Vala.FieldPrototype.html">FieldPrototype</a></li>
-                <li class="class"><a href="Vala.Field.html">Field</a></li>
-                <li class="class"><a href="Vala.SwitchLabel.html">SwitchLabel</a></li>
-                <li class="class"><a href="Vala.ElementAccess.html">ElementAccess</a></li>
-                <li class="class"><a href="Vala.GenericType.html">GenericType</a></li>
-                <li class="abstract_class"><a href="Vala.ObjectTypeSymbol.html">ObjectTypeSymbol</a></li>
-                <li class="class"><a href="Vala.FloatingType.html">FloatingType</a></li>
-                <li class="class"><a href="Vala.PointerIndirection.html">PointerIndirection</a></li>
-                <li class="class"><a href="Vala.LocalVariable.html">LocalVariable</a></li>
-                <li class="class"><a href="Vala.WhileStatement.html">WhileStatement</a></li>
-                <li class="class"><a href="Vala.Parameter.html">Parameter</a></li>
-                <li class="class"><a href="Vala.MemberInitializer.html">MemberInitializer</a></li>
-                <li class="class"><a href="Vala.Enum.html">Enum</a></li>
-                <li class="class"><a href="Vala.TypeParameter.html">TypeParameter</a></li>
-                <li class="class"><a href="Vala.Tuple.html">Tuple</a></li>
-                <li class="class"><a href="Vala.UnresolvedSymbol.html">UnresolvedSymbol</a></li>
-                <li class="class"><a href="Vala.ArrayMoveMethod.html">ArrayMoveMethod</a></li>
-                <li class="class"><a href="Vala.NamedArgument.html">NamedArgument</a></li>
-                <li class="class"><a href="Vala.BreakStatement.html">BreakStatement</a></li>
-                <li class="class"><a href="Vala.UnlockStatement.html">UnlockStatement</a></li>
-                <li class="class"><a href="Vala.StructValueType.html">StructValueType</a></li>
-                <li class="class"><a href="Vala.Signal.html">Signal</a></li>
-                <li class="class"><a href="Vala.ReferenceTransferExpression.html">ReferenceTransferExpression</a></li>
-                <li class="class"><a href="Vala.NullLiteral.html">NullLiteral</a></li>
-                <li class="class"><a href="Vala.Interface.html">Interface</a></li>
-                <li class="class"><a href="Vala.ErrorCode.html">ErrorCode</a></li>
-                <li class="class"><a href="Vala.DelegateType.html">DelegateType</a></li>
-                <li class="class"><a href="Vala.InitializerList.html">InitializerList</a></li>
-                <li class="class"><a href="Vala.IntegerLiteral.html">IntegerLiteral</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="abstract_class"><a href="Vala.TypeSymbol.html">TypeSymbol</a></li>
-                <li class="class"><a href="Vala.CharacterLiteral.html">CharacterLiteral</a></li>
-                <li class="class"><a href="Vala.TryStatement.html">TryStatement</a></li>
-                <li class="class"><a href="Vala.PropertyAccessor.html">PropertyAccessor</a></li>
-                <li class="class"><a href="Vala.ArrayLengthField.html">ArrayLengthField</a></li>
-                <li class="class"><a href="Vala.DeclarationStatement.html">DeclarationStatement</a></li>
-                <li class="class"><a href="Vala.LambdaExpression.html">LambdaExpression</a></li>
-                <li class="class"><a href="Vala.ClassType.html">ClassType</a></li>
-                <li class="class"><a href="Vala.PointerType.html">PointerType</a></li>
-                <li class="class"><a href="Vala.IntegerType.html">IntegerType</a></li>
                 <li class="class"><a href="Vala.AddressofExpression.html">AddressofExpression</a></li>
-                <li class="class"><a href="Vala.SwitchStatement.html">SwitchStatement</a></li>
-                <li class="abstract_class"><a href="Vala.Literal.html">Literal</a></li>
-                <li class="class"><a href="Vala.ObjectType.html">ObjectType</a></li>
-                <li class="class"><a href="Vala.Method.html">Method</a></li>
-                <li class="abstract_class"><a href="Vala.ValueType.html">ValueType</a></li>
+                <li class="class"><a href="Vala.ArrayCopyMethod.html">ArrayCopyMethod</a></li>
+                <li class="class"><a href="Vala.ArrayCreationExpression.html">ArrayCreationExpression</a></li>
+                <li class="class"><a href="Vala.ArrayLengthField.html">ArrayLengthField</a></li>
+                <li class="class"><a href="Vala.ArrayMoveMethod.html">ArrayMoveMethod</a></li>
+                <li class="class"><a href="Vala.ArrayResizeMethod.html">ArrayResizeMethod</a></li>
+                <li class="class"><a href="Vala.ArrayType.html">ArrayType</a></li>
+                <li class="class"><a href="Vala.Assignment.html">Assignment</a></li>
                 <li class="class"><a href="Vala.Attribute.html">Attribute</a></li>
                 <li class="class"><a href="Vala.BaseAccess.html">BaseAccess</a></li>
-                <li class="class"><a href="Vala.YieldStatement.html">YieldStatement</a></li>
+                <li class="class"><a href="Vala.BinaryExpression.html">BinaryExpression</a></li>
+                <li class="class"><a href="Vala.Block.html">Block</a></li>
+                <li class="class"><a href="Vala.BooleanLiteral.html">BooleanLiteral</a></li>
+                <li class="class"><a href="Vala.BooleanType.html">BooleanType</a></li>
+                <li class="class"><a href="Vala.BreakStatement.html">BreakStatement</a></li>
                 <li class="abstract_class"><a href="Vala.CallableType.html">CallableType</a></li>
-                <li class="class"><a href="Vala.ArrayCreationExpression.html">ArrayCreationExpression</a></li>
-                <li class="class"><a href="Vala.EnumValueType.html">EnumValueType</a></li>
-                <li class="class"><a href="Vala.DynamicProperty.html">DynamicProperty</a></li>
-                <li class="class"><a href="Vala.Namespace.html">Namespace</a></li>
-                <li class="abstract_class"><a href="Vala.Expression.html">Expression</a></li>
-                <li class="class"><a href="Vala.DeleteStatement.html">DeleteStatement</a></li>
-                <li class="class"><a href="Vala.Loop.html">Loop</a></li>
-                <li class="class"><a href="Vala.InvalidType.html">InvalidType</a></li>
-                <li class="class"><a href="Vala.Property.html">Property</a></li>
-                <li class="class"><a href="Vala.VoidType.html">VoidType</a></li>
-                <li class="class"><a href="Vala.UsingDirective.html">UsingDirective</a></li>
-                <li class="abstract_class"><a href="Vala.Subroutine.html">Subroutine</a></li>
-                <li class="class"><a href="Vala.PostfixExpression.html">PostfixExpression</a></li>
-                <li class="class"><a href="Vala.ArrayCopyMethod.html">ArrayCopyMethod</a></li>
-                <li class="class"><a href="Vala.RegexLiteral.html">RegexLiteral</a></li>
-                <li class="class"><a href="Vala.IfStatement.html">IfStatement</a></li>
-                <li class="class"><a href="Vala.ContinueStatement.html">ContinueStatement</a></li>
+                <li class="class"><a href="Vala.CastExpression.html">CastExpression</a></li>
+                <li class="class"><a href="Vala.CatchClause.html">CatchClause</a></li>
+                <li class="class"><a href="Vala.CharacterLiteral.html">CharacterLiteral</a></li>
+                <li class="class"><a href="Vala.Class.html">Class</a></li>
+                <li class="class"><a href="Vala.ClassType.html">ClassType</a></li>
+                <li class="class"><a href="Vala.ConditionalExpression.html">ConditionalExpression</a></li>
+                <li class="class"><a href="Vala.Constant.html">Constant</a></li>
                 <li class="class"><a href="Vala.Constructor.html">Constructor</a></li>
+                <li class="class"><a href="Vala.ContinueStatement.html">ContinueStatement</a></li>
+                <li class="class"><a href="Vala.CreationMethod.html">CreationMethod</a></li>
+                <li class="abstract_class"><a href="Vala.DataType.html">DataType</a></li>
+                <li class="class"><a href="Vala.DeclarationStatement.html">DeclarationStatement</a></li>
+                <li class="class"><a href="Vala.Delegate.html">Delegate</a></li>
+                <li class="class"><a href="Vala.DelegateType.html">DelegateType</a></li>
+                <li class="class"><a href="Vala.DeleteStatement.html">DeleteStatement</a></li>
+                <li class="class"><a href="Vala.Destructor.html">Destructor</a></li>
+                <li class="class"><a href="Vala.DoStatement.html">DoStatement</a></li>
+                <li class="class"><a href="Vala.DynamicMethod.html">DynamicMethod</a></li>
+                <li class="class"><a href="Vala.DynamicProperty.html">DynamicProperty</a></li>
+                <li class="class"><a href="Vala.DynamicSignal.html">DynamicSignal</a></li>
+                <li class="class"><a href="Vala.ElementAccess.html">ElementAccess</a></li>
+                <li class="class"><a href="Vala.EmptyStatement.html">EmptyStatement</a></li>
+                <li class="class"><a href="Vala.Enum.html">Enum</a></li>
+                <li class="class"><a href="Vala.EnumValue.html">EnumValue</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="class"><a href="Vala.EnumValueType.html">EnumValueType</a></li>
+                <li class="class"><a href="Vala.ErrorCode.html">ErrorCode</a></li>
+                <li class="class"><a href="Vala.ErrorDomain.html">ErrorDomain</a></li>
+                <li class="class"><a href="Vala.ErrorType.html">ErrorType</a></li>
+                <li class="abstract_class"><a href="Vala.Expression.html">Expression</a></li>
+                <li class="class"><a href="Vala.ExpressionStatement.html">ExpressionStatement</a></li>
+                <li class="class"><a href="Vala.Field.html">Field</a></li>
+                <li class="class"><a href="Vala.FieldPrototype.html">FieldPrototype</a></li>
+                <li class="class"><a href="Vala.FloatingType.html">FloatingType</a></li>
+                <li class="class"><a href="Vala.ForStatement.html">ForStatement</a></li>
+                <li class="class"><a href="Vala.ForeachStatement.html">ForeachStatement</a></li>
+                <li class="class"><a href="Vala.GenericType.html">GenericType</a></li>
+                <li class="class"><a href="Vala.IfStatement.html">IfStatement</a></li>
+                <li class="class"><a href="Vala.InitializerList.html">InitializerList</a></li>
+                <li class="class"><a href="Vala.IntegerLiteral.html">IntegerLiteral</a></li>
+                <li class="class"><a href="Vala.IntegerType.html">IntegerType</a></li>
+                <li class="class"><a href="Vala.Interface.html">Interface</a></li>
+                <li class="class"><a href="Vala.InterfaceType.html">InterfaceType</a></li>
+                <li class="class"><a href="Vala.InvalidType.html">InvalidType</a></li>
+                <li class="class"><a href="Vala.LambdaExpression.html">LambdaExpression</a></li>
+                <li class="abstract_class"><a href="Vala.Literal.html">Literal</a></li>
+                <li class="class"><a href="Vala.LocalVariable.html">LocalVariable</a></li>
+                <li class="class"><a href="Vala.LockStatement.html">LockStatement</a></li>
+                <li class="class"><a href="Vala.Loop.html">Loop</a></li>
+                <li class="class"><a href="Vala.MemberAccess.html">MemberAccess</a></li>
+                <li class="class"><a href="Vala.MemberInitializer.html">MemberInitializer</a></li>
+                <li class="class"><a href="Vala.Method.html">Method</a></li>
+                <li class="class"><a href="Vala.MethodCall.html">MethodCall</a></li>
+                <li class="class"><a href="Vala.MethodType.html">MethodType</a></li>
+                <li class="class"><a href="Vala.NamedArgument.html">NamedArgument</a></li>
+                <li class="class"><a href="Vala.Namespace.html">Namespace</a></li>
+                <li class="class"><a href="Vala.NullLiteral.html">NullLiteral</a></li>
+                <li class="class"><a href="Vala.NullType.html">NullType</a></li>
+                <li class="class"><a href="Vala.ObjectCreationExpression.html">ObjectCreationExpression</a></li>
+                <li class="class"><a href="Vala.ObjectType.html">ObjectType</a></li>
+                <li class="abstract_class"><a href="Vala.ObjectTypeSymbol.html">ObjectTypeSymbol</a></li>
+                <li class="class"><a href="Vala.Parameter.html">Parameter</a></li>
+                <li class="class"><a href="Vala.PointerIndirection.html">PointerIndirection</a></li>
+                <li class="class"><a href="Vala.PointerType.html">PointerType</a></li>
+                <li class="class"><a href="Vala.PostfixExpression.html">PostfixExpression</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="class"><a href="Vala.Property.html">Property</a></li>
+                <li class="class"><a href="Vala.PropertyAccessor.html">PropertyAccessor</a></li>
+                <li class="class"><a href="Vala.PropertyPrototype.html">PropertyPrototype</a></li>
+                <li class="class"><a href="Vala.RealLiteral.html">RealLiteral</a></li>
+                <li class="class"><a href="Vala.ReferenceTransferExpression.html">ReferenceTransferExpression</a></li>
+                <li class="abstract_class"><a href="Vala.ReferenceType.html">ReferenceType</a></li>
+                <li class="class"><a href="Vala.RegexLiteral.html">RegexLiteral</a></li>
+                <li class="class"><a href="Vala.ReturnStatement.html">ReturnStatement</a></li>
+                <li class="class"><a href="Vala.Signal.html">Signal</a></li>
+                <li class="class"><a href="Vala.SignalType.html">SignalType</a></li>
+                <li class="class"><a href="Vala.SizeofExpression.html">SizeofExpression</a></li>
+                <li class="class"><a href="Vala.SliceExpression.html">SliceExpression</a></li>
+                <li class="class"><a href="Vala.StatementList.html">StatementList</a></li>
+                <li class="class"><a href="Vala.StringLiteral.html">StringLiteral</a></li>
+                <li class="class"><a href="Vala.Struct.html">Struct</a></li>
+                <li class="class"><a href="Vala.StructValueType.html">StructValueType</a></li>
+                <li class="abstract_class"><a href="Vala.Subroutine.html">Subroutine</a></li>
+                <li class="class"><a href="Vala.SwitchLabel.html">SwitchLabel</a></li>
+                <li class="class"><a href="Vala.SwitchSection.html">SwitchSection</a></li>
+                <li class="class"><a href="Vala.SwitchStatement.html">SwitchStatement</a></li>
+                <li class="abstract_class"><a href="Vala.Symbol.html">Symbol</a></li>
+                <li class="class"><a href="Vala.Template.html">Template</a></li>
+                <li class="class"><a href="Vala.ThrowStatement.html">ThrowStatement</a></li>
+                <li class="class"><a href="Vala.TryStatement.html">TryStatement</a></li>
+                <li class="class"><a href="Vala.Tuple.html">Tuple</a></li>
+                <li class="class"><a href="Vala.TypeCheck.html">TypeCheck</a></li>
+                <li class="class"><a href="Vala.TypeParameter.html">TypeParameter</a></li>
+                <li class="abstract_class"><a href="Vala.TypeSymbol.html">TypeSymbol</a></li>
+                <li class="class"><a href="Vala.TypeofExpression.html">TypeofExpression</a></li>
+                <li class="class"><a href="Vala.UnaryExpression.html">UnaryExpression</a></li>
+                <li class="class"><a href="Vala.UnlockStatement.html">UnlockStatement</a></li>
+                <li class="class"><a href="Vala.UnresolvedSymbol.html">UnresolvedSymbol</a></li>
+                <li class="class"><a href="Vala.UnresolvedType.html">UnresolvedType</a></li>
+                <li class="class"><a href="Vala.UsingDirective.html">UsingDirective</a></li>
+                <li class="abstract_class"><a href="Vala.ValueType.html">ValueType</a></li>
                 <li class="class"><a href="Vala.Variable.html">Variable</a></li>
+                <li class="class"><a href="Vala.VoidType.html">VoidType</a></li>
+                <li class="class"><a href="Vala.WhileStatement.html">WhileStatement</a></li>
+                <li class="class"><a href="Vala.YieldStatement.html">YieldStatement</a></li>
               </ul>
             </div>
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-94')">Required by:</div>
-          <div class="content" id="box-content-94">
+          <div class="headline" onclick="toggle_box (this, 'box-content-97')">Required by:</div>
+          <div class="content" id="box-content-97">
             <div class="column">
               <ul class="navi_inline">
                 <li class="interface"><a href="Vala.Callable.html">Callable</a></li>
@@ -255,74 +256,59 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Properties:</h3>
         <ul class="navi_inline">
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><span class="abstract_class">CodeNode</span></span>? <b><a href="Vala.CodeNode.parent_node.html" class="property">parent_node</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Parent of this code node.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? <b><a href="Vala.CodeNode.source_reference.html" class="property">source_reference</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">References the location in the source file where this code node has 
-                been written.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CodeNode.unreachable.html" class="property">unreachable</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CodeNode.checked.html" class="property">checked</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CodeNode.type_name.html" class="property">type_name</a></b> { <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CodeNode.checked.html" class="property">checked</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CodeNode.error.html" class="property">error</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CodeNode.error.html" class="property">error</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Specifies whether a fatal error has been detected in this code node.
               </span>
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CodeNode.tree_can_fail.html" class="property">tree_can_fail</a></b> { <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><span class="abstract_class">CodeNode</span></span>? <b><a href="Vala.CodeNode.parent_node.html" class="property">parent_node</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Parent of this code node.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? <b><a href="Vala.CodeNode.source_reference.html" class="property">source_reference</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">References the location in the source file where this code node has 
+                been written.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CodeNode.tree_can_fail.html" class="property">tree_can_fail</a></b> { <span class="main_keyword">get</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Specifies that this node or a child node may throw an exception.
               </span>
             </div></li>
-        </ul>
-        <h3 class="main_title">Static methods:</h3>
-        <ul class="navi_inline">
-          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CodeNode.get_temp_name.html" class="static_method">get_temp_name</a></b> ()
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.CodeNode.type_name.html" class="property">type_name</a></b> { <span class="main_keyword">get</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.CodeNode.get_attribute_cache_index.html" class="static_method">get_attribute_cache_index</a></b> ()
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CodeNode.unreachable.html" class="property">unreachable</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+        </ul>
+        <h3 class="main_title">Static methods:</h3>
+        <ul class="navi_inline">
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.CodeNode.get_attribute_cache_index.html" class="static_method">get_attribute_cache_index</a></b> ()
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Returns a new cache index for accessing the attributes cache of code 
                 nodes</span>
             </div></li>
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.CodeNode.get_temp_name.html" class="static_method">get_temp_name</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
         </ul>
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
-          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.CodeNode.CodeNode.html" class="creation_method">CodeNode</a></b> ()
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <b><a href="Vala.CodeNode.CodeNode.html" class="creation_method">CodeNode</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>&gt; <b><a href="Vala.CodeNode.get_error_types.html" class="method">get_error_types</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Specifies the exceptions that can be thrown by this node or a child 
-                node</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.add_error_type.html" class="method">add_error_type</a></b> (<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span> error_type)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Adds an error type to the exceptions that can be thrown by this node 
-                or a child node</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.add_error_types.html" class="method">add_error_types</a></b> (<span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>&gt; error_types)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Adds a collection of error types to the exceptions that can be thrown 
-                by this node or a child node</span>
-            </div></li>
           <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.accept.html" class="virtual_method">accept</a></b> (<span class="main_type"><a href="Vala.CodeVisitor.html" class="abstract_class">CodeVisitor</a></span> visitor)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Visits this code node with the specified CodeVisitor.</span>
@@ -332,11 +318,83 @@
             <div class="leaf_brief_description"><span class="brief_description">Visits all children of this code node with the specified CodeVisitor.
               </span>
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CodeNode.check.html" class="virtual_method">check</a></b> (<span class="main_type"><a href="Vala.CodeContext.html" class="class">CodeContext</a></span> context)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CodeNode.check.html" class="virtual_method">check</a></b> (<span class="main_type"><a href="Vala.CodeContext.html" class="class">CodeContext</a></span> context)
             </span>
             <div class="leaf_brief_description">
             </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CodeNode.copy_attribute_bool.html" class="method">copy_attribute_bool</a></b> (<span class="main_type"><span class="abstract_class">CodeNode</span></span> source, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> attribute, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> argument)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Copy the boolean value of the specified attribute argument if 
+                available.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CodeNode.copy_attribute_double.html" class="method">copy_attribute_double</a></b> (<span class="main_type"><span class="abstract_class">CodeNode</span></span> source, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> attribute, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> argument)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Copy the double value of the specified attribute argument if 
+                available.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CodeNode.copy_attribute_integer.html" class="method">copy_attribute_integer</a></b> (<span class="main_type"><span class="abstract_class">CodeNode</span></span> source, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> attribute, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> argument)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Copy the integer value of the specified attribute argument if 
+                available.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CodeNode.copy_attribute_string.html" class="method">copy_attribute_string</a></b> (<span class="main_type"><span class="abstract_class">CodeNode</span></span> source, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> attribute, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> argument)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Copy the string value of the specified attribute argument if 
+                available.</span>
+            </div></li>
           <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.emit.html" class="virtual_method">emit</a></b> (<span class="main_type"><a href="Vala.CodeGenerator.html" class="abstract_class">CodeGenerator</a></span> codegen)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>? <b><a href="Vala.CodeNode.get_attribute.html" class="method">get_attribute</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the specified attribute.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CodeNode.get_attribute_bool.html" class="method">get_attribute_bool</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> attribute, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> argument, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> default_value = <span class="main_literal">false</span>)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the bool value of the specified attribute argument.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Vala.AttributeCache.html" class="class">AttributeCache</a></span>? <b><a href="Vala.CodeNode.get_attribute_cache.html" class="method">get_attribute_cache</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> index)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the attribute cache at the specified index.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/double.html" class="struct">double</a></span> <b><a href="Vala.CodeNode.get_attribute_double.html" class="method">get_attribute_double</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> attribute, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> argument, <span class="main_basic_type"><a href="../glib-2.0/double.html" class="struct">double</a></span> default_value = <span class="main_literal">0</span>)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the double value of the specified attribute argument.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.CodeNode.get_attribute_integer.html" class="method">get_attribute_integer</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> attribute, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> argument, <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> default_value = <span class="main_literal">0</span>)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the integer value of the specified attribute argument.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Vala.CodeNode.get_attribute_string.html" class="method">get_attribute_string</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> attribute, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> argument, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? default_value = <span class="main_literal">null</span>)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the string value of the specified attribute argument.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.get_defined_variables.html" class="virtual_method">get_defined_variables</a></b> (<span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Vala.Variable.html" class="class">Variable</a></span>&gt; collection)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.get_error_types.html" class="virtual_method">get_error_types</a></b> (<span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>&gt; collection, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? source_reference = <span class="main_literal">null</span>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span> <b><a href="Vala.CodeNode.get_or_create_attribute.html" class="method">get_or_create_attribute</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.get_used_variables.html" class="virtual_method">get_used_variables</a></b> (<span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Vala.Variable.html" class="class">Variable</a></span>&gt; collection)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CodeNode.has_attribute_argument.html" class="method">has_attribute_argument</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> attribute, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> argument)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns true if the specified attribute argument is set.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.remove_attribute_argument.html" class="method">remove_attribute_argument</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> attribute, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> argument)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Remove the specified named attribute argument</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.replace_expression.html" class="virtual_method">replace_expression</a></b> (<span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> old_node, <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> new_node)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -344,85 +402,45 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.replace_expression.html" class="virtual_method">replace_expression</a></b> (<span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> old_node, <span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span> new_node)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>? <b><a href="Vala.CodeNode.get_attribute.html" class="method">get_attribute</a></b> (<span class="main_basic_type"><span class="class">string</span></span> name)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the specified attribute.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span> <b><a href="Vala.CodeNode.get_or_create_attribute.html" class="method">get_or_create_attribute</a></b> (<span class="main_basic_type"><span class="class">string</span></span> name)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CodeNode.has_attribute_argument.html" class="method">has_attribute_argument</a></b> (<span class="main_basic_type"><span class="class">string</span></span> attribute, <span class="main_basic_type"><span class="class">string</span></span> argument)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns true if the specified attribute argument is set.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.set_attribute.html" class="method">set_attribute</a></b> (<span class="main_basic_type"><span class="class">string</span></span> name, <span class="main_basic_type"><span class="struct">bool</span></span> value, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? source_reference = <span class="main_literal">null</span>)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.set_attribute.html" class="method">set_attribute</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> value, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? source_reference = <span class="main_literal">null</span>)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Sets the specified named attribute to this code node.</span>
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.remove_attribute_argument.html" class="method">remove_attribute_argument</a></b> (<span class="main_basic_type"><span class="class">string</span></span> attribute, <span class="main_basic_type"><span class="class">string</span></span> argument)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Remove the specified named attribute argument</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Vala.CodeNode.get_attribute_string.html" class="method">get_attribute_string</a></b> (<span class="main_basic_type"><span class="class">string</span></span> attribute, <span class="main_basic_type"><span class="class">string</span></span> argument, <span class="main_basic_type"><span class="class">string</span></span>? default_value = <span class="main_literal">null</span>)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the string value of the specified attribute argument.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.CodeNode.get_attribute_integer.html" class="method">get_attribute_integer</a></b> (<span class="main_basic_type"><span class="class">string</span></span> attribute, <span class="main_basic_type"><span class="class">string</span></span> argument, <span class="main_basic_type"><span class="struct">int</span></span> default_value = <span class="main_literal">0</span>)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the integer value of the specified attribute argument.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">double</span></span> <b><a href="Vala.CodeNode.get_attribute_double.html" class="method">get_attribute_double</a></b> (<span class="main_basic_type"><span class="class">string</span></span> attribute, <span class="main_basic_type"><span class="class">string</span></span> argument, <span class="main_basic_type"><span class="struct">double</span></span> default_value = <span class="main_literal">0</span>)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the double value of the specified attribute argument.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CodeNode.get_attribute_bool.html" class="method">get_attribute_bool</a></b> (<span class="main_basic_type"><span class="class">string</span></span> attribute, <span class="main_basic_type"><span class="class">string</span></span> argument, <span class="main_basic_type"><span class="struct">bool</span></span> default_value = <span class="main_literal">false</span>)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the bool value of the specified attribute argument.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.set_attribute_string.html" class="method">set_attribute_string</a></b> (<span class="main_basic_type"><span class="class">string</span></span> attribute, <span class="main_basic_type"><span class="class">string</span></span> argument, <span class="main_basic_type"><span class="class">string</span></span>? value, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? source_reference = <span class="main_literal">null</span>)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Sets the string value of the specified attribute argument.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.set_attribute_integer.html" class="method">set_attribute_integer</a></b> (<span class="main_basic_type"><span class="class">string</span></span> attribute, <span class="main_basic_type"><span class="class">string</span></span> argument, <span class="main_basic_type"><span class="struct">int</span></span> value, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? source_reference = <span class="main_literal">null</span>)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Sets the integer value of the specified attribute argument.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.set_attribute_double.html" class="method">set_attribute_double</a></b> (<span class="main_basic_type"><span class="class">string</span></span> attribute, <span class="main_basic_type"><span class="class">string</span></span> argument, <span class="main_basic_type"><span class="struct">double</span></span> value, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? source_reference = <span class="main_literal">null</span>)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Sets the integer value of the specified attribute argument.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.set_attribute_bool.html" class="method">set_attribute_bool</a></b> (<span class="main_basic_type"><span class="class">string</span></span> attribute, <span class="main_basic_type"><span class="class">string</span></span> argument, <span class="main_basic_type"><span class="struct">bool</span></span> value, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? source_reference = <span class="main_literal">null</span>)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.set_attribute_bool.html" class="method">set_attribute_bool</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> attribute, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> argument, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> value, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? source_reference = <span class="main_literal">null</span>)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Sets the boolean value of the specified attribute argument.</span>
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Vala.AttributeCache.html" class="class">AttributeCache</a></span>? <b><a href="Vala.CodeNode.get_attribute_cache.html" class="method">get_attribute_cache</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> index)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the attribute cache at the specified index.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.set_attribute_cache.html" class="method">set_attribute_cache</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> index, <span class="main_type"><a href="Vala.AttributeCache.html" class="class">AttributeCache</a></span> cache)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.set_attribute_cache.html" class="method">set_attribute_cache</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> index, <span class="main_type"><a href="Vala.AttributeCache.html" class="class">AttributeCache</a></span> cache)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Sets the specified attribute cache to this code node.</span>
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CodeNode.to_string.html" class="virtual_method">to_string</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.set_attribute_double.html" class="method">set_attribute_double</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> attribute, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> argument, <span class="main_basic_type"><a href="../glib-2.0/double.html" class="struct">double</a></span> value, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? source_reference = <span class="main_literal">null</span>)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Sets the integer value of the specified attribute argument.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.set_attribute_integer.html" class="method">set_attribute_integer</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> attribute, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> argument, <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> value, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? source_reference = <span class="main_literal">null</span>)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Sets the integer value of the specified attribute argument.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.set_attribute_string.html" class="method">set_attribute_string</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> attribute, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> argument, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? value, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? source_reference = <span class="main_literal">null</span>)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Sets the string value of the specified attribute argument.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.CodeNode.to_string.html" class="virtual_method">to_string</a></b> ()
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Returns a string that represents this code node.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.get_defined_variables.html" class="virtual_method">get_defined_variables</a></b> (<span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Vala.Variable.html" class="class">Variable</a></span>&gt; collection)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeNode.get_used_variables.html" class="virtual_method">get_used_variables</a></b> (<span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Vala.Variable.html" class="class">Variable</a></span>&gt; collection)
-            </span>
-            <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CodeNode._checked.html" class="field">_checked</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CodeNode._error.html" class="field">_error</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">weak</span> <span class="main_type"><span class="abstract_class">CodeNode</span></span>? <b><a href="Vala.CodeNode._parent_node.html" class="field">_parent_node</a></b>
             </span>
             <div class="leaf_brief_description">
@@ -431,47 +449,31 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CodeNode._unreachable.html" class="field">_unreachable</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CodeNode._unreachable.html" class="field">_unreachable</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">List</span></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt; <b><a href="Vala.CodeNode.attributes.html" class="field">attributes</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../glib-2.0/GLib.List.html" class="class">List</a></span>&lt;<span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>&gt; <b><a href="Vala.CodeNode.attributes.html" class="field">attributes</a></b>
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Contains all attributes that have been specified for this code node.
               </span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CodeNode._checked.html" class="field">_checked</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CodeNode._error.html" class="field">_error</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>&gt; <b><a href="Vala.CodeNode._error_types.html" class="field">_error_types</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>&gt; <b><a href="Vala.CodeNode._empty_type_list.html" class="field">_empty_type_list</a></b>
-            </span>
-            <div class="leaf_brief_description">
             </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.AttributeCache.html" class="class">AttributeCache</a></span>[] <b><a href="Vala.CodeNode.attributes_cache.html" class="field">attributes_cache</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.CodeNode.last_temp_nr.html" class="field">last_temp_nr</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.CodeNode.last_temp_nr.html" class="field">last_temp_nr</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.CodeNode.next_attribute_cache_index.html" class="field">next_attribute_cache_index</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.CodeNode.next_attribute_cache_index.html" class="field">next_attribute_cache_index</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

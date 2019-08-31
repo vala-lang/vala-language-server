@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -59,10 +59,10 @@
         <img class="main_diagram" usemap="#Vala.HashSet" alt="Object hierarchy for HashSet" src="img/Vala.HashSet.svg"/>
 
       <map id="Vala.HashSet" name="Vala.HashSet">
-<area shape="rect" id="node1" href="Vala.HashSet.html" title="Vala.HashSet" alt="" coords="13,293,147,341"/>
-<area shape="rect" id="node2" href="Vala.Set.html" title="Vala.Set" alt="" coords="35,197,125,245"/>
-<area shape="rect" id="node3" href="Vala.Collection.html" title="Vala.Collection" alt="" coords="5,101,155,149"/>
-<area shape="rect" id="node4" href="Vala.Iterable.html" title="Vala.Iterable" alt="" coords="15,5,145,53"/>
+<area shape="rect" id="node1" href="Vala.HashSet.html" title="Vala.HashSet" alt="" coords="13,293,133,341"/>
+<area shape="rect" id="node2" href="Vala.Set.html" title="Vala.Set" alt="" coords="31,197,114,245"/>
+<area shape="rect" id="node3" href="Vala.Collection.html" title="Vala.Collection" alt="" coords="5,101,140,149"/>
+<area shape="rect" id="node4" href="Vala.Iterable.html" title="Vala.Iterable" alt="" coords="15,5,130,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -78,65 +78,45 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Classes:</h3>
         <ul class="navi_inline">
-          <li class="class"><a href="Vala.HashSet.Node.html">Node</a></li>
           <li class="class"><a href="Vala.HashSet.Iterator.html">Iterator</a></li>
+          <li class="class"><a href="Vala.HashSet.Node.html">Node</a></li>
         </ul>
         <h3 class="main_title">Constants:</h3>
         <ul class="navi_inline">
-          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.HashSet.MIN_SIZE.html" class="constant">MIN_SIZE</a></b>
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.HashSet.MAX_SIZE.html" class="constant">MAX_SIZE</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.HashSet.MAX_SIZE.html" class="constant">MAX_SIZE</a></b>
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.HashSet.MIN_SIZE.html" class="constant">MIN_SIZE</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Properties:</h3>
         <ul class="navi_inline">
-          <li class="virtual_property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.HashSet.size.html" class="virtual_property">size</a></b> { <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../glib-2.0/GLib.EqualFunc.html" class="delegate">EqualFunc</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.HashSet.equal_func.html" class="property">equal_func</a></b> { <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="delegate">HashFunc</span></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.HashSet.hash_func.html" class="property">hash_func</a></b> { <span class="main_keyword">set</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../glib-2.0/GLib.HashFunc.html" class="delegate">HashFunc</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.HashSet.hash_func.html" class="property">hash_func</a></b> { <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="delegate">EqualFunc</span></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.HashSet.equal_func.html" class="property">equal_func</a></b> { <span class="main_keyword">set</span>; }
+          <li class="virtual_property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.HashSet.size.html" class="virtual_property">size</a></b> { <span class="main_keyword">get</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
-          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.HashSet.HashSet.html" class="creation_method">HashSet</a></b> (<span class="main_type"><span class="delegate">HashFunc</span></span>&lt;<span class="main_type"><span>G</span></span>&gt; hash_func = <b><span class="field">direct_hash</span></b>, <span class="main_type"><span class="delegate">EqualFunc</span></span>&lt;<span class="main_type"><span>G</span></span>&gt; equal_func = <b><span class="field">direct_equal</span></b>)
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.HashSet.HashSet.html" class="creation_method">HashSet</a></b> (<span class="main_type"><a href="../glib-2.0/GLib.HashFunc.html" class="delegate">HashFunc</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; hash_func = <b><a href="../glib-2.0/GLib.direct_hash.html" class="field">direct_hash</a></b>, <span class="main_type"><a href="../glib-2.0/GLib.EqualFunc.html" class="delegate">EqualFunc</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; equal_func = <b><a href="../glib-2.0/GLib.direct_equal.html" class="field">direct_equal</a></b>)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.HashSet.Node.html" class="class">Node</a></span>&lt;<span class="main_type"><span>G</span></span>&gt;** <b><a href="Vala.HashSet.lookup_node.html" class="method">lookup_node</a></b> (<span class="main_type"><span>G</span></span> key)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.HashSet.contains.html" class="virtual_method">contains</a></b> (<span class="main_type"><span>G</span></span> key)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><span class="struct">Type</span></span> <b><a href="Vala.HashSet.get_element_type.html" class="virtual_method">get_element_type</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><a href="Vala.Iterator.html" class="abstract_class">Iterator</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.HashSet.iterator.html" class="virtual_method">iterator</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.HashSet.add.html" class="virtual_method">add</a></b> (<span class="main_type"><span>G</span></span> key)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.HashSet.remove.html" class="virtual_method">remove</a></b> (<span class="main_type"><span>G</span></span> key)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.HashSet.add.html" class="virtual_method">add</a></b> (<span class="main_type"><span>G</span></span> key)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -144,7 +124,27 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.HashSet.remove_helper.html" class="method">remove_helper</a></b> (<span class="main_type"><span>G</span></span> key)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.HashSet.contains.html" class="virtual_method">contains</a></b> (<span class="main_type"><span>G</span></span> key)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><a href="../gobject-2.0/GLib.Type.html" class="struct">Type</a></span> <b><a href="Vala.HashSet.get_element_type.html" class="virtual_method">get_element_type</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><a href="Vala.Iterator.html" class="abstract_class">Iterator</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.HashSet.iterator.html" class="virtual_method">iterator</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.HashSet.Node.html" class="class">Node</a></span>&lt;<span class="main_type"><span>G</span></span>&gt;** <b><a href="Vala.HashSet.lookup_node.html" class="method">lookup_node</a></b> (<span class="main_type"><span>G</span></span> key)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.HashSet.remove.html" class="virtual_method">remove</a></b> (<span class="main_type"><span>G</span></span> key)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.HashSet.remove_helper.html" class="method">remove_helper</a></b> (<span class="main_type"><span>G</span></span> key)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -155,11 +155,19 @@
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.HashSet._array_size.html" class="field">_array_size</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.HashSet._array_size.html" class="field">_array_size</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.HashSet._nnodes.html" class="field">_nnodes</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../glib-2.0/GLib.EqualFunc.html" class="delegate">EqualFunc</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.HashSet._equal_func.html" class="field">_equal_func</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../glib-2.0/GLib.HashFunc.html" class="delegate">HashFunc</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.HashSet._hash_func.html" class="field">_hash_func</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.HashSet._nnodes.html" class="field">_nnodes</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -167,59 +175,51 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.HashSet._stamp.html" class="field">_stamp</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="delegate">HashFunc</span></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.HashSet._hash_func.html" class="field">_hash_func</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="delegate">EqualFunc</span></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.HashSet._equal_func.html" class="field">_equal_func</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.HashSet._stamp.html" class="field">_stamp</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-11')">All known members inherited from class Vala.Collection</div>
-          <div class="content" id="box-content-11">
+          <div class="headline" onclick="toggle_box (this, 'box-content-67')">All known members inherited from class Vala.Collection</div>
+          <div class="content" id="box-content-67">
             <div class="column">
               <ul class="navi_inline">
-                <li class="abstract_property"><a href="Vala.Collection.size.html">size</a></li>
+                <li class="abstract_method"><a href="Vala.Collection.add.html">add</a></li>
+                <li class="virtual_method"><a href="Vala.Collection.add_all.html">add_all</a></li>
+                <li class="abstract_method"><a href="Vala.Collection.clear.html">clear</a></li>
+                <li class="abstract_method"><a href="Vala.Collection.contains.html">contains</a></li>
                 <li class="virtual_property"><a href="Vala.Collection.is_empty.html">is_empty</a></li>
+                <li class="abstract_method"><a href="Vala.Collection.remove.html">remove</a></li>
+                <li class="abstract_property"><a href="Vala.Collection.size.html">size</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="virtual_method"><a href="Vala.Collection.to_array.html">to_array</a></li>
                 <li class="static_method"><a href="Vala.Collection.to_bool_array.html">to_bool_array</a></li>
                 <li class="static_method"><a href="Vala.Collection.to_char_array.html">to_char_array</a></li>
-                <li class="static_method"><a href="Vala.Collection.to_uchar_array.html">to_uchar_array</a></li>
-                <li class="static_method"><a href="Vala.Collection.to_int_array.html">to_int_array</a></li>
-                <li class="static_method"><a href="Vala.Collection.to_uint_array.html">to_uint_array</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="static_method"><a href="Vala.Collection.to_int64_array.html">to_int64_array</a></li>
-                <li class="static_method"><a href="Vala.Collection.to_uint64_array.html">to_uint64_array</a></li>
-                <li class="static_method"><a href="Vala.Collection.to_long_array.html">to_long_array</a></li>
-                <li class="static_method"><a href="Vala.Collection.to_ulong_array.html">to_ulong_array</a></li>
-                <li class="static_method"><a href="Vala.Collection.to_float_array.html">to_float_array</a></li>
                 <li class="static_method"><a href="Vala.Collection.to_double_array.html">to_double_array</a></li>
+                <li class="static_method"><a href="Vala.Collection.to_float_array.html">to_float_array</a></li>
+                <li class="static_method"><a href="Vala.Collection.to_int64_array.html">to_int64_array</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="abstract_method"><a href="Vala.Collection.contains.html">contains</a></li>
-                <li class="abstract_method"><a href="Vala.Collection.add.html">add</a></li>
-                <li class="abstract_method"><a href="Vala.Collection.remove.html">remove</a></li>
-                <li class="abstract_method"><a href="Vala.Collection.clear.html">clear</a></li>
-                <li class="virtual_method"><a href="Vala.Collection.add_all.html">add_all</a></li>
-                <li class="virtual_method"><a href="Vala.Collection.to_array.html">to_array</a></li>
+                <li class="static_method"><a href="Vala.Collection.to_int_array.html">to_int_array</a></li>
+                <li class="static_method"><a href="Vala.Collection.to_long_array.html">to_long_array</a></li>
+                <li class="static_method"><a href="Vala.Collection.to_uchar_array.html">to_uchar_array</a></li>
+                <li class="static_method"><a href="Vala.Collection.to_uint64_array.html">to_uint64_array</a></li>
+                <li class="static_method"><a href="Vala.Collection.to_uint_array.html">to_uint_array</a></li>
+                <li class="static_method"><a href="Vala.Collection.to_ulong_array.html">to_ulong_array</a></li>
               </ul>
             </div>
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-12')">All known members inherited from class Vala.Iterable</div>
-          <div class="content" id="box-content-12">
+          <div class="headline" onclick="toggle_box (this, 'box-content-68')">All known members inherited from class Vala.Iterable</div>
+          <div class="content" id="box-content-68">
             <div class="column">
               <ul class="navi_inline">
                 <li class="abstract_method"><a href="Vala.Iterable.get_element_type.html">get_element_type</a></li>
@@ -238,7 +238,7 @@
         </div>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

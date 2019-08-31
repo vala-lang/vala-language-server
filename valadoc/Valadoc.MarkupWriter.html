@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -56,7 +56,7 @@
         <img class="main_diagram" usemap="#Valadoc.MarkupWriter" alt="Object hierarchy for MarkupWriter" src="img/Valadoc.MarkupWriter.svg"/>
 
       <map id="Valadoc.MarkupWriter" name="Valadoc.MarkupWriter">
-<area shape="rect" id="node1" href="Valadoc.MarkupWriter.html" title="Valadoc.MarkupWriter" alt="" coords="5,5,217,53"/>
+<area shape="rect" id="node1" href="Valadoc.MarkupWriter.html" title="Valadoc.MarkupWriter" alt="" coords="5,5,199,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -66,11 +66,11 @@
           <p>Writes markups and text to a file.</p>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-1')">All known sub-classes:</div>
-          <div class="content" id="box-content-1">
+          <div class="headline" onclick="toggle_box (this, 'box-content-2')">All known sub-classes:</div>
+          <div class="content" id="box-content-2">
             <div class="column">
               <ul class="navi_inline">
-                <li class="class"><a href="Valadoc.Html.MarkupWriter.html">MarkupWriter</a></li>
+                <li class="class"><a href="Valadoc.GtkDocMarkupWriter.html">GtkDocMarkupWriter</a></li>
               </ul>
             </div>
             <div class="column">
@@ -80,7 +80,7 @@
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="class"><a href="Valadoc.GtkDocMarkupWriter.html">GtkDocMarkupWriter</a></li>
+                <li class="class"><a href="Valadoc.Html.MarkupWriter.html">MarkupWriter</a></li>
               </ul>
             </div>
           </div>
@@ -92,106 +92,107 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Constants:</h3>
         <ul class="navi_inline">
-          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.MarkupWriter.MAX_COLUMN.html" class="constant">MAX_COLUMN</a></b>
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Valadoc.MarkupWriter.MAX_COLUMN.html" class="constant">MAX_COLUMN</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Delegates:</h3>
         <ul class="navi_inline">
-          <li class="delegate"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">delegate</span> <span class="main_keyword">void</span> <b><a href="Valadoc.MarkupWriter.WriteFunc.html" class="delegate">WriteFunc</a></b> (<span class="main_basic_type"><span class="class">string</span></span> text)
+          <li class="delegate"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">delegate</span> <span class="main_keyword">void</span> <b><a href="Valadoc.MarkupWriter.WriteFunc.html" class="delegate">WriteFunc</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> text)
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Writes text to a desination like a <span class="class">
-                  GLib.StringBuilder</span> or a <span class="class">GLib.FileStream</span></span>
+            <div class="leaf_brief_description"><span class="brief_description">Writes text to a desination like a 
+                <a href="../glib-2.0/GLib.StringBuilder.html" class="class">GLib.StringBuilder</a> or a 
+                <a href="../glib-2.0/GLib.FileStream.html" class="class">GLib.FileStream</a></span>
             </div></li>
         </ul>
         <h3 class="main_title">Static methods:</h3>
         <ul class="navi_inline">
-          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.MarkupWriter.escape.html" class="static_method">escape</a></b> (<span class="main_basic_type"><span class="class">string</span></span> txt)
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.MarkupWriter.escape.html" class="static_method">escape</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> txt)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
-          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Valadoc.MarkupWriter.MarkupWriter.html" class="creation_method">MarkupWriter</a></b> (<span class="main_keyword">owned</span> <span class="main_type"><a href="Valadoc.MarkupWriter.WriteFunc.html" class="delegate">WriteFunc</a></span> write, <span class="main_basic_type"><span class="struct">bool</span></span> xml_declaration = <span class="main_literal">true</span>)
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Valadoc.MarkupWriter.MarkupWriter.html" class="creation_method">MarkupWriter</a></b> (<span class="main_keyword">owned</span> <span class="main_type"><a href="Valadoc.MarkupWriter.WriteFunc.html" class="delegate">WriteFunc</a></span> write, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> xml_declaration = <span class="main_literal">true</span>)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Initializes a new instance of the MarkupWriter</span>
             </div></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">MarkupWriter</span></span> <b><a href="Valadoc.MarkupWriter.start_tag.html" class="method">start_tag</a></b> (<span class="main_basic_type"><span class="class">string</span></span> name, <span class="main_basic_type"><span class="class">string</span></span>[]? attributes = <span class="main_literal">null</span>)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Writes an start tag of a markup element to the file</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">MarkupWriter</span></span> <b><a href="Valadoc.MarkupWriter.simple_tag.html" class="method">simple_tag</a></b> (<span class="main_basic_type"><span class="class">string</span></span> name, <span class="main_basic_type"><span class="class">string</span></span>[]? attributes = <span class="main_literal">null</span>)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Writes a simple tag (&lt;name /&gt;) to the file</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">MarkupWriter</span></span> <b><a href="Valadoc.MarkupWriter.end_tag.html" class="method">end_tag</a></b> (<span class="main_basic_type"><span class="class">string</span></span> name)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Writes an end tag of a markup element to the file</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">MarkupWriter</span></span> <b><a href="Valadoc.MarkupWriter.text.html" class="method">text</a></b> (<span class="main_basic_type"><span class="class">string</span></span> text)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Writes the specified string to the output stream</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">MarkupWriter</span></span> <b><a href="Valadoc.MarkupWriter.raw_text.html" class="method">raw_text</a></b> (<span class="main_basic_type"><span class="class">string</span></span> text)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Writes the specified string to the output stream</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.MarkupWriter.set_wrap.html" class="method">set_wrap</a></b> (<span class="main_basic_type"><span class="struct">bool</span></span> wrap)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.MarkupWriter.break_line.html" class="method">break_line</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">void</span> <b><a href="Valadoc.MarkupWriter.do_write.html" class="method">do_write</a></b> (<span class="main_basic_type"><span class="class">string</span></span> text)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.MarkupWriter.check_column.html" class="method">check_column</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> end_tag = <span class="main_literal">false</span>)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.MarkupWriter.check_column.html" class="method">check_column</a></b> (<span class="main_basic_type"><span class="class">string</span></span> name, <span class="main_basic_type"><span class="struct">bool</span></span> end_tag = <span class="main_literal">false</span>)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.MarkupWriter.content_inline_element.html" class="virtual_method">content_inline_element</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.MarkupWriter.inline_element.html" class="virtual_method">inline_element</a></b> (<span class="main_basic_type"><span class="class">string</span></span> name)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">void</span> <b><a href="Valadoc.MarkupWriter.do_write.html" class="method">do_write</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> text)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.MarkupWriter.content_inline_element.html" class="virtual_method">content_inline_element</a></b> (<span class="main_basic_type"><span class="class">string</span></span> name)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><span class="class">MarkupWriter</span></span> <b><a href="Valadoc.MarkupWriter.end_tag.html" class="method">end_tag</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Writes an end tag of a markup element to the file</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.MarkupWriter.inline_element.html" class="virtual_method">inline_element</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name)
             </span>
             <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><span class="class">MarkupWriter</span></span> <b><a href="Valadoc.MarkupWriter.raw_text.html" class="method">raw_text</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> text)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Writes the specified string to the output stream</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.MarkupWriter.set_wrap.html" class="method">set_wrap</a></b> (<span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> wrap)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><span class="class">MarkupWriter</span></span> <b><a href="Valadoc.MarkupWriter.simple_tag.html" class="method">simple_tag</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>[]? attributes = <span class="main_literal">null</span>)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Writes a simple tag (&lt;name /&gt;) to the file</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><span class="class">MarkupWriter</span></span> <b><a href="Valadoc.MarkupWriter.start_tag.html" class="method">start_tag</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>[]? attributes = <span class="main_literal">null</span>)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Writes an start tag of a markup element to the file</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><span class="class">MarkupWriter</span></span> <b><a href="Valadoc.MarkupWriter.text.html" class="method">text</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> text)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Writes the specified string to the output stream</span>
             </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><a href="../glib-2.0/long.html" class="struct">long</a></span> <b><a href="Valadoc.MarkupWriter.current_column.html" class="field">current_column</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Valadoc.MarkupWriter.indent.html" class="field">indent</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.MarkupWriter.last_was_tag.html" class="field">last_was_tag</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.MarkupWriter.wrap.html" class="field">wrap</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_type"><a href="Valadoc.MarkupWriter.WriteFunc.html" class="delegate">WriteFunc</a></span> <b><a href="Valadoc.MarkupWriter.write.html" class="field">write</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.MarkupWriter.indent.html" class="field">indent</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="struct">long</span></span> <b><a href="Valadoc.MarkupWriter.current_column.html" class="field">current_column</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.MarkupWriter.last_was_tag.html" class="field">last_was_tag</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.MarkupWriter.wrap.html" class="field">wrap</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

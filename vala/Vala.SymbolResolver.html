@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -29,6 +29,7 @@
         <ul class="navi_main">
           <li class="creation_method"><a href="Vala.SymbolResolver.SymbolResolver.html">SymbolResolver</a></li>
           <li class="method"><a href="Vala.SymbolResolver.get_type_for_struct.html">get_type_for_struct</a></li>
+          <li class="method"><a href="Vala.SymbolResolver.has_base_struct_cycle.html">has_base_struct_cycle</a></li>
           <li class="method"><a href="Vala.SymbolResolver.resolve.html">resolve</a></li>
           <li class="method"><a href="Vala.SymbolResolver.resolve_symbol.html">resolve_symbol</a></li>
           <li class="method"><a href="Vala.SymbolResolver.resolve_type.html">resolve_type</a></li>
@@ -93,7 +94,6 @@
           <li class="virtual_method"><a href="Vala.SymbolResolver.visit_using_directive.html">visit_using_directive</a></li>
           <li class="virtual_method"><a href="Vala.SymbolResolver.visit_while_statement.html">visit_while_statement</a></li>
           <li class="virtual_method"><a href="Vala.SymbolResolver.visit_yield_statement.html">visit_yield_statement</a></li>
-          <li class="field"><a href="Vala.SymbolResolver.context.html">context</a></li>
           <li class="field"><a href="Vala.SymbolResolver.current_scope.html">current_scope</a></li>
           <li class="field"><a href="Vala.SymbolResolver.root_symbol.html">root_symbol</a></li>
         </ul>
@@ -105,8 +105,8 @@
         <img class="main_diagram" usemap="#Vala.SymbolResolver" alt="Object hierarchy for SymbolResolver" src="img/Vala.SymbolResolver.svg"/>
 
       <map id="Vala.SymbolResolver" name="Vala.SymbolResolver">
-<area shape="rect" id="node1" href="Vala.SymbolResolver.html" title="Vala.SymbolResolver" alt="" coords="5,101,204,149"/>
-<area shape="rect" id="node2" href="Vala.CodeVisitor.html" title="Vala.CodeVisitor" alt="" coords="23,5,186,53"/>
+<area shape="rect" id="node1" href="Vala.SymbolResolver.html" title="Vala.SymbolResolver" alt="" coords="5,101,187,149"/>
+<area shape="rect" id="node2" href="Vala.CodeVisitor.html" title="Vala.CodeVisitor" alt="" coords="22,5,170,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -129,75 +129,39 @@
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span> <b><a href="Vala.SymbolResolver.get_type_for_struct.html" class="method">get_type_for_struct</a></b> (<span class="main_type"><a href="Vala.Struct.html" class="class">Struct</a></span> st, <span class="main_type"><a href="Vala.Struct.html" class="class">Struct</a></span> base_struct)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.SymbolResolver.has_base_struct_cycle.html" class="method">has_base_struct_cycle</a></b> (<span class="main_type"><a href="Vala.Struct.html" class="class">Struct</a></span> st, <span class="main_type"><a href="Vala.Struct.html" class="class">Struct</a></span> loop_st)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.resolve.html" class="method">resolve</a></b> (<span class="main_type"><a href="Vala.CodeContext.html" class="class">CodeContext</a></span> context)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Resolve symbol names in the specified code context.</span>
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_namespace.html" class="virtual_method">visit_namespace</a></b> (<span class="main_type"><a href="Vala.Namespace.html" class="class">Namespace</a></span> ns)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span>? <b><a href="Vala.SymbolResolver.resolve_symbol.html" class="method">resolve_symbol</a></b> (<span class="main_type"><a href="Vala.UnresolvedSymbol.html" class="class">UnresolvedSymbol</a></span> unresolved_symbol)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_class.html" class="virtual_method">visit_class</a></b> (<span class="main_type"><a href="Vala.Class.html" class="class">Class</a></span> cl)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span> <b><a href="Vala.SymbolResolver.resolve_type.html" class="method">resolve_type</a></b> (<span class="main_type"><a href="Vala.UnresolvedType.html" class="class">UnresolvedType</a></span> unresolved_type)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_struct.html" class="virtual_method">visit_struct</a></b> (<span class="main_type"><a href="Vala.Struct.html" class="class">Struct</a></span> st)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_addressof_expression.html" class="virtual_method">visit_addressof_expression</a></b> (<span class="main_type"><a href="Vala.AddressofExpression.html" class="class">AddressofExpression</a></span> expr)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_interface.html" class="virtual_method">visit_interface</a></b> (<span class="main_type"><a href="Vala.Interface.html" class="class">Interface</a></span> iface)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_array_creation_expression.html" class="virtual_method">visit_array_creation_expression</a></b> (<span class="main_type"><a href="Vala.ArrayCreationExpression.html" class="class">ArrayCreationExpression</a></span> e)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_enum.html" class="virtual_method">visit_enum</a></b> (<span class="main_type"><a href="Vala.Enum.html" class="class">Enum</a></span> en)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_assignment.html" class="virtual_method">visit_assignment</a></b> (<span class="main_type"><a href="Vala.Assignment.html" class="class">Assignment</a></span> a)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_error_domain.html" class="virtual_method">visit_error_domain</a></b> (<span class="main_type"><a href="Vala.ErrorDomain.html" class="class">ErrorDomain</a></span> ed)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_delegate.html" class="virtual_method">visit_delegate</a></b> (<span class="main_type"><a href="Vala.Delegate.html" class="class">Delegate</a></span> cb)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_constant.html" class="virtual_method">visit_constant</a></b> (<span class="main_type"><a href="Vala.Constant.html" class="class">Constant</a></span> c)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_field.html" class="virtual_method">visit_field</a></b> (<span class="main_type"><a href="Vala.Field.html" class="class">Field</a></span> f)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_method.html" class="virtual_method">visit_method</a></b> (<span class="main_type"><a href="Vala.Method.html" class="class">Method</a></span> m)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_creation_method.html" class="virtual_method">visit_creation_method</a></b> (<span class="main_type"><a href="Vala.CreationMethod.html" class="class">CreationMethod</a></span> m)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_formal_parameter.html" class="virtual_method">visit_formal_parameter</a></b> (<span class="main_type"><a href="Vala.Parameter.html" class="class">Parameter</a></span> p)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_property.html" class="virtual_method">visit_property</a></b> (<span class="main_type"><a href="Vala.Property.html" class="class">Property</a></span> prop)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_property_accessor.html" class="virtual_method">visit_property_accessor</a></b> (<span class="main_type"><a href="Vala.PropertyAccessor.html" class="class">PropertyAccessor</a></span> acc)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_signal.html" class="virtual_method">visit_signal</a></b> (<span class="main_type"><a href="Vala.Signal.html" class="class">Signal</a></span> sig)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_constructor.html" class="virtual_method">visit_constructor</a></b> (<span class="main_type"><a href="Vala.Constructor.html" class="class">Constructor</a></span> c)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_destructor.html" class="virtual_method">visit_destructor</a></b> (<span class="main_type"><a href="Vala.Destructor.html" class="class">Destructor</a></span> d)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_binary_expression.html" class="virtual_method">visit_binary_expression</a></b> (<span class="main_type"><a href="Vala.BinaryExpression.html" class="class">BinaryExpression</a></span> expr)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -205,19 +169,31 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_using_directive.html" class="virtual_method">visit_using_directive</a></b> (<span class="main_type"><a href="Vala.UsingDirective.html" class="class">UsingDirective</a></span> ns)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_cast_expression.html" class="virtual_method">visit_cast_expression</a></b> (<span class="main_type"><a href="Vala.CastExpression.html" class="class">CastExpression</a></span> expr)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span>? <b><a href="Vala.SymbolResolver.resolve_symbol.html" class="method">resolve_symbol</a></b> (<span class="main_type"><a href="Vala.UnresolvedSymbol.html" class="class">UnresolvedSymbol</a></span> unresolved_symbol)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_catch_clause.html" class="virtual_method">visit_catch_clause</a></b> (<span class="main_type"><a href="Vala.CatchClause.html" class="class">CatchClause</a></span> clause)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span> <b><a href="Vala.SymbolResolver.get_type_for_struct.html" class="method">get_type_for_struct</a></b> (<span class="main_type"><a href="Vala.Struct.html" class="class">Struct</a></span> st, <span class="main_type"><a href="Vala.Struct.html" class="class">Struct</a></span> base_struct)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_class.html" class="virtual_method">visit_class</a></b> (<span class="main_type"><a href="Vala.Class.html" class="class">Class</a></span> cl)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span> <b><a href="Vala.SymbolResolver.resolve_type.html" class="method">resolve_type</a></b> (<span class="main_type"><a href="Vala.UnresolvedType.html" class="class">UnresolvedType</a></span> unresolved_type)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_conditional_expression.html" class="virtual_method">visit_conditional_expression</a></b> (<span class="main_type"><a href="Vala.ConditionalExpression.html" class="class">ConditionalExpression</a></span> expr)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_constant.html" class="virtual_method">visit_constant</a></b> (<span class="main_type"><a href="Vala.Constant.html" class="class">Constant</a></span> c)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_constructor.html" class="virtual_method">visit_constructor</a></b> (<span class="main_type"><a href="Vala.Constructor.html" class="class">Constructor</a></span> c)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_creation_method.html" class="virtual_method">visit_creation_method</a></b> (<span class="main_type"><a href="Vala.CreationMethod.html" class="class">CreationMethod</a></span> m)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -229,11 +205,31 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_local_variable.html" class="virtual_method">visit_local_variable</a></b> (<span class="main_type"><a href="Vala.LocalVariable.html" class="class">LocalVariable</a></span> local)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_delegate.html" class="virtual_method">visit_delegate</a></b> (<span class="main_type"><a href="Vala.Delegate.html" class="class">Delegate</a></span> cb)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_initializer_list.html" class="virtual_method">visit_initializer_list</a></b> (<span class="main_type"><a href="Vala.InitializerList.html" class="class">InitializerList</a></span> list)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_delete_statement.html" class="virtual_method">visit_delete_statement</a></b> (<span class="main_type"><a href="Vala.DeleteStatement.html" class="class">DeleteStatement</a></span> stmt)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_destructor.html" class="virtual_method">visit_destructor</a></b> (<span class="main_type"><a href="Vala.Destructor.html" class="class">Destructor</a></span> d)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_do_statement.html" class="virtual_method">visit_do_statement</a></b> (<span class="main_type"><a href="Vala.DoStatement.html" class="class">DoStatement</a></span> stmt)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_element_access.html" class="virtual_method">visit_element_access</a></b> (<span class="main_type"><a href="Vala.ElementAccess.html" class="class">ElementAccess</a></span> expr)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_enum.html" class="virtual_method">visit_enum</a></b> (<span class="main_type"><a href="Vala.Enum.html" class="class">Enum</a></span> en)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_error_domain.html" class="virtual_method">visit_error_domain</a></b> (<span class="main_type"><a href="Vala.ErrorDomain.html" class="class">ErrorDomain</a></span> ed)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -241,31 +237,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_if_statement.html" class="virtual_method">visit_if_statement</a></b> (<span class="main_type"><a href="Vala.IfStatement.html" class="class">IfStatement</a></span> stmt)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_switch_statement.html" class="virtual_method">visit_switch_statement</a></b> (<span class="main_type"><a href="Vala.SwitchStatement.html" class="class">SwitchStatement</a></span> stmt)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_switch_section.html" class="virtual_method">visit_switch_section</a></b> (<span class="main_type"><a href="Vala.SwitchSection.html" class="class">SwitchSection</a></span> section)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_switch_label.html" class="virtual_method">visit_switch_label</a></b> (<span class="main_type"><a href="Vala.SwitchLabel.html" class="class">SwitchLabel</a></span> label)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_loop.html" class="virtual_method">visit_loop</a></b> (<span class="main_type"><a href="Vala.Loop.html" class="class">Loop</a></span> stmt)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_while_statement.html" class="virtual_method">visit_while_statement</a></b> (<span class="main_type"><a href="Vala.WhileStatement.html" class="class">WhileStatement</a></span> stmt)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_do_statement.html" class="virtual_method">visit_do_statement</a></b> (<span class="main_type"><a href="Vala.DoStatement.html" class="class">DoStatement</a></span> stmt)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_field.html" class="virtual_method">visit_field</a></b> (<span class="main_type"><a href="Vala.Field.html" class="class">Field</a></span> f)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -277,11 +249,107 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_formal_parameter.html" class="virtual_method">visit_formal_parameter</a></b> (<span class="main_type"><a href="Vala.Parameter.html" class="class">Parameter</a></span> p)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_if_statement.html" class="virtual_method">visit_if_statement</a></b> (<span class="main_type"><a href="Vala.IfStatement.html" class="class">IfStatement</a></span> stmt)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_initializer_list.html" class="virtual_method">visit_initializer_list</a></b> (<span class="main_type"><a href="Vala.InitializerList.html" class="class">InitializerList</a></span> list)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_interface.html" class="virtual_method">visit_interface</a></b> (<span class="main_type"><a href="Vala.Interface.html" class="class">Interface</a></span> iface)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_lambda_expression.html" class="virtual_method">visit_lambda_expression</a></b> (<span class="main_type"><a href="Vala.LambdaExpression.html" class="class">LambdaExpression</a></span> l)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_local_variable.html" class="virtual_method">visit_local_variable</a></b> (<span class="main_type"><a href="Vala.LocalVariable.html" class="class">LocalVariable</a></span> local)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_loop.html" class="virtual_method">visit_loop</a></b> (<span class="main_type"><a href="Vala.Loop.html" class="class">Loop</a></span> stmt)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_member_access.html" class="virtual_method">visit_member_access</a></b> (<span class="main_type"><a href="Vala.MemberAccess.html" class="class">MemberAccess</a></span> expr)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_method.html" class="virtual_method">visit_method</a></b> (<span class="main_type"><a href="Vala.Method.html" class="class">Method</a></span> m)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_method_call.html" class="virtual_method">visit_method_call</a></b> (<span class="main_type"><a href="Vala.MethodCall.html" class="class">MethodCall</a></span> expr)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_named_argument.html" class="virtual_method">visit_named_argument</a></b> (<span class="main_type"><a href="Vala.NamedArgument.html" class="class">NamedArgument</a></span> expr)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_namespace.html" class="virtual_method">visit_namespace</a></b> (<span class="main_type"><a href="Vala.Namespace.html" class="class">Namespace</a></span> ns)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_object_creation_expression.html" class="virtual_method">visit_object_creation_expression</a></b> (<span class="main_type"><a href="Vala.ObjectCreationExpression.html" class="class">ObjectCreationExpression</a></span> expr)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_postfix_expression.html" class="virtual_method">visit_postfix_expression</a></b> (<span class="main_type"><a href="Vala.PostfixExpression.html" class="class">PostfixExpression</a></span> expr)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_property.html" class="virtual_method">visit_property</a></b> (<span class="main_type"><a href="Vala.Property.html" class="class">Property</a></span> prop)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_property_accessor.html" class="virtual_method">visit_property_accessor</a></b> (<span class="main_type"><a href="Vala.PropertyAccessor.html" class="class">PropertyAccessor</a></span> acc)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_reference_transfer_expression.html" class="virtual_method">visit_reference_transfer_expression</a></b> (<span class="main_type"><a href="Vala.ReferenceTransferExpression.html" class="class">ReferenceTransferExpression</a></span> expr)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_return_statement.html" class="virtual_method">visit_return_statement</a></b> (<span class="main_type"><a href="Vala.ReturnStatement.html" class="class">ReturnStatement</a></span> stmt)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_yield_statement.html" class="virtual_method">visit_yield_statement</a></b> (<span class="main_type"><a href="Vala.YieldStatement.html" class="class">YieldStatement</a></span> stmt)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_signal.html" class="virtual_method">visit_signal</a></b> (<span class="main_type"><a href="Vala.Signal.html" class="class">Signal</a></span> sig)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_sizeof_expression.html" class="virtual_method">visit_sizeof_expression</a></b> (<span class="main_type"><a href="Vala.SizeofExpression.html" class="class">SizeofExpression</a></span> expr)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_slice_expression.html" class="virtual_method">visit_slice_expression</a></b> (<span class="main_type"><a href="Vala.SliceExpression.html" class="class">SliceExpression</a></span> expr)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_struct.html" class="virtual_method">visit_struct</a></b> (<span class="main_type"><a href="Vala.Struct.html" class="class">Struct</a></span> st)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_switch_label.html" class="virtual_method">visit_switch_label</a></b> (<span class="main_type"><a href="Vala.SwitchLabel.html" class="class">SwitchLabel</a></span> label)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_switch_section.html" class="virtual_method">visit_switch_section</a></b> (<span class="main_type"><a href="Vala.SwitchSection.html" class="class">SwitchSection</a></span> section)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_switch_statement.html" class="virtual_method">visit_switch_statement</a></b> (<span class="main_type"><a href="Vala.SwitchStatement.html" class="class">SwitchStatement</a></span> stmt)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_template.html" class="virtual_method">visit_template</a></b> (<span class="main_type"><a href="Vala.Template.html" class="class">Template</a></span> tmpl)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -293,51 +361,11 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_delete_statement.html" class="virtual_method">visit_delete_statement</a></b> (<span class="main_type"><a href="Vala.DeleteStatement.html" class="class">DeleteStatement</a></span> stmt)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_catch_clause.html" class="virtual_method">visit_catch_clause</a></b> (<span class="main_type"><a href="Vala.CatchClause.html" class="class">CatchClause</a></span> clause)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_array_creation_expression.html" class="virtual_method">visit_array_creation_expression</a></b> (<span class="main_type"><a href="Vala.ArrayCreationExpression.html" class="class">ArrayCreationExpression</a></span> e)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_template.html" class="virtual_method">visit_template</a></b> (<span class="main_type"><a href="Vala.Template.html" class="class">Template</a></span> tmpl)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
           <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_tuple.html" class="virtual_method">visit_tuple</a></b> (<span class="main_type"><a href="Vala.Tuple.html" class="class">Tuple</a></span> tuple)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_member_access.html" class="virtual_method">visit_member_access</a></b> (<span class="main_type"><a href="Vala.MemberAccess.html" class="class">MemberAccess</a></span> expr)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_method_call.html" class="virtual_method">visit_method_call</a></b> (<span class="main_type"><a href="Vala.MethodCall.html" class="class">MethodCall</a></span> expr)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_element_access.html" class="virtual_method">visit_element_access</a></b> (<span class="main_type"><a href="Vala.ElementAccess.html" class="class">ElementAccess</a></span> expr)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_slice_expression.html" class="virtual_method">visit_slice_expression</a></b> (<span class="main_type"><a href="Vala.SliceExpression.html" class="class">SliceExpression</a></span> expr)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_postfix_expression.html" class="virtual_method">visit_postfix_expression</a></b> (<span class="main_type"><a href="Vala.PostfixExpression.html" class="class">PostfixExpression</a></span> expr)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_object_creation_expression.html" class="virtual_method">visit_object_creation_expression</a></b> (<span class="main_type"><a href="Vala.ObjectCreationExpression.html" class="class">ObjectCreationExpression</a></span> expr)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_sizeof_expression.html" class="virtual_method">visit_sizeof_expression</a></b> (<span class="main_type"><a href="Vala.SizeofExpression.html" class="class">SizeofExpression</a></span> expr)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_type_check.html" class="virtual_method">visit_type_check</a></b> (<span class="main_type"><a href="Vala.TypeCheck.html" class="class">TypeCheck</a></span> expr)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -349,46 +377,22 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_cast_expression.html" class="virtual_method">visit_cast_expression</a></b> (<span class="main_type"><a href="Vala.CastExpression.html" class="class">CastExpression</a></span> expr)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_using_directive.html" class="virtual_method">visit_using_directive</a></b> (<span class="main_type"><a href="Vala.UsingDirective.html" class="class">UsingDirective</a></span> ns)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_named_argument.html" class="virtual_method">visit_named_argument</a></b> (<span class="main_type"><a href="Vala.NamedArgument.html" class="class">NamedArgument</a></span> expr)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_while_statement.html" class="virtual_method">visit_while_statement</a></b> (<span class="main_type"><a href="Vala.WhileStatement.html" class="class">WhileStatement</a></span> stmt)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_addressof_expression.html" class="virtual_method">visit_addressof_expression</a></b> (<span class="main_type"><a href="Vala.AddressofExpression.html" class="class">AddressofExpression</a></span> expr)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_reference_transfer_expression.html" class="virtual_method">visit_reference_transfer_expression</a></b> (<span class="main_type"><a href="Vala.ReferenceTransferExpression.html" class="class">ReferenceTransferExpression</a></span> expr)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_binary_expression.html" class="virtual_method">visit_binary_expression</a></b> (<span class="main_type"><a href="Vala.BinaryExpression.html" class="class">BinaryExpression</a></span> expr)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_type_check.html" class="virtual_method">visit_type_check</a></b> (<span class="main_type"><a href="Vala.TypeCheck.html" class="class">TypeCheck</a></span> expr)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_conditional_expression.html" class="virtual_method">visit_conditional_expression</a></b> (<span class="main_type"><a href="Vala.ConditionalExpression.html" class="class">ConditionalExpression</a></span> expr)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_lambda_expression.html" class="virtual_method">visit_lambda_expression</a></b> (<span class="main_type"><a href="Vala.LambdaExpression.html" class="class">LambdaExpression</a></span> l)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_assignment.html" class="virtual_method">visit_assignment</a></b> (<span class="main_type"><a href="Vala.Assignment.html" class="class">Assignment</a></span> a)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.SymbolResolver.visit_yield_statement.html" class="virtual_method">visit_yield_statement</a></b> (<span class="main_type"><a href="Vala.YieldStatement.html" class="class">YieldStatement</a></span> stmt)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.CodeContext.html" class="class">CodeContext</a></span> <b><a href="Vala.SymbolResolver.context.html" class="field">context</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Scope.html" class="class">Scope</a></span> <b><a href="Vala.SymbolResolver.current_scope.html" class="field">current_scope</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -396,113 +400,109 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Scope.html" class="class">Scope</a></span> <b><a href="Vala.SymbolResolver.current_scope.html" class="field">current_scope</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-95')">All known members inherited from class Vala.CodeVisitor</div>
-          <div class="content" id="box-content-95">
+          <div class="headline" onclick="toggle_box (this, 'box-content-179')">All known members inherited from class Vala.CodeVisitor</div>
+          <div class="content" id="box-content-179">
             <div class="column">
               <ul class="navi_inline">
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_source_file.html">visit_source_file</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_namespace.html">visit_namespace</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_class.html">visit_class</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_struct.html">visit_struct</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_interface.html">visit_interface</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_enum.html">visit_enum</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_enum_value.html">visit_enum_value</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_error_domain.html">visit_error_domain</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_error_code.html">visit_error_code</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_delegate.html">visit_delegate</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_constant.html">visit_constant</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_field.html">visit_field</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_method.html">visit_method</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_creation_method.html">visit_creation_method</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_formal_parameter.html">visit_formal_parameter</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_property.html">visit_property</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_property_accessor.html">visit_property_accessor</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_signal.html">visit_signal</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_constructor.html">visit_constructor</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_destructor.html">visit_destructor</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_type_parameter.html">visit_type_parameter</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_using_directive.html">visit_using_directive</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_data_type.html">visit_data_type</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_addressof_expression.html">visit_addressof_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_array_creation_expression.html">visit_array_creation_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_assignment.html">visit_assignment</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_base_access.html">visit_base_access</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_binary_expression.html">visit_binary_expression</a></li>
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_block.html">visit_block</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_empty_statement.html">visit_empty_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_boolean_literal.html">visit_boolean_literal</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_break_statement.html">visit_break_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_cast_expression.html">visit_cast_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_catch_clause.html">visit_catch_clause</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_character_literal.html">visit_character_literal</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_class.html">visit_class</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_conditional_expression.html">visit_conditional_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_constant.html">visit_constant</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_constructor.html">visit_constructor</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_continue_statement.html">visit_continue_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_creation_method.html">visit_creation_method</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_data_type.html">visit_data_type</a></li>
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_declaration_statement.html">visit_declaration_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_local_variable.html">visit_local_variable</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_delegate.html">visit_delegate</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_delete_statement.html">visit_delete_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_destructor.html">visit_destructor</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_do_statement.html">visit_do_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_element_access.html">visit_element_access</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_empty_statement.html">visit_empty_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_end_full_expression.html">visit_end_full_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_enum.html">visit_enum</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_initializer_list.html">visit_initializer_list</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_enum_value.html">visit_enum_value</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_error_code.html">visit_error_code</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_error_domain.html">visit_error_domain</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_expression.html">visit_expression</a></li>
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_expression_statement.html">visit_expression_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_if_statement.html">visit_if_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_switch_statement.html">visit_switch_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_switch_section.html">visit_switch_section</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_switch_label.html">visit_switch_label</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_loop.html">visit_loop</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_while_statement.html">visit_while_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_do_statement.html">visit_do_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_field.html">visit_field</a></li>
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_for_statement.html">visit_for_statement</a></li>
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_foreach_statement.html">visit_foreach_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_break_statement.html">visit_break_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_continue_statement.html">visit_continue_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_return_statement.html">visit_return_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_yield_statement.html">visit_yield_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_throw_statement.html">visit_throw_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_try_statement.html">visit_try_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_catch_clause.html">visit_catch_clause</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_lock_statement.html">visit_lock_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_unlock_statement.html">visit_unlock_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_delete_statement.html">visit_delete_statement</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_expression.html">visit_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_array_creation_expression.html">visit_array_creation_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_boolean_literal.html">visit_boolean_literal</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_character_literal.html">visit_character_literal</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_formal_parameter.html">visit_formal_parameter</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_if_statement.html">visit_if_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_initializer_list.html">visit_initializer_list</a></li>
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_integer_literal.html">visit_integer_literal</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_real_literal.html">visit_real_literal</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_interface.html">visit_interface</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_lambda_expression.html">visit_lambda_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_local_variable.html">visit_local_variable</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_lock_statement.html">visit_lock_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_loop.html">visit_loop</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_member_access.html">visit_member_access</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_method.html">visit_method</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_method_call.html">visit_method_call</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_named_argument.html">visit_named_argument</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_namespace.html">visit_namespace</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_null_literal.html">visit_null_literal</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_object_creation_expression.html">visit_object_creation_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_pointer_indirection.html">visit_pointer_indirection</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_postfix_expression.html">visit_postfix_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_property.html">visit_property</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_regex_literal.html">visit_regex_literal</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_string_literal.html">visit_string_literal</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_template.html">visit_template</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_tuple.html">visit_tuple</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_null_literal.html">visit_null_literal</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_member_access.html">visit_member_access</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_method_call.html">visit_method_call</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_element_access.html">visit_element_access</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_slice_expression.html">visit_slice_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_base_access.html">visit_base_access</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_postfix_expression.html">visit_postfix_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_object_creation_expression.html">visit_object_creation_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_sizeof_expression.html">visit_sizeof_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_typeof_expression.html">visit_typeof_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_unary_expression.html">visit_unary_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_cast_expression.html">visit_cast_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_named_argument.html">visit_named_argument</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_pointer_indirection.html">visit_pointer_indirection</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_addressof_expression.html">visit_addressof_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_property_accessor.html">visit_property_accessor</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_real_literal.html">visit_real_literal</a></li>
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_reference_transfer_expression.html">visit_reference_transfer_expression</a>
                 </li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_binary_expression.html">visit_binary_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_regex_literal.html">visit_regex_literal</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_return_statement.html">visit_return_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_signal.html">visit_signal</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_sizeof_expression.html">visit_sizeof_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_slice_expression.html">visit_slice_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_source_file.html">visit_source_file</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_string_literal.html">visit_string_literal</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_struct.html">visit_struct</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_switch_label.html">visit_switch_label</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_switch_section.html">visit_switch_section</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_switch_statement.html">visit_switch_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_template.html">visit_template</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_throw_statement.html">visit_throw_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_try_statement.html">visit_try_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_tuple.html">visit_tuple</a></li>
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_type_check.html">visit_type_check</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_conditional_expression.html">visit_conditional_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_lambda_expression.html">visit_lambda_expression</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_assignment.html">visit_assignment</a></li>
-                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_end_full_expression.html">visit_end_full_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_type_parameter.html">visit_type_parameter</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_typeof_expression.html">visit_typeof_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_unary_expression.html">visit_unary_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_unlock_statement.html">visit_unlock_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_using_directive.html">visit_using_directive</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_while_statement.html">visit_while_statement</a></li>
+                <li class="virtual_method"><a href="Vala.CodeVisitor.visit_yield_statement.html">visit_yield_statement</a></li>
               </ul>
             </div>
           </div>
         </div>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

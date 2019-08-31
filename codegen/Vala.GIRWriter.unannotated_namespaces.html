@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -29,7 +29,6 @@
         <ul class="navi_main">
           <li class="struct"><a href="Vala.GIRWriter.GIRNamespace.html">GIRNamespace</a></li>
           <li class="creation_method"><a href="Vala.GIRWriter.GIRWriter.html">GIRWriter</a></li>
-          <li class="method"><a href="Vala.GIRWriter.camel_case_to_canonical.html">camel_case_to_canonical</a></li>
           <li class="method"><a href="Vala.GIRWriter.check_accessibility.html">check_accessibility</a></li>
           <li class="method"><a href="Vala.GIRWriter.do_write_signature.html">do_write_signature</a></li>
           <li class="virtual_method"><a href="Vala.GIRWriter.get_class_comment.html">get_class_comment</a></li>
@@ -53,7 +52,9 @@
           <li class="virtual_method"><a href="Vala.GIRWriter.get_struct_comment.html">get_struct_comment</a></li>
           <li class="method"><a href="Vala.GIRWriter.gi_type_name.html">gi_type_name</a></li>
           <li class="method"><a href="Vala.GIRWriter.is_introspectable.html">is_introspectable</a></li>
+          <li class="method"><a href="Vala.GIRWriter.is_method_introspectable.html">is_method_introspectable</a></li>
           <li class="method"><a href="Vala.GIRWriter.is_type_introspectable.html">is_type_introspectable</a></li>
+          <li class="method"><a href="Vala.GIRWriter.is_visibility.html">is_visibility</a></li>
           <li class="method"><a href="Vala.GIRWriter.literal_expression_to_value_string.html">literal_expression_to_value_string</a></li>
           <li class="method"><a href="Vala.GIRWriter.skip_implicit_params.html">skip_implicit_params</a></li>
           <li class="virtual_method"><a href="Vala.GIRWriter.visit_class.html">visit_class</a></li>
@@ -71,8 +72,8 @@
           <li class="virtual_method"><a href="Vala.GIRWriter.visit_namespace.html">visit_namespace</a></li>
           <li class="virtual_method"><a href="Vala.GIRWriter.visit_property.html">visit_property</a></li>
           <li class="virtual_method"><a href="Vala.GIRWriter.visit_signal.html">visit_signal</a></li>
+          <li class="virtual_method"><a href="Vala.GIRWriter.visit_source_file.html">visit_source_file</a></li>
           <li class="virtual_method"><a href="Vala.GIRWriter.visit_struct.html">visit_struct</a></li>
-          <li class="method"><a href="Vala.GIRWriter.write_annotations.html">write_annotations</a></li>
           <li class="method"><a href="Vala.GIRWriter.write_c_include.html">write_c_include</a></li>
           <li class="method"><a href="Vala.GIRWriter.write_c_includes.html">write_c_includes</a></li>
           <li class="method"><a href="Vala.GIRWriter.write_ctype_attributes.html">write_ctype_attributes</a></li>
@@ -89,6 +90,7 @@
           <li class="method"><a href="Vala.GIRWriter.write_signature.html">write_signature</a></li>
           <li class="method"><a href="Vala.GIRWriter.write_symbol_attributes.html">write_symbol_attributes</a></li>
           <li class="method"><a href="Vala.GIRWriter.write_type.html">write_type</a></li>
+          <li class="method"><a href="Vala.GIRWriter.write_type_parameter.html">write_type_parameter</a></li>
           <li class="field"><a href="Vala.GIRWriter.buffer.html">buffer</a></li>
           <li class="field"><a href="Vala.GIRWriter.context.html">context</a></li>
           <li class="field"><a href="Vala.GIRWriter.deferred.html">deferred</a></li>
@@ -100,6 +102,9 @@
           <li class="field"><a href="Vala.GIRWriter.gir_shared_library.html">gir_shared_library</a></li>
           <li class="field"><a href="Vala.GIRWriter.gir_version.html">gir_version</a></li>
           <li class="field"><a href="Vala.GIRWriter.gobject_type.html">gobject_type</a></li>
+          <li class="field"><a href="Vala.GIRWriter.gtype_type.html">gtype_type</a></li>
+          <li class="field"><a href="Vala.GIRWriter.gtypeinstance_type.html">gtypeinstance_type</a></li>
+          <li class="field"><a href="Vala.GIRWriter.gtypeinterface_type.html">gtypeinterface_type</a></li>
           <li class="field"><a href="Vala.GIRWriter.hierarchy.html">hierarchy</a></li>
           <li class="field"><a href="Vala.GIRWriter.indent.html">indent</a></li>
           <li class="field"><a href="Vala.GIRWriter.our_namespaces.html">our_namespaces</a></li>
@@ -111,11 +116,11 @@
         <h1 class="main_title">unannotated_namespaces</h1>
         <hr class="main_hr"/>
         <h2 class="main_title">Description:</h2>
-        <div class="main_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="class">HashSet</span></span>&lt;<span class="main_type"><span class="class">Namespace</span></span>&gt; <b><span class="field">unannotated_namespaces</span></b>
+        <div class="main_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.HashSet.html" class="class">HashSet</a></span>&lt;<span class="main_type"><a href="../vala/Vala.Namespace.html" class="class">Namespace</a></span>&gt; <b><span class="field">unannotated_namespaces</span></b>
         </div>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

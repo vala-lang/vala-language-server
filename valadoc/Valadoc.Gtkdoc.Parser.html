@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -124,12 +124,13 @@
         <img class="main_diagram" usemap="#Valadoc.Gtkdoc.Parser" alt="Object hierarchy for Parser" src="img/Valadoc.Gtkdoc.Parser.svg"/>
 
       <map id="Valadoc.Gtkdoc.Parser" name="Valadoc.Gtkdoc.Parser">
-<area shape="rect" id="node1" href="Valadoc.Gtkdoc.Parser.html" title="Valadoc.Gtkdoc.Parser" alt="" coords="61,101,278,149"/>
-<area shape="rect" id="node3" href="Valadoc.ResourceLocator.html" title="Valadoc.ResourceLocator" alt="" coords="152,5,392,53"/>
+<area shape="rect" id="node1" href="Valadoc.Gtkdoc.Parser.html" title="Valadoc.Gtkdoc.Parser" alt="" coords="61,101,250,149"/>
+<area shape="rect" id="node2" href="../gobject-2.0/GLib.Object.html" title="GLib.Object" alt="" coords="5,5,119,53"/>
+<area shape="rect" id="node3" href="Valadoc.ResourceLocator.html" title="Valadoc.ResourceLocator" alt="" coords="143,5,354,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
-        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">class</span> <b><span class="class">Parser</span></b> : <span class="main_type"><span class="class">Object</span></span>, <span class="main_type"><a href="Valadoc.ResourceLocator.html" class="interface">ResourceLocator</a></span>
+        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">class</span> <b><span class="class">Parser</span></b> : <span class="main_type"><a href="../gobject-2.0/GLib.Object.html" class="class">Object</a></span>, <span class="main_type"><a href="Valadoc.ResourceLocator.html" class="interface">ResourceLocator</a></span>
         </div><br/>
         <div class="namespace_note"><b>Namespace:</b> <a href="Valadoc.Gtkdoc.html">Valadoc.Gtkdoc</a>
         </div>
@@ -145,30 +146,6 @@
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.Gtkdoc.Parser.fix_resource_path.html" class="method">fix_resource_path</a></b> (<span class="main_basic_type"><span class="class">string</span></span> path)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Gtkdoc.Parser.reset.html" class="method">reset</a></b> (<span class="main_type"><a href="Valadoc.Api.SourceComment.html" class="class">SourceComment</a></span> comment)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.Gtkdoc.Parser.normalize.html" class="method">normalize</a></b> (<span class="main_basic_type"><span class="class">string</span></span> text)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.Gtkdoc.Parser.is_numeric.html" class="method">is_numeric</a></b> (<span class="main_basic_type"><span class="class">string</span></span> str)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Gtkdoc.Parser.report_unexpected_token.html" class="method">report_unexpected_token</a></b> (<span class="main_type"><a href="Valadoc.Gtkdoc.Token.html" class="class">Token</a></span> got, <span class="main_basic_type"><span class="class">string</span></span> expected)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Gtkdoc.Parser.report_warning.html" class="method">report_warning</a></b> (<span class="main_type"><a href="Valadoc.Gtkdoc.Token.html" class="class">Token</a></span> got, <span class="main_basic_type"><span class="class">string</span></span> message)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Note.html" class="class">Note</a></span>? <b><a href="Valadoc.Gtkdoc.Parser._parse_note.html" class="method">_parse_note</a></b> (<span class="main_type"><a href="Valadoc.Api.SourceComment.html" class="class">SourceComment</a></span> comment)
             </span>
             <div class="leaf_brief_description">
@@ -181,211 +158,11 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Valadoc.Content.Comment.html" class="class">Comment</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse.html" class="method">parse</a></b> (<span class="main_type"><a href="Valadoc.Api.Node.html" class="abstract_class">Node</a></span> element, <span class="main_type"><a href="Valadoc.Api.GirSourceComment.html" class="class">GirSourceComment</a></span> gir_comment, <span class="main_type"><a href="Valadoc.GirMetaData.html" class="class">GirMetaData</a></span> gir_metadata, <span class="main_type"><a href="Valadoc.Importer.InternalIdRegistrar.html" class="class">InternalIdRegistrar</a></span> id_registrar)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Gtkdoc.Parser.append_block_content_not_null.html" class="method">append_block_content_not_null</a></b> (<span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt; run, <span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>? element)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Taglet.html" class="interface">Taglet</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_block_taglet.html" class="method">parse_block_taglet</a></b> (<span class="main_type"><a href="Valadoc.Api.SourceComment.html" class="class">SourceComment</a></span> gir_comment, <span class="main_basic_type"><span class="class">string</span></span> taglet_name)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Comment.html" class="class">Comment</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_root_content.html" class="method">parse_root_content</a></b> (<span class="main_type"><a href="Valadoc.Api.SourceComment.html" class="class">SourceComment</a></span> gir_comment)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Gtkdoc.Token.html" class="class">Token</a></span> <b><a href="Valadoc.Gtkdoc.Parser.next.html" class="method">next</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.Gtkdoc.Parser.ignore_current_xml_close.html" class="method">ignore_current_xml_close</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.Gtkdoc.Parser.check_xml_open_tag.html" class="method">check_xml_open_tag</a></b> (<span class="main_basic_type"><span class="class">string</span></span> tagname)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.Gtkdoc.Parser.check_xml_close_tag.html" class="method">check_xml_close_tag</a></b> (<span class="main_basic_type"><span class="class">string</span></span> tagname)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_spaces.html" class="method">parse_docbook_spaces</a></b> (<span class="main_basic_type"><span class="struct">bool</span></span> accept_paragraphs = <span class="main_literal">true</span>)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Inline.html" class="interface">Inline</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_link_tempalte.html" class="method">parse_docbook_link_tempalte</a></b> (<span class="main_basic_type"><span class="class">string</span></span> tagname, <span class="main_basic_type"><span class="struct">bool</span></span> is_internal)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.InlineTaglet.html" class="abstract_class">InlineTaglet</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_symbol_link.html" class="method">parse_symbol_link</a></b> (<span class="main_basic_type"><span class="class">string</span></span> tagname)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Gtkdoc.Parser.parse_anchor.html" class="method">parse_anchor</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Link.html" class="class">Link</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_xref.html" class="method">parse_xref</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Run.html" class="class">Run</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_highlighted_template.html" class="method">parse_highlighted_template</a></b> (<span class="main_basic_type"><span class="class">string</span></span> tag_name, <span class="main_type"><a href="Valadoc.Content.Run.Style.html" class="enum">Style</a></span> style)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.ListItem.html" class="class">ListItem</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_listitem.html" class="method">parse_docbook_listitem</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.BlockContent.html" class="abstract_class">BlockContent</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_information_box_template.html" class="method">parse_docbook_information_box_template</a></b> (<span class="main_basic_type"><span class="class">string</span></span> tagname, <span class="main_type"><a href="Valadoc.Content.BlockContent.html" class="abstract_class">BlockContent</a></span> container)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Note.html" class="class">Note</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_important.html" class="method">parse_docbook_important</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Note.html" class="class">Note</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_note.html" class="method">parse_docbook_note</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Warning.html" class="class">Warning</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_warning.html" class="method">parse_docbook_warning</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_orderedlist.html" class="method">parse_docbook_orderedlist</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_itemizedlist.html" class="method">parse_docbook_itemizedlist</a></b> (<span class="main_basic_type"><span class="class">string</span></span> tag_name = <span class="main_literal">"itemizedlist"</span>, <span class="main_type"><a href="Valadoc.Content.List.Bullet.html" class="enum">Bullet</a></span> bullet_type = <b><a href="Valadoc.Content.List.Bullet.UNORDERED.html" class="enumvalue">UNORDERED</a></b>)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Paragraph.html" class="class">Paragraph</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_gtkdoc_paragraph.html" class="method">parse_gtkdoc_paragraph</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt; <b><a href="Valadoc.Gtkdoc.Parser.parse_mixed_content.html" class="method">parse_mixed_content</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_simpara.html" class="method">parse_docbook_simpara</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_para.html" class="method">parse_docbook_para</a></b> (<span class="main_basic_type"><span class="class">string</span></span> tag_name = <span class="main_literal">"para"</span>)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Paragraph.html" class="class">Paragraph</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_gtkdoc_source.html" class="method">parse_gtkdoc_source</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Paragraph.html" class="class">Paragraph</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_title.html" class="method">parse_docbook_title</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Paragraph.html" class="class">Paragraph</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_graphic.html" class="method">parse_docbook_graphic</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Embedded.html" class="class">Embedded</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_inlinegraphic.html" class="method">parse_docbook_inlinegraphic</a></b> (<span class="main_basic_type"><span class="class">string</span></span> tag_name = <span class="main_literal">"inlinegraphic"</span>)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Paragraph.html" class="class">Paragraph</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_programlisting.html" class="method">parse_docbook_programlisting</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_informalexample.html" class="method">parse_docbook_informalexample</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_example.html" class="method">parse_docbook_example</a></b> (<span class="main_basic_type"><span class="class">string</span></span> tag_name = <span class="main_literal">"example"</span>)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_refsect2.html" class="method">parse_docbook_refsect2</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> nr = <span class="main_literal">2</span>)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_figure.html" class="method">parse_docbook_figure</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Run.html" class="class">Run</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_footnote.html" class="method">parse_docbook_footnote</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Gtkdoc.Parser.append_block_content_not_null_all.html" class="method">append_block_content_not_null_all</a></b> (<span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt; run, <span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? elements)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Gtkdoc.Parser.append_block_content_not_null.html" class="method">append_block_content_not_null</a></b> (<span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt; run, <span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>? element)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.TableRow.html" class="class">TableRow</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_thead.html" class="method">parse_docbook_thead</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.TableCell.html" class="class">TableCell</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_entry.html" class="method">parse_docbook_entry</a></b> (<span class="main_type"><a href="Valadoc.Content.Run.Style.html" class="enum">Style</a></span> default_style = <b><a href="Valadoc.Content.Run.Style.NONE.html" class="enumvalue">NONE</a></b>)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.TableRow.html" class="class">TableRow</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_row.html" class="method">parse_docbook_row</a></b> (<span class="main_type"><a href="Valadoc.Content.Run.Style.html" class="enum">Style</a></span> default_style = <b><a href="Valadoc.Content.Run.Style.NONE.html" class="enumvalue">NONE</a></b>)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.TableRow.html" class="class">TableRow</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_tbody.html" class="method">parse_docbook_tbody</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Table.html" class="class">Table</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_tgroup.html" class="method">parse_docbook_tgroup</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Table.html" class="class">Table</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_informaltable.html" class="method">parse_docbook_informaltable</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_section.html" class="method">parse_docbook_section</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.ListItem.html" class="class">ListItem</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_member.html" class="method">parse_docbook_member</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.List.html" class="class">List</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_simplelist.html" class="method">parse_docbook_simplelist</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Paragraph.html" class="class">Paragraph</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_term.html" class="method">parse_docbook_term</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.ListItem.html" class="class">ListItem</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_varlistentry.html" class="method">parse_docbook_varlistentry</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_variablelist.html" class="method">parse_docbook_variablelist</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt; <b><a href="Valadoc.Gtkdoc.Parser.parse_block_content.html" class="method">parse_block_content</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Run.html" class="class">Run</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_xml_tag.html" class="method">parse_xml_tag</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Gtkdoc.Parser.append_inline_content_string.html" class="method">append_inline_content_string</a></b> (<span class="main_type"><a href="Valadoc.Content.Run.html" class="class">Run</a></span> run, <span class="main_basic_type"><span class="class">string</span></span> current)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Inline.html" class="interface">Inline</a></span> <b><a href="Valadoc.Gtkdoc.Parser.create_type_link.html" class="method">create_type_link</a></b> (<span class="main_basic_type"><span class="class">string</span></span> name, <span class="main_basic_type"><span class="struct">bool</span></span> c_accept_plural = <span class="main_literal">false</span>)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Gtkdoc.Parser.append_block_content_not_null_all.html" class="method">append_block_content_not_null_all</a></b> (<span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt; run, <span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? elements)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -393,18 +170,246 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Gtkdoc.Parser.append_inline_content_string.html" class="method">append_inline_content_string</a></b> (<span class="main_type"><a href="Valadoc.Content.Run.html" class="class">Run</a></span> run, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> current)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.Gtkdoc.Parser.check_xml_close_tag.html" class="method">check_xml_close_tag</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> tagname)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.Gtkdoc.Parser.check_xml_open_tag.html" class="method">check_xml_open_tag</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> tagname)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Inline.html" class="interface">Inline</a></span> <b><a href="Valadoc.Gtkdoc.Parser.create_type_link.html" class="method">create_type_link</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> c_accept_plural = <span class="main_literal">false</span>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.Gtkdoc.Parser.fix_resource_path.html" class="method">fix_resource_path</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> path)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.Gtkdoc.Parser.ignore_current_xml_close.html" class="method">ignore_current_xml_close</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.Gtkdoc.Parser.is_numeric.html" class="method">is_numeric</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> str)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Gtkdoc.Token.html" class="class">Token</a></span> <b><a href="Valadoc.Gtkdoc.Parser.next.html" class="method">next</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.Gtkdoc.Parser.normalize.html" class="method">normalize</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> text)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Valadoc.Content.Comment.html" class="class">Comment</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse.html" class="method">parse</a></b> (<span class="main_type"><a href="Valadoc.Api.Node.html" class="abstract_class">Node</a></span> element, <span class="main_type"><a href="Valadoc.Api.GirSourceComment.html" class="class">GirSourceComment</a></span> gir_comment, <span class="main_type"><a href="Valadoc.GirMetaData.html" class="class">GirMetaData</a></span> gir_metadata, <span class="main_type"><a href="Valadoc.Importer.InternalIdRegistrar.html" class="class">InternalIdRegistrar</a></span> id_registrar)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Gtkdoc.Parser.parse_anchor.html" class="method">parse_anchor</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt; <b><a href="Valadoc.Gtkdoc.Parser.parse_block_content.html" class="method">parse_block_content</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Taglet.html" class="interface">Taglet</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_block_taglet.html" class="method">parse_block_taglet</a></b> (<span class="main_type"><a href="Valadoc.Api.SourceComment.html" class="class">SourceComment</a></span> gir_comment, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> taglet_name)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.TableCell.html" class="class">TableCell</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_entry.html" class="method">parse_docbook_entry</a></b> (<span class="main_type"><a href="Valadoc.Content.Run.Style.html" class="enum">Style</a></span> default_style = <b><a href="Valadoc.Content.Run.Style.NONE.html" class="enumvalue">NONE</a></b>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_example.html" class="method">parse_docbook_example</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> tag_name = <span class="main_literal">"example"</span>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_figure.html" class="method">parse_docbook_figure</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Run.html" class="class">Run</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_footnote.html" class="method">parse_docbook_footnote</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Paragraph.html" class="class">Paragraph</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_graphic.html" class="method">parse_docbook_graphic</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Note.html" class="class">Note</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_important.html" class="method">parse_docbook_important</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_informalexample.html" class="method">parse_docbook_informalexample</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Table.html" class="class">Table</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_informaltable.html" class="method">parse_docbook_informaltable</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.BlockContent.html" class="abstract_class">BlockContent</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_information_box_template.html" class="method">parse_docbook_information_box_template</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> tagname, <span class="main_type"><a href="Valadoc.Content.BlockContent.html" class="abstract_class">BlockContent</a></span> container)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Embedded.html" class="class">Embedded</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_inlinegraphic.html" class="method">parse_docbook_inlinegraphic</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> tag_name = <span class="main_literal">"inlinegraphic"</span>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_itemizedlist.html" class="method">parse_docbook_itemizedlist</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> tag_name = <span class="main_literal">"itemizedlist"</span>, <span class="main_type"><a href="Valadoc.Content.List.Bullet.html" class="enum">Bullet</a></span> bullet_type = <b><a href="Valadoc.Content.List.Bullet.UNORDERED.html" class="enumvalue">UNORDERED</a></b>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Inline.html" class="interface">Inline</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_link_tempalte.html" class="method">parse_docbook_link_tempalte</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> tagname, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> is_internal)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.ListItem.html" class="class">ListItem</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_listitem.html" class="method">parse_docbook_listitem</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.ListItem.html" class="class">ListItem</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_member.html" class="method">parse_docbook_member</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Note.html" class="class">Note</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_note.html" class="method">parse_docbook_note</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_orderedlist.html" class="method">parse_docbook_orderedlist</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_para.html" class="method">parse_docbook_para</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> tag_name = <span class="main_literal">"para"</span>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Paragraph.html" class="class">Paragraph</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_programlisting.html" class="method">parse_docbook_programlisting</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_refsect2.html" class="method">parse_docbook_refsect2</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> nr = <span class="main_literal">2</span>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.TableRow.html" class="class">TableRow</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_row.html" class="method">parse_docbook_row</a></b> (<span class="main_type"><a href="Valadoc.Content.Run.Style.html" class="enum">Style</a></span> default_style = <b><a href="Valadoc.Content.Run.Style.NONE.html" class="enumvalue">NONE</a></b>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_section.html" class="method">parse_docbook_section</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_simpara.html" class="method">parse_docbook_simpara</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.List.html" class="class">List</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_simplelist.html" class="method">parse_docbook_simplelist</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_spaces.html" class="method">parse_docbook_spaces</a></b> (<span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> accept_paragraphs = <span class="main_literal">true</span>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Content.TableRow.html" class="class">TableRow</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_tbody.html" class="method">parse_docbook_tbody</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Paragraph.html" class="class">Paragraph</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_term.html" class="method">parse_docbook_term</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Table.html" class="class">Table</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_tgroup.html" class="method">parse_docbook_tgroup</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.TableRow.html" class="class">TableRow</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_thead.html" class="method">parse_docbook_thead</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Paragraph.html" class="class">Paragraph</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_title.html" class="method">parse_docbook_title</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_variablelist.html" class="method">parse_docbook_variablelist</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.ListItem.html" class="class">ListItem</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_varlistentry.html" class="method">parse_docbook_varlistentry</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Warning.html" class="class">Warning</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_docbook_warning.html" class="method">parse_docbook_warning</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Paragraph.html" class="class">Paragraph</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_gtkdoc_paragraph.html" class="method">parse_gtkdoc_paragraph</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Paragraph.html" class="class">Paragraph</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_gtkdoc_source.html" class="method">parse_gtkdoc_source</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Run.html" class="class">Run</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_highlighted_template.html" class="method">parse_highlighted_template</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> tag_name, <span class="main_type"><a href="Valadoc.Content.Run.Style.html" class="enum">Style</a></span> style)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Run.html" class="class">Run</a></span> <b><a href="Valadoc.Gtkdoc.Parser.parse_inline_content.html" class="method">parse_inline_content</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.Gtkdoc.Parser.resolve.html" class="method">resolve</a></b> (<span class="main_basic_type"><span class="class">string</span></span> path)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt; <b><a href="Valadoc.Gtkdoc.Parser.parse_mixed_content.html" class="method">parse_mixed_content</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Comment.html" class="class">Comment</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_root_content.html" class="method">parse_root_content</a></b> (<span class="main_type"><a href="Valadoc.Api.SourceComment.html" class="class">SourceComment</a></span> gir_comment)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.InlineTaglet.html" class="abstract_class">InlineTaglet</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_symbol_link.html" class="method">parse_symbol_link</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> tagname)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Run.html" class="class">Run</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_xml_tag.html" class="method">parse_xml_tag</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.Link.html" class="class">Link</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.parse_xref.html" class="method">parse_xref</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Gtkdoc.Parser.report_unexpected_token.html" class="method">report_unexpected_token</a></b> (<span class="main_type"><a href="Valadoc.Gtkdoc.Token.html" class="class">Token</a></span> got, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> expected)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Gtkdoc.Parser.report_warning.html" class="method">report_warning</a></b> (<span class="main_type"><a href="Valadoc.Gtkdoc.Token.html" class="class">Token</a></span> got, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> message)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Gtkdoc.Parser.reset.html" class="method">reset</a></b> (<span class="main_type"><a href="Valadoc.Api.SourceComment.html" class="class">SourceComment</a></span> comment)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.Gtkdoc.Parser.resolve.html" class="method">resolve</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> path)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Gtkdoc.Scanner.html" class="class">Scanner</a></span> <b><a href="Valadoc.Gtkdoc.Parser.scanner.html" class="field">scanner</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Api.SourceComment.html" class="class">SourceComment</a></span> <b><a href="Valadoc.Gtkdoc.Parser.comment.html" class="field">comment</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>[]? <b><a href="Valadoc.Gtkdoc.Parser.comment_lines.html" class="field">comment_lines</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -412,27 +417,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_basic_type"><span class="class">string</span></span>&gt; <b><a href="Valadoc.Gtkdoc.Parser.stack.html" class="field">stack</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;&gt; <b><a href="Valadoc.Gtkdoc.Parser.footnotes.html" class="field">footnotes</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.ContentFactory.html" class="class">ContentFactory</a></span> <b><a href="Valadoc.Gtkdoc.Parser.factory.html" class="field">factory</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.ErrorReporter.html" class="class">ErrorReporter</a></span> <b><a href="Valadoc.Gtkdoc.Parser.reporter.html" class="field">reporter</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Settings.html" class="class">Settings</a></span> <b><a href="Valadoc.Gtkdoc.Parser.settings.html" class="field">settings</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Api.Tree.html" class="class">Tree</a></span> <b><a href="Valadoc.Gtkdoc.Parser.tree.html" class="field">tree</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.GirMetaData.html" class="class">GirMetaData</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.current_metadata.html" class="field">current_metadata</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -440,31 +425,11 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.Gtkdoc.Parser.show_warnings.html" class="field">show_warnings</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.ContentFactory.html" class="class">ContentFactory</a></span> <b><a href="Valadoc.Gtkdoc.Parser.factory.html" class="field">factory</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Api.SourceComment.html" class="class">SourceComment</a></span> <b><a href="Valadoc.Gtkdoc.Parser.comment.html" class="field">comment</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.Gtkdoc.Parser.instance_param_name.html" class="field">instance_param_name</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>[]? <b><a href="Valadoc.Gtkdoc.Parser.comment_lines.html" class="field">comment_lines</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="class">Regex</span></span>? <b><a href="Valadoc.Gtkdoc.Parser.is_numeric_regex.html" class="field">is_numeric_regex</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="class">Regex</span></span>? <b><a href="Valadoc.Gtkdoc.Parser.normalize_regex.html" class="field">normalize_regex</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="class">Regex</span></span> <b><a href="Valadoc.Gtkdoc.Parser.regex_source_lang.html" class="field">regex_source_lang</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Valadoc.Content.Block.html" class="interface">Block</a></span>&gt;&gt; <b><a href="Valadoc.Gtkdoc.Parser.footnotes.html" class="field">footnotes</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -472,83 +437,119 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.GirMetaData.html" class="class">GirMetaData</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.current_metadata.html" class="field">current_metadata</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.Gtkdoc.Parser.instance_param_name.html" class="field">instance_param_name</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../glib-2.0/GLib.Regex.html" class="class">Regex</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.is_numeric_regex.html" class="field">is_numeric_regex</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../glib-2.0/GLib.Regex.html" class="class">Regex</a></span>? <b><a href="Valadoc.Gtkdoc.Parser.normalize_regex.html" class="field">normalize_regex</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../glib-2.0/GLib.Regex.html" class="class">Regex</a></span> <b><a href="Valadoc.Gtkdoc.Parser.regex_source_lang.html" class="field">regex_source_lang</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.ErrorReporter.html" class="class">ErrorReporter</a></span> <b><a href="Valadoc.Gtkdoc.Parser.reporter.html" class="field">reporter</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Gtkdoc.Scanner.html" class="class">Scanner</a></span> <b><a href="Valadoc.Gtkdoc.Parser.scanner.html" class="field">scanner</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Settings.html" class="class">Settings</a></span> <b><a href="Valadoc.Gtkdoc.Parser.settings.html" class="field">settings</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.Gtkdoc.Parser.show_warnings.html" class="field">show_warnings</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>&gt; <b><a href="Valadoc.Gtkdoc.Parser.stack.html" class="field">stack</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Api.Tree.html" class="class">Tree</a></span> <b><a href="Valadoc.Gtkdoc.Parser.tree.html" class="field">tree</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-358')">All known members inherited from class GLib.Object</div>
-          <div class="content" id="box-content-358">
+          <div class="headline" onclick="toggle_box (this, 'box-content-308')">All known members inherited from class GLib.Object</div>
+          <div class="content" id="box-content-308">
             <div class="column">
               <ul class="navi_inline">
-                <li class="static_method">interface_find_property</li>
-                <li class="static_method">interface_install_property</li>
-                <li class="static_method">interface_list_properties</li>
-                <li class="static_method">@new</li>
-                <li class="static_method">new_valist</li>
-                <li class="static_method">newv</li>
-                <li class="static_method">new_with_properties</li>
-                <li class="method">add_toggle_ref</li>
-                <li class="method">add_weak_pointer</li>
-                <li class="method">bind_property</li>
-                <li class="method">connect</li>
-                <li class="virtual_method">constructed</li>
-                <li class="method">disconnect</li>
-                <li class="virtual_method">dispose</li>
-                <li class="method">dup_data</li>
-                <li class="method">dup_qdata</li>
-                <li class="method">force_floating</li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.@get.html">@get</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.@new.html">@new</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.@ref.html">@ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.@set.html">@set</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.add_toggle_ref.html">add_toggle_ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.add_weak_pointer.html">add_weak_pointer</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.bind_property.html">bind_property</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.connect.html">connect</a></li>
+                <li class="virtual_method"><a href="../gobject-2.0/GLib.Object.constructed.html">constructed</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.disconnect.html">disconnect</a></li>
+                <li class="virtual_method"><a href="../gobject-2.0/GLib.Object.dispose.html">dispose</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.dup_data.html">dup_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.dup_qdata.html">dup_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.force_floating.html">force_floating</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.freeze_notify.html">freeze_notify</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_class.html">get_class</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_data.html">get_data</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="method">freeze_notify</li>
-                <li class="method">@get</li>
-                <li class="method">get_class</li>
-                <li class="method">get_data</li>
-                <li class="method">get_property</li>
-                <li class="method">get_qdata</li>
-                <li class="method">get_type</li>
-                <li class="method">getv</li>
-                <li class="method">is_floating</li>
-                <li class="method">notify_property</li>
-                <li class="method">@ref</li>
-                <li class="method">ref_sink</li>
-                <li class="method">replace_data</li>
-                <li class="method">replace_qdata</li>
-                <li class="method">remove_toggle_ref</li>
-                <li class="method">remove_weak_pointer</li>
-                <li class="method">@set</li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_property.html">get_property</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_qdata.html">get_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_type.html">get_type</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.getv.html">getv</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.interface_find_property.html">interface_find_property</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.interface_install_property.html">interface_install_property</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.interface_list_properties.html">interface_list_properties</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.is_floating.html">is_floating</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.new_valist.html">new_valist</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.new_with_properties.html">new_with_properties</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.newv.html">newv</a></li>
+                <li class="signal"><a href="../gobject-2.0/GLib.Object.notify.html">notify</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.notify_property.html">notify_property</a></li>
+                <li class="field"><a href="../gobject-2.0/GLib.Object.ref_count.html">ref_count</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.ref_sink.html">ref_sink</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.remove_toggle_ref.html">remove_toggle_ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.remove_weak_pointer.html">remove_weak_pointer</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="method">set_data</li>
-                <li class="method">set_data_full</li>
-                <li class="method">set_property</li>
-                <li class="method">set_qdata</li>
-                <li class="method">set_qdata_full</li>
-                <li class="method">set_valist</li>
-                <li class="method">setv</li>
-                <li class="method">steal_data</li>
-                <li class="method">steal_qdata</li>
-                <li class="method">thaw_notify</li>
-                <li class="method">unref</li>
-                <li class="method">watch_closure</li>
-                <li class="method">weak_ref</li>
-                <li class="method">weak_unref</li>
-                <li class="signal">notify</li>
-                <li class="field">ref_count</li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.replace_data.html">replace_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.replace_qdata.html">replace_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_data.html">set_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_data_full.html">set_data_full</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_property.html">set_property</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_qdata.html">set_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_qdata_full.html">set_qdata_full</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_valist.html">set_valist</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.setv.html">setv</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.steal_data.html">steal_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.steal_qdata.html">steal_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.thaw_notify.html">thaw_notify</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.unref.html">unref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.watch_closure.html">watch_closure</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.weak_ref.html">weak_ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.weak_unref.html">weak_unref</a></li>
               </ul>
             </div>
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-359')">All known members inherited from interface Valadoc.ResourceLocator
+          <div class="headline" onclick="toggle_box (this, 'box-content-309')">All known members inherited from interface Valadoc.ResourceLocator
           </div>
-          <div class="content" id="box-content-359">
+          <div class="content" id="box-content-309">
             <div class="column">
               <ul class="navi_inline">
                 <li class="abstract_method"><a href="Valadoc.ResourceLocator.resolve.html">resolve</a></li>
@@ -566,7 +567,7 @@
         </div>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

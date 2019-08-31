@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -59,22 +59,23 @@
         <img class="main_diagram" usemap="#Valadoc.Api.Visitor" alt="Object hierarchy for Visitor" src="img/Valadoc.Api.Visitor.svg"/>
 
       <map id="Valadoc.Api.Visitor" name="Valadoc.Api.Visitor">
-<area shape="rect" id="node1" href="Valadoc.Api.Visitor.html" title="Valadoc.Api.Visitor" alt="" coords="5,101,188,149"/>
+<area shape="rect" id="node1" href="Valadoc.Api.Visitor.html" title="Valadoc.Api.Visitor" alt="" coords="5,101,173,149"/>
+<area shape="rect" id="node2" href="../gobject-2.0/GLib.Object.html" title="GLib.Object" alt="" coords="33,5,146,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
-        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">abstract</span> <span class="main_keyword">class</span> <b><span class="abstract_class">Visitor</span></b> : <span class="main_type"><span class="class">Object</span></span>
+        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">abstract</span> <span class="main_keyword">class</span> <b><span class="abstract_class">Visitor</span></b> : <span class="main_type"><a href="../gobject-2.0/GLib.Object.html" class="class">Object</a></span>
         </div>
         <div class="description">
           <p>Abstract visitor for traversing API.</p>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-301')">All known sub-classes:</div>
-          <div class="content" id="box-content-301">
+          <div class="headline" onclick="toggle_box (this, 'box-content-265')">All known sub-classes:</div>
+          <div class="content" id="box-content-265">
             <div class="column">
               <ul class="navi_inline">
+                <li class="abstract_class"><a href="Valadoc.Html.BasicDoclet.html">BasicDoclet</a></li>
                 <li class="class"><a href="Valadoc.CTypeResolver.html">CTypeResolver</a></li>
-                <li class="class"><a href="Valadoc.Charts.Hierarchy.html">Hierarchy</a></li>
               </ul>
             </div>
             <div class="column">
@@ -86,7 +87,7 @@
             <div class="column">
               <ul class="navi_inline">
                 <li class="class"><a href="Valadoc.Html.CssClassResolver.html">CssClassResolver</a></li>
-                <li class="abstract_class"><a href="Valadoc.Html.BasicDoclet.html">BasicDoclet</a></li>
+                <li class="class"><a href="Valadoc.Charts.Hierarchy.html">Hierarchy</a></li>
               </ul>
             </div>
           </div>
@@ -98,45 +99,16 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
-          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Valadoc.Api.Visitor.Visitor.html" class="creation_method">Visitor</a></b> ()
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <b><a href="Valadoc.Api.Visitor.Visitor.html" class="creation_method">Visitor</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_tree.html" class="virtual_method">visit_tree</a></b> (<span class="main_type"><a href="Valadoc.Api.Tree.html" class="class">Tree</a></span> item)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for api trees.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_package.html" class="virtual_method">visit_package</a></b> (<span class="main_type"><a href="Valadoc.Api.Package.html" class="class">Package</a></span> item)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for packages like gir-files and vapi-files.
-              </span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_namespace.html" class="virtual_method">visit_namespace</a></b> (<span class="main_type"><a href="Valadoc.Api.Namespace.html" class="class">Namespace</a></span> item)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for namespaces</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_interface.html" class="virtual_method">visit_interface</a></b> (<span class="main_type"><a href="Valadoc.Api.Interface.html" class="class">Interface</a></span> item)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for interfaces.</span>
-            </div></li>
           <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_class.html" class="virtual_method">visit_class</a></b> (<span class="main_type"><a href="Valadoc.Api.Class.html" class="class">Class</a></span> item)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Visit operation called for classes.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_struct.html" class="virtual_method">visit_struct</a></b> (<span class="main_type"><a href="Valadoc.Api.Struct.html" class="class">Struct</a></span> item)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for structs.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_property.html" class="virtual_method">visit_property</a></b> (<span class="main_type"><a href="Valadoc.Api.Property.html" class="class">Property</a></span> item)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for properties.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_field.html" class="virtual_method">visit_field</a></b> (<span class="main_type"><a href="Valadoc.Api.Field.html" class="class">Field</a></span> item)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for fields.</span>
             </div></li>
           <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_constant.html" class="virtual_method">visit_constant</a></b> (<span class="main_type"><a href="Valadoc.Api.Constant.html" class="class">Constant</a></span> item)
             </span>
@@ -146,30 +118,6 @@
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Visit operation called for delegates.</span>
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_signal.html" class="virtual_method">visit_signal</a></b> (<span class="main_type"><a href="Valadoc.Api.Signal.html" class="class">Signal</a></span> item)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for signals.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_method.html" class="virtual_method">visit_method</a></b> (<span class="main_type"><a href="Valadoc.Api.Method.html" class="class">Method</a></span> item)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for methods.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_type_parameter.html" class="virtual_method">visit_type_parameter</a></b> (<span class="main_type"><a href="Valadoc.Api.TypeParameter.html" class="class">TypeParameter</a></span> item)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for type parameters.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_formal_parameter.html" class="virtual_method">visit_formal_parameter</a></b> (<span class="main_type"><a href="Valadoc.Api.FormalParameter.html" class="class">FormalParameter</a></span> item)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for formal parameters.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_error_domain.html" class="virtual_method">visit_error_domain</a></b> (<span class="main_type"><a href="Valadoc.Api.ErrorDomain.html" class="class">ErrorDomain</a></span> item)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for error domains.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_error_code.html" class="virtual_method">visit_error_code</a></b> (<span class="main_type"><a href="Valadoc.Api.ErrorCode.html" class="class">ErrorCode</a></span> item)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for error codes.</span>
-            </div></li>
           <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_enum.html" class="virtual_method">visit_enum</a></b> (<span class="main_type"><a href="Valadoc.Api.Enum.html" class="class">Enum</a></span> item)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Visit operation called for enums.</span>
@@ -178,78 +126,131 @@
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Visit operation called for enum values.</span>
             </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_error_code.html" class="virtual_method">visit_error_code</a></b> (<span class="main_type"><a href="Valadoc.Api.ErrorCode.html" class="class">ErrorCode</a></span> item)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for error codes.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_error_domain.html" class="virtual_method">visit_error_domain</a></b> (<span class="main_type"><a href="Valadoc.Api.ErrorDomain.html" class="class">ErrorDomain</a></span> item)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for error domains.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_field.html" class="virtual_method">visit_field</a></b> (<span class="main_type"><a href="Valadoc.Api.Field.html" class="class">Field</a></span> item)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for fields.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_formal_parameter.html" class="virtual_method">visit_formal_parameter</a></b> (<span class="main_type"><a href="Valadoc.Api.FormalParameter.html" class="class">FormalParameter</a></span> item)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for formal parameters.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_interface.html" class="virtual_method">visit_interface</a></b> (<span class="main_type"><a href="Valadoc.Api.Interface.html" class="class">Interface</a></span> item)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for interfaces.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_method.html" class="virtual_method">visit_method</a></b> (<span class="main_type"><a href="Valadoc.Api.Method.html" class="class">Method</a></span> item)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for methods.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_namespace.html" class="virtual_method">visit_namespace</a></b> (<span class="main_type"><a href="Valadoc.Api.Namespace.html" class="class">Namespace</a></span> item)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for namespaces</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_package.html" class="virtual_method">visit_package</a></b> (<span class="main_type"><a href="Valadoc.Api.Package.html" class="class">Package</a></span> item)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for packages like gir-files and vapi-files.
+              </span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_property.html" class="virtual_method">visit_property</a></b> (<span class="main_type"><a href="Valadoc.Api.Property.html" class="class">Property</a></span> item)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for properties.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_signal.html" class="virtual_method">visit_signal</a></b> (<span class="main_type"><a href="Valadoc.Api.Signal.html" class="class">Signal</a></span> item)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for signals.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_struct.html" class="virtual_method">visit_struct</a></b> (<span class="main_type"><a href="Valadoc.Api.Struct.html" class="class">Struct</a></span> item)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for structs.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_tree.html" class="virtual_method">visit_tree</a></b> (<span class="main_type"><a href="Valadoc.Api.Tree.html" class="class">Tree</a></span> item)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for api trees.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Visitor.visit_type_parameter.html" class="virtual_method">visit_type_parameter</a></b> (<span class="main_type"><a href="Valadoc.Api.TypeParameter.html" class="class">TypeParameter</a></span> item)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Visit operation called for type parameters.</span>
+            </div></li>
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-302')">All known members inherited from class GLib.Object</div>
-          <div class="content" id="box-content-302">
+          <div class="headline" onclick="toggle_box (this, 'box-content-266')">All known members inherited from class GLib.Object</div>
+          <div class="content" id="box-content-266">
             <div class="column">
               <ul class="navi_inline">
-                <li class="static_method">interface_find_property</li>
-                <li class="static_method">interface_install_property</li>
-                <li class="static_method">interface_list_properties</li>
-                <li class="static_method">@new</li>
-                <li class="static_method">new_valist</li>
-                <li class="static_method">newv</li>
-                <li class="static_method">new_with_properties</li>
-                <li class="method">add_toggle_ref</li>
-                <li class="method">add_weak_pointer</li>
-                <li class="method">bind_property</li>
-                <li class="method">connect</li>
-                <li class="virtual_method">constructed</li>
-                <li class="method">disconnect</li>
-                <li class="virtual_method">dispose</li>
-                <li class="method">dup_data</li>
-                <li class="method">dup_qdata</li>
-                <li class="method">force_floating</li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.@get.html">@get</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.@new.html">@new</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.@ref.html">@ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.@set.html">@set</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.add_toggle_ref.html">add_toggle_ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.add_weak_pointer.html">add_weak_pointer</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.bind_property.html">bind_property</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.connect.html">connect</a></li>
+                <li class="virtual_method"><a href="../gobject-2.0/GLib.Object.constructed.html">constructed</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.disconnect.html">disconnect</a></li>
+                <li class="virtual_method"><a href="../gobject-2.0/GLib.Object.dispose.html">dispose</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.dup_data.html">dup_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.dup_qdata.html">dup_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.force_floating.html">force_floating</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.freeze_notify.html">freeze_notify</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_class.html">get_class</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_data.html">get_data</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="method">freeze_notify</li>
-                <li class="method">@get</li>
-                <li class="method">get_class</li>
-                <li class="method">get_data</li>
-                <li class="method">get_property</li>
-                <li class="method">get_qdata</li>
-                <li class="method">get_type</li>
-                <li class="method">getv</li>
-                <li class="method">is_floating</li>
-                <li class="method">notify_property</li>
-                <li class="method">@ref</li>
-                <li class="method">ref_sink</li>
-                <li class="method">replace_data</li>
-                <li class="method">replace_qdata</li>
-                <li class="method">remove_toggle_ref</li>
-                <li class="method">remove_weak_pointer</li>
-                <li class="method">@set</li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_property.html">get_property</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_qdata.html">get_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_type.html">get_type</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.getv.html">getv</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.interface_find_property.html">interface_find_property</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.interface_install_property.html">interface_install_property</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.interface_list_properties.html">interface_list_properties</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.is_floating.html">is_floating</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.new_valist.html">new_valist</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.new_with_properties.html">new_with_properties</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.newv.html">newv</a></li>
+                <li class="signal"><a href="../gobject-2.0/GLib.Object.notify.html">notify</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.notify_property.html">notify_property</a></li>
+                <li class="field"><a href="../gobject-2.0/GLib.Object.ref_count.html">ref_count</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.ref_sink.html">ref_sink</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.remove_toggle_ref.html">remove_toggle_ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.remove_weak_pointer.html">remove_weak_pointer</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="method">set_data</li>
-                <li class="method">set_data_full</li>
-                <li class="method">set_property</li>
-                <li class="method">set_qdata</li>
-                <li class="method">set_qdata_full</li>
-                <li class="method">set_valist</li>
-                <li class="method">setv</li>
-                <li class="method">steal_data</li>
-                <li class="method">steal_qdata</li>
-                <li class="method">thaw_notify</li>
-                <li class="method">unref</li>
-                <li class="method">watch_closure</li>
-                <li class="method">weak_ref</li>
-                <li class="method">weak_unref</li>
-                <li class="signal">notify</li>
-                <li class="field">ref_count</li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.replace_data.html">replace_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.replace_qdata.html">replace_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_data.html">set_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_data_full.html">set_data_full</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_property.html">set_property</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_qdata.html">set_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_qdata_full.html">set_qdata_full</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_valist.html">set_valist</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.setv.html">setv</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.steal_data.html">steal_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.steal_qdata.html">steal_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.thaw_notify.html">thaw_notify</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.unref.html">unref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.watch_closure.html">watch_closure</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.weak_ref.html">weak_ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.weak_unref.html">weak_unref</a></li>
               </ul>
             </div>
           </div>
         </div>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

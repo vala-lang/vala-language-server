@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -39,6 +39,7 @@
           <li class="property"><a href="Vala.Class.is_compact.html">is_compact</a></li>
           <li class="property"><a href="Vala.Class.is_error_base.html">is_error_base</a></li>
           <li class="property"><a href="Vala.Class.is_immutable.html">is_immutable</a></li>
+          <li class="property"><a href="Vala.Class.is_singleton.html">is_singleton</a></li>
           <li class="property"><a href="Vala.Class.static_constructor.html">static_constructor</a></li>
           <li class="property"><a href="Vala.Class.static_destructor.html">static_destructor</a></li>
           <li class="creation_method"><a href="Vala.Class.Class.html">Class</a></li>
@@ -54,6 +55,7 @@
           <li class="method"><a href="Vala.Class.class_is_a.html">class_is_a</a></li>
           <li class="method"><a href="Vala.Class.get_all_prerequisites.html">get_all_prerequisites</a></li>
           <li class="method"><a href="Vala.Class.get_base_types.html">get_base_types</a></li>
+          <li class="method"><a href="Vala.Class.get_implicit_implementations.html">get_implicit_implementations</a></li>
           <li class="method"><a href="Vala.Class.is_fundamental.html">is_fundamental</a></li>
           <li class="virtual_method"><a href="Vala.Class.is_reference_type.html">is_reference_type</a></li>
           <li class="virtual_method"><a href="Vala.Class.is_subtype_of.html">is_subtype_of</a></li>
@@ -69,9 +71,11 @@
           <li class="field"><a href="Vala.Class._is_abstract.html">_is_abstract</a></li>
           <li class="field"><a href="Vala.Class._is_compact.html">_is_compact</a></li>
           <li class="field"><a href="Vala.Class._is_immutable.html">_is_immutable</a></li>
+          <li class="field"><a href="Vala.Class._is_singleton.html">_is_singleton</a></li>
           <li class="field"><a href="Vala.Class._static_constructor.html">_static_constructor</a></li>
           <li class="field"><a href="Vala.Class._static_destructor.html">_static_destructor</a></li>
           <li class="field"><a href="Vala.Class.base_types.html">base_types</a></li>
+          <li class="field"><a href="Vala.Class.implicit_implementations.html">implicit_implementations</a></li>
         </ul>
       </div>
       <div class="site_content">
@@ -81,11 +85,11 @@
         <img class="main_diagram" usemap="#Vala.Class" alt="Object hierarchy for Class" src="img/Vala.Class.svg"/>
 
       <map id="Vala.Class" name="Vala.Class">
-<area shape="rect" id="node1" href="Vala.Class.html" title="Vala.Class" alt="" coords="63,389,170,437"/>
-<area shape="rect" id="node2" href="Vala.ObjectTypeSymbol.html" title="Vala.ObjectTypeSymbol" alt="" coords="5,293,228,341"/>
-<area shape="rect" id="node3" href="Vala.TypeSymbol.html" title="Vala.TypeSymbol" alt="" coords="34,197,199,245"/>
-<area shape="rect" id="node4" href="Vala.Symbol.html" title="Vala.Symbol" alt="" coords="53,101,180,149"/>
-<area shape="rect" id="node5" href="Vala.CodeNode.html" title="Vala.CodeNode" alt="" coords="41,5,192,53"/>
+<area shape="rect" id="node1" href="Vala.Class.html" title="Vala.Class" alt="" coords="56,389,155,437"/>
+<area shape="rect" id="node2" href="Vala.ObjectTypeSymbol.html" title="Vala.ObjectTypeSymbol" alt="" coords="5,293,205,341"/>
+<area shape="rect" id="node3" href="Vala.TypeSymbol.html" title="Vala.TypeSymbol" alt="" coords="29,197,181,245"/>
+<area shape="rect" id="node4" href="Vala.Symbol.html" title="Vala.Symbol" alt="" coords="47,101,164,149"/>
+<area shape="rect" id="node5" href="Vala.CodeNode.html" title="Vala.CodeNode" alt="" coords="37,5,174,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -101,83 +105,100 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Properties:</h3>
         <ul class="navi_inline">
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">Class</span></span> <b><a href="Vala.Class.base_class.html" class="property">base_class</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">Class</span></span> <b><a href="Vala.Class.base_class.html" class="property">base_class</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Specifies the base class.</span>
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Class.is_abstract.html" class="property">is_abstract</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Constructor.html" class="class">Constructor</a></span>? <b><a href="Vala.Class.class_constructor.html" class="property">class_constructor</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">private</span> <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Specifies the class constructor.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Destructor.html" class="class">Destructor</a></span>? <b><a href="Vala.Class.class_destructor.html" class="property">class_destructor</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">private</span> <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Specifies the class destructor.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Constructor.html" class="class">Constructor</a></span>? <b><a href="Vala.Class.constructor.html" class="property">constructor</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">private</span> <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Specifies the instance constructor.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.CreationMethod.html" class="class">CreationMethod</a></span>? <b><a href="Vala.Class.default_construction_method.html" class="property">default_construction_method</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">private</span> <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Specifies the default construction method.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Destructor.html" class="class">Destructor</a></span>? <b><a href="Vala.Class.destructor.html" class="property">destructor</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">private</span> <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Specifies the instance destructor.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Class.has_class_private_fields.html" class="property">has_class_private_fields</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">private</span> <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Specifies whether this class has class fields.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Class.has_private_fields.html" class="property">has_private_fields</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Specifies whether this class has private fields.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Class.is_abstract.html" class="property">is_abstract</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Specifies whether this class is abstract. Abstract classes may not be 
                 instantiated.</span>
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Class.is_compact.html" class="property">is_compact</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Class.is_compact.html" class="property">is_compact</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Instances of compact classes are fast to create and have a compact 
                 memory layout. Compact classes don't support runtime type information or virtual methods.</span>
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Class.is_immutable.html" class="property">is_immutable</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Class.is_error_base.html" class="property">is_error_base</a></b> { <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Specifies whether this class denotes an error base.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Class.is_immutable.html" class="property">is_immutable</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Instances of immutable classes are immutable after construction.
               </span>
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Class.has_private_fields.html" class="property">has_private_fields</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Class.is_singleton.html" class="property">is_singleton</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Specifies whether this class has private fields.</span>
+            <div class="leaf_brief_description"><span class="brief_description">Instances of immutable classes are immutable after construction.
+              </span>
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Class.has_class_private_fields.html" class="property">has_class_private_fields</a></b> { <span class="main_keyword">private</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Specifies whether this class has class fields.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.CreationMethod.html" class="class">CreationMethod</a></span> <b><a href="Vala.Class.default_construction_method.html" class="property">default_construction_method</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Specifies the default construction method.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Constructor.html" class="class">Constructor</a></span> <b><a href="Vala.Class.constructor.html" class="property">constructor</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Specifies the instance constructor.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Constructor.html" class="class">Constructor</a></span> <b><a href="Vala.Class.class_constructor.html" class="property">class_constructor</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Specifies the class constructor.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Constructor.html" class="class">Constructor</a></span> <b><a href="Vala.Class.static_constructor.html" class="property">static_constructor</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Constructor.html" class="class">Constructor</a></span>? <b><a href="Vala.Class.static_constructor.html" class="property">static_constructor</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">private</span> <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Specifies the static class constructor.</span>
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Destructor.html" class="class">Destructor</a></span>? <b><a href="Vala.Class.destructor.html" class="property">destructor</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Specifies the instance destructor.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Destructor.html" class="class">Destructor</a></span>? <b><a href="Vala.Class.static_destructor.html" class="property">static_destructor</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Destructor.html" class="class">Destructor</a></span>? <b><a href="Vala.Class.static_destructor.html" class="property">static_destructor</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">private</span> <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Specifies the class destructor.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.Destructor.html" class="class">Destructor</a></span>? <b><a href="Vala.Class.class_destructor.html" class="property">class_destructor</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Specifies the class destructor.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Class.is_error_base.html" class="property">is_error_base</a></b> { <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Specifies whether this class denotes an error base.</span>
             </div></li>
         </ul>
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
-          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.Class.Class.html" class="creation_method">Class</a></b> (<span class="main_basic_type"><span class="class">string</span></span> name, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? source_reference = <span class="main_literal">null</span>, <span class="main_type"><a href="Vala.Comment.html" class="class">Comment</a></span>? comment = <span class="main_literal">null</span>)
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.Class.Class.html" class="creation_method">Class</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? source_reference = <span class="main_literal">null</span>, <span class="main_type"><a href="Vala.Comment.html" class="class">Comment</a></span>? comment = <span class="main_literal">null</span>)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Creates a new class.</span>
             </div></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.Class.accept.html" class="virtual_method">accept</a></b> (<span class="main_type"><a href="Vala.CodeVisitor.html" class="abstract_class">CodeVisitor</a></span> visitor)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.Class.accept_children.html" class="virtual_method">accept_children</a></b> (<span class="main_type"><a href="Vala.CodeVisitor.html" class="abstract_class">CodeVisitor</a></span> visitor)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.Class.add_base_type.html" class="method">add_base_type</a></b> (<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span> type)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Adds the specified class or interface to the list of base types of 
                 this class.</span>
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>&gt; <b><a href="Vala.Class.get_base_types.html" class="method">get_base_types</a></b> ()
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.Class.add_constructor.html" class="virtual_method">add_constructor</a></b> (<span class="main_type"><a href="Vala.Constructor.html" class="class">Constructor</a></span> c)
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns a copy of the base type list.</span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.Class.add_destructor.html" class="virtual_method">add_destructor</a></b> (<span class="main_type"><a href="Vala.Destructor.html" class="class">Destructor</a></span> d)
+            </span>
+            <div class="leaf_brief_description">
             </div></li>
           <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.Class.add_field.html" class="virtual_method">add_field</a></b> (<span class="main_type"><a href="Vala.Field.html" class="class">Field</a></span> f)
             </span>
@@ -191,47 +212,39 @@
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Adds the specified property as a member to this class.</span>
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.Class.add_constructor.html" class="virtual_method">add_constructor</a></b> (<span class="main_type"><a href="Vala.Constructor.html" class="class">Constructor</a></span> c)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Class.check.html" class="virtual_method">check</a></b> (<span class="main_type"><a href="Vala.CodeContext.html" class="class">CodeContext</a></span> context)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.Class.add_destructor.html" class="virtual_method">add_destructor</a></b> (<span class="main_type"><a href="Vala.Destructor.html" class="class">Destructor</a></span> d)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Class.class_is_a.html" class="method">class_is_a</a></b> (<span class="main_type"><span class="class">Class</span></span> cl, <span class="main_type"><a href="Vala.TypeSymbol.html" class="abstract_class">TypeSymbol</a></span> t)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.Class.accept.html" class="virtual_method">accept</a></b> (<span class="main_type"><a href="Vala.CodeVisitor.html" class="abstract_class">CodeVisitor</a></span> visitor)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Class.get_all_prerequisites.html" class="method">get_all_prerequisites</a></b> (<span class="main_type"><a href="Vala.Interface.html" class="class">Interface</a></span> iface, <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.TypeSymbol.html" class="abstract_class">TypeSymbol</a></span>&gt; list)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.Class.accept_children.html" class="virtual_method">accept_children</a></b> (<span class="main_type"><a href="Vala.CodeVisitor.html" class="abstract_class">CodeVisitor</a></span> visitor)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>&gt; <b><a href="Vala.Class.get_base_types.html" class="method">get_base_types</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns a copy of the base type list.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.HashMap.html" class="class">HashMap</a></span>&lt;<span class="main_type"><a href="Vala.Method.html" class="class">Method</a></span>,<span class="main_type"><a href="Vala.Method.html" class="class">Method</a></span>&gt; <b><a href="Vala.Class.get_implicit_implementations.html" class="method">get_implicit_implementations</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Class.is_reference_type.html" class="virtual_method">is_reference_type</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Class.is_fundamental.html" class="method">is_fundamental</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Class.is_fundamental.html" class="method">is_fundamental</a></b> ()
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Class.is_reference_type.html" class="virtual_method">is_reference_type</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Class.is_subtype_of.html" class="virtual_method">is_subtype_of</a></b> (<span class="main_type"><a href="Vala.TypeSymbol.html" class="abstract_class">TypeSymbol</a></span> t)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Class.is_subtype_of.html" class="virtual_method">is_subtype_of</a></b> (<span class="main_type"><a href="Vala.TypeSymbol.html" class="abstract_class">TypeSymbol</a></span> t)
             </span>
             <div class="leaf_brief_description">
             </div></li>
           <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.Class.replace_type.html" class="virtual_method">replace_type</a></b> (<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span> old_type, <span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span> new_type)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Class.get_all_prerequisites.html" class="method">get_all_prerequisites</a></b> (<span class="main_type"><a href="Vala.Interface.html" class="class">Interface</a></span> iface, <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.TypeSymbol.html" class="abstract_class">TypeSymbol</a></span>&gt; list)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Class.class_is_a.html" class="method">class_is_a</a></b> (<span class="main_type"><span class="class">Class</span></span> cl, <span class="main_type"><a href="Vala.TypeSymbol.html" class="abstract_class">TypeSymbol</a></span> t)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Class.check.html" class="virtual_method">check</a></b> (<span class="main_type"><a href="Vala.CodeContext.html" class="class">CodeContext</a></span> context)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -242,47 +255,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Class._is_abstract.html" class="field">_is_abstract</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Class._has_private_fields.html" class="field">_has_private_fields</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.Class._has_class_private_fields.html" class="field">_has_class_private_fields</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span>? <b><a href="Vala.Class._is_compact.html" class="field">_is_compact</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span>? <b><a href="Vala.Class._is_immutable.html" class="field">_is_immutable</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>&gt; <b><a href="Vala.Class.base_types.html" class="field">base_types</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.CreationMethod.html" class="class">CreationMethod</a></span> <b><a href="Vala.Class._default_construction_method.html" class="field">_default_construction_method</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Constructor.html" class="class">Constructor</a></span> <b><a href="Vala.Class._constructor.html" class="field">_constructor</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Constructor.html" class="class">Constructor</a></span> <b><a href="Vala.Class._class_constructor.html" class="field">_class_constructor</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Constructor.html" class="class">Constructor</a></span> <b><a href="Vala.Class._static_constructor.html" class="field">_static_constructor</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Destructor.html" class="class">Destructor</a></span>? <b><a href="Vala.Class._static_destructor.html" class="field">_static_destructor</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Constructor.html" class="class">Constructor</a></span>? <b><a href="Vala.Class._class_constructor.html" class="field">_class_constructor</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -290,67 +263,121 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Constructor.html" class="class">Constructor</a></span>? <b><a href="Vala.Class._constructor.html" class="field">_constructor</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.CreationMethod.html" class="class">CreationMethod</a></span>? <b><a href="Vala.Class._default_construction_method.html" class="field">_default_construction_method</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Destructor.html" class="class">Destructor</a></span>? <b><a href="Vala.Class._destructor.html" class="field">_destructor</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Class._has_class_private_fields.html" class="field">_has_class_private_fields</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Class._has_private_fields.html" class="field">_has_private_fields</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Class._is_abstract.html" class="field">_is_abstract</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span>? <b><a href="Vala.Class._is_compact.html" class="field">_is_compact</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span>? <b><a href="Vala.Class._is_immutable.html" class="field">_is_immutable</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span>? <b><a href="Vala.Class._is_singleton.html" class="field">_is_singleton</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Constructor.html" class="class">Constructor</a></span>? <b><a href="Vala.Class._static_constructor.html" class="field">_static_constructor</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Destructor.html" class="class">Destructor</a></span>? <b><a href="Vala.Class._static_destructor.html" class="field">_static_destructor</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>&gt; <b><a href="Vala.Class.base_types.html" class="field">base_types</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.HashMap.html" class="class">HashMap</a></span>&lt;<span class="main_type"><a href="Vala.Method.html" class="class">Method</a></span>,<span class="main_type"><a href="Vala.Method.html" class="class">Method</a></span>&gt; <b><a href="Vala.Class.implicit_implementations.html" class="field">implicit_implementations</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-294')">All known members inherited from class Vala.ObjectTypeSymbol</div>
-          <div class="content" id="box-content-294">
+          <div class="headline" onclick="toggle_box (this, 'box-content-289')">All known members inherited from class Vala.ObjectTypeSymbol</div>
+          <div class="content" id="box-content-289">
             <div class="column">
               <ul class="navi_inline">
-                <li class="method"><a href="Vala.ObjectTypeSymbol.get_members.html">get_members</a></li>
-                <li class="method"><a href="Vala.ObjectTypeSymbol.get_fields.html">get_fields</a></li>
-                <li class="method"><a href="Vala.ObjectTypeSymbol.get_methods.html">get_methods</a></li>
-                <li class="method"><a href="Vala.ObjectTypeSymbol.get_properties.html">get_properties</a></li>
-                <li class="method"><a href="Vala.ObjectTypeSymbol.get_signals.html">get_signals</a></li>
+                <li class="virtual_method"><a href="Vala.ObjectTypeSymbol.add_class.html">add_class</a></li>
+                <li class="virtual_method"><a href="Vala.ObjectTypeSymbol.add_constant.html">add_constant</a></li>
+                <li class="virtual_method"><a href="Vala.ObjectTypeSymbol.add_delegate.html">add_delegate</a></li>
+                <li class="virtual_method"><a href="Vala.ObjectTypeSymbol.add_enum.html">add_enum</a></li>
                 <li class="virtual_method"><a href="Vala.ObjectTypeSymbol.add_field.html">add_field</a></li>
+                <li class="method"><a href="Vala.ObjectTypeSymbol.add_hidden_method.html">add_hidden_method</a></li>
                 <li class="virtual_method"><a href="Vala.ObjectTypeSymbol.add_method.html">add_method</a></li>
                 <li class="virtual_method"><a href="Vala.ObjectTypeSymbol.add_property.html">add_property</a></li>
                 <li class="virtual_method"><a href="Vala.ObjectTypeSymbol.add_signal.html">add_signal</a></li>
-                <li class="method"><a href="Vala.ObjectTypeSymbol.get_classes.html">get_classes</a></li>
-                <li class="method"><a href="Vala.ObjectTypeSymbol.get_structs.html">get_structs</a></li>
-                <li class="method"><a href="Vala.ObjectTypeSymbol.get_enums.html">get_enums</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="method"><a href="Vala.ObjectTypeSymbol.get_delegates.html">get_delegates</a></li>
-                <li class="virtual_method"><a href="Vala.ObjectTypeSymbol.add_class.html">add_class</a></li>
                 <li class="virtual_method"><a href="Vala.ObjectTypeSymbol.add_struct.html">add_struct</a></li>
-                <li class="virtual_method"><a href="Vala.ObjectTypeSymbol.add_enum.html">add_enum</a></li>
-                <li class="virtual_method"><a href="Vala.ObjectTypeSymbol.add_delegate.html">add_delegate</a></li>
-                <li class="virtual_method"><a href="Vala.ObjectTypeSymbol.add_constant.html">add_constant</a></li>
-                <li class="method"><a href="Vala.ObjectTypeSymbol.get_constants.html">get_constants</a></li>
                 <li class="method"><a href="Vala.ObjectTypeSymbol.add_type_parameter.html">add_type_parameter</a></li>
-                <li class="method"><a href="Vala.ObjectTypeSymbol.get_type_parameters.html">get_type_parameters</a></li>
-                <li class="virtual_method"><a href="Vala.ObjectTypeSymbol.get_type_parameter_index.html">get_type_parameter_index</a></li>
-                <li class="method"><a href="Vala.ObjectTypeSymbol.get_this_type.html">get_this_type</a></li>
-                <li class="method"><a href="Vala.ObjectTypeSymbol.add_hidden_method.html">add_hidden_method</a></li>
+                <li class="field"><a href="Vala.ObjectTypeSymbol.classes.html">classes</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="field"><a href="Vala.ObjectTypeSymbol.type_parameters.html">type_parameters</a></li>
-                <li class="field"><a href="Vala.ObjectTypeSymbol.members.html">members</a></li>
+                <li class="field"><a href="Vala.ObjectTypeSymbol.constants.html">constants</a></li>
+                <li class="field"><a href="Vala.ObjectTypeSymbol.delegates.html">delegates</a></li>
+                <li class="field"><a href="Vala.ObjectTypeSymbol.enums.html">enums</a></li>
                 <li class="field"><a href="Vala.ObjectTypeSymbol.fields.html">fields</a></li>
+                <li class="method"><a href="Vala.ObjectTypeSymbol.get_classes.html">get_classes</a></li>
+                <li class="method"><a href="Vala.ObjectTypeSymbol.get_constants.html">get_constants</a></li>
+                <li class="method"><a href="Vala.ObjectTypeSymbol.get_delegates.html">get_delegates</a></li>
+                <li class="method"><a href="Vala.ObjectTypeSymbol.get_enums.html">get_enums</a></li>
+                <li class="method"><a href="Vala.ObjectTypeSymbol.get_fields.html">get_fields</a></li>
+                <li class="method"><a href="Vala.ObjectTypeSymbol.get_members.html">get_members</a></li>
+                <li class="method"><a href="Vala.ObjectTypeSymbol.get_methods.html">get_methods</a></li>
+                <li class="method"><a href="Vala.ObjectTypeSymbol.get_properties.html">get_properties</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="method"><a href="Vala.ObjectTypeSymbol.get_signals.html">get_signals</a></li>
+                <li class="method"><a href="Vala.ObjectTypeSymbol.get_structs.html">get_structs</a></li>
+                <li class="method"><a href="Vala.ObjectTypeSymbol.get_this_type.html">get_this_type</a></li>
+                <li class="virtual_method"><a href="Vala.ObjectTypeSymbol.get_type_parameter_index.html">get_type_parameter_index</a></li>
+                <li class="method"><a href="Vala.ObjectTypeSymbol.get_type_parameters.html">get_type_parameters</a></li>
+                <li class="method"><a href="Vala.ObjectTypeSymbol.has_type_parameters.html">has_type_parameters</a></li>
+                <li class="field"><a href="Vala.ObjectTypeSymbol.members.html">members</a></li>
                 <li class="field"><a href="Vala.ObjectTypeSymbol.methods.html">methods</a></li>
                 <li class="field"><a href="Vala.ObjectTypeSymbol.properties.html">properties</a></li>
                 <li class="field"><a href="Vala.ObjectTypeSymbol.signals.html">signals</a></li>
-                <li class="field"><a href="Vala.ObjectTypeSymbol.classes.html">classes</a></li>
                 <li class="field"><a href="Vala.ObjectTypeSymbol.structs.html">structs</a></li>
-                <li class="field"><a href="Vala.ObjectTypeSymbol.enums.html">enums</a></li>
-                <li class="field"><a href="Vala.ObjectTypeSymbol.delegates.html">delegates</a></li>
-                <li class="field"><a href="Vala.ObjectTypeSymbol.constants.html">constants</a></li>
+                <li class="field"><a href="Vala.ObjectTypeSymbol.type_parameters.html">type_parameters</a></li>
               </ul>
             </div>
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-295')">All known members inherited from class Vala.TypeSymbol</div>
-          <div class="content" id="box-content-295">
+          <div class="headline" onclick="toggle_box (this, 'box-content-290')">All known members inherited from class Vala.TypeSymbol</div>
+          <div class="content" id="box-content-290">
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="virtual_method"><a href="Vala.TypeSymbol.get_type_parameter_index.html">get_type_parameter_index</a></li>
+              </ul>
+            </div>
             <div class="column">
               <ul class="navi_inline">
                 <li class="virtual_method"><a href="Vala.TypeSymbol.is_reference_type.html">is_reference_type</a></li>
@@ -361,147 +388,145 @@
                 <li class="virtual_method"><a href="Vala.TypeSymbol.is_subtype_of.html">is_subtype_of</a></li>
               </ul>
             </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="virtual_method"><a href="Vala.TypeSymbol.get_type_parameter_index.html">get_type_parameter_index</a></li>
-              </ul>
-            </div>
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-296')">All known members inherited from class Vala.Symbol</div>
-          <div class="content" id="box-content-296">
+          <div class="headline" onclick="toggle_box (this, 'box-content-291')">All known members inherited from class Vala.Symbol</div>
+          <div class="content" id="box-content-291">
             <div class="column">
               <ul class="navi_inline">
-                <li class="property"><a href="Vala.Symbol.parent_symbol.html">parent_symbol</a></li>
-                <li class="property"><a href="Vala.Symbol.owner.html">owner</a></li>
-                <li class="property"><a href="Vala.Symbol.name.html">name</a></li>
-                <li class="property"><a href="Vala.Symbol.active.html">active</a></li>
-                <li class="property"><a href="Vala.Symbol.used.html">used</a></li>
-                <li class="property"><a href="Vala.Symbol.anonymous.html">anonymous</a></li>
+                <li class="field"><a href="Vala.Symbol._access.html">_access</a></li>
+                <li class="field"><a href="Vala.Symbol._active.html">_active</a></li>
+                <li class="field"><a href="Vala.Symbol._anonymous.html">_anonymous</a></li>
+                <li class="field"><a href="Vala.Symbol._comment.html">_comment</a></li>
+                <li class="field"><a href="Vala.Symbol._external.html">_external</a></li>
+                <li class="field"><a href="Vala.Symbol._hides.html">_hides</a></li>
+                <li class="field"><a href="Vala.Symbol._is_extern.html">_is_extern</a></li>
+                <li class="field"><a href="Vala.Symbol._name.html">_name</a></li>
+                <li class="field"><a href="Vala.Symbol._owner.html">_owner</a></li>
+                <li class="field"><a href="Vala.Symbol._scope.html">_scope</a></li>
+                <li class="field"><a href="Vala.Symbol._used.html">_used</a></li>
+                <li class="field"><a href="Vala.Symbol._version.html">_version</a></li>
                 <li class="property"><a href="Vala.Symbol.access.html">access</a></li>
+                <li class="property"><a href="Vala.Symbol.active.html">active</a></li>
+                <li class="virtual_method"><a href="Vala.Symbol.add_class.html">add_class</a></li>
+                <li class="virtual_method"><a href="Vala.Symbol.add_constant.html">add_constant</a></li>
+                <li class="virtual_method"><a href="Vala.Symbol.add_constructor.html">add_constructor</a></li>
+                <li class="virtual_method"><a href="Vala.Symbol.add_delegate.html">add_delegate</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="virtual_method"><a href="Vala.Symbol.add_destructor.html">add_destructor</a></li>
+                <li class="virtual_method"><a href="Vala.Symbol.add_enum.html">add_enum</a></li>
+                <li class="virtual_method"><a href="Vala.Symbol.add_error_domain.html">add_error_domain</a></li>
+                <li class="virtual_method"><a href="Vala.Symbol.add_field.html">add_field</a></li>
+                <li class="virtual_method"><a href="Vala.Symbol.add_interface.html">add_interface</a></li>
+                <li class="virtual_method"><a href="Vala.Symbol.add_method.html">add_method</a></li>
+                <li class="virtual_method"><a href="Vala.Symbol.add_namespace.html">add_namespace</a></li>
+                <li class="virtual_method"><a href="Vala.Symbol.add_property.html">add_property</a></li>
+                <li class="virtual_method"><a href="Vala.Symbol.add_signal.html">add_signal</a></li>
+                <li class="virtual_method"><a href="Vala.Symbol.add_struct.html">add_struct</a></li>
+                <li class="property"><a href="Vala.Symbol.anonymous.html">anonymous</a></li>
+                <li class="static_method"><a href="Vala.Symbol.camel_case_to_lower_case.html">camel_case_to_lower_case</a></li>
                 <li class="property"><a href="Vala.Symbol.comment.html">comment</a></li>
-                <li class="property"><a href="Vala.Symbol.version.html">version</a></li>
-                <li class="property"><a href="Vala.Symbol.hides.html">hides</a></li>
-                <li class="property"><a href="Vala.Symbol.scope.html">scope</a></li>
                 <li class="property"><a href="Vala.Symbol.external.html">external</a></li>
                 <li class="property"><a href="Vala.Symbol.external_package.html">external_package</a></li>
                 <li class="property"><a href="Vala.Symbol.from_commandline.html">from_commandline</a></li>
-                <li class="property"><a href="Vala.Symbol.source_type.html">source_type</a></li>
-                <li class="static_method"><a href="Vala.Symbol.camel_case_to_lower_case.html">camel_case_to_lower_case</a></li>
-                <li class="static_method"><a href="Vala.Symbol.lower_case_to_camel_case.html">lower_case_to_camel_case</a></li>
+                <li class="method"><a href="Vala.Symbol.get_full_name.html">get_full_name</a></li>
+                <li class="method"><a href="Vala.Symbol.get_hidden_member.html">get_hidden_member</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
+                <li class="method"><a href="Vala.Symbol.get_top_accessible_scope.html">get_top_accessible_scope</a></li>
+                <li class="property"><a href="Vala.Symbol.hides.html">hides</a></li>
+                <li class="method"><a href="Vala.Symbol.is_accessible.html">is_accessible</a></li>
+                <li class="virtual_method"><a href="Vala.Symbol.is_class_member.html">is_class_member</a></li>
+                <li class="property"><a href="Vala.Symbol.is_extern.html">is_extern</a></li>
+                <li class="virtual_method"><a href="Vala.Symbol.is_instance_member.html">is_instance_member</a></li>
                 <li class="method"><a href="Vala.Symbol.is_internal_symbol.html">is_internal_symbol</a></li>
                 <li class="method"><a href="Vala.Symbol.is_private_symbol.html">is_private_symbol</a></li>
-                <li class="method"><a href="Vala.Symbol.get_full_name.html">get_full_name</a></li>
-                <li class="method"><a href="Vala.Symbol.get_top_accessible_scope.html">get_top_accessible_scope</a></li>
-                <li class="virtual_method"><a href="Vala.Symbol.is_instance_member.html">is_instance_member</a></li>
-                <li class="virtual_method"><a href="Vala.Symbol.is_class_member.html">is_class_member</a></li>
-                <li class="method"><a href="Vala.Symbol.get_hidden_member.html">get_hidden_member</a></li>
-                <li class="method"><a href="Vala.Symbol.is_accessible.html">is_accessible</a></li>
-                <li class="virtual_method"><a href="Vala.Symbol.add_namespace.html">add_namespace</a></li>
-                <li class="virtual_method"><a href="Vala.Symbol.add_class.html">add_class</a></li>
-                <li class="virtual_method"><a href="Vala.Symbol.add_interface.html">add_interface</a></li>
-                <li class="virtual_method"><a href="Vala.Symbol.add_struct.html">add_struct</a></li>
-                <li class="virtual_method"><a href="Vala.Symbol.add_enum.html">add_enum</a></li>
-                <li class="virtual_method"><a href="Vala.Symbol.add_error_domain.html">add_error_domain</a></li>
-                <li class="virtual_method"><a href="Vala.Symbol.add_delegate.html">add_delegate</a></li>
-                <li class="virtual_method"><a href="Vala.Symbol.add_constant.html">add_constant</a></li>
-                <li class="virtual_method"><a href="Vala.Symbol.add_field.html">add_field</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="virtual_method"><a href="Vala.Symbol.add_method.html">add_method</a></li>
-                <li class="virtual_method"><a href="Vala.Symbol.add_property.html">add_property</a></li>
-                <li class="virtual_method"><a href="Vala.Symbol.add_signal.html">add_signal</a></li>
-                <li class="virtual_method"><a href="Vala.Symbol.add_constructor.html">add_constructor</a></li>
-                <li class="virtual_method"><a href="Vala.Symbol.add_destructor.html">add_destructor</a></li>
-                <li class="field"><a href="Vala.Symbol._name.html">_name</a></li>
-                <li class="field"><a href="Vala.Symbol._active.html">_active</a></li>
-                <li class="field"><a href="Vala.Symbol._used.html">_used</a></li>
-                <li class="field"><a href="Vala.Symbol._anonymous.html">_anonymous</a></li>
-                <li class="field"><a href="Vala.Symbol._access.html">_access</a></li>
-                <li class="field"><a href="Vala.Symbol._comment.html">_comment</a></li>
-                <li class="field"><a href="Vala.Symbol._version.html">_version</a></li>
-                <li class="field"><a href="Vala.Symbol._hides.html">_hides</a></li>
-                <li class="field"><a href="Vala.Symbol._external.html">_external</a></li>
-                <li class="field"><a href="Vala.Symbol._owner.html">_owner</a></li>
-                <li class="field"><a href="Vala.Symbol._scope.html">_scope</a></li>
+                <li class="static_method"><a href="Vala.Symbol.lower_case_to_camel_case.html">lower_case_to_camel_case</a></li>
+                <li class="property"><a href="Vala.Symbol.name.html">name</a></li>
+                <li class="property"><a href="Vala.Symbol.owner.html">owner</a></li>
+                <li class="property"><a href="Vala.Symbol.parent_symbol.html">parent_symbol</a></li>
+                <li class="property"><a href="Vala.Symbol.scope.html">scope</a></li>
+                <li class="property"><a href="Vala.Symbol.source_type.html">source_type</a></li>
+                <li class="virtual_method"><a href="Vala.Symbol.to_string.html">to_string</a></li>
+                <li class="property"><a href="Vala.Symbol.used.html">used</a></li>
+                <li class="property"><a href="Vala.Symbol.version.html">version</a></li>
               </ul>
             </div>
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-297')">All known members inherited from class Vala.CodeNode</div>
-          <div class="content" id="box-content-297">
+          <div class="headline" onclick="toggle_box (this, 'box-content-292')">All known members inherited from class Vala.CodeNode</div>
+          <div class="content" id="box-content-292">
             <div class="column">
               <ul class="navi_inline">
-                <li class="property"><a href="Vala.CodeNode.parent_node.html">parent_node</a></li>
-                <li class="property"><a href="Vala.CodeNode.source_reference.html">source_reference</a></li>
-                <li class="property"><a href="Vala.CodeNode.unreachable.html">unreachable</a></li>
-                <li class="property"><a href="Vala.CodeNode.type_name.html">type_name</a></li>
-                <li class="property"><a href="Vala.CodeNode.checked.html">checked</a></li>
-                <li class="property"><a href="Vala.CodeNode.error.html">error</a></li>
-                <li class="property"><a href="Vala.CodeNode.tree_can_fail.html">tree_can_fail</a></li>
-                <li class="static_method"><a href="Vala.CodeNode.get_temp_name.html">get_temp_name</a></li>
-                <li class="static_method"><a href="Vala.CodeNode.get_attribute_cache_index.html">get_attribute_cache_index</a></li>
-                <li class="method"><a href="Vala.CodeNode.get_error_types.html">get_error_types</a></li>
-                <li class="method"><a href="Vala.CodeNode.add_error_type.html">add_error_type</a></li>
-                <li class="method"><a href="Vala.CodeNode.add_error_types.html">add_error_types</a></li>
+                <li class="field"><a href="Vala.CodeNode._checked.html">_checked</a></li>
+                <li class="field"><a href="Vala.CodeNode._error.html">_error</a></li>
+                <li class="field"><a href="Vala.CodeNode._parent_node.html">_parent_node</a></li>
+                <li class="field"><a href="Vala.CodeNode._source_reference.html">_source_reference</a></li>
+                <li class="field"><a href="Vala.CodeNode._unreachable.html">_unreachable</a></li>
                 <li class="virtual_method"><a href="Vala.CodeNode.accept.html">accept</a></li>
                 <li class="virtual_method"><a href="Vala.CodeNode.accept_children.html">accept_children</a></li>
+                <li class="field"><a href="Vala.CodeNode.attributes.html">attributes</a></li>
+                <li class="field"><a href="Vala.CodeNode.attributes_cache.html">attributes_cache</a></li>
                 <li class="virtual_method"><a href="Vala.CodeNode.check.html">check</a></li>
+                <li class="property"><a href="Vala.CodeNode.checked.html">checked</a></li>
+                <li class="method"><a href="Vala.CodeNode.copy_attribute_bool.html">copy_attribute_bool</a></li>
+                <li class="method"><a href="Vala.CodeNode.copy_attribute_double.html">copy_attribute_double</a></li>
+                <li class="method"><a href="Vala.CodeNode.copy_attribute_integer.html">copy_attribute_integer</a></li>
+                <li class="method"><a href="Vala.CodeNode.copy_attribute_string.html">copy_attribute_string</a></li>
                 <li class="virtual_method"><a href="Vala.CodeNode.emit.html">emit</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="virtual_method"><a href="Vala.CodeNode.replace_type.html">replace_type</a></li>
-                <li class="virtual_method"><a href="Vala.CodeNode.replace_expression.html">replace_expression</a></li>
+                <li class="property"><a href="Vala.CodeNode.error.html">error</a></li>
                 <li class="method"><a href="Vala.CodeNode.get_attribute.html">get_attribute</a></li>
-                <li class="method"><a href="Vala.CodeNode.get_or_create_attribute.html">get_or_create_attribute</a></li>
-                <li class="method"><a href="Vala.CodeNode.has_attribute_argument.html">has_attribute_argument</a></li>
-                <li class="method"><a href="Vala.CodeNode.set_attribute.html">set_attribute</a></li>
-                <li class="method"><a href="Vala.CodeNode.remove_attribute_argument.html">remove_attribute_argument</a></li>
-                <li class="method"><a href="Vala.CodeNode.get_attribute_string.html">get_attribute_string</a></li>
-                <li class="method"><a href="Vala.CodeNode.get_attribute_integer.html">get_attribute_integer</a></li>
-                <li class="method"><a href="Vala.CodeNode.get_attribute_double.html">get_attribute_double</a></li>
                 <li class="method"><a href="Vala.CodeNode.get_attribute_bool.html">get_attribute_bool</a></li>
-                <li class="method"><a href="Vala.CodeNode.set_attribute_string.html">set_attribute_string</a></li>
-                <li class="method"><a href="Vala.CodeNode.set_attribute_integer.html">set_attribute_integer</a></li>
-                <li class="method"><a href="Vala.CodeNode.set_attribute_double.html">set_attribute_double</a></li>
-                <li class="method"><a href="Vala.CodeNode.set_attribute_bool.html">set_attribute_bool</a></li>
                 <li class="method"><a href="Vala.CodeNode.get_attribute_cache.html">get_attribute_cache</a></li>
+                <li class="static_method"><a href="Vala.CodeNode.get_attribute_cache_index.html">get_attribute_cache_index</a></li>
+                <li class="method"><a href="Vala.CodeNode.get_attribute_double.html">get_attribute_double</a></li>
+                <li class="method"><a href="Vala.CodeNode.get_attribute_integer.html">get_attribute_integer</a></li>
+                <li class="method"><a href="Vala.CodeNode.get_attribute_string.html">get_attribute_string</a></li>
+                <li class="virtual_method"><a href="Vala.CodeNode.get_defined_variables.html">get_defined_variables</a></li>
+                <li class="virtual_method"><a href="Vala.CodeNode.get_error_types.html">get_error_types</a></li>
+                <li class="method"><a href="Vala.CodeNode.get_or_create_attribute.html">get_or_create_attribute</a></li>
+                <li class="static_method"><a href="Vala.CodeNode.get_temp_name.html">get_temp_name</a></li>
+                <li class="virtual_method"><a href="Vala.CodeNode.get_used_variables.html">get_used_variables</a></li>
+                <li class="method"><a href="Vala.CodeNode.has_attribute_argument.html">has_attribute_argument</a></li>
+                <li class="field"><a href="Vala.CodeNode.last_temp_nr.html">last_temp_nr</a></li>
+                <li class="field"><a href="Vala.CodeNode.next_attribute_cache_index.html">next_attribute_cache_index</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
+                <li class="property"><a href="Vala.CodeNode.parent_node.html">parent_node</a></li>
+                <li class="method"><a href="Vala.CodeNode.remove_attribute_argument.html">remove_attribute_argument</a></li>
+                <li class="virtual_method"><a href="Vala.CodeNode.replace_expression.html">replace_expression</a></li>
+                <li class="virtual_method"><a href="Vala.CodeNode.replace_type.html">replace_type</a></li>
+                <li class="method"><a href="Vala.CodeNode.set_attribute.html">set_attribute</a></li>
+                <li class="method"><a href="Vala.CodeNode.set_attribute_bool.html">set_attribute_bool</a></li>
                 <li class="method"><a href="Vala.CodeNode.set_attribute_cache.html">set_attribute_cache</a></li>
+                <li class="method"><a href="Vala.CodeNode.set_attribute_double.html">set_attribute_double</a></li>
+                <li class="method"><a href="Vala.CodeNode.set_attribute_integer.html">set_attribute_integer</a></li>
+                <li class="method"><a href="Vala.CodeNode.set_attribute_string.html">set_attribute_string</a></li>
+                <li class="property"><a href="Vala.CodeNode.source_reference.html">source_reference</a></li>
                 <li class="virtual_method"><a href="Vala.CodeNode.to_string.html">to_string</a></li>
-                <li class="virtual_method"><a href="Vala.CodeNode.get_defined_variables.html">get_defined_variables</a></li>
-                <li class="virtual_method"><a href="Vala.CodeNode.get_used_variables.html">get_used_variables</a></li>
-                <li class="field"><a href="Vala.CodeNode._parent_node.html">_parent_node</a></li>
-                <li class="field"><a href="Vala.CodeNode._source_reference.html">_source_reference</a></li>
-                <li class="field"><a href="Vala.CodeNode._unreachable.html">_unreachable</a></li>
-                <li class="field"><a href="Vala.CodeNode.attributes.html">attributes</a></li>
-                <li class="field"><a href="Vala.CodeNode._checked.html">_checked</a></li>
-                <li class="field"><a href="Vala.CodeNode._error.html">_error</a></li>
-                <li class="field"><a href="Vala.CodeNode._error_types.html">_error_types</a></li>
-                <li class="field"><a href="Vala.CodeNode._empty_type_list.html">_empty_type_list</a></li>
-                <li class="field"><a href="Vala.CodeNode.attributes_cache.html">attributes_cache</a></li>
-                <li class="field"><a href="Vala.CodeNode.last_temp_nr.html">last_temp_nr</a></li>
-                <li class="field"><a href="Vala.CodeNode.next_attribute_cache_index.html">next_attribute_cache_index</a></li>
+                <li class="property"><a href="Vala.CodeNode.tree_can_fail.html">tree_can_fail</a></li>
+                <li class="property"><a href="Vala.CodeNode.type_name.html">type_name</a></li>
+                <li class="property"><a href="Vala.CodeNode.unreachable.html">unreachable</a></li>
               </ul>
             </div>
           </div>
         </div>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

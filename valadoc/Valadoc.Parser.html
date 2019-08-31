@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -64,8 +64,8 @@
         <img class="main_diagram" usemap="#Valadoc.Parser" alt="Object hierarchy for Parser" src="img/Valadoc.Parser.svg"/>
 
       <map id="Valadoc.Parser" name="Valadoc.Parser">
-<area shape="rect" id="node1" href="Valadoc.Parser.html" title="Valadoc.Parser" alt="" coords="41,101,192,149"/>
-<area shape="rect" id="node2" href="Valadoc.ParserCallback.html" title="Valadoc.ParserCallback" alt="" coords="5,5,228,53"/>
+<area shape="rect" id="node1" href="Valadoc.Parser.html" title="Valadoc.Parser" alt="" coords="37,101,168,149"/>
+<area shape="rect" id="node2" href="Valadoc.ParserCallback.html" title="Valadoc.ParserCallback" alt="" coords="5,5,200,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -85,19 +85,39 @@
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Parser.set_root_rule.html" class="method">set_root_rule</a></b> (<span class="main_type"><a href="Valadoc.Rule.html" class="abstract_class">Rule</a></span> root_rule)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Parser.parse.html" class="method">parse</a></b> (<span class="main_basic_type"><span class="class">string</span></span> content, <span class="main_basic_type"><span class="class">string</span></span> filename, <span class="main_basic_type"><span class="struct">int</span></span> first_line, <span class="main_basic_type"><span class="struct">int</span></span> first_column) <span class="main_keyword">throws</span> <span class="main_type"><a href="Valadoc.ParserError.html" class="errordomain">ParserError</a></span>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Parser.accept_token.html" class="method">accept_token</a></b> (<span class="main_type"><a href="Valadoc.Token.html" class="class">Token</a></span> token) <span class="main_keyword">throws</span> <span class="main_type"><a href="Valadoc.ParserError.html" class="errordomain">ParserError</a></span>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Rule.html" class="abstract_class">Rule</a></span>? <b><a href="Valadoc.Parser.peek_rule.html" class="method">peek_rule</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> offset = <span class="main_literal">-1</span>)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Parser.error.html" class="method">error</a></b> (<span class="main_type"><a href="Valadoc.Token.html" class="class">Token</a></span>? token, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> message) <span class="main_keyword">throws</span> <span class="main_type"><a href="Valadoc.ParserError.html" class="errordomain">ParserError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Valadoc.Parser.get_end_column.html" class="method">get_end_column</a></b> (<span class="main_type"><a href="Valadoc.Token.html" class="class">Token</a></span>? token)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Valadoc.Parser.get_line.html" class="method">get_line</a></b> (<span class="main_type"><a href="Valadoc.Token.html" class="class">Token</a></span>? token)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gobject-2.0/GLib.Object.html" class="class">Object</a></span>? <b><a href="Valadoc.Parser.get_rule_state.html" class="method">get_rule_state</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Valadoc.Parser.get_start_column.html" class="method">get_start_column</a></b> (<span class="main_type"><a href="Valadoc.Token.html" class="class">Token</a></span>? token)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Parser.parse.html" class="method">parse</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> content, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> filename, <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> first_line, <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> first_column) <span class="main_keyword">throws</span> <span class="main_type"><a href="Valadoc.ParserError.html" class="errordomain">ParserError</a></span>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Rule.html" class="abstract_class">Rule</a></span>? <b><a href="Valadoc.Parser.peek_rule.html" class="method">peek_rule</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> offset = <span class="main_literal">-1</span>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gobject-2.0/GLib.Object.html" class="class">Object</a></span>? <b><a href="Valadoc.Parser.peek_state.html" class="method">peek_state</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> offset = <span class="main_literal">-1</span>)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -109,58 +129,46 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="class">Object</span></span>? <b><a href="Valadoc.Parser.peek_state.html" class="method">peek_state</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> offset = <span class="main_literal">-1</span>)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">Object</span></span>? <b><a href="Valadoc.Parser.get_rule_state.html" class="method">get_rule_state</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Parser.set_rule_state.html" class="method">set_rule_state</a></b> (<span class="main_type"><span class="class">Object</span></span> state)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Parser.reduce.html" class="method">reduce</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.Parser.would_parent_accept_token.html" class="method">would_parent_accept_token</a></b> (<span class="main_type"><a href="Valadoc.Token.html" class="class">Token</a></span> token)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Parser.set_root_rule.html" class="method">set_root_rule</a></b> (<span class="main_type"><a href="Valadoc.Rule.html" class="abstract_class">Rule</a></span> root_rule)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.Parser.would_parent_reduce_to_rule.html" class="method">would_parent_reduce_to_rule</a></b> (<span class="main_type"><a href="Valadoc.Token.html" class="class">Token</a></span> token, <span class="main_type"><a href="Valadoc.Rule.html" class="abstract_class">Rule</a></span> rule)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Parser.set_rule_state.html" class="method">set_rule_state</a></b> (<span class="main_type"><a href="../gobject-2.0/GLib.Object.html" class="class">Object</a></span> state)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Parser.warning.html" class="method">warning</a></b> (<span class="main_type"><a href="Valadoc.Token.html" class="class">Token</a></span>? token, <span class="main_basic_type"><span class="class">string</span></span> message)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Parser.warning.html" class="method">warning</a></b> (<span class="main_type"><a href="Valadoc.Token.html" class="class">Token</a></span>? token, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> message)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Parser.error.html" class="method">error</a></b> (<span class="main_type"><a href="Valadoc.Token.html" class="class">Token</a></span>? token, <span class="main_basic_type"><span class="class">string</span></span> message) <span class="main_keyword">throws</span> <span class="main_type"><a href="Valadoc.ParserError.html" class="errordomain">ParserError</a></span>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.Parser.would_parent_accept_token.html" class="method">would_parent_accept_token</a></b> (<span class="main_type"><a href="Valadoc.Token.html" class="class">Token</a></span> token)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.Parser.get_line.html" class="method">get_line</a></b> (<span class="main_type"><a href="Valadoc.Token.html" class="class">Token</a></span>? token)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.Parser.get_start_column.html" class="method">get_start_column</a></b> (<span class="main_type"><a href="Valadoc.Token.html" class="class">Token</a></span>? token)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.Parser.get_end_column.html" class="method">get_end_column</a></b> (<span class="main_type"><a href="Valadoc.Token.html" class="class">Token</a></span>? token)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.Parser.would_parent_reduce_to_rule.html" class="method">would_parent_reduce_to_rule</a></b> (<span class="main_type"><a href="Valadoc.Token.html" class="class">Token</a></span> token, <span class="main_type"><a href="Valadoc.Rule.html" class="abstract_class">Rule</a></span> rule)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Settings.html" class="class">Settings</a></span> <b><a href="Valadoc.Parser._settings.html" class="field">_settings</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Token.html" class="class">Token</a></span> <b><a href="Valadoc.Parser._current_token.html" class="field">_current_token</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Scanner.html" class="interface">Scanner</a></span> <b><a href="Valadoc.Parser._scanner.html" class="field">_scanner</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.Parser._filename.html" class="field">_filename</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Valadoc.Parser._first_column.html" class="field">_first_column</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Valadoc.Parser._first_line.html" class="field">_first_line</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -172,60 +180,52 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.Parser._filename.html" class="field">_filename</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Scanner.html" class="interface">Scanner</a></span> <b><a href="Valadoc.Parser._scanner.html" class="field">_scanner</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.Parser._first_line.html" class="field">_first_line</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Settings.html" class="class">Settings</a></span> <b><a href="Valadoc.Parser._settings.html" class="field">_settings</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.Parser._first_column.html" class="field">_first_column</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.ArrayList.html" class="class">ArrayList</a></span>&lt;<span class="main_type"><a href="Valadoc.Rule.html" class="abstract_class">Rule</a></span>&gt; <b><a href="Valadoc.Parser.rule_stack.html" class="field">rule_stack</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Token.html" class="class">Token</a></span> <b><a href="Valadoc.Parser._current_token.html" class="field">_current_token</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="class">ArrayList</span></span>&lt;<span class="main_type"><a href="Valadoc.Rule.html" class="abstract_class">Rule</a></span>&gt; <b><a href="Valadoc.Parser.rule_stack.html" class="field">rule_stack</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="class">ArrayList</span></span>&lt;<span class="main_type"><span class="class">Object</span></span>?&gt; <b><a href="Valadoc.Parser.rule_state_stack.html" class="field">rule_state_stack</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.ArrayList.html" class="class">ArrayList</a></span>&lt;<span class="main_type"><a href="../gobject-2.0/GLib.Object.html" class="class">Object</a></span>?&gt; <b><a href="Valadoc.Parser.rule_state_stack.html" class="field">rule_state_stack</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-28')">All known members inherited from interface Valadoc.ParserCallback</div>
-          <div class="content" id="box-content-28">
+          <div class="headline" onclick="toggle_box (this, 'box-content-29')">All known members inherited from interface Valadoc.ParserCallback</div>
+          <div class="content" id="box-content-29">
             <div class="column">
               <ul class="navi_inline">
+                <li class="abstract_method"><a href="Valadoc.ParserCallback.error.html">error</a></li>
                 <li class="abstract_method"><a href="Valadoc.ParserCallback.get_rule_state.html">get_rule_state</a></li>
-                <li class="abstract_method"><a href="Valadoc.ParserCallback.set_rule_state.html">set_rule_state</a></li>
                 <li class="abstract_method"><a href="Valadoc.ParserCallback.push_rule.html">push_rule</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
                 <li class="abstract_method"><a href="Valadoc.ParserCallback.reduce.html">reduce</a></li>
-                <li class="abstract_method"><a href="Valadoc.ParserCallback.would_parent_accept_token.html">would_parent_accept_token</a></li>
-                <li class="abstract_method"><a href="Valadoc.ParserCallback.would_parent_reduce_to_rule.html">would_parent_reduce_to_rule</a></li>
+                <li class="abstract_method"><a href="Valadoc.ParserCallback.set_rule_state.html">set_rule_state</a></li>
+                <li class="abstract_method"><a href="Valadoc.ParserCallback.warning.html">warning</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="abstract_method"><a href="Valadoc.ParserCallback.warning.html">warning</a></li>
-                <li class="abstract_method"><a href="Valadoc.ParserCallback.error.html">error</a></li>
+                <li class="abstract_method"><a href="Valadoc.ParserCallback.would_parent_accept_token.html">would_parent_accept_token</a></li>
+                <li class="abstract_method"><a href="Valadoc.ParserCallback.would_parent_reduce_to_rule.html">would_parent_reduce_to_rule</a></li>
               </ul>
             </div>
           </div>
         </div>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

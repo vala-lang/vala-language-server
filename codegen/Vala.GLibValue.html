@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -49,11 +49,12 @@
         <img class="main_diagram" usemap="#Vala.GLibValue" alt="Object hierarchy for GLibValue" src="img/Vala.GLibValue.svg"/>
 
       <map id="Vala.GLibValue" name="Vala.GLibValue">
-<area shape="rect" id="node1" href="Vala.GLibValue.html" title="Vala.GLibValue" alt="" coords="12,101,159,149"/>
+<area shape="rect" id="node1" href="Vala.GLibValue.html" title="Vala.GLibValue" alt="" coords="9,101,149,149"/>
+<area shape="rect" id="node2" href="../vala/Vala.TargetValue.html" title="Vala.TargetValue" alt="" coords="5,5,153,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
-        <div class="main_code_definition"><span class="main_keyword">internal</span> <span class="main_keyword">class</span> <b><span class="class">GLibValue</span></b> : <span class="main_type"><span class="abstract_class">TargetValue</span></span>
+        <div class="main_code_definition"><span class="main_keyword">internal</span> <span class="main_keyword">class</span> <b><span class="class">GLibValue</span></b> : <span class="main_type"><a href="../vala/Vala.TargetValue.html" class="abstract_class">TargetValue</a></span>
         </div><br/>
         <div class="namespace_note"><b>Namespace:</b> <a href="Vala.html">Vala</a>
         </div>
@@ -62,14 +63,14 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
-          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.GLibValue.GLibValue.html" class="creation_method">GLibValue</a></b> (<span class="main_type"><span class="abstract_class">DataType</span></span>? value_type = <span class="main_literal">null</span>, <span class="main_type"><span class="abstract_class">CCodeExpression</span></span>? cvalue = <span class="main_literal">null</span>, <span class="main_basic_type"><span class="struct">bool</span></span> lvalue = <span class="main_literal">false</span>)
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.GLibValue.GLibValue.html" class="creation_method">GLibValue</a></b> (<span class="main_type"><a href="../vala/Vala.DataType.html" class="abstract_class">DataType</a></span>? value_type = <span class="main_literal">null</span>, <span class="main_type"><a href="../ccode/Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span>? cvalue = <span class="main_literal">null</span>, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> lvalue = <span class="main_literal">false</span>)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.GLibValue.append_array_length_cvalue.html" class="method">append_array_length_cvalue</a></b> (<span class="main_type"><span class="abstract_class">CCodeExpression</span></span> length_cvalue)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.GLibValue.append_array_length_cvalue.html" class="method">append_array_length_cvalue</a></b> (<span class="main_type"><a href="../ccode/Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> length_cvalue)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -80,43 +81,43 @@
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">CCodeExpression</span></span> <b><a href="Vala.GLibValue.cvalue.html" class="field">cvalue</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../ccode/Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span>? <b><a href="Vala.GLibValue.array_length_cexpr.html" class="field">array_length_cexpr</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.GLibValue.lvalue.html" class="field">lvalue</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="../ccode/Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span>&gt; <b><a href="Vala.GLibValue.array_length_cvalues.html" class="field">array_length_cvalues</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.GLibValue.non_null.html" class="field">non_null</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.GLibValue.array_null_terminated.html" class="field">array_null_terminated</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Vala.GLibValue.ctype.html" class="field">ctype</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../ccode/Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span>? <b><a href="Vala.GLibValue.array_size_cvalue.html" class="field">array_size_cvalue</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><span class="abstract_class">CCodeExpression</span></span>&gt; <b><a href="Vala.GLibValue.array_length_cvalues.html" class="field">array_length_cvalues</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Vala.GLibValue.ctype.html" class="field">ctype</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">CCodeExpression</span></span>? <b><a href="Vala.GLibValue.array_size_cvalue.html" class="field">array_size_cvalue</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../ccode/Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> <b><a href="Vala.GLibValue.cvalue.html" class="field">cvalue</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.GLibValue.array_null_terminated.html" class="field">array_null_terminated</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../ccode/Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span>? <b><a href="Vala.GLibValue.delegate_target_cvalue.html" class="field">delegate_target_cvalue</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">CCodeExpression</span></span>? <b><a href="Vala.GLibValue.array_length_cexpr.html" class="field">array_length_cexpr</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../ccode/Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span>? <b><a href="Vala.GLibValue.delegate_target_destroy_notify_cvalue.html" class="field">delegate_target_destroy_notify_cvalue</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">CCodeExpression</span></span>? <b><a href="Vala.GLibValue.delegate_target_cvalue.html" class="field">delegate_target_cvalue</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.GLibValue.lvalue.html" class="field">lvalue</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">CCodeExpression</span></span>? <b><a href="Vala.GLibValue.delegate_target_destroy_notify_cvalue.html" class="field">delegate_target_destroy_notify_cvalue</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.GLibValue.non_null.html" class="field">non_null</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -127,12 +128,12 @@
           <div class="content" id="box-content-232">
             <div class="column">
               <ul class="navi_inline">
-                <li class="property">actual_value_type</li>
+                <li class="property"><a href="../vala/Vala.TargetValue.actual_value_type.html">actual_value_type</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="property">value_type</li>
+                <li class="property"><a href="../vala/Vala.TargetValue.value_type.html">value_type</a></li>
               </ul>
             </div>
             <div class="column">
@@ -143,7 +144,7 @@
         </div>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

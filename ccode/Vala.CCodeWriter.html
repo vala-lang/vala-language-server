@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -40,6 +40,7 @@
           <li class="method"><a href="Vala.CCodeWriter.write_newline.html">write_newline</a></li>
           <li class="method"><a href="Vala.CCodeWriter.write_nspaces.html">write_nspaces</a></li>
           <li class="method"><a href="Vala.CCodeWriter.write_string.html">write_string</a></li>
+          <li class="field"><a href="Vala.CCodeWriter._bael.html">_bael</a></li>
           <li class="field"><a href="Vala.CCodeWriter._bol.html">_bol</a></li>
           <li class="field"><a href="Vala.CCodeWriter._filename.html">_filename</a></li>
           <li class="field"><a href="Vala.CCodeWriter._line_directives.html">_line_directives</a></li>
@@ -60,7 +61,7 @@
         <img class="main_diagram" usemap="#Vala.CCodeWriter" alt="Object hierarchy for CCodeWriter" src="img/Vala.CCodeWriter.svg"/>
 
       <map id="Vala.CCodeWriter" name="Vala.CCodeWriter">
-<area shape="rect" id="node1" href="Vala.CCodeWriter.html" title="Vala.CCodeWriter" alt="" coords="5,5,176,53"/>
+<area shape="rect" id="node1" href="Vala.CCodeWriter.html" title="Vala.CCodeWriter" alt="" coords="5,5,164,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -76,116 +77,120 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Properties:</h3>
         <ul class="navi_inline">
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CCodeWriter.filename.html" class="property">filename</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Specifies the file to be written.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CCodeWriter.line_directives.html" class="property">line_directives</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Specifies whether to emit line directives.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CCodeWriter.bol.html" class="property">bol</a></b> { <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CCodeWriter.bol.html" class="property">bol</a></b> { <span class="main_keyword">get</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Specifies whether the output stream is at the beginning of a line.
               </span>
             </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.CCodeWriter.filename.html" class="property">filename</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Specifies the file to be written.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CCodeWriter.line_directives.html" class="property">line_directives</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Specifies whether to emit line directives.</span>
+            </div></li>
         </ul>
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
-          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.CCodeWriter.CCodeWriter.html" class="creation_method">CCodeWriter</a></b> (<span class="main_basic_type"><span class="class">string</span></span> filename, <span class="main_basic_type"><span class="class">string</span></span>? source_filename = <span class="main_literal">null</span>)
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.CCodeWriter.CCodeWriter.html" class="creation_method">CCodeWriter</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> filename, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? source_filename = <span class="main_literal">null</span>)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CCodeWriter.open.html" class="method">open</a></b> (<span class="main_basic_type"><span class="struct">bool</span></span> write_version)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Opens the file.</span>
-            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeWriter.close.html" class="method">close</a></b> ()
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Closes the file.</span>
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeWriter.write_indent.html" class="method">write_indent</a></b> (<span class="main_type"><a href="Vala.CCodeLineDirective.html" class="class">CCodeLineDirective</a></span>? line = <span class="main_literal">null</span>)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CCodeWriter.open.html" class="method">open</a></b> (<span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> write_version)
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Writes tabs according to the current indent level.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeWriter.write_nspaces.html" class="method">write_nspaces</a></b> (<span class="main_basic_type"><span class="struct">uint</span></span> n)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Writes n spaces.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeWriter.write_string.html" class="method">write_string</a></b> (<span class="main_basic_type"><span class="class">string</span></span> s)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Writes the specified string.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeWriter.write_newline.html" class="method">write_newline</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Writes a newline.</span>
+            <div class="leaf_brief_description"><span class="brief_description">Opens the file.</span>
             </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeWriter.write_begin_block.html" class="method">write_begin_block</a></b> ()
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Opens a new block, increasing the indent level.</span>
             </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeWriter.write_comment.html" class="method">write_comment</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> text)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Writes the specified text as comment.</span>
+            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeWriter.write_end_block.html" class="method">write_end_block</a></b> ()
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Closes the current block, decreasing the indent level.</span>
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeWriter.write_comment.html" class="method">write_comment</a></b> (<span class="main_basic_type"><span class="class">string</span></span> text)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeWriter.write_indent.html" class="method">write_indent</a></b> (<span class="main_type"><a href="Vala.CCodeLineDirective.html" class="class">CCodeLineDirective</a></span>? line = <span class="main_literal">null</span>)
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Writes the specified text as comment.</span>
+            <div class="leaf_brief_description"><span class="brief_description">Writes tabs according to the current indent level.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeWriter.write_newline.html" class="method">write_newline</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Writes a newline.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeWriter.write_nspaces.html" class="method">write_nspaces</a></b> (<span class="main_basic_type"><a href="../glib-2.0/uint.html" class="struct">uint</a></span> n)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Writes n spaces.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeWriter.write_string.html" class="method">write_string</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> s)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Writes the specified string.</span>
             </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CCodeWriter._filename.html" class="field">_filename</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CCodeWriter._bael.html" class="field">_bael</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CCodeWriter.source_filename.html" class="field">source_filename</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CCodeWriter._bol.html" class="field">_bol</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.CCodeWriter._filename.html" class="field">_filename</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CCodeWriter._line_directives.html" class="field">_line_directives</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.CCodeWriter.current_line_number.html" class="field">current_line_number</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CCodeWriter.file_exists.html" class="field">file_exists</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_type"><a href="../glib-2.0/GLib.Regex.html" class="class">Regex</a></span> <b><a href="Vala.CCodeWriter.fix_indent_regex.html" class="field">fix_indent_regex</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.CCodeWriter.indent.html" class="field">indent</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.CCodeWriter.source_filename.html" class="field">source_filename</a></b>
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Specifies the source file used to generate this one.</span>
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CCodeWriter._line_directives.html" class="field">_line_directives</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../glib-2.0/GLib.FileStream.html" class="class">FileStream</a></span>? <b><a href="Vala.CCodeWriter.stream.html" class="field">stream</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_type"><span class="class">Regex</span></span> <b><a href="Vala.CCodeWriter.fix_indent_regex.html" class="field">fix_indent_regex</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.CCodeWriter.temp_filename.html" class="field">temp_filename</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CCodeWriter.temp_filename.html" class="field">temp_filename</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CCodeWriter.file_exists.html" class="field">file_exists</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="class">FileStream</span></span>? <b><a href="Vala.CCodeWriter.stream.html" class="field">stream</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.CCodeWriter.indent.html" class="field">indent</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.CCodeWriter.current_line_number.html" class="field">current_line_number</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CCodeWriter.using_line_directive.html" class="field">using_line_directive</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CCodeWriter._bol.html" class="field">_bol</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CCodeWriter.using_line_directive.html" class="field">using_line_directive</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -151,6 +151,7 @@
           <li class="enumvalue"><a href="Vala.Genie.TokenType.REQUIRES.html">REQUIRES</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.RETURN.html">RETURN</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.SEALED.html">SEALED</a></li>
+          <li class="enumvalue"><a href="Vala.Genie.TokenType.SELF.html">SELF</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.SEMICOLON.html">SEMICOLON</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.SET.html">SET</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.SIZEOF.html">SIZEOF</a></li>
@@ -160,7 +161,6 @@
           <li class="enumvalue"><a href="Vala.Genie.TokenType.STRUCT.html">STRUCT</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.SUPER.html">SUPER</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.TEMPLATE_STRING_LITERAL.html">TEMPLATE_STRING_LITERAL</a></li>
-          <li class="enumvalue"><a href="Vala.Genie.TokenType.THIS.html">THIS</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.TILDE.html">TILDE</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.TO.html">TO</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.TRUE.html">TRUE</a></li>
@@ -176,7 +176,6 @@
           <li class="enumvalue"><a href="Vala.Genie.TokenType.WEAK.html">WEAK</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.WHEN.html">WHEN</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.WHILE.html">WHILE</a></li>
-          <li class="enumvalue"><a href="Vala.Genie.TokenType.WRITEONLY.html">WRITEONLY</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.YIELD.html">YIELD</a></li>
           <li class="method"><a href="Vala.Genie.TokenType.to_string.html">to_string</a></li>
         </ul>
@@ -194,7 +193,6 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Enum values:</h3>
         <ul class="navi_inline">
-          <li class="enumvalue"><a href="Vala.Genie.TokenType.NONE.html">NONE</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.ABSTRACT.html">ABSTRACT</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.ARRAY.html">ARRAY</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.AS.html">AS</a></li>
@@ -240,11 +238,11 @@
           <li class="enumvalue"><a href="Vala.Genie.TokenType.DYNAMIC.html">DYNAMIC</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.ELLIPSIS.html">ELLIPSIS</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.ELSE.html">ELSE</a></li>
-          <li class="enumvalue"><a href="Vala.Genie.TokenType.ENUM.html">ENUM</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.ENSURES.html">ENSURES</a></li>
-          <li class="enumvalue"><a href="Vala.Genie.TokenType.ERRORDOMAIN.html">ERRORDOMAIN</a></li>
+          <li class="enumvalue"><a href="Vala.Genie.TokenType.ENUM.html">ENUM</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.EOF.html">EOF</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.EOL.html">EOL</a></li>
+          <li class="enumvalue"><a href="Vala.Genie.TokenType.ERRORDOMAIN.html">ERRORDOMAIN</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.EVENT.html">EVENT</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.EXCEPT.html">EXCEPT</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.EXTERN.html">EXTERN</a></li>
@@ -273,9 +271,14 @@
           <li class="enumvalue"><a href="Vala.Genie.TokenType.MINUS.html">MINUS</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.NAMESPACE.html">NAMESPACE</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.NEW.html">NEW</a></li>
+          <li class="enumvalue"><a href="Vala.Genie.TokenType.NONE.html">NONE</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.NULL.html">NULL</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.OF.html">OF</a></li>
-          <li class="enumvalue"><a href="Vala.Genie.TokenType.OUT.html">OUT</a></li>
+          <li class="enumvalue"><a href="Vala.Genie.TokenType.OPEN_BRACE.html">OPEN_BRACE</a></li>
+          <li class="enumvalue"><a href="Vala.Genie.TokenType.OPEN_BRACKET.html">OPEN_BRACKET</a></li>
+          <li class="enumvalue"><a href="Vala.Genie.TokenType.OPEN_PARENS.html">OPEN_PARENS</a></li>
+          <li class="enumvalue"><a href="Vala.Genie.TokenType.OPEN_REGEX_LITERAL.html">OPEN_REGEX_LITERAL</a></li>
+          <li class="enumvalue"><a href="Vala.Genie.TokenType.OPEN_TEMPLATE.html">OPEN_TEMPLATE</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.OP_AND.html">OP_AND</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.OP_DEC.html">OP_DEC</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.OP_EQ.html">OP_EQ</a></li>
@@ -289,11 +292,7 @@
           <li class="enumvalue"><a href="Vala.Genie.TokenType.OP_OR.html">OP_OR</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.OP_PTR.html">OP_PTR</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.OP_SHIFT_LEFT.html">OP_SHIFT_LEFT</a></li>
-          <li class="enumvalue"><a href="Vala.Genie.TokenType.OPEN_BRACE.html">OPEN_BRACE</a></li>
-          <li class="enumvalue"><a href="Vala.Genie.TokenType.OPEN_BRACKET.html">OPEN_BRACKET</a></li>
-          <li class="enumvalue"><a href="Vala.Genie.TokenType.OPEN_PARENS.html">OPEN_PARENS</a></li>
-          <li class="enumvalue"><a href="Vala.Genie.TokenType.OPEN_REGEX_LITERAL.html">OPEN_REGEX_LITERAL</a></li>
-          <li class="enumvalue"><a href="Vala.Genie.TokenType.OPEN_TEMPLATE.html">OPEN_TEMPLATE</a></li>
+          <li class="enumvalue"><a href="Vala.Genie.TokenType.OUT.html">OUT</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.OVERRIDE.html">OVERRIDE</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.OWNED.html">OWNED</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.PARAMS.html">PARAMS</a></li>
@@ -314,6 +313,7 @@
           <li class="enumvalue"><a href="Vala.Genie.TokenType.REQUIRES.html">REQUIRES</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.RETURN.html">RETURN</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.SEALED.html">SEALED</a></li>
+          <li class="enumvalue"><a href="Vala.Genie.TokenType.SELF.html">SELF</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.SEMICOLON.html">SEMICOLON</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.SET.html">SET</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.SIZEOF.html">SIZEOF</a></li>
@@ -323,7 +323,6 @@
           <li class="enumvalue"><a href="Vala.Genie.TokenType.STRUCT.html">STRUCT</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.SUPER.html">SUPER</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.TEMPLATE_STRING_LITERAL.html">TEMPLATE_STRING_LITERAL</a></li>
-          <li class="enumvalue"><a href="Vala.Genie.TokenType.THIS.html">THIS</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.TILDE.html">TILDE</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.TO.html">TO</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.TRUE.html">TRUE</a></li>
@@ -339,19 +338,18 @@
           <li class="enumvalue"><a href="Vala.Genie.TokenType.WEAK.html">WEAK</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.WHEN.html">WHEN</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.WHILE.html">WHILE</a></li>
-          <li class="enumvalue"><a href="Vala.Genie.TokenType.WRITEONLY.html">WRITEONLY</a></li>
           <li class="enumvalue"><a href="Vala.Genie.TokenType.YIELD.html">YIELD</a></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.Genie.TokenType.to_string.html" class="method">to_string</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.Genie.TokenType.to_string.html" class="method">to_string</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -72,11 +72,12 @@
         <img class="main_diagram" usemap="#Valadoc.ErrorReporter" alt="Object hierarchy for ErrorReporter" src="img/Valadoc.ErrorReporter.svg"/>
 
       <map id="Valadoc.ErrorReporter" name="Valadoc.ErrorReporter">
-<area shape="rect" id="node1" href="Valadoc.ErrorReporter.html" title="Valadoc.ErrorReporter" alt="" coords="5,101,220,149"/>
+<area shape="rect" id="node1" href="Valadoc.ErrorReporter.html" title="Valadoc.ErrorReporter" alt="" coords="5,101,195,149"/>
+<area shape="rect" id="node2" href="../gobject-2.0/GLib.Object.html" title="GLib.Object" alt="" coords="43,5,157,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
-        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">class</span> <b><span class="class">ErrorReporter</span></b> : <span class="main_type"><span class="class">Object</span></span>
+        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">class</span> <b><span class="class">ErrorReporter</span></b> : <span class="main_type"><a href="../gobject-2.0/GLib.Object.html" class="class">Object</a></span>
         </div><br/>
         <div class="namespace_note"><b>Namespace:</b> <a href="Valadoc.html">Valadoc</a>
         </div>
@@ -85,41 +86,41 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Constants:</h3>
         <ul class="navi_inline">
-          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.ErrorReporter.ANSI_COLOR_END.html" class="constant">ANSI_COLOR_END</a></b>
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.ErrorReporter.ANSI_COLOR_END.html" class="constant">ANSI_COLOR_END</a></b>
             </span>
             <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) end tag</span>
             </div></li>
         </ul>
         <h3 class="main_title">Properties:</h3>
         <ul class="navi_inline">
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.ErrorReporter.warnings_offset.html" class="property">warnings_offset</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Valadoc.ErrorReporter.errors.html" class="property">errors</a></b> { <span class="main_keyword">get</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.ErrorReporter.errors_offset.html" class="property">errors_offset</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Valadoc.ErrorReporter.errors_offset.html" class="property">errors_offset</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><span class="class">FileStream</span></span> <b><a href="Valadoc.ErrorReporter.stream.html" class="property">stream</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Valadoc.Settings.html" class="class">Settings</a></span>? <b><a href="Valadoc.ErrorReporter.settings.html" class="property">settings</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Valadoc.Settings.html" class="class">Settings</a></span>? <b><a href="Valadoc.ErrorReporter.settings.html" class="property">settings</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="../glib-2.0/GLib.FileStream.html" class="class">FileStream</a></span> <b><a href="Valadoc.ErrorReporter.stream.html" class="property">stream</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.ErrorReporter.errors.html" class="property">errors</a></b> { <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Valadoc.ErrorReporter.warnings.html" class="property">warnings</a></b> { <span class="main_keyword">get</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.ErrorReporter.warnings.html" class="property">warnings</a></b> { <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Valadoc.ErrorReporter.warnings_offset.html" class="property">warnings_offset</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Delegates:</h3>
         <ul class="navi_inline">
-          <li class="delegate"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">delegate</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.ErrorReporter.AttyFunc.html" class="delegate">AttyFunc</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> fd)
+          <li class="delegate"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">delegate</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Valadoc.ErrorReporter.AttyFunc.html" class="delegate">AttyFunc</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> fd)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -133,112 +134,50 @@
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.ErrorReporter.set_colors.html" class="method">set_colors</a></b> (<span class="main_basic_type"><span class="class">string</span></span> str)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.ErrorReporter.error.html" class="method">error</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> file, <span class="main_basic_type"><a href="../glib-2.0/long.html" class="struct">long</a></span> line, <span class="main_basic_type"><a href="../glib-2.0/long.html" class="struct">long</a></span> startpos, <span class="main_basic_type"><a href="../glib-2.0/long.html" class="struct">long</a></span> endpos, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> errline, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> msg_format, ...)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.ErrorReporter.is_atty.html" class="method">is_atty</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> fd)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_keyword">void</span> <b><a href="Valadoc.ErrorReporter.msg.html" class="method">msg</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> type, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> type_color_start, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> type_color_end, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> file, <span class="main_basic_type"><a href="../glib-2.0/long.html" class="struct">long</a></span> line, <span class="main_basic_type"><a href="../glib-2.0/long.html" class="struct">long</a></span> startpos, <span class="main_basic_type"><a href="../glib-2.0/long.html" class="struct">long</a></span> endpos, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> errline, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> msg_format, <span class="main_type"><a href="../glib-2.0/va_list.html" class="struct">va_list</a></span> args)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.ErrorReporter.print_highlighted_message.html" class="method">print_highlighted_message</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> message)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.ErrorReporter.set_colors.html" class="method">set_colors</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> str)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Set all colors by string</span>
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.ErrorReporter.is_atty.html" class="method">is_atty</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> fd)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.ErrorReporter.simple_error.html" class="method">simple_error</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? location, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> msg_format, ...)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_keyword">void</span> <b><a href="Valadoc.ErrorReporter.msg.html" class="method">msg</a></b> (<span class="main_basic_type"><span class="class">string</span></span> type, <span class="main_basic_type"><span class="class">string</span></span> type_color_start, <span class="main_basic_type"><span class="class">string</span></span> type_color_end, <span class="main_basic_type"><span class="class">string</span></span> file, <span class="main_basic_type"><span class="struct">long</span></span> line, <span class="main_basic_type"><span class="struct">long</span></span> startpos, <span class="main_basic_type"><span class="struct">long</span></span> endpos, <span class="main_basic_type"><span class="class">string</span></span> errline, <span class="main_basic_type"><span class="class">string</span></span> msg_format, <span class="main_type"><span class="struct">va_list</span></span> args)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.ErrorReporter.simple_note.html" class="method">simple_note</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? location, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> msg_format, ...)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Valadoc.ErrorReporter.print_highlighted_message.html" class="method">print_highlighted_message</a></b> (<span class="main_basic_type"><span class="class">string</span></span> message)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.ErrorReporter.simple_warning.html" class="method">simple_warning</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? location, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> msg_format, ...)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.ErrorReporter.simple_warning.html" class="method">simple_warning</a></b> (<span class="main_basic_type"><span class="class">string</span></span>? location, <span class="main_basic_type"><span class="class">string</span></span> msg_format, ...)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.ErrorReporter.simple_error.html" class="method">simple_error</a></b> (<span class="main_basic_type"><span class="class">string</span></span>? location, <span class="main_basic_type"><span class="class">string</span></span> msg_format, ...)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.ErrorReporter.simple_note.html" class="method">simple_note</a></b> (<span class="main_basic_type"><span class="class">string</span></span>? location, <span class="main_basic_type"><span class="class">string</span></span> msg_format, ...)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.ErrorReporter.error.html" class="method">error</a></b> (<span class="main_basic_type"><span class="class">string</span></span> file, <span class="main_basic_type"><span class="struct">long</span></span> line, <span class="main_basic_type"><span class="struct">long</span></span> startpos, <span class="main_basic_type"><span class="struct">long</span></span> endpos, <span class="main_basic_type"><span class="class">string</span></span> errline, <span class="main_basic_type"><span class="class">string</span></span> msg_format, ...)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.ErrorReporter.warning.html" class="method">warning</a></b> (<span class="main_basic_type"><span class="class">string</span></span> file, <span class="main_basic_type"><span class="struct">long</span></span> line, <span class="main_basic_type"><span class="struct">long</span></span> startpos, <span class="main_basic_type"><span class="struct">long</span></span> endpos, <span class="main_basic_type"><span class="class">string</span></span> errline, <span class="main_basic_type"><span class="class">string</span></span> msg_format, ...)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.ErrorReporter.warning.html" class="method">warning</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> file, <span class="main_basic_type"><a href="../glib-2.0/long.html" class="struct">long</a></span> line, <span class="main_basic_type"><a href="../glib-2.0/long.html" class="struct">long</a></span> startpos, <span class="main_basic_type"><a href="../glib-2.0/long.html" class="struct">long</a></span> endpos, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> errline, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> msg_format, ...)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.ErrorReporter._warnings.html" class="field">_warnings</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Valadoc.ErrorReporter._errors.html" class="field">_errors</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.ErrorReporter._errors.html" class="field">_errors</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.ErrorReporter.locus_color_start.html" class="field">locus_color_start</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) start tag for source location</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.ErrorReporter.locus_color_end.html" class="field">locus_color_end</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) end tag for source location</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.ErrorReporter.warning_color_start.html" class="field">warning_color_start</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) start tag for warning titles</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.ErrorReporter.warning_color_end.html" class="field">warning_color_end</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) end tag for warning titles</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.ErrorReporter.error_color_start.html" class="field">error_color_start</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) start tag for error titles</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.ErrorReporter.error_color_end.html" class="field">error_color_end</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) end tag for error titles</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.ErrorReporter.note_color_start.html" class="field">note_color_start</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) start tag for note titles</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.ErrorReporter.note_color_end.html" class="field">note_color_end</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) end tag for note titles</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.ErrorReporter.caret_color_start.html" class="field">caret_color_start</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) start tag for caret line (^^^)</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.ErrorReporter.caret_color_end.html" class="field">caret_color_end</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) end tag for caret line (^^^)</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.ErrorReporter.quote_color_start.html" class="field">quote_color_start</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) start tag for quotes line ('...', 
-                `...`, `...')</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.ErrorReporter.quote_color_end.html" class="field">quote_color_end</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) end tag for quotes line ('...', `...`, 
-                `...')</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.ErrorReporter._warnings_offset.html" class="field">_warnings_offset</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Valadoc.ErrorReporter._errors_offset.html" class="field">_errors_offset</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_type"><span class="class">FileStream</span></span> <b><a href="Valadoc.ErrorReporter._stream.html" class="field">_stream</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Valadoc.ErrorReporter._errors_offset.html" class="field">_errors_offset</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -246,78 +185,140 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="../glib-2.0/GLib.FileStream.html" class="class">FileStream</a></span> <b><a href="Valadoc.ErrorReporter._stream.html" class="field">_stream</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Valadoc.ErrorReporter._warnings.html" class="field">_warnings</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Valadoc.ErrorReporter._warnings_offset.html" class="field">_warnings_offset</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.ErrorReporter.caret_color_end.html" class="field">caret_color_end</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) end tag for caret line (^^^)</span>
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.ErrorReporter.caret_color_start.html" class="field">caret_color_start</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) start tag for caret line (^^^)</span>
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.ErrorReporter.error_color_end.html" class="field">error_color_end</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) end tag for error titles</span>
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.ErrorReporter.error_color_start.html" class="field">error_color_start</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) start tag for error titles</span>
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.ErrorReporter.locus_color_end.html" class="field">locus_color_end</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) end tag for source location</span>
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.ErrorReporter.locus_color_start.html" class="field">locus_color_start</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) start tag for source location</span>
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.ErrorReporter.note_color_end.html" class="field">note_color_end</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) end tag for note titles</span>
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.ErrorReporter.note_color_start.html" class="field">note_color_start</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) start tag for note titles</span>
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.ErrorReporter.quote_color_end.html" class="field">quote_color_end</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) end tag for quotes line ('...', `...`, 
+                `...')</span>
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.ErrorReporter.quote_color_start.html" class="field">quote_color_start</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) start tag for quotes line ('...', 
+                `...`, `...')</span>
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.ErrorReporter.warning_color_end.html" class="field">warning_color_end</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) end tag for warning titles</span>
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.ErrorReporter.warning_color_start.html" class="field">warning_color_start</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">SGR (Select Graphic Rendition) start tag for warning titles</span>
+            </div></li>
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-8')">All known members inherited from class GLib.Object</div>
-          <div class="content" id="box-content-8">
+          <div class="headline" onclick="toggle_box (this, 'box-content-9')">All known members inherited from class GLib.Object</div>
+          <div class="content" id="box-content-9">
             <div class="column">
               <ul class="navi_inline">
-                <li class="static_method">interface_find_property</li>
-                <li class="static_method">interface_install_property</li>
-                <li class="static_method">interface_list_properties</li>
-                <li class="static_method">@new</li>
-                <li class="static_method">new_valist</li>
-                <li class="static_method">newv</li>
-                <li class="static_method">new_with_properties</li>
-                <li class="method">add_toggle_ref</li>
-                <li class="method">add_weak_pointer</li>
-                <li class="method">bind_property</li>
-                <li class="method">connect</li>
-                <li class="virtual_method">constructed</li>
-                <li class="method">disconnect</li>
-                <li class="virtual_method">dispose</li>
-                <li class="method">dup_data</li>
-                <li class="method">dup_qdata</li>
-                <li class="method">force_floating</li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.@get.html">@get</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.@new.html">@new</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.@ref.html">@ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.@set.html">@set</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.add_toggle_ref.html">add_toggle_ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.add_weak_pointer.html">add_weak_pointer</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.bind_property.html">bind_property</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.connect.html">connect</a></li>
+                <li class="virtual_method"><a href="../gobject-2.0/GLib.Object.constructed.html">constructed</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.disconnect.html">disconnect</a></li>
+                <li class="virtual_method"><a href="../gobject-2.0/GLib.Object.dispose.html">dispose</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.dup_data.html">dup_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.dup_qdata.html">dup_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.force_floating.html">force_floating</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.freeze_notify.html">freeze_notify</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_class.html">get_class</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_data.html">get_data</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="method">freeze_notify</li>
-                <li class="method">@get</li>
-                <li class="method">get_class</li>
-                <li class="method">get_data</li>
-                <li class="method">get_property</li>
-                <li class="method">get_qdata</li>
-                <li class="method">get_type</li>
-                <li class="method">getv</li>
-                <li class="method">is_floating</li>
-                <li class="method">notify_property</li>
-                <li class="method">@ref</li>
-                <li class="method">ref_sink</li>
-                <li class="method">replace_data</li>
-                <li class="method">replace_qdata</li>
-                <li class="method">remove_toggle_ref</li>
-                <li class="method">remove_weak_pointer</li>
-                <li class="method">@set</li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_property.html">get_property</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_qdata.html">get_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_type.html">get_type</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.getv.html">getv</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.interface_find_property.html">interface_find_property</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.interface_install_property.html">interface_install_property</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.interface_list_properties.html">interface_list_properties</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.is_floating.html">is_floating</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.new_valist.html">new_valist</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.new_with_properties.html">new_with_properties</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.newv.html">newv</a></li>
+                <li class="signal"><a href="../gobject-2.0/GLib.Object.notify.html">notify</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.notify_property.html">notify_property</a></li>
+                <li class="field"><a href="../gobject-2.0/GLib.Object.ref_count.html">ref_count</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.ref_sink.html">ref_sink</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.remove_toggle_ref.html">remove_toggle_ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.remove_weak_pointer.html">remove_weak_pointer</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="method">set_data</li>
-                <li class="method">set_data_full</li>
-                <li class="method">set_property</li>
-                <li class="method">set_qdata</li>
-                <li class="method">set_qdata_full</li>
-                <li class="method">set_valist</li>
-                <li class="method">setv</li>
-                <li class="method">steal_data</li>
-                <li class="method">steal_qdata</li>
-                <li class="method">thaw_notify</li>
-                <li class="method">unref</li>
-                <li class="method">watch_closure</li>
-                <li class="method">weak_ref</li>
-                <li class="method">weak_unref</li>
-                <li class="signal">notify</li>
-                <li class="field">ref_count</li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.replace_data.html">replace_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.replace_qdata.html">replace_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_data.html">set_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_data_full.html">set_data_full</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_property.html">set_property</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_qdata.html">set_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_qdata_full.html">set_qdata_full</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_valist.html">set_valist</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.setv.html">setv</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.steal_data.html">steal_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.steal_qdata.html">steal_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.thaw_notify.html">thaw_notify</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.unref.html">unref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.watch_closure.html">watch_closure</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.weak_ref.html">weak_ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.weak_unref.html">weak_unref</a></li>
               </ul>
             </div>
           </div>
         </div>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

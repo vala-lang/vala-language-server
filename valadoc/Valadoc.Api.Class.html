@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -37,6 +37,7 @@
           <li class="property"><a href="Valadoc.Api.Class.is_fundamental.html">is_fundamental</a></li>
           <li class="virtual_property"><a href="Valadoc.Api.Class.node_type.html">node_type</a></li>
           <li class="creation_method"><a href="Valadoc.Api.Class.Class.html">Class</a></li>
+          <li class="method"><a href="Valadoc.Api.Class._get_private_cname.html">_get_private_cname</a></li>
           <li class="virtual_method"><a href="Valadoc.Api.Class.accept.html">accept</a></li>
           <li class="method"><a href="Valadoc.Api.Class.add_interface.html">add_interface</a></li>
           <li class="virtual_method"><a href="Valadoc.Api.Class.build_signature.html">build_signature</a></li>
@@ -92,13 +93,13 @@
         <img class="main_diagram" usemap="#Valadoc.Api.Class" alt="Object hierarchy for Class" src="img/Valadoc.Api.Class.svg"/>
 
       <map id="Valadoc.Api.Class" name="Valadoc.Api.Class">
-<area shape="rect" id="node1" href="Valadoc.Api.Class.html" title="Valadoc.Api.Class" alt="" coords="219,485,391,533"/>
-<area shape="rect" id="node2" href="Valadoc.Api.TypeSymbol.html" title="Valadoc.Api.TypeSymbol" alt="" coords="189,389,420,437"/>
-<area shape="rect" id="node3" href="Valadoc.Api.Symbol.html" title="Valadoc.Api.Symbol" alt="" coords="209,293,400,341"/>
-<area shape="rect" id="node4" href="Valadoc.Api.Node.html" title="Valadoc.Api.Node" alt="" coords="219,197,391,245"/>
-<area shape="rect" id="node5" href="Valadoc.Api.Item.html" title="Valadoc.Api.Item" alt="" coords="5,101,172,149"/>
-<area shape="rect" id="node7" href="Valadoc.Api.Browsable.html" title="Valadoc.Api.Browsable" alt="" coords="197,101,413,149"/>
-<area shape="rect" id="node8" href="Valadoc.Documentation.html" title="Valadoc.Documentation" alt="" coords="437,101,663,149"/>
+<area shape="rect" id="node1" href="Valadoc.Api.Class.html" title="Valadoc.Api.Class" alt="" coords="103,485,260,533"/>
+<area shape="rect" id="node2" href="Valadoc.Api.TypeSymbol.html" title="Valadoc.Api.TypeSymbol" alt="" coords="76,389,287,437"/>
+<area shape="rect" id="node3" href="Valadoc.Api.Symbol.html" title="Valadoc.Api.Symbol" alt="" coords="94,293,269,341"/>
+<area shape="rect" id="node4" href="Valadoc.Api.Node.html" title="Valadoc.Api.Node" alt="" coords="103,197,260,245"/>
+<area shape="rect" id="node5" href="Valadoc.Api.Item.html" title="Valadoc.Api.Item" alt="" coords="5,101,157,149"/>
+<area shape="rect" id="node6" href="../gobject-2.0/GLib.Object.html" title="GLib.Object" alt="" coords="25,5,138,53"/>
+<area shape="rect" id="node7" href="Valadoc.Documentation.html" title="Valadoc.Documentation" alt="" coords="182,101,381,149"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -114,21 +115,21 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Properties:</h3>
         <ul class="navi_inline">
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Valadoc.Api.TypeReference.html" class="class">TypeReference</a></span>? <b><a href="Valadoc.Api.Class.base_type.html" class="property">base_type</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Valadoc.Api.TypeReference.html" class="class">TypeReference</a></span>? <b><a href="Valadoc.Api.Class.base_type.html" class="property">base_type</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Specifies the base class.</span>
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.Api.Class.is_abstract.html" class="property">is_abstract</a></b> { <span class="main_keyword">private</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.Api.Class.is_abstract.html" class="property">is_abstract</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">private</span> <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Specifies whether this class is abstract.</span>
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.Api.Class.is_fundamental.html" class="property">is_fundamental</a></b> { <span class="main_keyword">private</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Specifies whether this class is fundamental.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.Api.Class.is_compact.html" class="property">is_compact</a></b> { <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.Api.Class.is_compact.html" class="property">is_compact</a></b> { <span class="main_keyword">get</span>; }
             </span>
             <div class="leaf_brief_description">
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.Api.Class.is_fundamental.html" class="property">is_fundamental</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">private</span> <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Specifies whether this class is fundamental.</span>
             </div></li>
           <li class="virtual_property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><a href="Valadoc.Api.NodeType.html" class="enum">NodeType</a></span> <b><a href="Valadoc.Api.Class.node_type.html" class="virtual_property">node_type</a></b> { <span class="main_keyword">get</span>; }
             </span>
@@ -137,91 +138,14 @@
         </ul>
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
-          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Valadoc.Api.Class.Class.html" class="creation_method">Class</a></b> (<span class="main_type"><a href="Valadoc.Api.Node.html" class="abstract_class">Node</a></span> parent, <span class="main_type"><a href="Valadoc.Api.SourceFile.html" class="class">SourceFile</a></span> file, <span class="main_basic_type"><span class="class">string</span></span> name, <span class="main_type"><a href="Valadoc.Api.SymbolAccessibility.html" class="enum">SymbolAccessibility</a></span> accessibility, <span class="main_type"><a href="Valadoc.Api.SourceComment.html" class="class">SourceComment</a></span>? comment, <span class="main_basic_type"><span class="class">string</span></span>? cname, <span class="main_basic_type"><span class="class">string</span></span>? private_cname, <span class="main_basic_type"><span class="class">string</span></span>? class_macro_name, <span class="main_basic_type"><span class="class">string</span></span>? type_macro_name, <span class="main_basic_type"><span class="class">string</span></span>? is_type_macro_name, <span class="main_basic_type"><span class="class">string</span></span>? type_cast_macro_name, <span class="main_basic_type"><span class="class">string</span></span>? type_function_name, <span class="main_basic_type"><span class="class">string</span></span>? class_type_macro_name, <span class="main_basic_type"><span class="class">string</span></span>? is_class_type_macro_name, <span class="main_basic_type"><span class="class">string</span></span>? dbus_name, <span class="main_basic_type"><span class="class">string</span></span>? type_id, <span class="main_basic_type"><span class="class">string</span></span>? param_spec_function_name, <span class="main_basic_type"><span class="class">string</span></span>? ref_function_name, <span class="main_basic_type"><span class="class">string</span></span>? unref_function_name, <span class="main_basic_type"><span class="class">string</span></span>? free_function_name, <span class="main_basic_type"><span class="class">string</span></span>? finalize_function_name, <span class="main_basic_type"><span class="class">string</span></span>? take_value_function_cname, <span class="main_basic_type"><span class="class">string</span></span>? get_value_function_cname, <span class="main_basic_type"><span class="class">string</span></span>? set_value_function_cname, <span class="main_basic_type"><span class="struct">bool</span></span> is_fundamental, <span class="main_basic_type"><span class="struct">bool</span></span> is_abstract, <span class="main_basic_type"><span class="struct">bool</span></span> is_basic_type, <span class="main_keyword">void</span>* data)
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Valadoc.Api.Class.Class.html" class="creation_method">Class</a></b> (<span class="main_type"><a href="Valadoc.Api.Node.html" class="abstract_class">Node</a></span> parent, <span class="main_type"><a href="Valadoc.Api.SourceFile.html" class="class">SourceFile</a></span> file, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name, <span class="main_type"><a href="../vala/Vala.SymbolAccessibility.html" class="enum">SymbolAccessibility</a></span> accessibility, <span class="main_type"><a href="Valadoc.Api.SourceComment.html" class="class">SourceComment</a></span>? comment, <span class="main_type"><a href="../vala/Vala.Class.html" class="class">Class</a></span> data)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.get_cname.html" class="method">get_cname</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the name of this class as it is used in C.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.get_private_cname.html" class="method">get_private_cname</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the name of this class' private data structure as it is used 
-                in C.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.get_type_id.html" class="method">get_type_id</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the C symbol representing the runtime type id for this data 
-                type.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.get_ref_function_cname.html" class="method">get_ref_function_cname</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the C function name that increments the reference count of 
-                instances of this data type.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.get_unref_function_cname.html" class="method">get_unref_function_cname</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the C function name that decrements the reference count of 
-                instances of this data type.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.get_free_function_name.html" class="method">get_free_function_name</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the C function name that frees the instances of this data 
-                type.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.get_finalize_function_name.html" class="method">get_finalize_function_name</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the C function name that finalizes the instances of this data 
-                type.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.get_param_spec_function_cname.html" class="method">get_param_spec_function_cname</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the cname of the GValue parameter spec function.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.get_set_value_function_cname.html" class="method">get_set_value_function_cname</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the cname of the GValue setter function.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.get_get_value_function_cname.html" class="method">get_get_value_function_cname</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the cname of the GValue getter function.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.get_take_value_function_cname.html" class="method">get_take_value_function_cname</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the cname of the GValue taker function.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.get_dbus_name.html" class="method">get_dbus_name</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the dbus-name.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.Api.Class.get_class_macro_name.html" class="method">get_class_macro_name</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Gets the name of the GType macro which returns the class struct.
-              </span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.Api.Class.get_class_type_macro_name.html" class="method">get_class_type_macro_name</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Gets the name of the GType macro which returns the type of the class.
-              </span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Valadoc.Api.Class.get_is_class_type_macro_name.html" class="method">get_is_class_type_macro_name</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Gets the name of the GType macro which returns whether a class 
-                instance is of a given type.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Api.TypeReference.html" class="class">TypeReference</a></span>&gt; <b><a href="Valadoc.Api.Class.get_implemented_interface_list.html" class="method">get_implemented_interface_list</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns a list of all newly implemented interfaces.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Api.TypeReference.html" class="class">TypeReference</a></span>&gt; <b><a href="Valadoc.Api.Class.get_full_implemented_interface_list.html" class="method">get_full_implemented_interface_list</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns a list of all implemented interfaces.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Class.add_interface.html" class="method">add_interface</a></b> (<span class="main_type"><a href="Valadoc.Api.TypeReference.html" class="class">TypeReference</a></span> iface)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class._get_private_cname.html" class="method">_get_private_cname</a></b> (<span class="main_type"><a href="../vala/Vala.Class.html" class="class">Class</a></span> element)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -229,19 +153,7 @@
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Visits this node with the specified Visitor.</span>
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><span class="class">Class</span></span>&gt; <b><a href="Valadoc.Api.Class.get_known_child_classes.html" class="method">get_known_child_classes</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns a list of all known classes based on this class</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Api.Interface.html" class="class">Interface</a></span>&gt; <b><a href="Valadoc.Api.Class.get_known_derived_interfaces.html" class="method">get_known_derived_interfaces</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns a list of all known interfaces based on this class</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Class.register_derived_interface.html" class="method">register_derived_interface</a></b> (<span class="main_type"><a href="Valadoc.Api.Interface.html" class="class">Interface</a></span> iface)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Class.register_child_class.html" class="method">register_child_class</a></b> (<span class="main_type"><span class="class">Class</span></span> cl)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Class.add_interface.html" class="method">add_interface</a></b> (<span class="main_type"><a href="Valadoc.Api.TypeReference.html" class="class">TypeReference</a></span> iface)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -249,333 +161,403 @@
             </span>
             <div class="leaf_brief_description"><span class="brief_description"></span>
             </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.Api.Class.get_class_macro_name.html" class="method">get_class_macro_name</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Gets the name of the GType macro which returns the class struct.
+              </span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.Api.Class.get_class_type_macro_name.html" class="method">get_class_type_macro_name</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Gets the name of the GType macro which returns the type of the class.
+              </span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.get_cname.html" class="method">get_cname</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the name of this class as it is used in C.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.get_dbus_name.html" class="method">get_dbus_name</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the dbus-name.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.get_finalize_function_name.html" class="method">get_finalize_function_name</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the C function name that finalizes the instances of this data 
+                type.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.get_free_function_name.html" class="method">get_free_function_name</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the C function name that frees the instances of this data 
+                type.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Api.TypeReference.html" class="class">TypeReference</a></span>&gt; <b><a href="Valadoc.Api.Class.get_full_implemented_interface_list.html" class="method">get_full_implemented_interface_list</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns a list of all implemented interfaces.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.get_get_value_function_cname.html" class="method">get_get_value_function_cname</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the cname of the GValue getter function.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Api.TypeReference.html" class="class">TypeReference</a></span>&gt; <b><a href="Valadoc.Api.Class.get_implemented_interface_list.html" class="method">get_implemented_interface_list</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns a list of all newly implemented interfaces.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Valadoc.Api.Class.get_is_class_type_macro_name.html" class="method">get_is_class_type_macro_name</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Gets the name of the GType macro which returns whether a class 
+                instance is of a given type.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><span class="class">Class</span></span>&gt; <b><a href="Valadoc.Api.Class.get_known_child_classes.html" class="method">get_known_child_classes</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns a list of all known classes based on this class</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Api.Interface.html" class="class">Interface</a></span>&gt; <b><a href="Valadoc.Api.Class.get_known_derived_interfaces.html" class="method">get_known_derived_interfaces</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns a list of all known interfaces based on this class</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.get_param_spec_function_cname.html" class="method">get_param_spec_function_cname</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the cname of the GValue parameter spec function.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.get_private_cname.html" class="method">get_private_cname</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the name of this class' private data structure as it is used 
+                in C.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.get_ref_function_cname.html" class="method">get_ref_function_cname</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the C function name that increments the reference count of 
+                instances of this data type.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.get_set_value_function_cname.html" class="method">get_set_value_function_cname</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the cname of the GValue setter function.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.get_take_value_function_cname.html" class="method">get_take_value_function_cname</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the cname of the GValue taker function.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.get_type_id.html" class="method">get_type_id</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the C symbol representing the runtime type id for this data 
+                type.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.get_unref_function_cname.html" class="method">get_unref_function_cname</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the C function name that decrements the reference count of 
+                instances of this data type.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Class.register_child_class.html" class="method">register_child_class</a></b> (<span class="main_type"><span class="class">Class</span></span> cl)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Api.Class.register_derived_interface.html" class="method">register_derived_interface</a></b> (<span class="main_type"><a href="Valadoc.Api.Interface.html" class="class">Interface</a></span> iface)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="class">ArrayList</span></span>&lt;<span class="main_type"><a href="Valadoc.Api.TypeReference.html" class="class">TypeReference</a></span>&gt; <b><a href="Valadoc.Api.Class.interfaces.html" class="field">interfaces</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.dbus_name.html" class="field">dbus_name</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.take_value_function_cname.html" class="field">take_value_function_cname</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.get_value_function_cname.html" class="field">get_value_function_cname</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.set_value_function_cname.html" class="field">set_value_function_cname</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.unref_function_name.html" class="field">unref_function_name</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.ref_function_name.html" class="field">ref_function_name</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.free_function_name.html" class="field">free_function_name</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.finalize_function_name.html" class="field">finalize_function_name</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.param_spec_function_name.html" class="field">param_spec_function_name</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.type_id.html" class="field">type_id</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.is_class_type_macro_name.html" class="field">is_class_type_macro_name</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.class_type_macro_name.html" class="field">class_type_macro_name</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.class_macro_name.html" class="field">class_macro_name</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.private_cname.html" class="field">private_cname</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Api.Class.cname.html" class="field">cname</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Api.TypeReference.html" class="class">TypeReference</a></span>? <b><a href="Valadoc.Api.Class._base_type.html" class="field">_base_type</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">Collection</span></span>&lt;<span class="main_type"><a href="Valadoc.Api.TypeReference.html" class="class">TypeReference</a></span>&gt; <b><a href="Valadoc.Api.Class._full_implemented_interfaces.html" class="field">_full_implemented_interfaces</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Valadoc.Api.TypeReference.html" class="class">TypeReference</a></span>&gt; <b><a href="Valadoc.Api.Class._full_implemented_interfaces.html" class="field">_full_implemented_interfaces</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.Api.Class._is_abstract.html" class="field">_is_abstract</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.Api.Class._is_abstract.html" class="field">_is_abstract</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Valadoc.Api.Class._is_fundamental.html" class="field">_is_fundamental</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Valadoc.Api.Class._is_fundamental.html" class="field">_is_fundamental</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">Set</span></span>&lt;<span class="main_type"><a href="Valadoc.Api.Interface.html" class="class">Interface</a></span>&gt; <b><a href="Valadoc.Api.Class._known_derived_interfaces.html" class="field">_known_derived_interfaces</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.Set.html" class="abstract_class">Set</a></span>&lt;<span class="main_type"><span class="class">Class</span></span>&gt; <b><a href="Valadoc.Api.Class._known_child_classes.html" class="field">_known_child_classes</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">Set</span></span>&lt;<span class="main_type"><span class="class">Class</span></span>&gt; <b><a href="Valadoc.Api.Class._known_child_classes.html" class="field">_known_child_classes</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.Set.html" class="abstract_class">Set</a></span>&lt;<span class="main_type"><a href="Valadoc.Api.Interface.html" class="class">Interface</a></span>&gt; <b><a href="Valadoc.Api.Class._known_derived_interfaces.html" class="field">_known_derived_interfaces</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.class_macro_name.html" class="field">class_macro_name</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.class_type_macro_name.html" class="field">class_type_macro_name</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.cname.html" class="field">cname</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.dbus_name.html" class="field">dbus_name</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.finalize_function_name.html" class="field">finalize_function_name</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.free_function_name.html" class="field">free_function_name</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.get_value_function_cname.html" class="field">get_value_function_cname</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.ArrayList.html" class="class">ArrayList</a></span>&lt;<span class="main_type"><a href="Valadoc.Api.TypeReference.html" class="class">TypeReference</a></span>&gt; <b><a href="Valadoc.Api.Class.interfaces.html" class="field">interfaces</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.is_class_type_macro_name.html" class="field">is_class_type_macro_name</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.param_spec_function_name.html" class="field">param_spec_function_name</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.private_cname.html" class="field">private_cname</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.ref_function_name.html" class="field">ref_function_name</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.set_value_function_cname.html" class="field">set_value_function_cname</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.take_value_function_cname.html" class="field">take_value_function_cname</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.type_id.html" class="field">type_id</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Api.Class.unref_function_name.html" class="field">unref_function_name</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-313')">All known members inherited from class Valadoc.Api.TypeSymbol</div>
-          <div class="content" id="box-content-313">
+          <div class="headline" onclick="toggle_box (this, 'box-content-274')">All known members inherited from class Valadoc.Api.TypeSymbol</div>
+          <div class="content" id="box-content-274">
             <div class="column">
               <ul class="navi_inline">
-                <li class="property"><a href="Valadoc.Api.TypeSymbol.is_basic_type.html">is_basic_type</a></li>
-                <li class="method"><a href="Valadoc.Api.TypeSymbol.get_type_macro_name.html">get_type_macro_name</a></li>
-                <li class="method"><a href="Valadoc.Api.TypeSymbol.get_type_cast_macro_name.html">get_type_cast_macro_name</a></li>
+                <li class="field"><a href="Valadoc.Api.TypeSymbol._is_basic_type.html">_is_basic_type</a></li>
                 <li class="method"><a href="Valadoc.Api.TypeSymbol.get_is_type_macro_name.html">get_is_type_macro_name</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="method"><a href="Valadoc.Api.TypeSymbol.get_type_cast_macro_name.html">get_type_cast_macro_name</a></li>
                 <li class="method"><a href="Valadoc.Api.TypeSymbol.get_type_function_name.html">get_type_function_name</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="virtual_method"><a href="Valadoc.Api.TypeSymbol.parse_comments.html">parse_comments</a></li>
-                <li class="virtual_method"><a href="Valadoc.Api.TypeSymbol.check_comments.html">check_comments</a></li>
-                <li class="field"><a href="Valadoc.Api.TypeSymbol.source_comment.html">source_comment</a></li>
-                <li class="field"><a href="Valadoc.Api.TypeSymbol.type_macro_name.html">type_macro_name</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="field"><a href="Valadoc.Api.TypeSymbol.is_type_macro_name.html">is_type_macro_name</a></li>
-                <li class="field"><a href="Valadoc.Api.TypeSymbol.type_cast_macro_name.html">type_cast_macro_name</a></li>
-                <li class="field"><a href="Valadoc.Api.TypeSymbol.type_function_name.html">type_function_name</a></li>
-                <li class="field"><a href="Valadoc.Api.TypeSymbol._is_basic_type.html">_is_basic_type</a></li>
+                <li class="method"><a href="Valadoc.Api.TypeSymbol.get_type_macro_name.html">get_type_macro_name</a></li>
+                <li class="property"><a href="Valadoc.Api.TypeSymbol.is_basic_type.html">is_basic_type</a></li>
               </ul>
             </div>
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-314')">All known members inherited from class Valadoc.Api.Symbol</div>
-          <div class="content" id="box-content-314">
+          <div class="headline" onclick="toggle_box (this, 'box-content-275')">All known members inherited from class Valadoc.Api.Symbol</div>
+          <div class="content" id="box-content-275">
             <div class="column">
               <ul class="navi_inline">
-                <li class="property"><a href="Valadoc.Api.Symbol.is_deprecated.html">is_deprecated</a></li>
+                <li class="field"><a href="Valadoc.Api.Symbol._accessibility.html">_accessibility</a></li>
+                <li class="field"><a href="Valadoc.Api.Symbol._is_deprecated.html">_is_deprecated</a></li>
                 <li class="property"><a href="Valadoc.Api.Symbol.accessibility.html">accessibility</a></li>
-                <li class="property"><a href="Valadoc.Api.Symbol.is_public.html">is_public</a></li>
-                <li class="property"><a href="Valadoc.Api.Symbol.is_protected.html">is_protected</a></li>
+                <li class="method"><a href="Valadoc.Api.Symbol.add_attribute.html">add_attribute</a></li>
+                <li class="field"><a href="Valadoc.Api.Symbol.attributes.html">attributes</a></li>
+                <li class="virtual_method"><a href="Valadoc.Api.Symbol.check_comments.html">check_comments</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="method"><a href="Valadoc.Api.Symbol.get_attribute.html">get_attribute</a></li>
+                <li class="method"><a href="Valadoc.Api.Symbol.get_attributes.html">get_attributes</a></li>
+                <li class="virtual_method"><a href="Valadoc.Api.Symbol.is_browsable.html">is_browsable</a></li>
+                <li class="property"><a href="Valadoc.Api.Symbol.is_deprecated.html">is_deprecated</a></li>
                 <li class="property"><a href="Valadoc.Api.Symbol.is_internal.html">is_internal</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
                 <li class="property"><a href="Valadoc.Api.Symbol.is_private.html">is_private</a></li>
-                <li class="method"><a href="Valadoc.Api.Symbol.add_attribute.html">add_attribute</a></li>
-                <li class="method"><a href="Valadoc.Api.Symbol.get_attributes.html">get_attributes</a></li>
-                <li class="method"><a href="Valadoc.Api.Symbol.get_attribute.html">get_attribute</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="virtual_method"><a href="Valadoc.Api.Symbol.is_browsable.html">is_browsable</a></li>
-                <li class="field"><a href="Valadoc.Api.Symbol.attributes.html">attributes</a></li>
-                <li class="field"><a href="Valadoc.Api.Symbol._is_deprecated.html">_is_deprecated</a></li>
-                <li class="field"><a href="Valadoc.Api.Symbol._accessibility.html">_accessibility</a></li>
+                <li class="property"><a href="Valadoc.Api.Symbol.is_protected.html">is_protected</a></li>
+                <li class="property"><a href="Valadoc.Api.Symbol.is_public.html">is_public</a></li>
+                <li class="virtual_method"><a href="Valadoc.Api.Symbol.parse_comments.html">parse_comments</a></li>
+                <li class="field"><a href="Valadoc.Api.Symbol.source_comment.html">source_comment</a></li>
               </ul>
             </div>
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-315')">All known members inherited from class Valadoc.Api.Node</div>
-          <div class="content" id="box-content-315">
+          <div class="headline" onclick="toggle_box (this, 'box-content-276')">All known members inherited from class Valadoc.Api.Node</div>
+          <div class="content" id="box-content-276">
             <div class="column">
               <ul class="navi_inline">
+                <li class="field"><a href="Valadoc.Api.Node._documentation.html">_documentation</a></li>
+                <li class="field"><a href="Valadoc.Api.Node._full_name.html">_full_name</a></li>
+                <li class="field"><a href="Valadoc.Api.Node._name.html">_name</a></li>
+                <li class="field"><a href="Valadoc.Api.Node._nspace.html">_nspace</a></li>
+                <li class="field"><a href="Valadoc.Api.Node._package.html">_package</a></li>
+                <li class="abstract_method"><a href="Valadoc.Api.Node.accept.html">accept</a></li>
+                <li class="method"><a href="Valadoc.Api.Node.accept_all_children.html">accept_all_children</a></li>
+                <li class="method"><a href="Valadoc.Api.Node.accept_children.html">accept_children</a></li>
+                <li class="method"><a href="Valadoc.Api.Node.accept_children_by_type.html">accept_children_by_type</a></li>
+                <li class="method"><a href="Valadoc.Api.Node.add_child.html">add_child</a></li>
+                <li class="virtual_method"><a href="Valadoc.Api.Node.check_comments.html">check_comments</a></li>
+                <li class="method"><a href="Valadoc.Api.Node.compare_to.html">compare_to</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="field"><a href="Valadoc.Api.Node.do_document.html">do_document</a></li>
+                <li class="property"><a href="Valadoc.Api.Node.documentation.html">documentation</a></li>
+                <li class="field"><a href="Valadoc.Api.Node.file.html">file</a></li>
+                <li class="method"><a href="Valadoc.Api.Node.find_by_name.html">find_by_name</a></li>
+                <li class="method"><a href="Valadoc.Api.Node.get_children_by_type.html">get_children_by_type</a></li>
+                <li class="method"><a href="Valadoc.Api.Node.get_children_by_types.html">get_children_by_types</a></li>
+                <li class="method"><a href="Valadoc.Api.Node.get_filename.html">get_filename</a></li>
+                <li class="method"><a href="Valadoc.Api.Node.get_full_name.html">get_full_name</a></li>
+                <li class="method"><a href="Valadoc.Api.Node.get_source_file.html">get_source_file</a></li>
+                <li class="method"><a href="Valadoc.Api.Node.has_children.html">has_children</a></li>
+                <li class="method"><a href="Valadoc.Api.Node.has_children_by_type.html">has_children_by_type</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="method"><a href="Valadoc.Api.Node.has_visible_children.html">has_visible_children</a></li>
+                <li class="method"><a href="Valadoc.Api.Node.has_visible_children_by_type.html">has_visible_children_by_type</a></li>
+                <li class="method"><a href="Valadoc.Api.Node.has_visible_children_by_types.html">has_visible_children_by_types</a></li>
+                <li class="abstract_method"><a href="Valadoc.Api.Node.is_browsable.html">is_browsable</a></li>
                 <li class="property"><a href="Valadoc.Api.Node.name.html">name</a></li>
                 <li class="abstract_property"><a href="Valadoc.Api.Node.node_type.html">node_type</a></li>
                 <li class="property"><a href="Valadoc.Api.Node.nspace.html">nspace</a></li>
                 <li class="property"><a href="Valadoc.Api.Node.package.html">package</a></li>
-                <li class="property"><a href="Valadoc.Api.Node.documentation.html">documentation</a></li>
-                <li class="method"><a href="Valadoc.Api.Node.get_source_file.html">get_source_file</a></li>
-                <li class="abstract_method"><a href="Valadoc.Api.Node.accept.html">accept</a></li>
-                <li class="abstract_method"><a href="Valadoc.Api.Node.is_browsable.html">is_browsable</a></li>
-                <li class="method"><a href="Valadoc.Api.Node.get_filename.html">get_filename</a></li>
-                <li class="method"><a href="Valadoc.Api.Node.add_child.html">add_child</a></li>
                 <li class="virtual_method"><a href="Valadoc.Api.Node.parse_comments.html">parse_comments</a></li>
-                <li class="virtual_method"><a href="Valadoc.Api.Node.check_comments.html">check_comments</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="method"><a href="Valadoc.Api.Node.has_visible_children_by_type.html">has_visible_children_by_type</a></li>
-                <li class="method"><a href="Valadoc.Api.Node.has_visible_children_by_types.html">has_visible_children_by_types</a></li>
-                <li class="method"><a href="Valadoc.Api.Node.has_visible_children.html">has_visible_children</a></li>
-                <li class="method"><a href="Valadoc.Api.Node.has_children_by_type.html">has_children_by_type</a></li>
-                <li class="method"><a href="Valadoc.Api.Node.has_children.html">has_children</a></li>
-                <li class="method"><a href="Valadoc.Api.Node.get_children_by_type.html">get_children_by_type</a></li>
-                <li class="method"><a href="Valadoc.Api.Node.get_children_by_types.html">get_children_by_types</a></li>
-                <li class="method"><a href="Valadoc.Api.Node.accept_children_by_type.html">accept_children_by_type</a></li>
-                <li class="method"><a href="Valadoc.Api.Node.accept_children.html">accept_children</a></li>
-                <li class="method"><a href="Valadoc.Api.Node.accept_all_children.html">accept_all_children</a></li>
-                <li class="method"><a href="Valadoc.Api.Node.find_by_name.html">find_by_name</a></li>
-                <li class="method"><a href="Valadoc.Api.Node.get_full_name.html">get_full_name</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="method"><a href="Valadoc.Api.Node.compare_to.html">compare_to</a></li>
-                <li class="method"><a href="Valadoc.Api.Node.is_keyword.html">is_keyword</a></li>
-                <li class="field"><a href="Valadoc.Api.Node.do_document.html">do_document</a></li>
-                <li class="field"><a href="Valadoc.Api.Node.file.html">file</a></li>
-                <li class="field"><a href="Valadoc.Api.Node._name.html">_name</a></li>
                 <li class="field"><a href="Valadoc.Api.Node.per_name_children.html">per_name_children</a></li>
                 <li class="field"><a href="Valadoc.Api.Node.per_type_children.html">per_type_children</a></li>
-                <li class="field"><a href="Valadoc.Api.Node._nspace.html">_nspace</a></li>
-                <li class="field"><a href="Valadoc.Api.Node._package.html">_package</a></li>
-                <li class="field"><a href="Valadoc.Api.Node._full_name.html">_full_name</a></li>
-                <li class="field"><a href="Valadoc.Api.Node._documentation.html">_documentation</a></li>
               </ul>
             </div>
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-316')">All known members inherited from class Valadoc.Api.Item</div>
-          <div class="content" id="box-content-316">
+          <div class="headline" onclick="toggle_box (this, 'box-content-277')">All known members inherited from class Valadoc.Api.Item</div>
+          <div class="content" id="box-content-277">
             <div class="column">
               <ul class="navi_inline">
+                <li class="field"><a href="Valadoc.Api.Item._data.html">_data</a></li>
+                <li class="field"><a href="Valadoc.Api.Item._parent.html">_parent</a></li>
+                <li class="field"><a href="Valadoc.Api.Item._signature.html">_signature</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="abstract_method"><a href="Valadoc.Api.Item.build_signature.html">build_signature</a></li>
+                <li class="virtual_method"><a href="Valadoc.Api.Item.check_comments.html">check_comments</a></li>
                 <li class="property"><a href="Valadoc.Api.Item.data.html">data</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
                 <li class="property"><a href="Valadoc.Api.Item.parent.html">parent</a></li>
+                <li class="virtual_method"><a href="Valadoc.Api.Item.parse_comments.html">parse_comments</a></li>
                 <li class="property"><a href="Valadoc.Api.Item.signature.html">signature</a></li>
               </ul>
             </div>
+          </div>
+        </div>
+        <div class="box">
+          <div class="headline" onclick="toggle_box (this, 'box-content-278')">All known members inherited from class GLib.Object</div>
+          <div class="content" id="box-content-278">
             <div class="column">
               <ul class="navi_inline">
-                <li class="virtual_method"><a href="Valadoc.Api.Item.parse_comments.html">parse_comments</a></li>
-                <li class="virtual_method"><a href="Valadoc.Api.Item.check_comments.html">check_comments</a></li>
-                <li class="abstract_method"><a href="Valadoc.Api.Item.build_signature.html">build_signature</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.@get.html">@get</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.@new.html">@new</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.@ref.html">@ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.@set.html">@set</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.add_toggle_ref.html">add_toggle_ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.add_weak_pointer.html">add_weak_pointer</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.bind_property.html">bind_property</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.connect.html">connect</a></li>
+                <li class="virtual_method"><a href="../gobject-2.0/GLib.Object.constructed.html">constructed</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.disconnect.html">disconnect</a></li>
+                <li class="virtual_method"><a href="../gobject-2.0/GLib.Object.dispose.html">dispose</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.dup_data.html">dup_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.dup_qdata.html">dup_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.force_floating.html">force_floating</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.freeze_notify.html">freeze_notify</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_class.html">get_class</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_data.html">get_data</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="field"><a href="Valadoc.Api.Item._signature.html">_signature</a></li>
-                <li class="field"><a href="Valadoc.Api.Item._data.html">_data</a></li>
-                <li class="field"><a href="Valadoc.Api.Item._parent.html">_parent</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_property.html">get_property</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_qdata.html">get_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_type.html">get_type</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.getv.html">getv</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.interface_find_property.html">interface_find_property</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.interface_install_property.html">interface_install_property</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.interface_list_properties.html">interface_list_properties</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.is_floating.html">is_floating</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.new_valist.html">new_valist</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.new_with_properties.html">new_with_properties</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.newv.html">newv</a></li>
+                <li class="signal"><a href="../gobject-2.0/GLib.Object.notify.html">notify</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.notify_property.html">notify_property</a></li>
+                <li class="field"><a href="../gobject-2.0/GLib.Object.ref_count.html">ref_count</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.ref_sink.html">ref_sink</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.remove_toggle_ref.html">remove_toggle_ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.remove_weak_pointer.html">remove_weak_pointer</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="method"><a href="../gobject-2.0/GLib.Object.replace_data.html">replace_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.replace_qdata.html">replace_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_data.html">set_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_data_full.html">set_data_full</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_property.html">set_property</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_qdata.html">set_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_qdata_full.html">set_qdata_full</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_valist.html">set_valist</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.setv.html">setv</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.steal_data.html">steal_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.steal_qdata.html">steal_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.thaw_notify.html">thaw_notify</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.unref.html">unref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.watch_closure.html">watch_closure</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.weak_ref.html">weak_ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.weak_unref.html">weak_unref</a></li>
               </ul>
             </div>
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-317')">All known members inherited from class GLib.Object</div>
-          <div class="content" id="box-content-317">
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="static_method">interface_find_property</li>
-                <li class="static_method">interface_install_property</li>
-                <li class="static_method">interface_list_properties</li>
-                <li class="static_method">@new</li>
-                <li class="static_method">new_valist</li>
-                <li class="static_method">newv</li>
-                <li class="static_method">new_with_properties</li>
-                <li class="method">add_toggle_ref</li>
-                <li class="method">add_weak_pointer</li>
-                <li class="method">bind_property</li>
-                <li class="method">connect</li>
-                <li class="virtual_method">constructed</li>
-                <li class="method">disconnect</li>
-                <li class="virtual_method">dispose</li>
-                <li class="method">dup_data</li>
-                <li class="method">dup_qdata</li>
-                <li class="method">force_floating</li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="method">freeze_notify</li>
-                <li class="method">@get</li>
-                <li class="method">get_class</li>
-                <li class="method">get_data</li>
-                <li class="method">get_property</li>
-                <li class="method">get_qdata</li>
-                <li class="method">get_type</li>
-                <li class="method">getv</li>
-                <li class="method">is_floating</li>
-                <li class="method">notify_property</li>
-                <li class="method">@ref</li>
-                <li class="method">ref_sink</li>
-                <li class="method">replace_data</li>
-                <li class="method">replace_qdata</li>
-                <li class="method">remove_toggle_ref</li>
-                <li class="method">remove_weak_pointer</li>
-                <li class="method">@set</li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="method">set_data</li>
-                <li class="method">set_data_full</li>
-                <li class="method">set_property</li>
-                <li class="method">set_qdata</li>
-                <li class="method">set_qdata_full</li>
-                <li class="method">set_valist</li>
-                <li class="method">setv</li>
-                <li class="method">steal_data</li>
-                <li class="method">steal_qdata</li>
-                <li class="method">thaw_notify</li>
-                <li class="method">unref</li>
-                <li class="method">watch_closure</li>
-                <li class="method">weak_ref</li>
-                <li class="method">weak_unref</li>
-                <li class="signal">notify</li>
-                <li class="field">ref_count</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-318')">All known members inherited from interface Valadoc.Api.Browsable</div>
-          <div class="content" id="box-content-318">
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="abstract_method"><a href="Valadoc.Api.Browsable.is_browsable.html">is_browsable</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-319')">All known members inherited from interface Valadoc.Documentation</div>
-          <div class="content" id="box-content-319">
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="abstract_property"><a href="Valadoc.Documentation.package.html">package</a></li>
-              </ul>
-            </div>
+          <div class="headline" onclick="toggle_box (this, 'box-content-279')">All known members inherited from interface Valadoc.Documentation</div>
+          <div class="content" id="box-content-279">
             <div class="column">
               <ul class="navi_inline">
                 <li class="abstract_method"><a href="Valadoc.Documentation.get_filename.html">get_filename</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="abstract_property"><a href="Valadoc.Documentation.package.html">package</a></li>
               </ul>
             </div>
             <div class="column">
@@ -586,7 +568,7 @@
         </div>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

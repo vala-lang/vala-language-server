@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -63,7 +63,7 @@
       
 
       <map id="Vala.GirParser.MetadataParser" name="Vala.GirParser.MetadataParser">
-<area shape="rect" id="node1" href="Vala.GirParser.MetadataParser.html" title="Vala.GirParser.MetadataParser" alt="" coords="5,5,288,53"/>
+<area shape="rect" id="node1" href="Vala.GirParser.MetadataParser.html" title="Vala.GirParser.MetadataParser" alt="" coords="5,5,252,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -87,7 +87,15 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.GirParser.Metadata.html" class="class">Metadata</a></span> <b><a href="Vala.GirParser.MetadataParser.parse_metadata.html" class="method">parse_metadata</a></b> (<span class="main_type"><a href="Vala.SourceFile.html" class="class">SourceFile</a></span> metadata_file)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.GirParser.MetadataParser.get_string.html" class="method">get_string</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span>? begin = <span class="main_literal">null</span>, <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span>? end = <span class="main_literal">null</span>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.GirParser.MetadataParser.has_newline.html" class="method">has_newline</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.GirParser.MetadataParser.has_space.html" class="method">has_space</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -95,27 +103,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.GirParser.MetadataParser.has_space.html" class="method">has_space</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.GirParser.MetadataParser.has_newline.html" class="method">has_newline</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.GirParser.MetadataParser.get_string.html" class="method">get_string</a></b> (<span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span>? begin = <span class="main_literal">null</span>, <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span>? end = <span class="main_literal">null</span>)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Vala.GirParser.MetadataParser.parse_identifier.html" class="method">parse_identifier</a></b> (<span class="main_basic_type"><span class="struct">bool</span></span> is_glob)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Vala.GirParser.MetadataParser.parse_selector.html" class="method">parse_selector</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.GirParser.Metadata.html" class="class">Metadata</a></span>? <b><a href="Vala.GirParser.MetadataParser.parse_pattern.html" class="method">parse_pattern</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.GirParser.MetadataParser.parse_args.html" class="method">parse_args</a></b> (<span class="main_type"><a href="Vala.GirParser.Metadata.html" class="class">Metadata</a></span> metadata)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -123,27 +111,34 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.GirParser.MetadataParser.parse_args.html" class="method">parse_args</a></b> (<span class="main_type"><a href="Vala.GirParser.Metadata.html" class="class">Metadata</a></span> metadata)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Vala.GirParser.MetadataParser.parse_identifier.html" class="method">parse_identifier</a></b> (<span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> is_glob)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.GirParser.MetadataParser.parse_rule.html" class="method">parse_rule</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.GirParser.Metadata.html" class="class">Metadata</a></span> <b><a href="Vala.GirParser.MetadataParser.parse_metadata.html" class="method">parse_metadata</a></b> (<span class="main_type"><a href="Vala.SourceFile.html" class="class">SourceFile</a></span> metadata_file)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.GirParser.Metadata.html" class="class">Metadata</a></span>? <b><a href="Vala.GirParser.MetadataParser.parse_pattern.html" class="method">parse_pattern</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.GirParser.MetadataParser.parse_rule.html" class="method">parse_rule</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Vala.GirParser.MetadataParser.parse_selector.html" class="method">parse_selector</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.GirParser.Metadata.html" class="class">Metadata</a></span> <b><a href="Vala.GirParser.MetadataParser.tree.html" class="field">tree</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Grammar: metadata ::= [ rule [ '\n' relativerule ]* ] rule ::= pattern
-                ' ' [ args ] relativerule ::= '.' rule pattern ::= glob [ '#' selector ] [ '.' pattern ]</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Scanner.html" class="class">Scanner</a></span> <b><a href="Vala.GirParser.MetadataParser.scanner.html" class="field">scanner</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> <b><a href="Vala.GirParser.MetadataParser.begin.html" class="field">begin</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.SourceLocation.html" class="struct">SourceLocation</a></span> <b><a href="Vala.GirParser.MetadataParser.begin.html" class="field">begin</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> <b><a href="Vala.GirParser.MetadataParser.current.html" class="field">current</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -155,18 +150,23 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.TokenType.html" class="enum">TokenType</a></span> <b><a href="Vala.GirParser.MetadataParser.current.html" class="field">current</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.GirParser.Metadata.html" class="class">Metadata</a></span> <b><a href="Vala.GirParser.MetadataParser.parent_metadata.html" class="field">parent_metadata</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Scanner.html" class="class">Scanner</a></span> <b><a href="Vala.GirParser.MetadataParser.scanner.html" class="field">scanner</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.GirParser.Metadata.html" class="class">Metadata</a></span> <b><a href="Vala.GirParser.MetadataParser.tree.html" class="field">tree</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Grammar: metadata ::= [ rule [ '\n' relativerule ]* ] rule ::= pattern
+                ' ' [ args ] relativerule ::= '.' rule pattern ::= glob [ '#' selector ] [ '.' pattern ]</span>
+            </div></li>
         </ul>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

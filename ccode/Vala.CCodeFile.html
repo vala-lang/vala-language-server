@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -27,6 +27,7 @@
         </ul>
         <hr class="navi_hr"/>
         <ul class="navi_main">
+          <li class="property"><a href="Vala.CCodeFile.file.html">file</a></li>
           <li class="property"><a href="Vala.CCodeFile.is_header.html">is_header</a></li>
           <li class="static_method"><a href="Vala.CCodeFile.get_define_for_filename.html">get_define_for_filename</a></li>
           <li class="creation_method"><a href="Vala.CCodeFile.CCodeFile.html">CCodeFile</a></li>
@@ -44,6 +45,7 @@
           <li class="method"><a href="Vala.CCodeFile.get_symbols.html">get_symbols</a></li>
           <li class="method"><a href="Vala.CCodeFile.get_symbols_from_fragment.html">get_symbols_from_fragment</a></li>
           <li class="method"><a href="Vala.CCodeFile.store.html">store</a></li>
+          <li class="field"><a href="Vala.CCodeFile._file.html">_file</a></li>
           <li class="field"><a href="Vala.CCodeFile._is_header.html">_is_header</a></li>
           <li class="field"><a href="Vala.CCodeFile.comments.html">comments</a></li>
           <li class="field"><a href="Vala.CCodeFile.constant_declaration.html">constant_declaration</a></li>
@@ -65,7 +67,7 @@
         <img class="main_diagram" usemap="#Vala.CCodeFile" alt="Object hierarchy for CCodeFile" src="img/Vala.CCodeFile.svg"/>
 
       <map id="Vala.CCodeFile" name="Vala.CCodeFile">
-<area shape="rect" id="node1" href="Vala.CCodeFile.html" title="Vala.CCodeFile" alt="" coords="5,5,153,53"/>
+<area shape="rect" id="node1" href="Vala.CCodeFile.html" title="Vala.CCodeFile" alt="" coords="5,5,144,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -78,40 +80,56 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Properties:</h3>
         <ul class="navi_inline">
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CCodeFile.is_header.html" class="property">is_header</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="../vala/Vala.SourceFile.html" class="class">SourceFile</a></span>? <b><a href="Vala.CCodeFile.file.html" class="property">file</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">private</span> <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CCodeFile.is_header.html" class="property">is_header</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Static methods:</h3>
         <ul class="navi_inline">
-          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CCodeFile.get_define_for_filename.html" class="static_method">get_define_for_filename</a></b> (<span class="main_basic_type"><span class="class">string</span></span> filename)
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.CCodeFile.get_define_for_filename.html" class="static_method">get_define_for_filename</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> filename)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
-          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.CCodeFile.CCodeFile.html" class="creation_method">CCodeFile</a></b> ()
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.CCodeFile.CCodeFile.html" class="creation_method">CCodeFile</a></b> (<span class="main_type"><a href="../vala/Vala.SourceFile.html" class="class">SourceFile</a></span>? source_file = <span class="main_literal">null</span>)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CCodeFile.add_declaration.html" class="method">add_declaration</a></b> (<span class="main_basic_type"><span class="class">string</span></span> name)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFile.add_comment.html" class="method">add_comment</a></b> (<span class="main_type"><a href="Vala.CCodeComment.html" class="class">CCodeComment</a></span> comment)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFile.add_feature_test_macro.html" class="method">add_feature_test_macro</a></b> (<span class="main_basic_type"><span class="class">string</span></span> feature_test_macro)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFile.add_constant_declaration.html" class="method">add_constant_declaration</a></b> (<span class="main_type"><a href="Vala.CCodeNode.html" class="abstract_class">CCodeNode</a></span> node)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFile.add_include.html" class="method">add_include</a></b> (<span class="main_basic_type"><span class="class">string</span></span> filename, <span class="main_basic_type"><span class="struct">bool</span></span> local = <span class="main_literal">false</span>)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CCodeFile.add_declaration.html" class="method">add_declaration</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFile.add_feature_test_macro.html" class="method">add_feature_test_macro</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> feature_test_macro)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFile.add_function.html" class="method">add_function</a></b> (<span class="main_type"><a href="Vala.CCodeFunction.html" class="class">CCodeFunction</a></span> func)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFile.add_function_declaration.html" class="method">add_function_declaration</a></b> (<span class="main_type"><a href="Vala.CCodeFunction.html" class="class">CCodeFunction</a></span> func)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFile.add_include.html" class="method">add_include</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> filename, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> local = <span class="main_literal">false</span>)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -127,50 +145,30 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFile.add_constant_declaration.html" class="method">add_constant_declaration</a></b> (<span class="main_type"><a href="Vala.CCodeNode.html" class="abstract_class">CCodeNode</a></span> node)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFile.add_type_member_definition.html" class="method">add_type_member_definition</a></b> (<span class="main_type"><a href="Vala.CCodeNode.html" class="abstract_class">CCodeNode</a></span> node)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFile.add_function_declaration.html" class="method">add_function_declaration</a></b> (<span class="main_type"><a href="Vala.CCodeFunction.html" class="class">CCodeFunction</a></span> func)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>&gt; <b><a href="Vala.CCodeFile.get_symbols.html" class="method">get_symbols</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFile.add_function.html" class="method">add_function</a></b> (<span class="main_type"><a href="Vala.CCodeFunction.html" class="class">CCodeFunction</a></span> func)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFile.get_symbols_from_fragment.html" class="method">get_symbols_from_fragment</a></b> (<span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>&gt; symbols, <span class="main_type"><a href="Vala.CCodeFragment.html" class="class">CCodeFragment</a></span> fragment)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_basic_type"><span class="class">string</span></span>&gt; <b><a href="Vala.CCodeFile.get_symbols.html" class="method">get_symbols</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFile.get_symbols_from_fragment.html" class="method">get_symbols_from_fragment</a></b> (<span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_basic_type"><span class="class">string</span></span>&gt; symbols, <span class="main_type"><a href="Vala.CCodeFragment.html" class="class">CCodeFragment</a></span> fragment)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CCodeFile.store.html" class="method">store</a></b> (<span class="main_basic_type"><span class="class">string</span></span> filename, <span class="main_basic_type"><span class="class">string</span></span>? source_filename, <span class="main_basic_type"><span class="struct">bool</span></span> write_version, <span class="main_basic_type"><span class="struct">bool</span></span> line_directives, <span class="main_basic_type"><span class="class">string</span></span>? begin_decls = <span class="main_literal">null</span>, <span class="main_basic_type"><span class="class">string</span></span>? end_decls = <span class="main_literal">null</span>)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CCodeFile.store.html" class="method">store</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> filename, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? source_filename, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> write_version, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> line_directives, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? begin_decls = <span class="main_literal">null</span>, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? end_decls = <span class="main_literal">null</span>)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CCodeFile._is_header.html" class="field">_is_header</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="../vala/Vala.SourceFile.html" class="class">SourceFile</a></span>? <b><a href="Vala.CCodeFile._file.html" class="field">_file</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">Set</span></span>&lt;<span class="main_basic_type"><span class="class">string</span></span>&gt; <b><a href="Vala.CCodeFile.features.html" class="field">features</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">Set</span></span>&lt;<span class="main_basic_type"><span class="class">string</span></span>&gt; <b><a href="Vala.CCodeFile.declarations.html" class="field">declarations</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">Set</span></span>&lt;<span class="main_basic_type"><span class="class">string</span></span>&gt; <b><a href="Vala.CCodeFile.includes.html" class="field">includes</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CCodeFile._is_header.html" class="field">_is_header</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -178,11 +176,27 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.CCodeFragment.html" class="class">CCodeFragment</a></span> <b><a href="Vala.CCodeFile.constant_declaration.html" class="field">constant_declaration</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.Set.html" class="abstract_class">Set</a></span>&lt;<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>&gt; <b><a href="Vala.CCodeFile.declarations.html" class="field">declarations</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.CCodeFragment.html" class="class">CCodeFragment</a></span> <b><a href="Vala.CCodeFile.feature_test_macros.html" class="field">feature_test_macros</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.Set.html" class="abstract_class">Set</a></span>&lt;<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>&gt; <b><a href="Vala.CCodeFile.features.html" class="field">features</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.CCodeFragment.html" class="class">CCodeFragment</a></span> <b><a href="Vala.CCodeFile.include_directives.html" class="field">include_directives</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.Set.html" class="abstract_class">Set</a></span>&lt;<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>&gt; <b><a href="Vala.CCodeFile.includes.html" class="field">includes</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -198,10 +212,6 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.CCodeFragment.html" class="class">CCodeFragment</a></span> <b><a href="Vala.CCodeFile.constant_declaration.html" class="field">constant_declaration</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.CCodeFragment.html" class="class">CCodeFragment</a></span> <b><a href="Vala.CCodeFile.type_member_definition.html" class="field">type_member_definition</a></b>
             </span>
             <div class="leaf_brief_description">
@@ -209,7 +219,7 @@
         </ul>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

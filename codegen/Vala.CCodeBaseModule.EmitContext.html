@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -39,6 +39,7 @@
           <li class="field"><a href="Vala.CCodeBaseModule.EmitContext.closure_variable_clash_map.html">closure_variable_clash_map</a></li>
           <li class="field"><a href="Vala.CCodeBaseModule.EmitContext.closure_variable_count_map.html">closure_variable_count_map</a></li>
           <li class="field"><a href="Vala.CCodeBaseModule.EmitContext.current_catch.html">current_catch</a></li>
+          <li class="field"><a href="Vala.CCodeBaseModule.EmitContext.current_inner_error_id.html">current_inner_error_id</a></li>
           <li class="field"><a href="Vala.CCodeBaseModule.EmitContext.current_method_inner_error.html">current_method_inner_error</a></li>
           <li class="field"><a href="Vala.CCodeBaseModule.EmitContext.current_method_return.html">current_method_return</a></li>
           <li class="field"><a href="Vala.CCodeBaseModule.EmitContext.current_symbol.html">current_symbol</a></li>
@@ -59,7 +60,7 @@
       
 
       <map id="Vala.CCodeBaseModule.EmitContext" name="Vala.CCodeBaseModule.EmitContext">
-<area shape="rect" id="node1" href="Vala.CCodeBaseModule.EmitContext.html" title="Vala.CCodeBaseModule.EmitContext" alt="" coords="5,5,339,53"/>
+<area shape="rect" id="node1" href="Vala.CCodeBaseModule.EmitContext.html" title="Vala.CCodeBaseModule.EmitContext" alt="" coords="5,5,305,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -68,84 +69,88 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
-          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.CCodeBaseModule.EmitContext.EmitContext.html" class="creation_method">EmitContext</a></b> (<span class="main_type"><span class="abstract_class">Symbol</span></span>? symbol = <span class="main_literal">null</span>)
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.CCodeBaseModule.EmitContext.EmitContext.html" class="creation_method">EmitContext</a></b> (<span class="main_type"><a href="../vala/Vala.Symbol.html" class="abstract_class">Symbol</a></span>? symbol = <span class="main_literal">null</span>)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeBaseModule.EmitContext.push_symbol.html" class="method">push_symbol</a></b> (<span class="main_type"><span class="abstract_class">Symbol</span></span> symbol)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeBaseModule.EmitContext.pop_symbol.html" class="method">pop_symbol</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeBaseModule.EmitContext.pop_symbol.html" class="method">pop_symbol</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeBaseModule.EmitContext.push_symbol.html" class="method">push_symbol</a></b> (<span class="main_type"><a href="../vala/Vala.Symbol.html" class="abstract_class">Symbol</a></span> symbol)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">Symbol</span></span>? <b><a href="Vala.CCodeBaseModule.EmitContext.current_symbol.html" class="field">current_symbol</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../ccode/Vala.CCodeFunction.html" class="class">CCodeFunction</a></span> <b><a href="Vala.CCodeBaseModule.EmitContext.ccode.html" class="field">ccode</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">ArrayList</span></span>&lt;<span class="main_type"><span class="abstract_class">Symbol</span></span>&gt; <b><a href="Vala.CCodeBaseModule.EmitContext.symbol_stack.html" class="field">symbol_stack</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.ArrayList.html" class="class">ArrayList</a></span>&lt;<span class="main_type"><a href="../ccode/Vala.CCodeFunction.html" class="class">CCodeFunction</a></span>&gt; <b><a href="Vala.CCodeBaseModule.EmitContext.ccode_stack.html" class="field">ccode_stack</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">TryStatement</span></span> <b><a href="Vala.CCodeBaseModule.EmitContext.current_try.html" class="field">current_try</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.Map.html" class="abstract_class">Map</a></span>&lt;<span class="main_type"><a href="../vala/Vala.LocalVariable.html" class="class">LocalVariable</a></span>,<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span>&gt; <b><a href="Vala.CCodeBaseModule.EmitContext.closure_variable_clash_map.html" class="field">closure_variable_clash_map</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">CatchClause</span></span> <b><a href="Vala.CCodeBaseModule.EmitContext.current_catch.html" class="field">current_catch</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.Map.html" class="abstract_class">Map</a></span>&lt;<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>,<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span>&gt; <b><a href="Vala.CCodeBaseModule.EmitContext.closure_variable_count_map.html" class="field">closure_variable_count_map</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">CCodeFunction</span></span> <b><a href="Vala.CCodeBaseModule.EmitContext.ccode.html" class="field">ccode</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../vala/Vala.CatchClause.html" class="class">CatchClause</a></span> <b><a href="Vala.CCodeBaseModule.EmitContext.current_catch.html" class="field">current_catch</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">ArrayList</span></span>&lt;<span class="main_type"><span class="class">CCodeFunction</span></span>&gt; <b><a href="Vala.CCodeBaseModule.EmitContext.ccode_stack.html" class="field">ccode_stack</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.CCodeBaseModule.EmitContext.current_inner_error_id.html" class="field">current_inner_error_id</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">ArrayList</span></span>&lt;<span class="main_type"><span class="abstract_class">TargetValue</span></span>&gt; <b><a href="Vala.CCodeBaseModule.EmitContext.temp_ref_values.html" class="field">temp_ref_values</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CCodeBaseModule.EmitContext.current_method_inner_error.html" class="field">current_method_inner_error</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.CCodeBaseModule.EmitContext.next_temp_var_id.html" class="field">next_temp_var_id</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CCodeBaseModule.EmitContext.current_method_return.html" class="field">current_method_return</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CCodeBaseModule.EmitContext.current_method_inner_error.html" class="field">current_method_inner_error</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../vala/Vala.Symbol.html" class="abstract_class">Symbol</a></span>? <b><a href="Vala.CCodeBaseModule.EmitContext.current_symbol.html" class="field">current_symbol</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CCodeBaseModule.EmitContext.current_method_return.html" class="field">current_method_return</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../vala/Vala.TryStatement.html" class="class">TryStatement</a></span> <b><a href="Vala.CCodeBaseModule.EmitContext.current_try.html" class="field">current_try</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.CCodeBaseModule.EmitContext.next_coroutine_state.html" class="field">next_coroutine_state</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.CCodeBaseModule.EmitContext.next_coroutine_state.html" class="field">next_coroutine_state</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">Map</span></span>&lt;<span class="main_basic_type"><span class="class">string</span></span>,<span class="main_basic_type"><span class="class">string</span></span>&gt; <b><a href="Vala.CCodeBaseModule.EmitContext.variable_name_map.html" class="field">variable_name_map</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.CCodeBaseModule.EmitContext.next_temp_var_id.html" class="field">next_temp_var_id</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">Map</span></span>&lt;<span class="main_basic_type"><span class="class">string</span></span>,<span class="main_basic_type"><span class="struct">int</span></span>&gt; <b><a href="Vala.CCodeBaseModule.EmitContext.closure_variable_count_map.html" class="field">closure_variable_count_map</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.ArrayList.html" class="class">ArrayList</a></span>&lt;<span class="main_type"><a href="../vala/Vala.Symbol.html" class="abstract_class">Symbol</a></span>&gt; <b><a href="Vala.CCodeBaseModule.EmitContext.symbol_stack.html" class="field">symbol_stack</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="abstract_class">Map</span></span>&lt;<span class="main_type"><span class="class">LocalVariable</span></span>,<span class="main_basic_type"><span class="struct">int</span></span>&gt; <b><a href="Vala.CCodeBaseModule.EmitContext.closure_variable_clash_map.html" class="field">closure_variable_clash_map</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.ArrayList.html" class="class">ArrayList</a></span>&lt;<span class="main_type"><a href="../vala/Vala.TargetValue.html" class="abstract_class">TargetValue</a></span>&gt; <b><a href="Vala.CCodeBaseModule.EmitContext.temp_ref_values.html" class="field">temp_ref_values</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.Map.html" class="abstract_class">Map</a></span>&lt;<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>,<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>&gt; <b><a href="Vala.CCodeBaseModule.EmitContext.variable_name_map.html" class="field">variable_name_map</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

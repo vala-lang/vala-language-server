@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -64,7 +64,7 @@
         <img class="main_diagram" usemap="#Vala.TimSort" alt="Object hierarchy for TimSort" src="img/Vala.TimSort.svg"/>
 
       <map id="Vala.TimSort" name="Vala.TimSort">
-<area shape="rect" id="node1" href="Vala.TimSort.html" title="Vala.TimSort" alt="" coords="5,5,135,53"/>
+<area shape="rect" id="node1" href="Vala.TimSort.html" title="Vala.TimSort" alt="" coords="5,5,128,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -81,12 +81,10 @@
           <p>Tim's C code may be found here: <a href="http://svn.python.org/projects/python/trunk/Objects/listobject.c" target="_blank">
               http://svn.python.org/projects/python/trunk/Objects/listobject.c</a></p>
           <p>The underlying techniques are described in this paper (and may have even earlier origins):</p>
-          <ul class="no_bullet">
-            <li>"Optimistic Sorting and Information Theoretic Complexity"   
-              <p>Peter McIlroy</p>
-              <p>SODA (Fourth Annual ACM-SIAM Symposium on Discrete Algorithms), pp</p>
-              <p>467-474, Austin, Texas, 25-27 January 1993.</p></li>
-          </ul>
+          <p>"Optimistic Sorting and Information Theoretic Complexity"</p>
+          <p>Peter McIlroy</p>
+          <p>SODA (Fourth Annual ACM-SIAM Symposium on Discrete Algorithms), pp</p>
+          <p>467-474, Austin, Texas, 25-27 January 1993.</p>
         </div><br/>
         <div class="namespace_note"><b>Namespace:</b> <a href="Vala.html">Vala</a>
         </div>
@@ -99,29 +97,29 @@
         </ul>
         <h3 class="main_title">Constants:</h3>
         <ul class="navi_inline">
-          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.TimSort.MINIMUM_GALLOP.html" class="constant">MINIMUM_GALLOP</a></b>
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.TimSort.MINIMUM_GALLOP.html" class="constant">MINIMUM_GALLOP</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Delegates:</h3>
         <ul class="navi_inline">
-          <li class="delegate"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">delegate</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.TimSort.LowerFunc.html" class="delegate">LowerFunc</a></b> (<span class="main_type"><span>G</span></span> left, <span class="main_type"><span>G</span></span> right)
+          <li class="delegate"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">delegate</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.TimSort.LowerFunc.html" class="delegate">LowerFunc</a></b> (<span class="main_type"><span>G</span></span> left, <span class="main_type"><span>G</span></span> right)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Static methods:</h3>
         <ul class="navi_inline">
-          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_keyword">void</span> <b><a href="Vala.TimSort.sort.html" class="static_method">sort</a></b>&lt;<b><span>G</span></b>&gt; (<span class="main_type"><a href="Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; list, <span class="main_type"><span class="delegate">CompareDataFunc</span></span>&lt;<span class="main_type"><span>G</span></span>&gt; compare)
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_keyword">void</span> <b><a href="Vala.TimSort.sort.html" class="static_method">sort</a></b>&lt;<b><span>G</span></b>&gt; (<span class="main_type"><a href="Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; list, <span class="main_type"><a href="../glib-2.0/GLib.CompareDataFunc.html" class="delegate">CompareDataFunc</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; compare)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_keyword">void</span> <b><a href="Vala.TimSort.sort_list.html" class="static_method">sort_list</a></b>&lt;<b><span>G</span></b>&gt; (<span class="main_type"><a href="Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; list, <span class="main_type"><span class="delegate">CompareDataFunc</span></span>&lt;<span class="main_type"><span>G</span></span>&gt; compare)
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_keyword">void</span> <b><a href="Vala.TimSort.sort_arraylist.html" class="static_method">sort_arraylist</a></b>&lt;<b><span>G</span></b>&gt; (<span class="main_type"><a href="Vala.ArrayList.html" class="class">ArrayList</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; list, <span class="main_type"><a href="../glib-2.0/GLib.CompareDataFunc.html" class="delegate">CompareDataFunc</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; compare)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_keyword">void</span> <b><a href="Vala.TimSort.sort_arraylist.html" class="static_method">sort_arraylist</a></b>&lt;<b><span>G</span></b>&gt; (<span class="main_type"><a href="Vala.ArrayList.html" class="class">ArrayList</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; list, <span class="main_type"><span class="delegate">CompareDataFunc</span></span>&lt;<span class="main_type"><span>G</span></span>&gt; compare)
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_keyword">void</span> <b><a href="Vala.TimSort.sort_list.html" class="static_method">sort_list</a></b>&lt;<b><span>G</span></b>&gt; (<span class="main_type"><a href="Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; list, <span class="main_type"><a href="../glib-2.0/GLib.CompareDataFunc.html" class="delegate">CompareDataFunc</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; compare)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -135,27 +133,39 @@
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.TimSort.Slice.html" class="class">Slice</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.TimSort.compute_longest_run.html" class="method">compute_longest_run</a></b> (<span class="main_type"><a href="Vala.TimSort.Slice.html" class="class">Slice</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; a, <span class="main_keyword">out</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> descending)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.TimSort.compute_minimum_run_length.html" class="method">compute_minimum_run_length</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> length)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.TimSort.do_sort.html" class="method">do_sort</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.TimSort.lower_than.html" class="method">lower_than</a></b> (<span class="main_type"><span>G</span></span> left, <span class="main_type"><span>G</span></span> right)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.TimSort.gallop_leftmost.html" class="method">gallop_leftmost</a></b> (<span class="main_type"><span>G</span></span> key, <span class="main_type"><a href="Vala.TimSort.Slice.html" class="class">Slice</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; a, <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> hint)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.TimSort.lower_than_or_equal_to.html" class="method">lower_than_or_equal_to</a></b> (<span class="main_type"><span>G</span></span> left, <span class="main_type"><span>G</span></span> right)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.TimSort.gallop_rightmost.html" class="method">gallop_rightmost</a></b> (<span class="main_type"><span>G</span></span> key, <span class="main_type"><a href="Vala.TimSort.Slice.html" class="class">Slice</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; a, <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> hint)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.TimSort.compute_minimum_run_length.html" class="method">compute_minimum_run_length</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> length)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.TimSort.insertion_sort.html" class="method">insertion_sort</a></b> (<span class="main_type"><a href="Vala.TimSort.Slice.html" class="class">Slice</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; a, <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> offset)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.TimSort.Slice.html" class="class">Slice</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.TimSort.compute_longest_run.html" class="method">compute_longest_run</a></b> (<span class="main_type"><a href="Vala.TimSort.Slice.html" class="class">Slice</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; a, <span class="main_keyword">out</span> <span class="main_basic_type"><span class="struct">bool</span></span> descending)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.TimSort.lower_than.html" class="method">lower_than</a></b> (<span class="main_type"><span>G</span></span> left, <span class="main_type"><span>G</span></span> right)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.TimSort.insertion_sort.html" class="method">insertion_sort</a></b> (<span class="main_type"><a href="Vala.TimSort.Slice.html" class="class">Slice</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; a, <span class="main_basic_type"><span class="struct">int</span></span> offset)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">inline</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.TimSort.lower_than_or_equal_to.html" class="method">lower_than_or_equal_to</a></b> (<span class="main_type"><span>G</span></span> left, <span class="main_type"><span>G</span></span> right)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.TimSort.merge_at.html" class="method">merge_at</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> index)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -167,15 +177,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.TimSort.merge_at.html" class="method">merge_at</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> index)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.TimSort.gallop_leftmost.html" class="method">gallop_leftmost</a></b> (<span class="main_type"><span>G</span></span> key, <span class="main_type"><a href="Vala.TimSort.Slice.html" class="class">Slice</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; a, <span class="main_basic_type"><span class="struct">int</span></span> hint)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.TimSort.gallop_rightmost.html" class="method">gallop_rightmost</a></b> (<span class="main_type"><span>G</span></span> key, <span class="main_type"><a href="Vala.TimSort.Slice.html" class="class">Slice</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; a, <span class="main_basic_type"><span class="struct">int</span></span> hint)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.TimSort.merge_high.html" class="method">merge_high</a></b> (<span class="main_keyword">owned</span> <span class="main_type"><a href="Vala.TimSort.Slice.html" class="class">Slice</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; a, <span class="main_keyword">owned</span> <span class="main_type"><a href="Vala.TimSort.Slice.html" class="class">Slice</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; b)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -183,18 +185,18 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.TimSort.merge_high.html" class="method">merge_high</a></b> (<span class="main_keyword">owned</span> <span class="main_type"><a href="Vala.TimSort.Slice.html" class="class">Slice</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; a, <span class="main_keyword">owned</span> <span class="main_type"><a href="Vala.TimSort.Slice.html" class="class">Slice</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; b)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.TimSort.list_collection.html" class="field">list_collection</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span>G</span></span>[] <b><a href="Vala.TimSort.array.html" class="field">array</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span>G</span></span>[] <b><a href="Vala.TimSort.array.html" class="field">array</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="../glib-2.0/GLib.CompareDataFunc.html" class="delegate">CompareDataFunc</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.TimSort.compare.html" class="field">compare</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.TimSort.index.html" class="field">index</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -202,11 +204,11 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.TimSort.index.html" class="field">index</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.TimSort.list_collection.html" class="field">list_collection</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.TimSort.size.html" class="field">size</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.TimSort.minimum_gallop.html" class="field">minimum_gallop</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -214,18 +216,14 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.TimSort.minimum_gallop.html" class="field">minimum_gallop</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">weak</span> <span class="main_type"><span class="delegate">CompareDataFunc</span></span>&lt;<span class="main_type"><span>G</span></span>&gt; <b><a href="Vala.TimSort.compare.html" class="field">compare</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.TimSort.size.html" class="field">size</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

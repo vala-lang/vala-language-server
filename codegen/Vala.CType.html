@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -27,9 +27,11 @@
         </ul>
         <hr class="navi_hr"/>
         <ul class="navi_main">
+          <li class="property"><a href="Vala.CType.cdefault_value.html">cdefault_value</a></li>
           <li class="property"><a href="Vala.CType.ctype_name.html">ctype_name</a></li>
           <li class="creation_method"><a href="Vala.CType.CType.html">CType</a></li>
           <li class="virtual_method"><a href="Vala.CType.copy.html">copy</a></li>
+          <li class="field"><a href="Vala.CType._cdefault_value.html">_cdefault_value</a></li>
           <li class="field"><a href="Vala.CType._ctype_name.html">_ctype_name</a></li>
         </ul>
       </div>
@@ -40,11 +42,13 @@
         <img class="main_diagram" usemap="#Vala.CType" alt="Object hierarchy for CType" src="img/Vala.CType.svg"/>
 
       <map id="Vala.CType" name="Vala.CType">
-<area shape="rect" id="node1" href="Vala.CType.html" title="Vala.CType" alt="" coords="23,197,138,245"/>
+<area shape="rect" id="node1" href="Vala.CType.html" title="Vala.CType" alt="" coords="21,197,127,245"/>
+<area shape="rect" id="node2" href="../vala/Vala.DataType.html" title="Vala.DataType" alt="" coords="9,101,139,149"/>
+<area shape="rect" id="node3" href="../vala/Vala.CodeNode.html" title="Vala.CodeNode" alt="" coords="5,5,143,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
-        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">class</span> <b><span class="class">CType</span></b> : <span class="main_type"><span class="abstract_class">DataType</span></span>
+        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">class</span> <b><span class="class">CType</span></b> : <span class="main_type"><a href="../vala/Vala.DataType.html" class="abstract_class">DataType</a></span>
         </div>
         <div class="description">
           <p>A C type, used only for code generation purposes.</p>
@@ -56,28 +60,36 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Properties:</h3>
         <ul class="navi_inline">
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CType.ctype_name.html" class="property">ctype_name</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.CType.cdefault_value.html" class="property">cdefault_value</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The default value of the C type.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.CType.ctype_name.html" class="property">ctype_name</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">The name of the C type.</span>
             </div></li>
         </ul>
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
-          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.CType.CType.html" class="creation_method">CType</a></b> (<span class="main_basic_type"><span class="class">string</span></span> ctype_name)
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.CType.CType.html" class="creation_method">CType</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> ctype_name, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> cdefault_value)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><span class="abstract_class">DataType</span></span> <b><a href="Vala.CType.copy.html" class="virtual_method">copy</a></b> ()
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><a href="../vala/Vala.DataType.html" class="abstract_class">DataType</a></span> <b><a href="Vala.CType.copy.html" class="virtual_method">copy</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CType._ctype_name.html" class="field">_ctype_name</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.CType._cdefault_value.html" class="field">_cdefault_value</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.CType._ctype_name.html" class="field">_ctype_name</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -88,47 +100,49 @@
           <div class="content" id="box-content-216">
             <div class="column">
               <ul class="navi_inline">
-                <li class="property">data_type</li>
-                <li class="property">floating_reference</li>
-                <li class="property">is_dynamic</li>
-                <li class="property">nullable</li>
-                <li class="property">value_owned</li>
-                <li class="virtual_method">accept</li>
-                <li class="virtual_method">accept_children</li>
-                <li class="method">add_type_argument</li>
-                <li class="virtual_method">compatible</li>
-                <li class="abstract_method">copy</li>
-                <li class="virtual_method">equals</li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.accept.html">accept</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.accept_children.html">accept_children</a></li>
+                <li class="method"><a href="../vala/Vala.DataType.add_type_argument.html">add_type_argument</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.compatible.html">compatible</a></li>
+                <li class="abstract_method"><a href="../vala/Vala.DataType.copy.html">copy</a></li>
+                <li class="property"><a href="../vala/Vala.DataType.data_type.html">data_type</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.equals.html">equals</a></li>
+                <li class="property"><a href="../vala/Vala.DataType.floating_reference.html">floating_reference</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.get_actual_type.html">get_actual_type</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.get_member.html">get_member</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.get_parameters.html">get_parameters</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.get_pointer_member.html">get_pointer_member</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="virtual_method">get_actual_type</li>
-                <li class="virtual_method">get_member</li>
-                <li class="virtual_method">get_parameters</li>
-                <li class="virtual_method">get_pointer_member</li>
-                <li class="virtual_method">get_return_type</li>
-                <li class="method">get_type_arguments</li>
-                <li class="method">has_type_arguments</li>
-                <li class="virtual_method">infer_type_argument</li>
-                <li class="virtual_method">is_accessible</li>
-                <li class="virtual_method">is_array</li>
-                <li class="virtual_method">is_disposable</li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.get_return_type.html">get_return_type</a></li>
+                <li class="method"><a href="../vala/Vala.DataType.get_type_arguments.html">get_type_arguments</a></li>
+                <li class="method"><a href="../vala/Vala.DataType.get_type_signature.html">get_type_signature</a></li>
+                <li class="method"><a href="../vala/Vala.DataType.has_type_arguments.html">has_type_arguments</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.infer_type_argument.html">infer_type_argument</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.is_accessible.html">is_accessible</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.is_disposable.html">is_disposable</a></li>
+                <li class="property"><a href="../vala/Vala.DataType.is_dynamic.html">is_dynamic</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.is_invokable.html">is_invokable</a></li>
+                <li class="method"><a href="../vala/Vala.DataType.is_non_null_simple_type.html">is_non_null_simple_type</a></li>
+                <li class="method"><a href="../vala/Vala.DataType.is_real_non_null_struct_type.html">is_real_non_null_struct_type</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="virtual_method">is_invokable</li>
-                <li class="method">is_real_non_null_struct_type</li>
-                <li class="virtual_method">is_real_struct_type</li>
-                <li class="virtual_method">is_reference_type_or_type_parameter</li>
-                <li class="method">is_weak</li>
-                <li class="method">remove_all_type_arguments</li>
-                <li class="virtual_method">replace_type</li>
-                <li class="virtual_method">stricter</li>
-                <li class="virtual_method">to_prototype_string</li>
-                <li class="virtual_method">to_qualified_string</li>
-                <li class="virtual_method">to_string</li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.is_real_struct_type.html">is_real_struct_type</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.is_reference_type_or_type_parameter.html">
+                    is_reference_type_or_type_parameter</a></li>
+                <li class="method"><a href="../vala/Vala.DataType.is_weak.html">is_weak</a></li>
+                <li class="property"><a href="../vala/Vala.DataType.nullable.html">nullable</a></li>
+                <li class="method"><a href="../vala/Vala.DataType.remove_all_type_arguments.html">remove_all_type_arguments</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.replace_type.html">replace_type</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.stricter.html">stricter</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.to_prototype_string.html">to_prototype_string</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.to_qualified_string.html">to_qualified_string</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.DataType.to_string.html">to_string</a></li>
+                <li class="property"><a href="../vala/Vala.DataType.value_owned.html">value_owned</a></li>
               </ul>
             </div>
           </div>
@@ -138,57 +152,59 @@
           <div class="content" id="box-content-217">
             <div class="column">
               <ul class="navi_inline">
-                <li class="property">checked</li>
-                <li class="property">error</li>
-                <li class="property">parent_node</li>
-                <li class="property">source_reference</li>
-                <li class="property">tree_can_fail</li>
-                <li class="property">type_name</li>
-                <li class="property">unreachable</li>
-                <li class="static_method">get_attribute_cache_index</li>
-                <li class="static_method">get_temp_name</li>
-                <li class="virtual_method">accept</li>
-                <li class="virtual_method">accept_children</li>
-                <li class="method">add_error_type</li>
+                <li class="virtual_method"><a href="../vala/Vala.CodeNode.accept.html">accept</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.CodeNode.accept_children.html">accept_children</a></li>
+                <li class="field"><a href="../vala/Vala.CodeNode.attributes.html">attributes</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.CodeNode.check.html">check</a></li>
+                <li class="property"><a href="../vala/Vala.CodeNode.checked.html">checked</a></li>
+                <li class="method"><a href="../vala/Vala.CodeNode.copy_attribute_bool.html">copy_attribute_bool</a></li>
+                <li class="method"><a href="../vala/Vala.CodeNode.copy_attribute_double.html">copy_attribute_double</a></li>
+                <li class="method"><a href="../vala/Vala.CodeNode.copy_attribute_integer.html">copy_attribute_integer</a></li>
+                <li class="method"><a href="../vala/Vala.CodeNode.copy_attribute_string.html">copy_attribute_string</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.CodeNode.emit.html">emit</a></li>
+                <li class="property"><a href="../vala/Vala.CodeNode.error.html">error</a></li>
+                <li class="method"><a href="../vala/Vala.CodeNode.get_attribute.html">get_attribute</a></li>
+                <li class="method"><a href="../vala/Vala.CodeNode.get_attribute_bool.html">get_attribute_bool</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="method">add_error_types</li>
-                <li class="virtual_method">check</li>
-                <li class="virtual_method">emit</li>
-                <li class="method">get_attribute</li>
-                <li class="method">get_attribute_bool</li>
-                <li class="method">get_attribute_cache</li>
-                <li class="method">get_attribute_double</li>
-                <li class="method">get_attribute_integer</li>
-                <li class="method">get_attribute_string</li>
-                <li class="virtual_method">get_defined_variables</li>
-                <li class="method">get_error_types</li>
-                <li class="virtual_method">get_used_variables</li>
+                <li class="method"><a href="../vala/Vala.CodeNode.get_attribute_cache.html">get_attribute_cache</a></li>
+                <li class="static_method"><a href="../vala/Vala.CodeNode.get_attribute_cache_index.html">get_attribute_cache_index</a></li>
+                <li class="method"><a href="../vala/Vala.CodeNode.get_attribute_double.html">get_attribute_double</a></li>
+                <li class="method"><a href="../vala/Vala.CodeNode.get_attribute_integer.html">get_attribute_integer</a></li>
+                <li class="method"><a href="../vala/Vala.CodeNode.get_attribute_string.html">get_attribute_string</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.CodeNode.get_defined_variables.html">get_defined_variables</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.CodeNode.get_error_types.html">get_error_types</a></li>
+                <li class="static_method"><a href="../vala/Vala.CodeNode.get_temp_name.html">get_temp_name</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.CodeNode.get_used_variables.html">get_used_variables</a></li>
+                <li class="method"><a href="../vala/Vala.CodeNode.has_attribute_argument.html">has_attribute_argument</a></li>
+                <li class="property"><a href="../vala/Vala.CodeNode.parent_node.html">parent_node</a></li>
+                <li class="method"><a href="../vala/Vala.CodeNode.remove_attribute_argument.html">remove_attribute_argument</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.CodeNode.replace_expression.html">replace_expression</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="method">has_attribute_argument</li>
-                <li class="method">remove_attribute_argument</li>
-                <li class="virtual_method">replace_expression</li>
-                <li class="virtual_method">replace_type</li>
-                <li class="method">set_attribute</li>
-                <li class="method">set_attribute_bool</li>
-                <li class="method">set_attribute_cache</li>
-                <li class="method">set_attribute_double</li>
-                <li class="method">set_attribute_integer</li>
-                <li class="method">set_attribute_string</li>
-                <li class="virtual_method">to_string</li>
-                <li class="field">attributes</li>
+                <li class="virtual_method"><a href="../vala/Vala.CodeNode.replace_type.html">replace_type</a></li>
+                <li class="method"><a href="../vala/Vala.CodeNode.set_attribute.html">set_attribute</a></li>
+                <li class="method"><a href="../vala/Vala.CodeNode.set_attribute_bool.html">set_attribute_bool</a></li>
+                <li class="method"><a href="../vala/Vala.CodeNode.set_attribute_cache.html">set_attribute_cache</a></li>
+                <li class="method"><a href="../vala/Vala.CodeNode.set_attribute_double.html">set_attribute_double</a></li>
+                <li class="method"><a href="../vala/Vala.CodeNode.set_attribute_integer.html">set_attribute_integer</a></li>
+                <li class="method"><a href="../vala/Vala.CodeNode.set_attribute_string.html">set_attribute_string</a></li>
+                <li class="property"><a href="../vala/Vala.CodeNode.source_reference.html">source_reference</a></li>
+                <li class="virtual_method"><a href="../vala/Vala.CodeNode.to_string.html">to_string</a></li>
+                <li class="property"><a href="../vala/Vala.CodeNode.tree_can_fail.html">tree_can_fail</a></li>
+                <li class="property"><a href="../vala/Vala.CodeNode.type_name.html">type_name</a></li>
+                <li class="property"><a href="../vala/Vala.CodeNode.unreachable.html">unreachable</a></li>
               </ul>
             </div>
           </div>
         </div>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

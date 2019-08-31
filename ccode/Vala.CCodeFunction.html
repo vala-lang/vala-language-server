@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -76,8 +76,8 @@
         <img class="main_diagram" usemap="#Vala.CCodeFunction" alt="Object hierarchy for CCodeFunction" src="img/Vala.CCodeFunction.svg"/>
 
       <map id="Vala.CCodeFunction" name="Vala.CCodeFunction">
-<area shape="rect" id="node1" href="Vala.CCodeFunction.html" title="Vala.CCodeFunction" alt="" coords="5,101,200,149"/>
-<area shape="rect" id="node2" href="Vala.CCodeNode.html" title="Vala.CCodeNode" alt="" coords="21,5,184,53"/>
+<area shape="rect" id="node1" href="Vala.CCodeFunction.html" title="Vala.CCodeFunction" alt="" coords="5,101,180,149"/>
+<area shape="rect" id="node2" href="Vala.CCodeNode.html" title="Vala.CCodeNode" alt="" coords="18,5,167,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -93,122 +93,41 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Properties:</h3>
         <ul class="navi_inline">
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CCodeFunction.name.html" class="property">name</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The name of this function.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CCodeFunction.return_type.html" class="property">return_type</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The function return type.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CCodeFunction.is_declaration.html" class="property">is_declaration</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.CCodeBlock.html" class="class">CCodeBlock</a></span> <b><a href="Vala.CCodeFunction.block.html" class="property">block</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.CCodeBlock.html" class="class">CCodeBlock</a></span> <b><a href="Vala.CCodeFunction.block.html" class="property">block</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">The function body.</span>
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.CCodeLineDirective.html" class="class">CCodeLineDirective</a></span> <b><a href="Vala.CCodeFunction.current_line.html" class="property">current_line</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.CCodeBlock.html" class="class">CCodeBlock</a></span> <b><a href="Vala.CCodeFunction.current_block.html" class="property">current_block</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The current block to be written into.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.CCodeLineDirective.html" class="class">CCodeLineDirective</a></span> <b><a href="Vala.CCodeFunction.current_line.html" class="property">current_line</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">The current line directive.</span>
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.CCodeBlock.html" class="class">CCodeBlock</a></span> <b><a href="Vala.CCodeFunction.current_block.html" class="property">current_block</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CCodeFunction.is_declaration.html" class="property">is_declaration</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">The current block to be written into.</span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.CCodeFunction.name.html" class="property">name</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The name of this function.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.CCodeFunction.return_type.html" class="property">return_type</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The function return type.</span>
             </div></li>
         </ul>
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
-          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.CCodeFunction.CCodeFunction.html" class="creation_method">CCodeFunction</a></b> (<span class="main_basic_type"><span class="class">string</span></span> name, <span class="main_basic_type"><span class="class">string</span></span> return_type = <span class="main_literal">"void"</span>)
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.CCodeFunction.CCodeFunction.html" class="creation_method">CCodeFunction</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> return_type = <span class="main_literal">"void"</span>)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_parameter.html" class="method">add_parameter</a></b> (<span class="main_type"><a href="Vala.CCodeParameter.html" class="class">CCodeParameter</a></span> param)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Appends the specified parameter to the list of function parameters.
-              </span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.insert_parameter.html" class="method">insert_parameter</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> position, <span class="main_type"><a href="Vala.CCodeParameter.html" class="class">CCodeParameter</a></span> param)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Vala.CCodeFunction.get_parameter_count.html" class="method">get_parameter_count</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.CCodeParameter.html" class="class">CCodeParameter</a></span> <b><a href="Vala.CCodeFunction.get_parameter.html" class="method">get_parameter</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> position)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">CCodeFunction</span></span> <b><a href="Vala.CCodeFunction.copy.html" class="method">copy</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns a copy of this function.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.write.html" class="virtual_method">write</a></b> (<span class="main_type"><a href="Vala.CCodeWriter.html" class="class">CCodeWriter</a></span> writer)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_statement.html" class="method">add_statement</a></b> (<span class="main_type"><a href="Vala.CCodeNode.html" class="abstract_class">CCodeNode</a></span> stmt)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.open_block.html" class="method">open_block</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.open_if.html" class="method">open_if</a></b> (<span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> condition)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_else.html" class="method">add_else</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.else_if.html" class="method">else_if</a></b> (<span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> condition)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.open_while.html" class="method">open_while</a></b> (<span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> condition)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.open_for.html" class="method">open_for</a></b> (<span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span>? initializer, <span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> condition, <span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span>? iterator)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.open_switch.html" class="method">open_switch</a></b> (<span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> expression)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_label.html" class="method">add_label</a></b> (<span class="main_basic_type"><span class="class">string</span></span> label)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_case.html" class="method">add_case</a></b> (<span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> expression)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_default.html" class="method">add_default</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_goto.html" class="method">add_goto</a></b> (<span class="main_basic_type"><span class="class">string</span></span> target)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_expression.html" class="method">add_expression</a></b> (<span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> expression)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_assignment.html" class="method">add_assignment</a></b> (<span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> left, <span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> right)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_return.html" class="method">add_return</a></b> (<span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span>? expression = <span class="main_literal">null</span>)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -216,11 +135,48 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_case.html" class="method">add_case</a></b> (<span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> expression)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_continue.html" class="method">add_continue</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_declaration.html" class="method">add_declaration</a></b> (<span class="main_basic_type"><span class="class">string</span></span> type_name, <span class="main_type"><a href="Vala.CCodeDeclarator.html" class="abstract_class">CCodeDeclarator</a></span> declarator, <span class="main_type"><a href="Vala.CCodeModifiers.html" class="enum">CCodeModifiers</a></span> modifiers = <span class="main_literal">0</span>)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_declaration.html" class="method">add_declaration</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> type_name, <span class="main_type"><a href="Vala.CCodeDeclarator.html" class="abstract_class">CCodeDeclarator</a></span> declarator, <span class="main_type"><a href="Vala.CCodeModifiers.html" class="enum">CCodeModifiers</a></span> modifiers = <span class="main_literal">0</span>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_default.html" class="method">add_default</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_else.html" class="method">add_else</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_expression.html" class="method">add_expression</a></b> (<span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> expression)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_goto.html" class="method">add_goto</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> target)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_label.html" class="method">add_label</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> label)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_parameter.html" class="method">add_parameter</a></b> (<span class="main_type"><a href="Vala.CCodeParameter.html" class="class">CCodeParameter</a></span> param)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Appends the specified parameter to the list of function parameters.
+              </span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_return.html" class="method">add_return</a></b> (<span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span>? expression = <span class="main_literal">null</span>)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.add_statement.html" class="method">add_statement</a></b> (<span class="main_type"><a href="Vala.CCodeNode.html" class="abstract_class">CCodeNode</a></span> stmt)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -228,26 +184,54 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">CCodeFunction</span></span> <b><a href="Vala.CCodeFunction.copy.html" class="method">copy</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns a copy of this function.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.else_if.html" class="method">else_if</a></b> (<span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> condition)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Vala.CCodeParameter.html" class="class">CCodeParameter</a></span> <b><a href="Vala.CCodeFunction.get_parameter.html" class="method">get_parameter</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> position)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.CCodeFunction.get_parameter_count.html" class="method">get_parameter_count</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.insert_parameter.html" class="method">insert_parameter</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> position, <span class="main_type"><a href="Vala.CCodeParameter.html" class="class">CCodeParameter</a></span> param)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.open_block.html" class="method">open_block</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.open_for.html" class="method">open_for</a></b> (<span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span>? initializer, <span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> condition, <span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span>? iterator)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.open_if.html" class="method">open_if</a></b> (<span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> condition)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.open_switch.html" class="method">open_switch</a></b> (<span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> expression)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.open_while.html" class="method">open_while</a></b> (<span class="main_type"><a href="Vala.CCodeExpression.html" class="abstract_class">CCodeExpression</a></span> condition)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.CCodeFunction.write.html" class="virtual_method">write</a></b> (<span class="main_type"><a href="Vala.CCodeWriter.html" class="class">CCodeWriter</a></span> writer)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CCodeFunction._name.html" class="field">_name</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.CCodeFunction._return_type.html" class="field">_return_type</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Vala.CCodeFunction._is_declaration.html" class="field">_is_declaration</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.CCodeBlock.html" class="class">CCodeBlock</a></span> <b><a href="Vala.CCodeFunction._block.html" class="field">_block</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.CCodeLineDirective.html" class="class">CCodeLineDirective</a></span> <b><a href="Vala.CCodeFunction._current_line.html" class="field">_current_line</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -255,43 +239,59 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.CCodeParameter.html" class="class">CCodeParameter</a></span>&gt; <b><a href="Vala.CCodeFunction.parameters.html" class="field">parameters</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.CCodeLineDirective.html" class="class">CCodeLineDirective</a></span> <b><a href="Vala.CCodeFunction._current_line.html" class="field">_current_line</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="abstract_class">List</span></span>&lt;<span class="main_type"><a href="Vala.CCodeStatement.html" class="abstract_class">CCodeStatement</a></span>&gt; <b><a href="Vala.CCodeFunction.statement_stack.html" class="field">statement_stack</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CCodeFunction._is_declaration.html" class="field">_is_declaration</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.CCodeFunction._name.html" class="field">_name</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.CCodeFunction._return_type.html" class="field">_return_type</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.CCodeParameter.html" class="class">CCodeParameter</a></span>&gt; <b><a href="Vala.CCodeFunction.parameters.html" class="field">parameters</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.CCodeStatement.html" class="abstract_class">CCodeStatement</a></span>&gt; <b><a href="Vala.CCodeFunction.statement_stack.html" class="field">statement_stack</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-35')">All known members inherited from class Vala.CCodeNode</div>
-          <div class="content" id="box-content-35">
+          <div class="headline" onclick="toggle_box (this, 'box-content-37')">All known members inherited from class Vala.CCodeNode</div>
+          <div class="content" id="box-content-37">
             <div class="column">
               <ul class="navi_inline">
+                <li class="field"><a href="Vala.CCodeNode._line.html">_line</a></li>
+                <li class="field"><a href="Vala.CCodeNode._modifiers.html">_modifiers</a></li>
                 <li class="property"><a href="Vala.CCodeNode.line.html">line</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
                 <li class="property"><a href="Vala.CCodeNode.modifiers.html">modifiers</a></li>
                 <li class="abstract_method"><a href="Vala.CCodeNode.write.html">write</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="virtual_method"><a href="Vala.CCodeNode.write_declaration.html">write_declaration</a></li>
                 <li class="virtual_method"><a href="Vala.CCodeNode.write_combined.html">write_combined</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="field"><a href="Vala.CCodeNode._line.html">_line</a></li>
-                <li class="field"><a href="Vala.CCodeNode._modifiers.html">_modifiers</a></li>
+                <li class="virtual_method"><a href="Vala.CCodeNode.write_declaration.html">write_declaration</a></li>
               </ul>
             </div>
           </div>
         </div>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

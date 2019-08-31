@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -41,6 +41,7 @@
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.CLOSURE.html">CLOSURE</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.CNAME.html">CNAME</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.CPREFIX.html">CPREFIX</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.CTYPE.html">CTYPE</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.DEFAULT.html">DEFAULT</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.DELEGATE_TARGET.html">DELEGATE_TARGET</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.DELEGATE_TARGET_CNAME.html">DELEGATE_TARGET_CNAME</a></li>
@@ -57,6 +58,7 @@
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.HIDDEN.html">HIDDEN</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.INSTANCE_IDX.html">INSTANCE_IDX</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.LOWER_CASE_CPREFIX.html">LOWER_CASE_CPREFIX</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.LOWER_CASE_CSUFFIX.html">LOWER_CASE_CSUFFIX</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.NAME.html">NAME</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.NO_ACCESSOR_METHOD.html">NO_ACCESSOR_METHOD</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.NULLABLE.html">NULLABLE</a></li>
@@ -93,67 +95,69 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Enum values:</h3>
         <ul class="navi_inline">
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.SKIP.html">SKIP</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.HIDDEN.html">HIDDEN</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.TYPE.html">TYPE</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.TYPE_ARGUMENTS.html">TYPE_ARGUMENTS</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.CHEADER_FILENAME.html">CHEADER_FILENAME</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.NAME.html">NAME</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.OWNED.html">OWNED</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.UNOWNED.html">UNOWNED</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.PARENT.html">PARENT</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.NULLABLE.html">NULLABLE</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.DEPRECATED.html">DEPRECATED</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.REPLACEMENT.html">REPLACEMENT</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.DEPRECATED_SINCE.html">DEPRECATED_SINCE</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.SINCE.html">SINCE</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.ABSTRACT.html">ABSTRACT</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.ARRAY.html">ARRAY</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.ARRAY_LENGTH_FIELD.html">ARRAY_LENGTH_FIELD</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.ARRAY_LENGTH_IDX.html">ARRAY_LENGTH_IDX</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.ARRAY_NULL_TERMINATED.html">ARRAY_NULL_TERMINATED</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.BASE_TYPE.html">BASE_TYPE</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.CHEADER_FILENAME.html">CHEADER_FILENAME</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.CLOSURE.html">CLOSURE</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.CNAME.html">CNAME</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.CPREFIX.html">CPREFIX</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.CTYPE.html">CTYPE</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.DEFAULT.html">DEFAULT</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.DELEGATE_TARGET.html">DELEGATE_TARGET</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.DELEGATE_TARGET_CNAME.html">DELEGATE_TARGET_CNAME</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.DEPRECATED.html">DEPRECATED</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.DEPRECATED_SINCE.html">DEPRECATED_SINCE</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.DESTROY.html">DESTROY</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.DESTROYS_INSTANCE.html">DESTROYS_INSTANCE</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.ERRORDOMAIN.html">ERRORDOMAIN</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.EXPERIMENTAL.html">EXPERIMENTAL</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.FINISH_INSTANCE.html">FINISH_INSTANCE</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.FINISH_NAME.html">FINISH_NAME</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.FINISH_VFUNC_NAME.html">FINISH_VFUNC_NAME</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.FLOATING.html">FLOATING</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.HIDDEN.html">HIDDEN</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.INSTANCE_IDX.html">INSTANCE_IDX</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.LOWER_CASE_CPREFIX.html">LOWER_CASE_CPREFIX</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.LOWER_CASE_CSUFFIX.html">LOWER_CASE_CSUFFIX</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.NAME.html">NAME</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.NO_ACCESSOR_METHOD.html">NO_ACCESSOR_METHOD</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.NULLABLE.html">NULLABLE</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.OUT.html">OUT</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.OWNED.html">OWNED</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.PARENT.html">PARENT</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.PRINTF_FORMAT.html">PRINTF_FORMAT</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.REF.html">REF</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.REPLACEMENT.html">REPLACEMENT</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.RETURNS_MODIFIED_POINTER.html">RETURNS_MODIFIED_POINTER</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.RETURN_VOID.html">RETURN_VOID</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.SCOPE.html">SCOPE</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.SENTINEL.html">SENTINEL</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.SINCE.html">SINCE</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.SKIP.html">SKIP</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.STRUCT.html">STRUCT</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.SYMBOL_TYPE.html">SYMBOL_TYPE</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.THROWS.html">THROWS</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.TYPE.html">TYPE</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.TYPE_ARGUMENTS.html">TYPE_ARGUMENTS</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.TYPE_ID.html">TYPE_ID</a></li>
+          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.UNOWNED.html">UNOWNED</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.VFUNC_NAME.html">VFUNC_NAME</a></li>
           <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.VIRTUAL.html">VIRTUAL</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.ABSTRACT.html">ABSTRACT</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.SCOPE.html">SCOPE</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.STRUCT.html">STRUCT</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.THROWS.html">THROWS</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.PRINTF_FORMAT.html">PRINTF_FORMAT</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.ARRAY_LENGTH_FIELD.html">ARRAY_LENGTH_FIELD</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.SENTINEL.html">SENTINEL</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.CLOSURE.html">CLOSURE</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.DESTROY.html">DESTROY</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.CPREFIX.html">CPREFIX</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.LOWER_CASE_CPREFIX.html">LOWER_CASE_CPREFIX</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.ERRORDOMAIN.html">ERRORDOMAIN</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.DESTROYS_INSTANCE.html">DESTROYS_INSTANCE</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.BASE_TYPE.html">BASE_TYPE</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.FINISH_NAME.html">FINISH_NAME</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.FINISH_INSTANCE.html">FINISH_INSTANCE</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.SYMBOL_TYPE.html">SYMBOL_TYPE</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.INSTANCE_IDX.html">INSTANCE_IDX</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.EXPERIMENTAL.html">EXPERIMENTAL</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.FLOATING.html">FLOATING</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.TYPE_ID.html">TYPE_ID</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.RETURN_VOID.html">RETURN_VOID</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.RETURNS_MODIFIED_POINTER.html">RETURNS_MODIFIED_POINTER</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.DELEGATE_TARGET_CNAME.html">DELEGATE_TARGET_CNAME</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.FINISH_VFUNC_NAME.html">FINISH_VFUNC_NAME</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.NO_ACCESSOR_METHOD.html">NO_ACCESSOR_METHOD</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.CNAME.html">CNAME</a></li>
-          <li class="enumvalue"><a href="Vala.GirParser.ArgumentType.DELEGATE_TARGET.html">DELEGATE_TARGET</a></li>
         </ul>
         <h3 class="main_title">Static methods:</h3>
         <ul class="navi_inline">
-          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_type"><span class="enum">ArgumentType</span></span>? <b><a href="Vala.GirParser.ArgumentType.from_string.html" class="static_method">from_string</a></b> (<span class="main_basic_type"><span class="class">string</span></span> name)
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_type"><span class="enum">ArgumentType</span></span>? <b><a href="Vala.GirParser.ArgumentType.from_string.html" class="static_method">from_string</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name)
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

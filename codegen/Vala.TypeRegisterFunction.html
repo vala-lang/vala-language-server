@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -73,7 +73,7 @@
       
 
       <map id="Vala.TypeRegisterFunction" name="Vala.TypeRegisterFunction">
-<area shape="rect" id="node1" href="Vala.TypeRegisterFunction.html" title="Vala.TypeRegisterFunction" alt="" coords="5,5,253,53"/>
+<area shape="rect" id="node1" href="Vala.TypeRegisterFunction.html" title="Vala.TypeRegisterFunction" alt="" coords="5,5,224,53"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -87,18 +87,18 @@
           <div class="content" id="box-content-33">
             <div class="column">
               <ul class="navi_inline">
-                <li class="class"><a href="Vala.InterfaceRegisterFunction.html">InterfaceRegisterFunction</a></li>
                 <li class="class"><a href="Vala.ClassRegisterFunction.html">ClassRegisterFunction</a></li>
+                <li class="class"><a href="Vala.EnumRegisterFunction.html">EnumRegisterFunction</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="class"><a href="Vala.InterfaceRegisterFunction.html">InterfaceRegisterFunction</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
                 <li class="class"><a href="Vala.StructRegisterFunction.html">StructRegisterFunction</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="class"><a href="Vala.EnumRegisterFunction.html">EnumRegisterFunction</a></li>
               </ul>
             </div>
           </div>
@@ -110,133 +110,133 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
-          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.TypeRegisterFunction.TypeRegisterFunction.html" class="creation_method">TypeRegisterFunction</a></b> ()
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <b><a href="Vala.TypeRegisterFunction.TypeRegisterFunction.html" class="creation_method">TypeRegisterFunction</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.TypeRegisterFunction.init_from_type.html" class="method">init_from_type</a></b> (<span class="main_type"><span class="class">CodeContext</span></span> context, <span class="main_basic_type"><span class="struct">bool</span></span> plugin, <span class="main_basic_type"><span class="struct">bool</span></span> declaration_only)
+          <li class="abstract_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">abstract</span> <span class="main_type"><a href="../vala/Vala.SymbolAccessibility.html" class="enum">SymbolAccessibility</a></span> <b><a href="Vala.TypeRegisterFunction.get_accessibility.html" class="abstract_method">get_accessibility</a></b> ()
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Constructs the C function from the specified type.</span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the accessibility for this type.</span>
             </div></li>
-          <li class="abstract_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">abstract</span> <span class="main_type"><span class="abstract_class">TypeSymbol</span></span> <b><a href="Vala.TypeRegisterFunction.get_type_declaration.html" class="abstract_method">get_type_declaration</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the data type to be registered.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.TypeRegisterFunction.get_type_struct_name.html" class="virtual_method">get_type_struct_name</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the name of the type struct in C code.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.TypeRegisterFunction.get_base_init_func_name.html" class="virtual_method">get_base_init_func_name</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the name of the base_init function in C code.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.TypeRegisterFunction.get_class_finalize_func_name.html" class="virtual_method">get_class_finalize_func_name</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the name of the class_finalize function in C code.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.TypeRegisterFunction.get_base_finalize_func_name.html" class="virtual_method">get_base_finalize_func_name</a></b> ()
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.TypeRegisterFunction.get_base_finalize_func_name.html" class="virtual_method">get_base_finalize_func_name</a></b> ()
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Returns the name of the base_finalize function in C code.</span>
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.TypeRegisterFunction.get_class_init_func_name.html" class="virtual_method">get_class_init_func_name</a></b> ()
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.TypeRegisterFunction.get_base_init_func_name.html" class="virtual_method">get_base_init_func_name</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the name of the base_init function in C code.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.TypeRegisterFunction.get_class_finalize_func_name.html" class="virtual_method">get_class_finalize_func_name</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the name of the class_finalize function in C code.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.TypeRegisterFunction.get_class_init_func_name.html" class="virtual_method">get_class_init_func_name</a></b> ()
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Returns the name of the class_init function in C code.</span>
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.TypeRegisterFunction.get_instance_struct_size.html" class="virtual_method">get_instance_struct_size</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the size of the instance struct in C code.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.TypeRegisterFunction.get_instance_init_func_name.html" class="virtual_method">get_instance_init_func_name</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the name of the instance_init function in C code.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.TypeRegisterFunction.get_parent_type_name.html" class="virtual_method">get_parent_type_name</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the name of the parent type in C code.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Vala.TypeRegisterFunction.get_gtype_value_table_init_function_name.html" class="virtual_method">get_gtype_value_table_init_function_name</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the C-name of the new generated GTypeValueTable init function 
-                or null when not available.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Vala.TypeRegisterFunction.get_gtype_value_table_peek_pointer_function_name.html" class="virtual_method">get_gtype_value_table_peek_pointer_function_name</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the C-name of the new generated GTypeValueTable peek pointer 
-                function or null when not available.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Vala.TypeRegisterFunction.get_gtype_value_table_free_function_name.html" class="virtual_method">get_gtype_value_table_free_function_name</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the C-name of the new generated GTypeValueTable free function 
-                or null when not available.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Vala.TypeRegisterFunction.get_gtype_value_table_copy_function_name.html" class="virtual_method">get_gtype_value_table_copy_function_name</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the C-name of the new generated GTypeValueTable copy function 
-                or null when not available.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Vala.TypeRegisterFunction.get_gtype_value_table_lcopy_value_function_name.html" class="virtual_method">get_gtype_value_table_lcopy_value_function_name</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the C-name of the new generated GTypeValueTable lcopy function
-                or null when not available.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Vala.TypeRegisterFunction.get_gtype_value_table_collect_value_function_name.html" class="virtual_method">get_gtype_value_table_collect_value_function_name</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the C-name of the new generated GTypeValueTable collect value 
-                function or null when not available.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Vala.TypeRegisterFunction.get_type_flags.html" class="virtual_method">get_type_flags</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the set of type flags to be applied when registering.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_type"><span class="class">CCodeFragment</span></span> <b><a href="Vala.TypeRegisterFunction.get_type_interface_init_declaration.html" class="virtual_method">get_type_interface_init_declaration</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns additional C declarations to setup interfaces.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Vala.TypeRegisterFunction.get_type_interface_init_statements.html" class="virtual_method">get_type_interface_init_statements</a></b> (<span class="main_type"><span class="class">CodeContext</span></span> context, <span class="main_type"><span class="class">CCodeBlock</span></span> block, <span class="main_basic_type"><span class="struct">bool</span></span> plugin)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns additional C initialization statements to setup interfaces.
-              </span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">CCodeFragment</span></span> <b><a href="Vala.TypeRegisterFunction.get_source_declaration.html" class="method">get_source_declaration</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">CCodeFragment</span></span> <b><a href="Vala.TypeRegisterFunction.get_declaration.html" class="method">get_declaration</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../ccode/Vala.CCodeFragment.html" class="class">CCodeFragment</a></span> <b><a href="Vala.TypeRegisterFunction.get_declaration.html" class="method">get_declaration</a></b> ()
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Returns the declaration for this type register function in C code.
               </span>
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="class">CCodeFragment</span></span> <b><a href="Vala.TypeRegisterFunction.get_definition.html" class="method">get_definition</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../ccode/Vala.CCodeFragment.html" class="class">CCodeFragment</a></span> <b><a href="Vala.TypeRegisterFunction.get_definition.html" class="method">get_definition</a></b> ()
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Returns the definition for this type register function in C code.
               </span>
             </div></li>
-          <li class="abstract_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">abstract</span> <span class="main_type"><span class="enum">SymbolAccessibility</span></span> <b><a href="Vala.TypeRegisterFunction.get_accessibility.html" class="abstract_method">get_accessibility</a></b> ()
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Vala.TypeRegisterFunction.get_gtype_value_table_collect_value_function_name.html" class="virtual_method">get_gtype_value_table_collect_value_function_name</a></b> ()
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns the accessibility for this type.</span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the C-name of the new generated GTypeValueTable collect value 
+                function or null when not available.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Vala.TypeRegisterFunction.get_gtype_value_table_copy_function_name.html" class="virtual_method">get_gtype_value_table_copy_function_name</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the C-name of the new generated GTypeValueTable copy function 
+                or null when not available.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Vala.TypeRegisterFunction.get_gtype_value_table_free_function_name.html" class="virtual_method">get_gtype_value_table_free_function_name</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the C-name of the new generated GTypeValueTable free function 
+                or null when not available.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Vala.TypeRegisterFunction.get_gtype_value_table_init_function_name.html" class="virtual_method">get_gtype_value_table_init_function_name</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the C-name of the new generated GTypeValueTable init function 
+                or null when not available.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Vala.TypeRegisterFunction.get_gtype_value_table_lcopy_value_function_name.html" class="virtual_method">get_gtype_value_table_lcopy_value_function_name</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the C-name of the new generated GTypeValueTable lcopy function
+                or null when not available.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Vala.TypeRegisterFunction.get_gtype_value_table_peek_pointer_function_name.html" class="virtual_method">get_gtype_value_table_peek_pointer_function_name</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the C-name of the new generated GTypeValueTable peek pointer 
+                function or null when not available.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.TypeRegisterFunction.get_instance_init_func_name.html" class="virtual_method">get_instance_init_func_name</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the name of the instance_init function in C code.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.TypeRegisterFunction.get_instance_struct_size.html" class="virtual_method">get_instance_struct_size</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the size of the instance struct in C code.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.TypeRegisterFunction.get_parent_type_name.html" class="virtual_method">get_parent_type_name</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the name of the parent type in C code.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../ccode/Vala.CCodeFragment.html" class="class">CCodeFragment</a></span> <b><a href="Vala.TypeRegisterFunction.get_source_declaration.html" class="method">get_source_declaration</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="abstract_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">abstract</span> <span class="main_type"><a href="../vala/Vala.TypeSymbol.html" class="abstract_class">TypeSymbol</a></span> <b><a href="Vala.TypeRegisterFunction.get_type_declaration.html" class="abstract_method">get_type_declaration</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the data type to be registered.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.TypeRegisterFunction.get_type_flags.html" class="virtual_method">get_type_flags</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the set of type flags to be applied when registering.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_type"><a href="../ccode/Vala.CCodeFragment.html" class="class">CCodeFragment</a></span> <b><a href="Vala.TypeRegisterFunction.get_type_interface_init_declaration.html" class="virtual_method">get_type_interface_init_declaration</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns additional C declarations to setup interfaces.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Vala.TypeRegisterFunction.get_type_interface_init_statements.html" class="virtual_method">get_type_interface_init_statements</a></b> (<span class="main_type"><a href="../vala/Vala.CodeContext.html" class="class">CodeContext</a></span> context, <span class="main_type"><a href="../ccode/Vala.CCodeBlock.html" class="class">CCodeBlock</a></span> block, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> plugin)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns additional C initialization statements to setup interfaces.
+              </span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.TypeRegisterFunction.get_type_struct_name.html" class="virtual_method">get_type_struct_name</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the name of the type struct in C code.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.TypeRegisterFunction.init_from_type.html" class="method">init_from_type</a></b> (<span class="main_type"><a href="../vala/Vala.CodeContext.html" class="class">CodeContext</a></span> context, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> plugin, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> declaration_only)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Constructs the C function from the specified type.</span>
             </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="class">CCodeFragment</span></span> <b><a href="Vala.TypeRegisterFunction.source_declaration_fragment.html" class="field">source_declaration_fragment</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../ccode/Vala.CCodeFragment.html" class="class">CCodeFragment</a></span> <b><a href="Vala.TypeRegisterFunction.declaration_fragment.html" class="field">declaration_fragment</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="class">CCodeFragment</span></span> <b><a href="Vala.TypeRegisterFunction.declaration_fragment.html" class="field">declaration_fragment</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../ccode/Vala.CCodeFragment.html" class="class">CCodeFragment</a></span> <b><a href="Vala.TypeRegisterFunction.definition_fragment.html" class="field">definition_fragment</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><span class="class">CCodeFragment</span></span> <b><a href="Vala.TypeRegisterFunction.definition_fragment.html" class="field">definition_fragment</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../ccode/Vala.CCodeFragment.html" class="class">CCodeFragment</a></span> <b><a href="Vala.TypeRegisterFunction.source_declaration_fragment.html" class="field">source_declaration_fragment</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

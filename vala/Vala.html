@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -134,6 +134,7 @@
           <li class="class"><a href="Vala.PostfixExpression.html">PostfixExpression</a></li>
           <li class="class"><a href="Vala.Property.html">Property</a></li>
           <li class="class"><a href="Vala.PropertyAccessor.html">PropertyAccessor</a></li>
+          <li class="class"><a href="Vala.PropertyPrototype.html">PropertyPrototype</a></li>
           <li class="class"><a href="Vala.RealLiteral.html">RealLiteral</a></li>
           <li class="class"><a href="Vala.ReferenceTransferExpression.html">ReferenceTransferExpression</a></li>
           <li class="abstract_class"><a href="Vala.ReferenceType.html">ReferenceType</a></li>
@@ -181,6 +182,16 @@
           <li class="class"><a href="Vala.WhileStatement.html">WhileStatement</a></li>
           <li class="class"><a href="Vala.YieldStatement.html">YieldStatement</a></li>
           <li class="struct"><a href="Vala.SourceLocation.html">SourceLocation</a></li>
+          <li class="constant"><a href="Vala.API_VERSION.html">API_VERSION</a></li>
+          <li class="constant"><a href="Vala.BUILD_VERSION.html">BUILD_VERSION</a></li>
+          <li class="constant"><a href="Vala.MAJOR_VERSION.html">MAJOR_VERSION</a></li>
+          <li class="constant"><a href="Vala.MICRO_VERSION.html">MICRO_VERSION</a></li>
+          <li class="constant"><a href="Vala.MINOR_VERSION.html">MINOR_VERSION</a></li>
+          <li class="method"><a href="Vala.check_version.html">check_version</a></li>
+          <li class="method"><a href="Vala.get_build_version.html">get_build_version</a></li>
+          <li class="method"><a href="Vala.get_major_version.html">get_major_version</a></li>
+          <li class="method"><a href="Vala.get_micro_version.html">get_micro_version</a></li>
+          <li class="method"><a href="Vala.get_minor_version.html">get_minor_version</a></li>
         </ul>
       </div>
       <div class="site_content">
@@ -202,264 +213,266 @@
         </ul>
         <h3 class="main_title">Classes:</h3>
         <ul class="navi_inline">
-          <li class="class"><a href="Vala.UsingDirective.html">UsingDirective</a> - <span class="brief_description">A reference to a namespace symbol.
-            </span></li>
-          <li class="class"><a href="Vala.PointerIndirection.html">PointerIndirection</a> - <span class="brief_description">Represents a pointer 
-              indirection in the source code, e.g. `*pointer`.</span></li>
-          <li class="class"><a href="Vala.Constant.html">Constant</a> - <span class="brief_description">Represents a type member with a constant 
-              value.</span></li>
-          <li class="class"><a href="Vala.SourceFile.html">SourceFile</a> - <span class="brief_description">Represents a Vala source or VAPI package 
-              file.</span></li>
-          <li class="class"><a href="Vala.UnaryExpression.html">UnaryExpression</a> - <span class="brief_description">Represents an expression with 
-              one operand in the source code.</span></li>
-          <li class="abstract_class"><a href="Vala.TypeSymbol.html">TypeSymbol</a> - <span class="brief_description">Represents a runtime data type. 
-              This data type may be defined in Vala source code or imported from an external library with a Vala API file.</span></li>
-          <li class="class"><a href="Vala.CastExpression.html">CastExpression</a> - <span class="brief_description">Represents a type cast in the 
-              source code.</span></li>
-          <li class="class"><a href="Vala.LambdaExpression.html">LambdaExpression</a> - <span class="brief_description">Represents a lambda expression
-              in the source code. Lambda expressions are anonymous methods with implicitly typed parameters.</span></li>
-          <li class="class"><a href="Vala.BooleanLiteral.html">BooleanLiteral</a> - <span class="brief_description">Represents a literal boolean, i.e.
-              true or false.</span></li>
+          <li class="class"><a href="Vala.AddressofExpression.html">AddressofExpression</a> - <span class="brief_description">Represents an address-of
+              expression in the source code, e.g. `&amp;foo`.</span></li>
+          <li class="class"><a href="Vala.ArrayCopyMethod.html">ArrayCopyMethod</a> - <span class="brief_description">Represents the Array.copy 
+              method.</span></li>
           <li class="class"><a href="Vala.ArrayCreationExpression.html">ArrayCreationExpression</a> - <span class="brief_description">Represents an 
               array creation expression e.g. <pre class="main_source"><code> <span class="main_keyword">new</span> <span class="main_basic_type">int</span>[] {<span class="main_literal">1</span>,<span class="main_literal">2</span>,<span class="main_literal">3</span>} </code></pre>
               .</span></li>
-          <li class="abstract_class"><a href="Vala.ReferenceType.html">ReferenceType</a> - <span class="brief_description">A reference type, i.e. a 
-              class, interface, or array type.</span></li>
-          <li class="class"><a href="Vala.ArrayCopyMethod.html">ArrayCopyMethod</a> - <span class="brief_description">Represents the Array.copy 
-              method.</span></li>
-          <li class="class"><a href="Vala.WhileStatement.html">WhileStatement</a> - <span class="brief_description">Represents a while iteration 
-              statement in the source code.</span></li>
-          <li class="class"><a href="Vala.MemberAccess.html">MemberAccess</a> - <span class="brief_description">Represents an access to a type member 
-              in the source code.</span></li>
-          <li class="class"><a href="Vala.NullLiteral.html">NullLiteral</a> - <span class="brief_description">Represents a literal `null` in the 
-              source code.</span></li>
-          <li class="class"><a href="Vala.DoStatement.html">DoStatement</a> - <span class="brief_description">Represents a do iteration statement in 
-              the source code.</span></li>
+          <li class="class"><a href="Vala.ArrayLengthField.html">ArrayLengthField</a> - <span class="brief_description">Represents the Array.length 
+              field.</span></li>
           <li class="class"><a href="Vala.ArrayMoveMethod.html">ArrayMoveMethod</a> - <span class="brief_description">Represents the Array.move 
               method.</span></li>
-          <li class="class"><a href="Vala.TypeofExpression.html">TypeofExpression</a> - <span class="brief_description">Represents a typeof expression
+          <li class="class"><a href="Vala.ArrayResizeMethod.html">ArrayResizeMethod</a> - <span class="brief_description">Represents the Array.resize 
+              method.</span></li>
+          <li class="class"><a href="Vala.ArrayType.html">ArrayType</a> - <span class="brief_description">An array type.</span></li>
+          <li class="class"><a href="Vala.Assignment.html">Assignment</a> - <span class="brief_description">Represents an assignment expression in the
+              source code.</span></li>
+          <li class="class"><a href="Vala.Attribute.html">Attribute</a> - <span class="brief_description">Represents an attribute specified in the 
+              source code.</span></li>
+          <li class="class"><a href="Vala.AttributeCache.html">AttributeCache</a></li>
+          <li class="class"><a href="Vala.BaseAccess.html">BaseAccess</a> - <span class="brief_description">Represents an access to base class members
               in the source code.</span></li>
-          <li class="class"><a href="Vala.Scanner.html">Scanner</a> - <span class="brief_description">Lexical scanner for Vala source files.</span>
-          </li>
+          <li class="class"><a href="Vala.BasicBlock.html">BasicBlock</a> - <span class="brief_description">Represents a basic block, i.e. a straight-
+              line piece of code without any jumps or jump targets.</span></li>
           <li class="class"><a href="Vala.BinaryExpression.html">BinaryExpression</a> - <span class="brief_description">Represents an expression with 
               two operands in the source code.</span></li>
-          <li class="class"><a href="Vala.SwitchStatement.html">SwitchStatement</a> - <span class="brief_description">Represents a switch selection 
-              statement in the source code.</span></li>
-          <li class="class"><a href="Vala.ErrorDomain.html">ErrorDomain</a> - <span class="brief_description">Represents an error domain declaration 
-              in the source code.</span></li>
-          <li class="class"><a href="Vala.DeleteStatement.html">DeleteStatement</a> - <span class="brief_description">Represents a delete statement 
-              e.g. "delete a".</span></li>
-          <li class="class"><a href="Vala.GenericType.html">GenericType</a> - <span class="brief_description">The type of a generic type parameter.
-            </span></li>
-          <li class="abstract_class"><a href="Vala.ValueType.html">ValueType</a> - <span class="brief_description">A value type, i.e. a struct or an 
-              enum type.</span></li>
-          <li class="class"><a href="Vala.RealLiteral.html">RealLiteral</a> - <span class="brief_description">Represents a real literal in the source 
-              code.</span></li>
-          <li class="class"><a href="Vala.Property.html">Property</a> - <span class="brief_description">Represents a property declaration in the 
+          <li class="class"><a href="Vala.Block.html">Block</a> - <span class="brief_description">Represents a source code block.</span></li>
+          <li class="class"><a href="Vala.BooleanLiteral.html">BooleanLiteral</a> - <span class="brief_description">Represents a literal boolean, i.e.
+              true or false.</span></li>
+          <li class="class"><a href="Vala.BooleanType.html">BooleanType</a> - <span class="brief_description">A boolean type.</span></li>
+          <li class="class"><a href="Vala.BreakStatement.html">BreakStatement</a> - <span class="brief_description">Represents a break statement in 
+              the source code.</span></li>
+          <li class="abstract_class"><a href="Vala.CallableType.html">CallableType</a> - <span class="brief_description">A callable type, i.e. a 
+              delegate, method, or signal type.</span></li>
+          <li class="class"><a href="Vala.CastExpression.html">CastExpression</a> - <span class="brief_description">Represents a type cast in the 
               source code.</span></li>
-          <li class="class"><a href="Vala.FloatingType.html">FloatingType</a> - <span class="brief_description">A floating-point type.</span></li>
-          <li class="class"><a href="Vala.DynamicMethod.html">DynamicMethod</a> - <span class="brief_description">Represents a late bound method.
+          <li class="class"><a href="Vala.CatchClause.html">CatchClause</a> - <span class="brief_description">Represents a catch clause in a try 
+              statement in the source code.</span></li>
+          <li class="class"><a href="Vala.CharacterLiteral.html">CharacterLiteral</a> - <span class="brief_description">Represents a single literal 
+              character.</span></li>
+          <li class="class"><a href="Vala.Class.html">Class</a> - <span class="brief_description">Represents a class declaration in the source code.
             </span></li>
-          <li class="class"><a href="Vala.UnresolvedSymbol.html">UnresolvedSymbol</a> - <span class="brief_description">An unresolved reference to a 
-              symbol.</span></li>
+          <li class="class"><a href="Vala.ClassType.html">ClassType</a> - <span class="brief_description">A class type.</span></li>
+          <li class="class"><a href="Vala.CodeContext.html">CodeContext</a> - <span class="brief_description">The root of the code tree.</span></li>
+          <li class="abstract_class"><a href="Vala.CodeGenerator.html">CodeGenerator</a> - <span class="brief_description">Abstract code visitor 
+              generating code.</span></li>
+          <li class="abstract_class"><a href="Vala.CodeNode.html">CodeNode</a> - <span class="brief_description">Represents a part of the parsed 
+              source code.</span></li>
+          <li class="abstract_class"><a href="Vala.CodeVisitor.html">CodeVisitor</a> - <span class="brief_description">Abstract code node visitor for 
+              traversing source code tree.</span></li>
+          <li class="class"><a href="Vala.CodeWriter.html">CodeWriter</a> - <span class="brief_description">Code visitor generating Vala API file for 
+              the public interface.</span></li>
+          <li class="class"><a href="Vala.Comment.html">Comment</a> - <span class="brief_description">A documentation comment used by valadoc</span>
+          </li>
           <li class="class"><a href="Vala.ConditionalExpression.html">ConditionalExpression</a> - <span class="brief_description">Represents a 
               conditional expression in the source code.</span></li>
+          <li class="class"><a href="Vala.Constant.html">Constant</a> - <span class="brief_description">Represents a type member with a constant 
+              value.</span></li>
+          <li class="class"><a href="Vala.Constructor.html">Constructor</a> - <span class="brief_description">Represents a class or instance 
+              constructor.</span></li>
+          <li class="class"><a href="Vala.ContinueStatement.html">ContinueStatement</a> - <span class="brief_description">Represents a continue 
+              statement in the source code.</span></li>
+          <li class="class"><a href="Vala.CreationMethod.html">CreationMethod</a> - <span class="brief_description">Represents a type creation method.
+            </span></li>
+          <li class="abstract_class"><a href="Vala.DataType.html">DataType</a> - <span class="brief_description">A reference to a data type. This is 
+              used to specify static types of expressions.</span></li>
+          <li class="class"><a href="Vala.DeclarationStatement.html">DeclarationStatement</a> - <span class="brief_description">Represents a local 
+              variable or constant declaration statement in the source code.</span></li>
+          <li class="class"><a href="Vala.Delegate.html">Delegate</a> - <span class="brief_description">Represents a function callback type.</span>
+          </li>
+          <li class="class"><a href="Vala.DelegateType.html">DelegateType</a> - <span class="brief_description">The type of an instance of a delegate.
+            </span></li>
+          <li class="class"><a href="Vala.DeleteStatement.html">DeleteStatement</a> - <span class="brief_description">Represents a delete statement 
+              e.g. "delete a".</span></li>
+          <li class="class"><a href="Vala.Destructor.html">Destructor</a> - <span class="brief_description">Represents a class or instance destructor.
+            </span></li>
+          <li class="class"><a href="Vala.DoStatement.html">DoStatement</a> - <span class="brief_description">Represents a do iteration statement in 
+              the source code.</span></li>
+          <li class="class"><a href="Vala.DynamicMethod.html">DynamicMethod</a> - <span class="brief_description">Represents a late bound method.
+            </span></li>
+          <li class="class"><a href="Vala.DynamicProperty.html">DynamicProperty</a> - <span class="brief_description">Represents a late bound 
+              property.</span></li>
+          <li class="class"><a href="Vala.DynamicSignal.html">DynamicSignal</a> - <span class="brief_description">Represents a late bound signal.
+            </span></li>
+          <li class="class"><a href="Vala.ElementAccess.html">ElementAccess</a> - <span class="brief_description">Represents an array access 
+              expression e.g. "a[1,2]".</span></li>
+          <li class="class"><a href="Vala.EmptyStatement.html">EmptyStatement</a> - <span class="brief_description">An empty statement.</span></li>
+          <li class="class"><a href="Vala.Enum.html">Enum</a> - <span class="brief_description">Represents an enum declaration in the source code.
+            </span></li>
+          <li class="class"><a href="Vala.EnumValue.html">EnumValue</a> - <span class="brief_description">Represents an enum member in the source 
+              code.</span></li>
+          <li class="class"><a href="Vala.EnumValueType.html">EnumValueType</a> - <span class="brief_description">An enum value type.</span></li>
+          <li class="class"><a href="Vala.ErrorCode.html">ErrorCode</a> - <span class="brief_description">Represents an enum member in the source 
+              code.</span></li>
+          <li class="class"><a href="Vala.ErrorDomain.html">ErrorDomain</a> - <span class="brief_description">Represents an error domain declaration 
+              in the source code.</span></li>
+          <li class="class"><a href="Vala.ErrorType.html">ErrorType</a> - <span class="brief_description">A class type.</span></li>
+          <li class="abstract_class"><a href="Vala.Expression.html">Expression</a> - <span class="brief_description">Base class for all code nodes 
+              that might be used as an expression.</span></li>
+          <li class="class"><a href="Vala.ExpressionStatement.html">ExpressionStatement</a> - <span class="brief_description">A code statement that 
+              evaluates a given expression. The value computed by the expression, if any, is discarded.</span></li>
+          <li class="class"><a href="Vala.Field.html">Field</a> - <span class="brief_description">Represents a type or namespace field.</span></li>
+          <li class="class"><a href="Vala.FieldPrototype.html">FieldPrototype</a> - <span class="brief_description">A reference to an instance field 
+              without a specific instance.</span></li>
+          <li class="class"><a href="Vala.FloatingType.html">FloatingType</a> - <span class="brief_description">A floating-point type.</span></li>
+          <li class="class"><a href="Vala.FlowAnalyzer.html">FlowAnalyzer</a> - <span class="brief_description">Code visitor building the control flow
+              graph.</span></li>
+          <li class="class"><a href="Vala.ForStatement.html">ForStatement</a> - <span class="brief_description">Represents a for iteration statement 
+              in the source code.</span></li>
+          <li class="class"><a href="Vala.ForeachStatement.html">ForeachStatement</a> - <span class="brief_description">Represents a foreach statement
+              in the source code. Foreach statements iterate over the elements of a collection.</span></li>
+          <li class="class"><a href="Vala.GenericType.html">GenericType</a> - <span class="brief_description">The type of a generic type parameter.
+            </span></li>
+          <li class="class"><a href="Vala.GirComment.html">GirComment</a> - <span class="brief_description">A documentation comment used by valadoc
+            </span></li>
+          <li class="class"><a href="Vala.GirParser.html">GirParser</a> - <span class="brief_description">Code visitor parsing all GIR source files.
+            </span></li>
+          <li class="class"><a href="Vala.IfStatement.html">IfStatement</a> - <span class="brief_description">Represents an if selection statement in 
+              the source code.</span></li>
+          <li class="class"><a href="Vala.InitializerList.html">InitializerList</a> - <span class="brief_description">Represents an array or struct 
+              initializer list in the source code.</span></li>
+          <li class="class"><a href="Vala.IntegerLiteral.html">IntegerLiteral</a> - <span class="brief_description">Represents an integer literal in 
+              the source code.</span></li>
+          <li class="class"><a href="Vala.IntegerType.html">IntegerType</a> - <span class="brief_description">An integer type.</span></li>
+          <li class="class"><a href="Vala.Interface.html">Interface</a> - <span class="brief_description">Represents a class declaration in the source
+              code.</span></li>
+          <li class="class"><a href="Vala.InterfaceType.html">InterfaceType</a> - <span class="brief_description">An interface type.</span></li>
+          <li class="class"><a href="Vala.InvalidType.html">InvalidType</a> - <span class="brief_description">An invalid reference to a data type.
+            </span></li>
+          <li class="class"><a href="Vala.LambdaExpression.html">LambdaExpression</a> - <span class="brief_description">Represents a lambda expression
+              in the source code. Lambda expressions are anonymous methods with implicitly typed parameters.</span></li>
+          <li class="abstract_class"><a href="Vala.Literal.html">Literal</a> - <span class="brief_description">Base class for all literals in the 
+              source code.</span></li>
+          <li class="class"><a href="Vala.LocalVariable.html">LocalVariable</a> - <span class="brief_description">Represents a local variable 
+              declaration in the source code.</span></li>
+          <li class="class"><a href="Vala.LockStatement.html">LockStatement</a> - <span class="brief_description">Represents a lock statement e.g. <pre class="main_source"><code> <span class="main_keyword">lock</span> (a); </code></pre>
+               or <pre class="main_source"><code> <span class="main_keyword">lock</span> (a) { f(a); } </code></pre>.</span></li>
+          <li class="class"><a href="Vala.Loop.html">Loop</a> - <span class="brief_description">Represents an endless loop.</span></li>
+          <li class="class"><a href="Vala.MarkupReader.html">MarkupReader</a> - <span class="brief_description">Simple reader for a subset of XML.
+            </span></li>
+          <li class="class"><a href="Vala.MemberAccess.html">MemberAccess</a> - <span class="brief_description">Represents an access to a type member 
+              in the source code.</span></li>
+          <li class="class"><a href="Vala.MemberInitializer.html">MemberInitializer</a> - <span class="brief_description">Represents a member 
+              initializer, i.e. an element of an object initializer, in the source code.</span></li>
+          <li class="class"><a href="Vala.Method.html">Method</a> - <span class="brief_description">Represents a type or namespace method.</span></li>
+          <li class="class"><a href="Vala.MethodCall.html">MethodCall</a> - <span class="brief_description">Represents an invocation expression in the
+              source code.</span></li>
+          <li class="class"><a href="Vala.MethodType.html">MethodType</a> - <span class="brief_description">The type of a method referencea.</span>
+          </li>
+          <li class="class"><a href="Vala.NamedArgument.html">NamedArgument</a></li>
+          <li class="class"><a href="Vala.Namespace.html">Namespace</a> - <span class="brief_description">Represents a namespace declaration in the 
+              source code.</span></li>
+          <li class="class"><a href="Vala.NullLiteral.html">NullLiteral</a> - <span class="brief_description">Represents a literal `null` in the 
+              source code.</span></li>
+          <li class="class"><a href="Vala.NullType.html">NullType</a> - <span class="brief_description">The type of the null literal.</span></li>
+          <li class="class"><a href="Vala.ObjectCreationExpression.html">ObjectCreationExpression</a> - <span class="brief_description">Represents an 
+              object creation expression in the source code.</span></li>
+          <li class="class"><a href="Vala.ObjectType.html">ObjectType</a> - <span class="brief_description">A class type.</span></li>
+          <li class="abstract_class"><a href="Vala.ObjectTypeSymbol.html">ObjectTypeSymbol</a> - <span class="brief_description">Represents a runtime 
+              data type for objects and interfaces. This data type may be defined in Vala source code or imported from an external library with a Vala
+              API file.</span></li>
+          <li class="class"><a href="Vala.Parameter.html">Parameter</a> - <span class="brief_description">Represents a formal parameter in method and 
+              callback signatures.</span></li>
+          <li class="class"><a href="Vala.Parser.html">Parser</a> - <span class="brief_description">Code visitor parsing all Vala source files.</span>
+          </li>
+          <li class="class"><a href="Vala.PhiFunction.html">PhiFunction</a></li>
+          <li class="class"><a href="Vala.PointerIndirection.html">PointerIndirection</a> - <span class="brief_description">Represents a pointer 
+              indirection in the source code, e.g. `*pointer`.</span></li>
+          <li class="class"><a href="Vala.PointerType.html">PointerType</a> - <span class="brief_description">A pointer type.</span></li>
+          <li class="class"><a href="Vala.PostfixExpression.html">PostfixExpression</a> - <span class="brief_description">Represents a postfix 
+              increment or decrement expression.</span></li>
+          <li class="class"><a href="Vala.Property.html">Property</a> - <span class="brief_description">Represents a property declaration in the 
+              source code.</span></li>
+          <li class="class"><a href="Vala.PropertyAccessor.html">PropertyAccessor</a> - <span class="brief_description">Represents a get or set 
+              accessor of a property in the source code.</span></li>
+          <li class="class"><a href="Vala.PropertyPrototype.html">PropertyPrototype</a> - <span class="brief_description">A reference to an instance 
+              property without a specific instance.</span></li>
+          <li class="class"><a href="Vala.RealLiteral.html">RealLiteral</a> - <span class="brief_description">Represents a real literal in the source 
+              code.</span></li>
+          <li class="class"><a href="Vala.ReferenceTransferExpression.html">ReferenceTransferExpression</a> - <span class="brief_description">
+              Represents a reference transfer expression in the source code, e.g. `#foo`.</span></li>
+          <li class="abstract_class"><a href="Vala.ReferenceType.html">ReferenceType</a> - <span class="brief_description">A reference type, i.e. a 
+              class, interface, or array type.</span></li>
+          <li class="class"><a href="Vala.RegexLiteral.html">RegexLiteral</a> - <span class="brief_description">Represents a regular expression 
+              literal in the source code.</span></li>
           <li class="class"><a href="Vala.Report.html">Report</a> - <span class="brief_description">Namespace to centralize reporting warnings and 
               errors.</span></li>
           <li class="class"><a href="Vala.ReturnStatement.html">ReturnStatement</a> - <span class="brief_description">Represents a return statement in
               the source code.</span></li>
-          <li class="class"><a href="Vala.NullType.html">NullType</a> - <span class="brief_description">The type of the null literal.</span></li>
-          <li class="class"><a href="Vala.StructValueType.html">StructValueType</a> - <span class="brief_description">A struct value type.</span></li>
-          <li class="class"><a href="Vala.ExpressionStatement.html">ExpressionStatement</a> - <span class="brief_description">A code statement that 
-              evaluates a given expression. The value computed by the expression, if any, is discarded.</span></li>
-          <li class="class"><a href="Vala.TryStatement.html">TryStatement</a> - <span class="brief_description">Represents a try statement in the 
-              source code.</span></li>
+          <li class="class"><a href="Vala.Scanner.html">Scanner</a> - <span class="brief_description">Lexical scanner for Vala source files.</span>
+          </li>
+          <li class="class"><a href="Vala.Scope.html">Scope</a> - <span class="brief_description">Represents a part of the symbol tree.</span></li>
+          <li class="class"><a href="Vala.SemanticAnalyzer.html">SemanticAnalyzer</a> - <span class="brief_description">Code visitor analyzing and 
+              checking code.</span></li>
+          <li class="class"><a href="Vala.Signal.html">Signal</a> - <span class="brief_description">Represents an object signal. Signals enable 
+              objects to provide notifications.</span></li>
+          <li class="class"><a href="Vala.SignalType.html">SignalType</a> - <span class="brief_description">The type of a signal referencea.</span>
+          </li>
+          <li class="class"><a href="Vala.SizeofExpression.html">SizeofExpression</a> - <span class="brief_description">Represents a sizeof expression
+              in the source code.</span></li>
+          <li class="class"><a href="Vala.SliceExpression.html">SliceExpression</a> - <span class="brief_description">Represents an array slice 
+              expression e.g "a[1:5]".</span></li>
+          <li class="class"><a href="Vala.SourceFile.html">SourceFile</a> - <span class="brief_description">Represents a Vala source or VAPI package 
+              file.</span></li>
+          <li class="class"><a href="Vala.SourceReference.html">SourceReference</a> - <span class="brief_description">Represents a reference to a 
+              location in a source file.</span></li>
+          <li class="class"><a href="Vala.StatementList.html">StatementList</a></li>
           <li class="class"><a href="Vala.StringLiteral.html">StringLiteral</a> - <span class="brief_description">Represents a string literal in the 
               source code.</span></li>
-          <li class="class"><a href="Vala.Method.html">Method</a> - <span class="brief_description">Represents a type or namespace method.</span></li>
-          <li class="class"><a href="Vala.TypeCheck.html">TypeCheck</a> - <span class="brief_description">Represents a type check (`is`) expression in
-              the source code.</span></li>
-          <li class="class"><a href="Vala.InvalidType.html">InvalidType</a> - <span class="brief_description">An invalid reference to a data type.
-            </span></li>
-          <li class="abstract_class"><a href="Vala.CodeNode.html">CodeNode</a> - <span class="brief_description">Represents a part of the parsed 
+          <li class="class"><a href="Vala.Struct.html">Struct</a> - <span class="brief_description">Represents a struct declaration in the source 
+              code.</span></li>
+          <li class="class"><a href="Vala.StructValueType.html">StructValueType</a> - <span class="brief_description">A struct value type.</span></li>
+          <li class="abstract_class"><a href="Vala.Subroutine.html">Subroutine</a></li>
+          <li class="class"><a href="Vala.SwitchLabel.html">SwitchLabel</a> - <span class="brief_description">Represents a switch label in the source 
+              code.</span></li>
+          <li class="class"><a href="Vala.SwitchSection.html">SwitchSection</a> - <span class="brief_description">Represents a switch section in the 
               source code.</span></li>
-          <li class="class"><a href="Vala.AttributeCache.html">AttributeCache</a></li>
+          <li class="class"><a href="Vala.SwitchStatement.html">SwitchStatement</a> - <span class="brief_description">Represents a switch selection 
+              statement in the source code.</span></li>
+          <li class="abstract_class"><a href="Vala.Symbol.html">Symbol</a> - <span class="brief_description">Represents a node in the symbol tree.
+            </span></li>
           <li class="class"><a href="Vala.SymbolResolver.html">SymbolResolver</a> - <span class="brief_description">Code visitor resolving symbol 
               names.</span></li>
-          <li class="class"><a href="Vala.CatchClause.html">CatchClause</a> - <span class="brief_description">Represents a catch clause in a try 
+          <li class="abstract_class"><a href="Vala.TargetValue.html">TargetValue</a></li>
+          <li class="class"><a href="Vala.Template.html">Template</a></li>
+          <li class="class"><a href="Vala.ThrowStatement.html">ThrowStatement</a> - <span class="brief_description">Represents a throw statement in 
+              the source code.</span></li>
+          <li class="class"><a href="Vala.TryStatement.html">TryStatement</a> - <span class="brief_description">Represents a try statement in the 
+              source code.</span></li>
+          <li class="class"><a href="Vala.Tuple.html">Tuple</a> - <span class="brief_description">Represents a fixed-length sequence of expressions in
+              the source code.</span></li>
+          <li class="class"><a href="Vala.TypeCheck.html">TypeCheck</a> - <span class="brief_description">Represents a type check (`is`) expression in
+              the source code.</span></li>
+          <li class="class"><a href="Vala.TypeParameter.html">TypeParameter</a> - <span class="brief_description">Represents a generic type parameter 
+              in the source code.</span></li>
+          <li class="abstract_class"><a href="Vala.TypeSymbol.html">TypeSymbol</a> - <span class="brief_description">Represents a runtime data type. 
+              This data type may be defined in Vala source code or imported from an external library with a Vala API file.</span></li>
+          <li class="class"><a href="Vala.TypeofExpression.html">TypeofExpression</a> - <span class="brief_description">Represents a typeof expression
+              in the source code.</span></li>
+          <li class="class"><a href="Vala.UnaryExpression.html">UnaryExpression</a> - <span class="brief_description">Represents an expression with 
+              one operand in the source code.</span></li>
+          <li class="class"><a href="Vala.UnlockStatement.html">UnlockStatement</a> - <span class="brief_description">Represents an unlock statement 
+              e.g. <pre class="main_source"><code> <span class="main_keyword">unlock</span> (a); </code></pre>.</span></li>
+          <li class="class"><a href="Vala.UnresolvedSymbol.html">UnresolvedSymbol</a> - <span class="brief_description">An unresolved reference to a 
+              symbol.</span></li>
+          <li class="class"><a href="Vala.UnresolvedType.html">UnresolvedType</a> - <span class="brief_description">An unresolved reference to a data 
+              type.</span></li>
+          <li class="class"><a href="Vala.UsedAttr.html">UsedAttr</a> - <span class="brief_description">Code visitor to warn about unused attributes
+            </span></li>
+          <li class="class"><a href="Vala.UsingDirective.html">UsingDirective</a> - <span class="brief_description">A reference to a namespace symbol.
+            </span></li>
+          <li class="abstract_class"><a href="Vala.ValueType.html">ValueType</a> - <span class="brief_description">A value type, i.e. a struct or an 
+              enum type.</span></li>
+          <li class="class"><a href="Vala.Variable.html">Variable</a></li>
+          <li class="class"><a href="Vala.VersionAttribute.html">VersionAttribute</a> - <span class="brief_description">Represents a [Version] 
+              attribute</span></li>
+          <li class="class"><a href="Vala.VoidType.html">VoidType</a> - <span class="brief_description">The void type.</span></li>
+          <li class="class"><a href="Vala.WhileStatement.html">WhileStatement</a> - <span class="brief_description">Represents a while iteration 
               statement in the source code.</span></li>
           <li class="class"><a href="Vala.YieldStatement.html">YieldStatement</a> - <span class="brief_description">Represents a yield statement in 
               the source code.</span></li>
-          <li class="abstract_class"><a href="Vala.Symbol.html">Symbol</a> - <span class="brief_description">Represents a node in the symbol tree.
-            </span></li>
-          <li class="class"><a href="Vala.CodeWriter.html">CodeWriter</a> - <span class="brief_description">Code visitor generating Vala API file for 
-              the public interface.</span></li>
-          <li class="abstract_class"><a href="Vala.TargetValue.html">TargetValue</a></li>
-          <li class="class"><a href="Vala.ForStatement.html">ForStatement</a> - <span class="brief_description">Represents a for iteration statement 
-              in the source code.</span></li>
-          <li class="class"><a href="Vala.BreakStatement.html">BreakStatement</a> - <span class="brief_description">Represents a break statement in 
-              the source code.</span></li>
-          <li class="class"><a href="Vala.SwitchSection.html">SwitchSection</a> - <span class="brief_description">Represents a switch section in the 
-              source code.</span></li>
-          <li class="class"><a href="Vala.InitializerList.html">InitializerList</a> - <span class="brief_description">Represents an array or struct 
-              initializer list in the source code.</span></li>
-          <li class="class"><a href="Vala.SliceExpression.html">SliceExpression</a> - <span class="brief_description">Represents an array slice 
-              expression e.g "a[1:5]".</span></li>
-          <li class="class"><a href="Vala.PointerType.html">PointerType</a> - <span class="brief_description">A pointer type.</span></li>
-          <li class="class"><a href="Vala.DynamicSignal.html">DynamicSignal</a> - <span class="brief_description">Represents a late bound signal.
-            </span></li>
-          <li class="class"><a href="Vala.DynamicProperty.html">DynamicProperty</a> - <span class="brief_description">Represents a late bound 
-              property.</span></li>
-          <li class="class"><a href="Vala.FieldPrototype.html">FieldPrototype</a> - <span class="brief_description">A reference to an instance field 
-              without a specific instance.</span></li>
-          <li class="class"><a href="Vala.ContinueStatement.html">ContinueStatement</a> - <span class="brief_description">Represents a continue 
-              statement in the source code.</span></li>
-          <li class="class"><a href="Vala.MemberInitializer.html">MemberInitializer</a> - <span class="brief_description">Represents a member 
-              initializer, i.e. an element of an object initializer, in the source code.</span></li>
-          <li class="class"><a href="Vala.ObjectCreationExpression.html">ObjectCreationExpression</a> - <span class="brief_description">Represents an 
-              object creation expression in the source code.</span></li>
-          <li class="abstract_class"><a href="Vala.Literal.html">Literal</a> - <span class="brief_description">Base class for all literals in the 
-              source code.</span></li>
-          <li class="class"><a href="Vala.CreationMethod.html">CreationMethod</a> - <span class="brief_description">Represents a type creation method.
-            </span></li>
-          <li class="class"><a href="Vala.MarkupReader.html">MarkupReader</a> - <span class="brief_description">Simple reader for a subset of XML.
-            </span></li>
-          <li class="class"><a href="Vala.ElementAccess.html">ElementAccess</a> - <span class="brief_description">Represents an array access 
-              expression e.g. "a[1,2]".</span></li>
-          <li class="class"><a href="Vala.Variable.html">Variable</a></li>
-          <li class="class"><a href="Vala.Tuple.html">Tuple</a> - <span class="brief_description">Represents a fixed-length sequence of expressions in
-              the source code.</span></li>
-          <li class="abstract_class"><a href="Vala.CodeGenerator.html">CodeGenerator</a> - <span class="brief_description">Abstract code visitor 
-              generating code.</span></li>
-          <li class="class"><a href="Vala.DelegateType.html">DelegateType</a> - <span class="brief_description">The type of an instance of a delegate.
-            </span></li>
-          <li class="class"><a href="Vala.Comment.html">Comment</a> - <span class="brief_description">A documentation comment used by valadoc</span>
-          </li>
-          <li class="abstract_class"><a href="Vala.CallableType.html">CallableType</a> - <span class="brief_description">A callable type, i.e. a 
-              delegate, method, or signal type.</span></li>
-          <li class="class"><a href="Vala.InterfaceType.html">InterfaceType</a> - <span class="brief_description">An interface type.</span></li>
-          <li class="class"><a href="Vala.PostfixExpression.html">PostfixExpression</a> - <span class="brief_description">Represents a postfix 
-              increment or decrement expression.</span></li>
-          <li class="class"><a href="Vala.LocalVariable.html">LocalVariable</a> - <span class="brief_description">Represents a local variable 
-              declaration in the source code.</span></li>
-          <li class="class"><a href="Vala.Template.html">Template</a></li>
-          <li class="class"><a href="Vala.Signal.html">Signal</a> - <span class="brief_description">Represents an object signal. Signals enable 
-              objects to provide notifications.</span></li>
-          <li class="class"><a href="Vala.Assignment.html">Assignment</a> - <span class="brief_description">Represents an assignment expression in the
-              source code.</span></li>
-          <li class="class"><a href="Vala.PropertyAccessor.html">PropertyAccessor</a> - <span class="brief_description">Represents a get or set 
-              accessor of a property in the source code.</span></li>
-          <li class="class"><a href="Vala.UsedAttr.html">UsedAttr</a> - <span class="brief_description">Code visitor to warn about unused attributes
-            </span></li>
-          <li class="class"><a href="Vala.AddressofExpression.html">AddressofExpression</a> - <span class="brief_description">Represents an address-of
-              expression in the source code, e.g. `&amp;foo`.</span></li>
-          <li class="abstract_class"><a href="Vala.DataType.html">DataType</a> - <span class="brief_description">A reference to a data type. This is 
-              used to specify static types of expressions.</span></li>
-          <li class="abstract_class"><a href="Vala.Expression.html">Expression</a> - <span class="brief_description">Base class for all code nodes 
-              that might be used as an expression.</span></li>
-          <li class="class"><a href="Vala.SwitchLabel.html">SwitchLabel</a> - <span class="brief_description">Represents a switch label in the source 
-              code.</span></li>
-          <li class="class"><a href="Vala.Parser.html">Parser</a> - <span class="brief_description">Code visitor parsing all Vala source files.</span>
-          </li>
-          <li class="class"><a href="Vala.TypeParameter.html">TypeParameter</a> - <span class="brief_description">Represents a generic type parameter 
-              in the source code.</span></li>
-          <li class="class"><a href="Vala.EmptyStatement.html">EmptyStatement</a> - <span class="brief_description">An empty statement.</span></li>
-          <li class="class"><a href="Vala.ErrorCode.html">ErrorCode</a> - <span class="brief_description">Represents an enum member in the source 
-              code.</span></li>
-          <li class="class"><a href="Vala.GirComment.html">GirComment</a> - <span class="brief_description">A documentation comment used by valadoc
-            </span></li>
-          <li class="class"><a href="Vala.FlowAnalyzer.html">FlowAnalyzer</a> - <span class="brief_description">Code visitor building the control flow
-              graph.</span></li>
-          <li class="class"><a href="Vala.EnumValue.html">EnumValue</a> - <span class="brief_description">Represents an enum member in the source 
-              code.</span></li>
-          <li class="class"><a href="Vala.ClassType.html">ClassType</a> - <span class="brief_description">A class type.</span></li>
-          <li class="class"><a href="Vala.SourceReference.html">SourceReference</a> - <span class="brief_description">Represents a reference to a 
-              location in a source file.</span></li>
-          <li class="class"><a href="Vala.EnumValueType.html">EnumValueType</a> - <span class="brief_description">An enum value type.</span></li>
-          <li class="class"><a href="Vala.Struct.html">Struct</a> - <span class="brief_description">Represents a struct declaration in the source 
-              code.</span></li>
-          <li class="class"><a href="Vala.IfStatement.html">IfStatement</a> - <span class="brief_description">Represents an if selection statement in 
-              the source code.</span></li>
-          <li class="class"><a href="Vala.PhiFunction.html">PhiFunction</a></li>
-          <li class="class"><a href="Vala.UnlockStatement.html">UnlockStatement</a> - <span class="brief_description">Represents an unlock statement 
-              e.g. <pre class="main_source"><code> unlock (a); </code></pre>.</span></li>
-          <li class="class"><a href="Vala.SemanticAnalyzer.html">SemanticAnalyzer</a> - <span class="brief_description">Code visitor analyzing and 
-              checking code.</span></li>
-          <li class="class"><a href="Vala.CharacterLiteral.html">CharacterLiteral</a> - <span class="brief_description">Represents a single literal 
-              character.</span></li>
-          <li class="class"><a href="Vala.ThrowStatement.html">ThrowStatement</a> - <span class="brief_description">Represents a throw statement in 
-              the source code.</span></li>
-          <li class="class"><a href="Vala.ObjectType.html">ObjectType</a> - <span class="brief_description">A class type.</span></li>
-          <li class="class"><a href="Vala.UnresolvedType.html">UnresolvedType</a> - <span class="brief_description">An unresolved reference to a data 
-              type.</span></li>
-          <li class="class"><a href="Vala.Loop.html">Loop</a> - <span class="brief_description">Represents an endless loop.</span></li>
-          <li class="abstract_class"><a href="Vala.ObjectTypeSymbol.html">ObjectTypeSymbol</a> - <span class="brief_description">Represents a runtime 
-              data type for objects and interfaces. This data type may be defined in Vala source code or imported from an external library with a Vala
-              API file.</span></li>
-          <li class="abstract_class"><a href="Vala.CodeVisitor.html">CodeVisitor</a> - <span class="brief_description">Abstract code node visitor for 
-              traversing source code tree.</span></li>
-          <li class="class"><a href="Vala.Delegate.html">Delegate</a> - <span class="brief_description">Represents a function callback type.</span>
-          </li>
-          <li class="class"><a href="Vala.IntegerType.html">IntegerType</a> - <span class="brief_description">An integer type.</span></li>
-          <li class="class"><a href="Vala.Block.html">Block</a> - <span class="brief_description">Represents a source code block.</span></li>
-          <li class="class"><a href="Vala.Namespace.html">Namespace</a> - <span class="brief_description">Represents a namespace declaration in the 
-              source code.</span></li>
-          <li class="class"><a href="Vala.Field.html">Field</a> - <span class="brief_description">Represents a type or namespace field.</span></li>
-          <li class="class"><a href="Vala.Constructor.html">Constructor</a> - <span class="brief_description">Represents a class or instance 
-              constructor.</span></li>
-          <li class="class"><a href="Vala.Enum.html">Enum</a> - <span class="brief_description">Represents an enum declaration in the source code.
-            </span></li>
-          <li class="class"><a href="Vala.SizeofExpression.html">SizeofExpression</a> - <span class="brief_description">Represents a sizeof expression
-              in the source code.</span></li>
-          <li class="class"><a href="Vala.IntegerLiteral.html">IntegerLiteral</a> - <span class="brief_description">Represents an integer literal in 
-              the source code.</span></li>
-          <li class="class"><a href="Vala.ErrorType.html">ErrorType</a> - <span class="brief_description">A class type.</span></li>
-          <li class="class"><a href="Vala.VersionAttribute.html">VersionAttribute</a> - <span class="brief_description">Represents a [Version] 
-              attribute</span></li>
-          <li class="class"><a href="Vala.GirParser.html">GirParser</a> - <span class="brief_description">Code visitor parsing all GIR source files.
-            </span></li>
-          <li class="class"><a href="Vala.StatementList.html">StatementList</a></li>
-          <li class="class"><a href="Vala.ReferenceTransferExpression.html">ReferenceTransferExpression</a> - <span class="brief_description">
-              Represents a reference transfer expression in the source code, e.g. `#foo`.</span></li>
-          <li class="class"><a href="Vala.LockStatement.html">LockStatement</a> - <span class="brief_description">Represents a lock statement e.g. <pre class="main_source"><code> <span class="main_keyword">lock</span> (a); </code></pre>
-               or <pre class="main_source"><code> <span class="main_keyword">lock</span> (a) { f(a); } </code></pre>.</span></li>
-          <li class="class"><a href="Vala.ArrayLengthField.html">ArrayLengthField</a> - <span class="brief_description">Represents the Array.length 
-              field.</span></li>
-          <li class="class"><a href="Vala.Scope.html">Scope</a> - <span class="brief_description">Represents a part of the symbol tree.</span></li>
-          <li class="class"><a href="Vala.BaseAccess.html">BaseAccess</a> - <span class="brief_description">Represents an access to base class members
-              in the source code.</span></li>
-          <li class="class"><a href="Vala.ForeachStatement.html">ForeachStatement</a> - <span class="brief_description">Represents a foreach statement
-              in the source code. Foreach statements iterate over the elements of a collection.</span></li>
-          <li class="abstract_class"><a href="Vala.Subroutine.html">Subroutine</a></li>
-          <li class="class"><a href="Vala.BooleanType.html">BooleanType</a> - <span class="brief_description">A boolean type.</span></li>
-          <li class="class"><a href="Vala.RegexLiteral.html">RegexLiteral</a> - <span class="brief_description">Represents a regular expression 
-              literal in the source code.</span></li>
-          <li class="class"><a href="Vala.Parameter.html">Parameter</a> - <span class="brief_description">Represents a formal parameter in method and 
-              callback signatures.</span></li>
-          <li class="class"><a href="Vala.MethodCall.html">MethodCall</a> - <span class="brief_description">Represents an invocation expression in the
-              source code.</span></li>
-          <li class="class"><a href="Vala.Interface.html">Interface</a> - <span class="brief_description">Represents a class declaration in the source
-              code.</span></li>
-          <li class="class"><a href="Vala.ArrayResizeMethod.html">ArrayResizeMethod</a> - <span class="brief_description">Represents the Array.resize 
-              method.</span></li>
-          <li class="class"><a href="Vala.DeclarationStatement.html">DeclarationStatement</a> - <span class="brief_description">Represents a local 
-              variable or constant declaration statement in the source code.</span></li>
-          <li class="class"><a href="Vala.SignalType.html">SignalType</a> - <span class="brief_description">The type of a signal referencea.</span>
-          </li>
-          <li class="class"><a href="Vala.BasicBlock.html">BasicBlock</a> - <span class="brief_description">Represents a basic block, i.e. a straight-
-              line piece of code without any jumps or jump targets.</span></li>
-          <li class="class"><a href="Vala.MethodType.html">MethodType</a> - <span class="brief_description">The type of a method referencea.</span>
-          </li>
-          <li class="class"><a href="Vala.Attribute.html">Attribute</a> - <span class="brief_description">Represents an attribute specified in the 
-              source code.</span></li>
-          <li class="class"><a href="Vala.ArrayType.html">ArrayType</a> - <span class="brief_description">An array type.</span></li>
-          <li class="class"><a href="Vala.VoidType.html">VoidType</a> - <span class="brief_description">The void type.</span></li>
-          <li class="class"><a href="Vala.CodeContext.html">CodeContext</a> - <span class="brief_description">The root of the code tree.</span></li>
-          <li class="class"><a href="Vala.Class.html">Class</a> - <span class="brief_description">Represents a class declaration in the source code.
-            </span></li>
-          <li class="class"><a href="Vala.NamedArgument.html">NamedArgument</a></li>
-          <li class="class"><a href="Vala.Destructor.html">Destructor</a> - <span class="brief_description">Represents a class or instance destructor.
-            </span></li>
         </ul>
         <h3 class="main_title">Structs:</h3>
         <ul class="navi_inline">
@@ -468,25 +481,75 @@
         </ul>
         <h3 class="main_title">Enums:</h3>
         <ul class="navi_inline">
-          <li class="enum"><a href="Vala.SourceFileType.html">SourceFileType</a></li>
-          <li class="enum"><a href="Vala.UnaryOperator.html">UnaryOperator</a></li>
-          <li class="enum"><a href="Vala.Profile.html">Profile</a></li>
+          <li class="enum"><a href="Vala.AssignmentOperator.html">AssignmentOperator</a></li>
           <li class="enum"><a href="Vala.BinaryOperator.html">BinaryOperator</a></li>
-          <li class="enum"><a href="Vala.TokenType.html">TokenType</a></li>
-          <li class="enum"><a href="Vala.SymbolAccessibility.html">SymbolAccessibility</a></li>
-          <li class="enum"><a href="Vala.MemberBinding.html">MemberBinding</a></li>
           <li class="enum"><a href="Vala.CodeWriterType.html">CodeWriterType</a></li>
           <li class="enum"><a href="Vala.MarkupTokenType.html">MarkupTokenType</a></li>
-          <li class="enum"><a href="Vala.AssignmentOperator.html">AssignmentOperator</a></li>
+          <li class="enum"><a href="Vala.MemberBinding.html">MemberBinding</a></li>
           <li class="enum"><a href="Vala.ParameterDirection.html">ParameterDirection</a></li>
+          <li class="enum"><a href="Vala.Profile.html">Profile</a></li>
+          <li class="enum"><a href="Vala.SourceFileType.html">SourceFileType</a></li>
+          <li class="enum"><a href="Vala.SymbolAccessibility.html">SymbolAccessibility</a></li>
+          <li class="enum"><a href="Vala.TokenType.html">TokenType</a></li>
+          <li class="enum"><a href="Vala.UnaryOperator.html">UnaryOperator</a></li>
         </ul>
         <h3 class="main_title">Error domains:</h3>
         <ul class="navi_inline">
           <li class="errordomain"><a href="Vala.ParseError.html">ParseError</a></li>
         </ul>
+        <h3 class="main_title">Constants:</h3>
+        <ul class="navi_inline">
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.API_VERSION.html" class="constant">API_VERSION</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The API version string</span>
+            </div></li>
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.BUILD_VERSION.html" class="constant">BUILD_VERSION</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The full build-version string generated by the build-system</span>
+            </div></li>
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.MAJOR_VERSION.html" class="constant">MAJOR_VERSION</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Like get_major_version, but from the headers used at application 
+                compile time, rather than from the library linked against at application run time</span>
+            </div></li>
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.MICRO_VERSION.html" class="constant">MICRO_VERSION</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Like get_micro_version, but from the headers used at application 
+                compile time, rather than from the library linked against at application run time</span>
+            </div></li>
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.MINOR_VERSION.html" class="constant">MINOR_VERSION</a></b>
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Like get_minor_version, but from the headers used at application 
+                compile time, rather than from the library linked against at application run time</span>
+            </div></li>
+        </ul>
+        <h3 class="main_title">Functions:</h3>
+        <ul class="navi_inline">
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Vala.check_version.html" class="method">check_version</a></b> (<span class="main_basic_type"><a href="../glib-2.0/uint.html" class="struct">uint</a></span> required_major, <span class="main_basic_type"><a href="../glib-2.0/uint.html" class="struct">uint</a></span> required_minor, <span class="main_basic_type"><a href="../glib-2.0/uint.html" class="struct">uint</a></span> required_micro)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Checks that the vala library in use is compatible with the given 
+                version.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.get_build_version.html" class="method">get_build_version</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the full build-version string of the vala library.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/uint.html" class="struct">uint</a></span> <b><a href="Vala.get_major_version.html" class="method">get_major_version</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the major version number of the vala library.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/uint.html" class="struct">uint</a></span> <b><a href="Vala.get_micro_version.html" class="method">get_micro_version</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the micro version number of the vala library.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/uint.html" class="struct">uint</a></span> <b><a href="Vala.get_minor_version.html" class="method">get_minor_version</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the minor version number of the vala library.</span>
+            </div></li>
+        </ul>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8"/>
@@ -50,11 +50,12 @@
         <img class="main_diagram" usemap="#Valadoc.Content.Paragraph" alt="Object hierarchy for Paragraph" src="img/Valadoc.Content.Paragraph.svg"/>
 
       <map id="Valadoc.Content.Paragraph" name="Valadoc.Content.Paragraph">
-<area shape="rect" id="node1" href="Valadoc.Content.Paragraph.html" title="Valadoc.Content.Paragraph" alt="" coords="305,293,564,341"/>
-<area shape="rect" id="node2" href="Valadoc.Content.InlineContent.html" title="Valadoc.Content.InlineContent" alt="" coords="15,197,302,245"/>
-<area shape="rect" id="node3" href="Valadoc.Content.ContentElement.html" title="Valadoc.Content.ContentElement" alt="" coords="5,101,312,149"/>
-<area shape="rect" id="node5" href="Valadoc.Content.Block.html" title="Valadoc.Content.Block" alt="" coords="327,197,543,245"/>
-<area shape="rect" id="node6" href="Valadoc.Content.StyleAttributes.html" title="Valadoc.Content.StyleAttributes" alt="" coords="567,197,865,245"/>
+<area shape="rect" id="node1" href="Valadoc.Content.Paragraph.html" title="Valadoc.Content.Paragraph" alt="" coords="270,293,493,341"/>
+<area shape="rect" id="node2" href="Valadoc.Content.InlineContent.html" title="Valadoc.Content.InlineContent" alt="" coords="15,197,262,245"/>
+<area shape="rect" id="node3" href="Valadoc.Content.ContentElement.html" title="Valadoc.Content.ContentElement" alt="" coords="5,101,272,149"/>
+<area shape="rect" id="node4" href="../gobject-2.0/GLib.Object.html" title="GLib.Object" alt="" coords="82,5,195,53"/>
+<area shape="rect" id="node5" href="Valadoc.Content.Block.html" title="Valadoc.Content.Block" alt="" coords="286,197,477,245"/>
+<area shape="rect" id="node6" href="Valadoc.Content.StyleAttributes.html" title="Valadoc.Content.StyleAttributes" alt="" coords="501,197,760,245"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -67,15 +68,15 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Properties:</h3>
         <ul class="navi_inline">
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Valadoc.Content.HorizontalAlign.html" class="enum">HorizontalAlign</a></span> <b><a href="Valadoc.Content.Paragraph.horizontal_align.html" class="property">horizontal_align</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Valadoc.Content.HorizontalAlign.html" class="enum">HorizontalAlign</a></span> <b><a href="Valadoc.Content.Paragraph.horizontal_align.html" class="property">horizontal_align</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Valadoc.Content.VerticalAlign.html" class="enum">VerticalAlign</a></span> <b><a href="Valadoc.Content.Paragraph.vertical_align.html" class="property">vertical_align</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Content.Paragraph.style.html" class="property">style</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Content.Paragraph.style.html" class="property">style</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Valadoc.Content.VerticalAlign.html" class="enum">VerticalAlign</a></span> <b><a href="Valadoc.Content.Paragraph.vertical_align.html" class="property">vertical_align</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -89,11 +90,11 @@
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Content.Paragraph.check.html" class="virtual_method">check</a></b> (<span class="main_type"><a href="Valadoc.Api.Tree.html" class="class">Tree</a></span> api_root, <span class="main_type"><a href="Valadoc.Api.Node.html" class="abstract_class">Node</a></span> container, <span class="main_basic_type"><span class="class">string</span></span> file_path, <span class="main_type"><a href="Valadoc.ErrorReporter.html" class="class">ErrorReporter</a></span> reporter, <span class="main_type"><a href="Valadoc.Settings.html" class="class">Settings</a></span> settings)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Content.Paragraph.accept.html" class="virtual_method">accept</a></b> (<span class="main_type"><a href="Valadoc.Content.ContentVisitor.html" class="abstract_class">ContentVisitor</a></span> visitor)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Content.Paragraph.accept.html" class="virtual_method">accept</a></b> (<span class="main_type"><a href="Valadoc.Content.ContentVisitor.html" class="abstract_class">ContentVisitor</a></span> visitor)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Valadoc.Content.Paragraph.check.html" class="virtual_method">check</a></b> (<span class="main_type"><a href="Valadoc.Api.Tree.html" class="class">Tree</a></span> api_root, <span class="main_type"><a href="Valadoc.Api.Node.html" class="abstract_class">Node</a></span> container, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> file_path, <span class="main_type"><a href="Valadoc.ErrorReporter.html" class="class">ErrorReporter</a></span> reporter, <span class="main_type"><a href="Valadoc.Settings.html" class="class">Settings</a></span> settings)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -108,137 +109,137 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.VerticalAlign.html" class="enum">VerticalAlign</a></span> <b><a href="Valadoc.Content.Paragraph._vertical_align.html" class="field">_vertical_align</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Valadoc.Content.Paragraph._style.html" class="field">_style</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><span class="class">string</span></span>? <b><a href="Valadoc.Content.Paragraph._style.html" class="field">_style</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Valadoc.Content.VerticalAlign.html" class="enum">VerticalAlign</a></span> <b><a href="Valadoc.Content.Paragraph._vertical_align.html" class="field">_vertical_align</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-80')">All known members inherited from class Valadoc.Content.InlineContent
+          <div class="headline" onclick="toggle_box (this, 'box-content-81')">All known members inherited from class Valadoc.Content.InlineContent
           </div>
-          <div class="content" id="box-content-80">
+          <div class="content" id="box-content-81">
             <div class="column">
               <ul class="navi_inline">
-                <li class="property"><a href="Valadoc.Content.InlineContent.content.html">content</a></li>
-                <li class="virtual_method"><a href="Valadoc.Content.InlineContent.check.html">check</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="virtual_method"><a href="Valadoc.Content.InlineContent.accept_children.html">accept_children</a></li>
-                <li class="virtual_method"><a href="Valadoc.Content.InlineContent.is_empty.html">is_empty</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="method"><a href="Valadoc.Content.InlineContent.replace_node.html">replace_node</a></li>
                 <li class="field"><a href="Valadoc.Content.InlineContent._content.html">_content</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.InlineContent.accept_children.html">accept_children</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="virtual_method"><a href="Valadoc.Content.InlineContent.check.html">check</a></li>
+                <li class="property"><a href="Valadoc.Content.InlineContent.content.html">content</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="virtual_method"><a href="Valadoc.Content.InlineContent.is_empty.html">is_empty</a></li>
+                <li class="method"><a href="Valadoc.Content.InlineContent.replace_node.html">replace_node</a></li>
               </ul>
             </div>
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-81')">All known members inherited from class Valadoc.Content.ContentElement
+          <div class="headline" onclick="toggle_box (this, 'box-content-82')">All known members inherited from class Valadoc.Content.ContentElement
           </div>
-          <div class="content" id="box-content-81">
+          <div class="content" id="box-content-82">
             <div class="column">
               <ul class="navi_inline">
-                <li class="property"><a href="Valadoc.Content.ContentElement.parent.html">parent</a></li>
-                <li class="abstract_method"><a href="Valadoc.Content.ContentElement.copy.html">copy</a></li>
-                <li class="virtual_method"><a href="Valadoc.Content.ContentElement.configure.html">configure</a></li>
+                <li class="field"><a href="Valadoc.Content.ContentElement._parent.html">_parent</a></li>
+                <li class="abstract_method"><a href="Valadoc.Content.ContentElement.accept.html">accept</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentElement.accept_children.html">accept_children</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
                 <li class="abstract_method"><a href="Valadoc.Content.ContentElement.check.html">check</a></li>
-                <li class="abstract_method"><a href="Valadoc.Content.ContentElement.accept.html">accept</a></li>
+                <li class="virtual_method"><a href="Valadoc.Content.ContentElement.configure.html">configure</a></li>
+                <li class="abstract_method"><a href="Valadoc.Content.ContentElement.copy.html">copy</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
                 <li class="abstract_method"><a href="Valadoc.Content.ContentElement.is_empty.html">is_empty</a></li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="virtual_method"><a href="Valadoc.Content.ContentElement.accept_children.html">accept_children</a></li>
-                <li class="field"><a href="Valadoc.Content.ContentElement._parent.html">_parent</a></li>
+                <li class="property"><a href="Valadoc.Content.ContentElement.parent.html">parent</a></li>
               </ul>
             </div>
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-82')">All known members inherited from class GLib.Object</div>
-          <div class="content" id="box-content-82">
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="static_method">interface_find_property</li>
-                <li class="static_method">interface_install_property</li>
-                <li class="static_method">interface_list_properties</li>
-                <li class="static_method">@new</li>
-                <li class="static_method">new_valist</li>
-                <li class="static_method">newv</li>
-                <li class="static_method">new_with_properties</li>
-                <li class="method">add_toggle_ref</li>
-                <li class="method">add_weak_pointer</li>
-                <li class="method">bind_property</li>
-                <li class="method">connect</li>
-                <li class="virtual_method">constructed</li>
-                <li class="method">disconnect</li>
-                <li class="virtual_method">dispose</li>
-                <li class="method">dup_data</li>
-                <li class="method">dup_qdata</li>
-                <li class="method">force_floating</li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="method">freeze_notify</li>
-                <li class="method">@get</li>
-                <li class="method">get_class</li>
-                <li class="method">get_data</li>
-                <li class="method">get_property</li>
-                <li class="method">get_qdata</li>
-                <li class="method">get_type</li>
-                <li class="method">getv</li>
-                <li class="method">is_floating</li>
-                <li class="method">notify_property</li>
-                <li class="method">@ref</li>
-                <li class="method">ref_sink</li>
-                <li class="method">replace_data</li>
-                <li class="method">replace_qdata</li>
-                <li class="method">remove_toggle_ref</li>
-                <li class="method">remove_weak_pointer</li>
-                <li class="method">@set</li>
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-                <li class="method">set_data</li>
-                <li class="method">set_data_full</li>
-                <li class="method">set_property</li>
-                <li class="method">set_qdata</li>
-                <li class="method">set_qdata_full</li>
-                <li class="method">set_valist</li>
-                <li class="method">setv</li>
-                <li class="method">steal_data</li>
-                <li class="method">steal_qdata</li>
-                <li class="method">thaw_notify</li>
-                <li class="method">unref</li>
-                <li class="method">watch_closure</li>
-                <li class="method">weak_ref</li>
-                <li class="method">weak_unref</li>
-                <li class="signal">notify</li>
-                <li class="field">ref_count</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-83')">All known members inherited from interface
-            Valadoc.Content.StyleAttributes</div>
+          <div class="headline" onclick="toggle_box (this, 'box-content-83')">All known members inherited from class GLib.Object</div>
           <div class="content" id="box-content-83">
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="method"><a href="../gobject-2.0/GLib.Object.@get.html">@get</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.@new.html">@new</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.@ref.html">@ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.@set.html">@set</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.add_toggle_ref.html">add_toggle_ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.add_weak_pointer.html">add_weak_pointer</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.bind_property.html">bind_property</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.connect.html">connect</a></li>
+                <li class="virtual_method"><a href="../gobject-2.0/GLib.Object.constructed.html">constructed</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.disconnect.html">disconnect</a></li>
+                <li class="virtual_method"><a href="../gobject-2.0/GLib.Object.dispose.html">dispose</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.dup_data.html">dup_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.dup_qdata.html">dup_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.force_floating.html">force_floating</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.freeze_notify.html">freeze_notify</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_class.html">get_class</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_data.html">get_data</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_property.html">get_property</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_qdata.html">get_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.get_type.html">get_type</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.getv.html">getv</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.interface_find_property.html">interface_find_property</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.interface_install_property.html">interface_install_property</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.interface_list_properties.html">interface_list_properties</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.is_floating.html">is_floating</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.new_valist.html">new_valist</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.new_with_properties.html">new_with_properties</a></li>
+                <li class="static_method"><a href="../gobject-2.0/GLib.Object.newv.html">newv</a></li>
+                <li class="signal"><a href="../gobject-2.0/GLib.Object.notify.html">notify</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.notify_property.html">notify_property</a></li>
+                <li class="field"><a href="../gobject-2.0/GLib.Object.ref_count.html">ref_count</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.ref_sink.html">ref_sink</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.remove_toggle_ref.html">remove_toggle_ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.remove_weak_pointer.html">remove_weak_pointer</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="method"><a href="../gobject-2.0/GLib.Object.replace_data.html">replace_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.replace_qdata.html">replace_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_data.html">set_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_data_full.html">set_data_full</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_property.html">set_property</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_qdata.html">set_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_qdata_full.html">set_qdata_full</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.set_valist.html">set_valist</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.setv.html">setv</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.steal_data.html">steal_data</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.steal_qdata.html">steal_qdata</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.thaw_notify.html">thaw_notify</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.unref.html">unref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.watch_closure.html">watch_closure</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.weak_ref.html">weak_ref</a></li>
+                <li class="method"><a href="../gobject-2.0/GLib.Object.weak_unref.html">weak_unref</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="box">
+          <div class="headline" onclick="toggle_box (this, 'box-content-84')">All known members inherited from interface
+            Valadoc.Content.StyleAttributes</div>
+          <div class="content" id="box-content-84">
             <div class="column">
               <ul class="navi_inline">
                 <li class="abstract_property"><a href="Valadoc.Content.StyleAttributes.horizontal_align.html">horizontal_align</a></li>
@@ -246,19 +247,19 @@
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="abstract_property"><a href="Valadoc.Content.StyleAttributes.vertical_align.html">vertical_align</a></li>
+                <li class="abstract_property"><a href="Valadoc.Content.StyleAttributes.style.html">style</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="abstract_property"><a href="Valadoc.Content.StyleAttributes.style.html">style</a></li>
+                <li class="abstract_property"><a href="Valadoc.Content.StyleAttributes.vertical_align.html">vertical_align</a></li>
               </ul>
             </div>
           </div>
         </div>
       </div>
     </div><br/>
-    <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+    <div class="site_footer">Generated by <a href="https://wiki.gnome.org/Projects/Valadoc"><kbd>valadoc</kbd></a>
     </div>
   </body>
 </html>
