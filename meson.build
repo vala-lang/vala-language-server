@@ -23,17 +23,23 @@ conf_file = configure_file(input: 'config.vala.in',
 
 subdir('gnome-builder')
 
+util = files([
+    'reporter.vala',
+    'context.vala',
+    'vala038_workarounds.vala',
+    'text_document.vala',
+])
+
 src = files([
     'main.vala',
     'protocol.vala',
-    'reporter.vala',
-    'context.vala',
     'iterator.vala',
-    'vala038_workarounds.vala',
 ])
 
 executable('vala-language-server',
            dependencies: deps,
-           sources: [src, conf_file],
+           sources: [src, util, conf_file],
            vala_args: ['--pkg=posix', '--enable-gobject-tracing', '--fatal-warnings'],
            install: true)
+
+subdir('debug-ui')

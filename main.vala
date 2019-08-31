@@ -17,43 +17,6 @@ class Meson.Target : Object {
     public bool build_by_default { get; set; }
 }
 
-class Vls.TextDocument : Object {
-    private Context ctx;
-    private string filename;
-
-    public Vala.SourceFile file;
-    public string uri;
-    public int version;
-
-    public TextDocument (Context ctx,
-                         string filename,
-                         string? content = null,
-                         int version = 0) throws ConvertError, FileError {
-
-        if (!FileUtils.test (filename, FileTest.EXISTS)) {
-            throw new FileError.NOENT ("file %s does not exist".printf (filename));
-        }
-
-        this.uri = Filename.to_uri (filename);
-        this.filename = filename;
-        this.version = version;
-        this.ctx = ctx;
-
-        var type = Vala.SourceFileType.NONE;
-        if (uri.has_suffix (".vala") || uri.has_suffix (".gs"))
-            type = Vala.SourceFileType.SOURCE;
-        else if (uri.has_suffix (".vapi"))
-            type = Vala.SourceFileType.PACKAGE;
-
-        file = new Vala.SourceFile (ctx.code_context, type, filename, content);
-        if (type == Vala.SourceFileType.SOURCE) {
-            var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib", null));
-            file.add_using_directive (ns_ref);
-            ctx.add_using ("GLib");
-        }
-    }
-}
-
 class Vls.Server {
     Jsonrpc.Server server;
     MainLoop loop;
@@ -793,12 +756,17 @@ class Vls.Server {
         }
 
         if (best is Vala.Expression && !(best is Vala.Literal)) {
-            var b = (Vala.Expression)best;
-            debug ("best (%p) is a Expression", best);
-            if (b.symbol_reference != null && b.symbol_reference.source_reference != null) {
-                best = b.symbol_reference;
-                debug ("best is now the symbol_referenece => %p (%s)", best, best.to_string ());
-            }
+            var bestExpr = (Vala.Expression) best;
+            debug ("best is a Expression");
+
+            var sym = bestExpr.symbol_reference;
+
+            while (sym != null && sym.source_reference == null)
+                sym = sym.parent_symbol;
+
+            best = sym;
+
+            debug ("best is now symbol_reference => %p (%s) (%s)", best, ((Vala.Symbol) best).name, best.to_string ());
         } else {
             try {
                 client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
@@ -897,7 +865,7 @@ class Vls.Server {
     }
 }
 
-void main () {
+void main (string[] args) {
     var loop = new MainLoop ();
     new Vls.Server (loop);
     loop.run ();
