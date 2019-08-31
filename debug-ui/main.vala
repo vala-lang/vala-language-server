@@ -1,5 +1,6 @@
 void main (string[] args) {
     Gtk.init (ref args);
+    Gtk.Sourceinit ();
 
     var context = new Vls.Context ();
 
@@ -20,7 +21,9 @@ void main (string[] args) {
 
     context.check ();
 
-    foreach (var sf in context.code_context.get_source_files ())
-        new Vls.CodeNodeUI (sf, null);
+    foreach (var sf in context.code_context.get_source_files ()) {
+        if (sf.file_type == Vala.SourceFileType.SOURCE) 
+            new Vls.CodeNodeUI (sf, null);
+    }
     Gtk.main ();
 }

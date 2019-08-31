@@ -26,7 +26,16 @@ class Vls.TextDocument : Object {
         else if (uri.has_suffix (".vapi"))
             type = Vala.SourceFileType.PACKAGE;
 
-        file = new Vala.SourceFile (ctx.code_context, type, filename, content);
+        string text;
+
+        if (content == null) {
+            print (@"reading $filename");
+            FileUtils.get_contents (filename, out text);
+        } else {
+            text = content;
+        }
+
+        file = new Vala.SourceFile (ctx.code_context, type, filename, text);
         if (type == Vala.SourceFileType.SOURCE) {
             var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib", null));
             file.add_using_directive (ns_ref);

@@ -28,13 +28,23 @@ class Vls.CodeNodeUI : Vala.CodeVisitor {
 
         scrollview.add (treeview);
 
-        print (@"$path\n");
-        treeview.expand_to_path (path);
+        //  treeview.expand_to_path (path);
 
-        var box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-        box.pack_start (new Gtk.Label (file.filename), false, false);
-        box.pack_end (scrollview, true, true);
-        w.add (box);
+        var sourcebuffer = new Gtk.SourceBuffer.with_language (new Gtk.SourceLanguageManager ().get_language ("vala"));
+        sourcebuffer.text = file.content;
+        var sourceview = new Gtk.SourceView.with_buffer (sourcebuffer);
+        sourceview.editable = false;
+        var scrollcode = new Gtk.ScrolledWindow (null, null);
+        scrollcode.add (sourceview);
+
+        var fileview = new Gtk.Box (Gtk.Orientation.VERTICAL, 6);
+        fileview.pack_start (new Gtk.Label (file.filename), false, false);
+        fileview.pack_end (scrollcode, true, true);
+
+        var paned = new Gtk.Paned (Gtk.Orientation.HORIZONTAL);
+        paned.pack1 (fileview, true, true);
+        paned.pack2 (scrollview, true, true);
+        w.add (paned);
 
         w.default_height = 600;
         w.default_width = 800;
