@@ -21,6 +21,14 @@ void main (string[] args) {
 
     context.check ();
 
+    context.report.errorlist.foreach ((err) => {
+        print (err.message + "\n");
+    });
+
+    context.report.warnlist.foreach ((warn) => {
+        print (warn.message + "\n");
+    });
+
     foreach (var sf in context.code_context.get_source_files ()) {
         if (sf.file_type == Vala.SourceFileType.SOURCE) 
             new Vls.CodeNodeUI (sf, null);

@@ -59,11 +59,13 @@ class Vls.CodeNodeUI : Vala.CodeVisitor {
     }
 
     void add_iter_to_path (Vala.SourceReference sr, Gtk.TreeIter iter) {
-        if ((sr.begin.line <= highlight.source_reference.begin.line && highlight.source_reference.end.line <= sr.end.line)
-         || (sr.begin.column <= highlight.source_reference.begin.column && highlight.source_reference.end.column <= sr.end.column)) {
-            Gtk.TreeIter parent;
-            store.iter_parent (out parent, iter);
-            path.append_index (store.iter_n_children (parent));
+        if (highlight != null) {
+            if ((sr.begin.line <= highlight.source_reference.begin.line && highlight.source_reference.end.line <= sr.end.line)
+            || (sr.begin.column <= highlight.source_reference.begin.column && highlight.source_reference.end.column <= sr.end.column)) {
+                Gtk.TreeIter parent;
+                store.iter_parent (out parent, iter);
+                path.append_index (store.iter_n_children (parent));
+            }
         }
     }
 
@@ -85,10 +87,11 @@ class Vls.CodeNodeUI : Vala.CodeVisitor {
         current = old;
     }
 
-    #if 0
     public override void visit_expression (Vala.Expression e) {
         Gtk.TreeIter thisTree, old = current;
-        string row = e.value_type.to_string ();
+        string? row = null;
+        if (e.value_type != null)
+            row = e.value_type.to_string ();
         if (row == null || row.strip () == "") {
             row = get_code (e);
         }
@@ -101,7 +104,8 @@ class Vls.CodeNodeUI : Vala.CodeVisitor {
         add_iter_to_path (e.source_reference, thisTree);
 
         if (e.symbol_reference != null) {
-            this.visit_symbol (e.symbol_reference);
+            //  this.visit_symbol (e.symbol_reference);
+            store.insert_with_values (null, current, -1, 0, @"symbol_ref = $(e.symbol_reference)", 1, "", 2, "", 3, false, -1);
         } else {
             store.insert_with_values (null, current, -1, 0, "symbol_ref = null", 1, "", 2, "", 3, false, -1);
         }
@@ -109,7 +113,6 @@ class Vls.CodeNodeUI : Vala.CodeVisitor {
         e.accept_children (this);
         current = old;
     }
-    #endif
 
     private void visit_statement (Vala.Statement st) {
         Gtk.TreeIter thisTree, old = current;
@@ -266,7 +269,7 @@ class Vls.CodeNodeUI : Vala.CodeVisitor {
         string contents = get_code (expr);
 
         string vt = expr.value_type.to_string () ?? "";
-        string tt = expr.target_type.to_string () ?? "";
+        string tt = expr.target_type != null ? expr.target_type.to_string () : "";
         string tvvt = expr.target_value != null
             ? expr.target_value.value_type != null
                 ? expr.target_value.value_type.to_string ()

@@ -29,7 +29,7 @@ class Vls.TextDocument : Object {
         string text;
 
         if (content == null) {
-            print (@"reading $filename");
+            print (@"reading $filename\n");
             FileUtils.get_contents (filename, out text);
         } else {
             text = content;
