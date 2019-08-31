@@ -579,6 +579,7 @@ class Vls.Server {
         } else {
             debug ("updating contents of %s", uri);
             ctx.get_source_file (uri).file.content = fileContents;
+            ctx.invalidate ();
         }
 
         // compile everything if context is dirty
