@@ -28,8 +28,9 @@ src = files([
     'protocol.vala',
     'reporter.vala',
     'context.vala',
-    'iterator.vala',
     'vala038_workarounds.vala',
+    'list_symbols.vala',
+    'find_symbol.vala',
 ])
 
 executable('vala-language-server',
