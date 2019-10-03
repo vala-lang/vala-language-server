@@ -56,14 +56,14 @@ namespace LanguageServer {
          */
         public uint character { get; set; default = -1; }
 
-        public int compare(Position other) {
+        public int compare (Position other) {
             return line > other.line ? 1 :
                 (line == other.line ?
                  (character > other.character ? 1 :
                   (character == other.character ? 0 : -1)) : -1);
         }
 
-        public string to_string() { return @"$line:$character"; }
+        public string to_string () { return @"$line:$character"; }
 
         public Position to_libvala () {
             return new Position () {
@@ -89,18 +89,18 @@ namespace LanguageServer {
          */
         public Position end { get; set; }
 
-        public string to_string() { return @"$start -> $end"; }
+        public string to_string () { return @"$start -> $end"; }
 
         public Range.from_sourceref (Vala.SourceReference sref) {
             this.start = new Position.from_libvala (sref.begin);
             this.end = new Position.from_libvala (sref.end);
         }
 
-        public uint hash() { 
-            return this.to_string().hash();
+        public uint hash () {
+            return this.to_string ().hash ();
         }
 
-        public bool equal_to(Range other) { return this.to_string() == other.to_string(); }
+        public bool equal_to (Range other) { return this.to_string () == other.to_string (); }
     }
 
     class Diagnostic : Object {
@@ -137,9 +137,9 @@ namespace LanguageServer {
      * the new text is considered to be the full content of the document.
      */
     class TextDocumentContentChangeEvent : Object {
-        public Range? range 		{ get; set; }
-        public int rangeLength 	{ get; set; }
-        public string text 			{ get; set; }
+        public Range? range    { get; set; }
+        public int rangeLength { get; set; }
+        public string text     { get; set; }
     }
 
     enum MessageType {
@@ -200,7 +200,7 @@ namespace LanguageServer {
         }
 
         public new Value Json.Serializable.get_property (ParamSpec pspec) {
-            Value val = Value(pspec.value_type);
+            Value val = Value (pspec.value_type);
             base.get_property (pspec.get_name (), ref val);
             return val;
         }

@@ -56,7 +56,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
                 }
             }
         }
-        
+
         if (dsym.kind == Method || dsym.kind == Function) {
             if (/_lambda\d+_/.match (dsym.name))
                 return null;

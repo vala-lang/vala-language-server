@@ -31,7 +31,7 @@ class Vls.Context {
                 dirty = false;
 
                 string version = Config.libvala_version;
-                string[] parts = version.split(".");
+                string[] parts = version.split (".");
                 assert (parts.length == 3);
                 assert (parts[0] == "0");
                 // var minor = int.parse (parts[1]);
@@ -85,10 +85,10 @@ class Vls.Context {
         }
     }
 
-    public Context() {
+    public Context () {
         _defines = new HashSet<string> ();
         _packages = new HashSet<string> ();
-        _usings = new HashSet<string> (); 
+        _usings = new HashSet<string> ();
         _sources = new HashMap<string, TextDocument> ();
         _csources = new HashSet<string> ();
         _vapidirs = new HashSet<string> ();
@@ -196,7 +196,7 @@ class Vls.Context {
     /**
      * call this before each semantic update
      */
-    public void invalidate() {
+    public void invalidate () {
         dirty = true;
     }
 

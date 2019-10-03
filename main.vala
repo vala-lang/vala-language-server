@@ -83,7 +83,7 @@ class Vls.Server {
         this.cc = new HashTable<string, string> (str_hash, str_equal);
 
         Timeout.add (10000, () => {
-            debug (@"listening...");
+            debug ("listening...");
             return true;
         });
 
@@ -94,9 +94,9 @@ class Vls.Server {
 
         // hack to prevent other things from corrupting JSON-RPC pipe:
         // create a new handle to stdout, and close the old one (or move it to stderr)
-        var new_stdout_fd = Posix.dup(Posix.STDOUT_FILENO);
-        Posix.close(Posix.STDOUT_FILENO);
-        Posix.dup2(Posix.STDERR_FILENO, Posix.STDOUT_FILENO);
+        var new_stdout_fd = Posix.dup (Posix.STDOUT_FILENO);
+        Posix.close (Posix.STDOUT_FILENO);
+        Posix.dup2 (Posix.STDERR_FILENO, Posix.STDOUT_FILENO);
 
         var stdin = new UnixInputStream (Posix.STDIN_FILENO, false);
         var stdout = new UnixOutputStream (new_stdout_fd, false);
@@ -169,7 +169,7 @@ class Vls.Server {
 
     void showMessage (Jsonrpc.Client client, string message, MessageType type) {
         try {
-            client.send_notification ("window/showMessage", buildDict(
+            client.send_notification ("window/showMessage", buildDict (
                 type: new Variant.int16 (type),
                 message: new Variant.string (message)
             ));
@@ -229,7 +229,7 @@ class Vls.Server {
         }
 
         // for every target, get all target_files
-        targets_parser.get_root ().get_array().foreach_element ((_1, _2, node) => {
+        targets_parser.get_root ().get_array ().foreach_element ((_1, _2, node) => {
             var target_obj = node.get_object ();
             Json.Node target_sources_array = target_obj.get_member ("target_sources");
             if (target_sources_array == null)
@@ -239,13 +239,13 @@ class Vls.Server {
                 if (target_source.language != "vala") return;
 
                 // get all packages
-                for (int i=0; i<target_source.parameters.length; i++) {
+                for (int i = 0; i < target_source.parameters.length; i++) {
                     string param = target_source.parameters[i];
                     if (param.index_of ("--pkg") == 0) {
                         if (param == "--pkg") {
-                            if (i+1 < target_source.parameters.length) {
+                            if (i + 1 < target_source.parameters.length) {
                                 // the next argument is the package name
-                                ctx.add_package (target_source.parameters[i+1]);
+                                ctx.add_package (target_source.parameters[i + 1]);
                                 i++;
                             }
                         } else {
@@ -257,8 +257,8 @@ class Vls.Server {
                         }
                     } else if (param.index_of ("--vapidir") == 0) {
                         if (param == "--vapidir") {
-                            if (i+1 < target_source.parameters.length) {
-                                ctx.add_vapidir (target_source.parameters[i+1]);
+                            if (i + 1 < target_source.parameters.length) {
+                                ctx.add_vapidir (target_source.parameters[i + 1]);
                                 i++;
                             }
                         } else {
@@ -458,7 +458,7 @@ class Vls.Server {
         }
 
         try {
-            client.reply (id, buildDict(
+            client.reply (id, buildDict (
                 capabilities: buildDict (
                     textDocumentSync: new Variant.int16 (TextDocumentSyncKind.Full),
                     definitionProvider: new Variant.boolean (true),
@@ -481,7 +481,7 @@ class Vls.Server {
         }
 
         string name;
-        var dirs_to_search = new GLib.List<string>();
+        var dirs_to_search = new GLib.List<string> ();
         while ((name = dir.read_name ()) != null) {
             string path = Path.build_filename (dirname, name);
             if (name == target)
@@ -492,7 +492,7 @@ class Vls.Server {
         }
 
         foreach (string path in dirs_to_search) {
-            string r = findFile(path, target);
+            string r = findFile (path, target);
             if (r != null)
                 return r;
         }
@@ -509,8 +509,8 @@ class Vls.Server {
     }
 
     T? parse_variant<T> (Variant variant) {
-        var json = Json.gvariant_serialize(variant);
-        return Json.gobject_deserialize(typeof(T), json);
+        var json = Json.gvariant_serialize (variant);
+        return Json.gobject_deserialize (typeof (T), json);
     }
 
     Variant object_to_variant (Object object) throws Error {
@@ -528,7 +528,7 @@ class Vls.Server {
             linepos = pos;
         }
 
-        return linepos+1 + charno;
+        return linepos + 1 + charno;
     }
 
     void textDocumentDidOpen (Jsonrpc.Client client, Variant @params) {
@@ -656,7 +656,7 @@ class Vls.Server {
         TextDocument? doc = doc_uri == null ? null : ctx.get_source_file (doc_uri);
 
         if (doc != null) {
-            docs = new ArrayList<TextDocument>();
+            docs = new ArrayList<TextDocument> ();
             docs.add (doc);
         } else {
             docs = ctx.get_source_files ();
@@ -690,7 +690,7 @@ class Vls.Server {
                     var node = Json.gobject_serialize (diag);
                     array.add_element (node);
                 } else
-                    array.add_element (Json.gobject_serialize (new Diagnostic() {
+                    array.add_element (Json.gobject_serialize (new Diagnostic () {
                         severity = DiagnosticSeverity.Error,
                         message = err.message
                     }));
@@ -719,7 +719,7 @@ class Vls.Server {
                     var node = Json.gobject_serialize (diag);
                     array.add_element (node);
                 } else
-                    array.add_element (Json.gobject_serialize (new Diagnostic() {
+                    array.add_element (Json.gobject_serialize (new Diagnostic () {
                         severity = DiagnosticSeverity.Warning,
                         message = err.message
                     }));
@@ -734,7 +734,7 @@ class Vls.Server {
             }
 
             try {
-                client.send_notification ("textDocument/publishDiagnostics", buildDict(
+                client.send_notification ("textDocument/publishDiagnostics", buildDict (
                     uri: new Variant.string (uri),
                     diagnostics: result
                 ));
@@ -757,7 +757,7 @@ class Vls.Server {
             try {
                 client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
             } catch (Error e) {
-                debug("[textDocument/definition] failed to reply to client: %s", e.message);
+                debug ("[textDocument/definition] failed to reply to client: %s", e.message);
             }
             return;
         }
@@ -768,7 +768,7 @@ class Vls.Server {
             try {
                 client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
             } catch (Error e) {
-                debug("[textDocument/definition] failed to reply to client: %s", e.message);
+                debug ("[textDocument/definition] failed to reply to client: %s", e.message);
             }
             return;
         }
@@ -787,10 +787,10 @@ class Vls.Server {
         {
             assert (best != null);
             var sr = best.source_reference;
-            var from = (long)Server.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
-            var to = (long)Server.get_string_pos (file.content, sr.end.line-1, sr.end.column);
+            var from = (long)Server.get_string_pos (file.content, sr.begin.line - 1, sr.begin.column - 1);
+            var to = (long)Server.get_string_pos (file.content, sr.end.line - 1, sr.end.column);
             string contents = file.content [from:to];
-            debug ("Got node: %s @ %s = %s", best.type_name, sr.to_string(), contents);
+            debug ("Got node: %s @ %s = %s", best.type_name, sr.to_string (), contents);
         }
 
         if (best is Vala.Expression && !(best is Vala.Literal)) {
@@ -804,7 +804,7 @@ class Vls.Server {
             try {
                 client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
             } catch (Error e) {
-                debug("[textDocument/definition] failed to reply to client: %s", e.message);
+                debug ("[textDocument/definition] failed to reply to client: %s", e.message);
             }
             return;
         }
@@ -840,7 +840,7 @@ class Vls.Server {
                 }
             }));
         } catch (Error e) {
-            debug("[textDocument/definition] failed to reply to client: %s", e.message);
+            debug ("[textDocument/definition] failed to reply to client: %s", e.message);
         }
     }
 
@@ -856,7 +856,7 @@ class Vls.Server {
             try {
                 client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
             } catch (Error e) {
-                debug("[textDocument/documentSymbol] failed to reply to client: %s", e.message);
+                debug ("[textDocument/documentSymbol] failed to reply to client: %s", e.message);
             }
             return;
         }
@@ -865,12 +865,12 @@ class Vls.Server {
         var syms = new ListSymbols (sourcefile.file);
         if (init_params.capabilities.textDocument.documentSymbol.hierarchicalDocumentSymbolSupport)
             foreach (var dsym in syms) {
-                debug(@"found $(dsym.name)");
+                debug (@"found $(dsym.name)");
                 array.add_element (Json.gobject_serialize (dsym));
             }
         else {
             foreach (var dsym in syms.flattened ()) {
-                debug(@"found $(dsym.name)");
+                debug (@"found $(dsym.name)");
                 array.add_element (Json.gobject_serialize (new SymbolInformation.from_document_symbol (dsym, p.textDocument.uri)));
             }
         }
@@ -886,7 +886,7 @@ class Vls.Server {
     void shutdown (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         ctx.clear ();
         try {
-            client.reply (id, buildDict(null));
+            client.reply (id, buildDict (null));
         } catch (Error e) {
             debug (@"shutdown: failed to reply to client: $(e.message)");
         }
