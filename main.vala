@@ -856,6 +856,8 @@ class Vls.Server {
                 best = b.symbol_reference;
                 debug ("best is now the symbol_reference => %p (%s / %s @ %s)", best, best.type_name, best.to_string (), best.source_reference.to_string ());
             }
+        } else if (best is Vala.DelegateType) {
+            best = ((Vala.DelegateType)best).delegate_symbol;
         } else if (best is Vala.DataType) { // field types
             var dt = (Vala.DataType)best;
             debug ("[%s] is a DataType, using data_type: [%s] @ %s", best.to_string (), dt.data_type.type_name, dt.data_type.source_reference.to_string ());
