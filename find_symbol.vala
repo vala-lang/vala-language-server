@@ -304,6 +304,12 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         expr.accept_children (this);
     }
 
+    public override void visit_named_argument (Vala.NamedArgument expr) {
+        if (this.match (expr))
+            result.add (expr);
+        expr.accept_children (this);
+    }
+
     public override void visit_namespace (Vala.Namespace ns) {
         if (this.match (ns))
             result.add (ns);
