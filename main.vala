@@ -764,6 +764,7 @@ class Vls.Server {
         var fs = new FindSymbol (sourcefile.file, p.position.to_libvala ());
 
         if (fs.result.size == 0) {
+            debug ("no results :(");
             try {
                 client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
             } catch (Error e) {
@@ -810,13 +811,14 @@ class Vls.Server {
             debug ("best (%p) is a Expression", best);
             if (b.symbol_reference != null && b.symbol_reference.source_reference != null) {
                 best = b.symbol_reference;
-                debug ("best is now the symbol_referenece => %p (%s)", best, best.to_string ());
+                debug ("best is now the symbol_reference => %p (%s / %s @ %s)", best, best.type_name, best.to_string (), best.source_reference.to_string ());
             }
         } else if (best is Vala.DataType) { // field types
             var dt = (Vala.DataType)best;
             debug ("[%s] is a DataType, using data_type: [%s] @ %s", best.to_string (), dt.data_type.type_name, dt.data_type.source_reference.to_string ());
             best = dt.data_type;
         } else { // return null
+            debug ("best is a %s, returning null", best.type_name);
             try {
                 client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
             } catch (Error e) {
