@@ -423,4 +423,10 @@ class Vls.FindSymbol : Vala.CodeVisitor {
             result.add (expr);
         expr.accept_children (this);
     }
+
+    public override void visit_unary_expression (Vala.UnaryExpression expr) {
+        if (this.match (expr))
+            result.add (expr);
+        expr.accept_children (this);
+    }
 }
