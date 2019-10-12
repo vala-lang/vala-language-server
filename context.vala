@@ -100,6 +100,7 @@ class Vls.Context {
 //    }
 
     public void add_package (string pkgname) {
+        debug (@"Adding package $pkgname");
         if (_packages.add (pkgname))
             dirty = true;
     }
@@ -110,6 +111,7 @@ class Vls.Context {
 //    }
 
     public void add_using (string using_directive) {
+        debug (@"using $using_directive");
         if (_usings.add (using_directive))
             dirty = true;
     }
@@ -164,6 +166,7 @@ class Vls.Context {
     }
 
     public void add_vapidir (string dir) {
+        debug (@"Adding vapidir $dir");
         if (_vapidirs.add (dir))
             dirty = true;
     }

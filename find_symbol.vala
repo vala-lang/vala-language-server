@@ -7,8 +7,9 @@ class Vls.FindSymbol : Vala.CodeVisitor {
 
     bool match (Vala.CodeNode node) {
         var sr = node.source_reference;
+
         if (sr == null) {
-            debug ("node %s has no source reference", node.type_name);
+            //  debug ("node %s [%s] has no source reference", node.type_name, node.to_string ());
             return false;
         }
 
