@@ -133,10 +133,6 @@ class Vls.Context {
         return _sources[uri];
     }
 
-    //  public TextDocument? get_source_file_by_path (string path) {
-    //      Collection<TextDocument> files = get_source_files ();
-    //  }
-
     public Collection<TextDocument> get_source_files () {
         return _sources.values;
     }
