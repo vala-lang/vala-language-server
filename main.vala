@@ -761,8 +761,7 @@ class Vls.Server {
             }
             return;
         }
-        var file = sourcefile.file;
-        var fs = new FindSymbol (file, p.position.to_libvala ());
+        var fs = new FindSymbol (sourcefile.file, p.position.to_libvala ());
 
         if (fs.result.size == 0) {
             try {
@@ -787,20 +786,37 @@ class Vls.Server {
         {
             assert (best != null);
             var sr = best.source_reference;
-            var from = (long)Server.get_string_pos (file.content, sr.begin.line - 1, sr.begin.column - 1);
-            var to = (long)Server.get_string_pos (file.content, sr.end.line - 1, sr.end.column);
-            string contents = file.content [from:to];
-            debug ("Got node: %s @ %s = %s", best.type_name, sr.to_string (), contents);
+            var file = ctx.get_source_file (@"file://$(sr.file.filename)");
+            string contents;
+            if (file != null) {
+                debug ("have %s", sr.file.filename);
+                contents = file.file.content;
+            } else {
+                debug ("reading %s", sr.file.filename);
+                try {
+                    FileUtils.get_contents (sr.file.filename, out contents);
+                } catch (Error e) {
+                    warning (e.message);
+                }
+            }
+            var from = (long)Server.get_string_pos (contents, sr.begin.line - 1, sr.begin.column - 1);
+            var to = (long)Server.get_string_pos (contents, sr.end.line - 1, sr.end.column);
+            string piece = contents [from:to];
+            debug ("Got node: %s @ %s = %s", best.type_name, sr.to_string (), piece);
         }
 
-        if (best is Vala.Expression && !(best is Vala.Literal)) {
+        if (best is Vala.Expression && !(best is Vala.Literal)) { // expressions
             var b = (Vala.Expression)best;
             debug ("best (%p) is a Expression", best);
             if (b.symbol_reference != null && b.symbol_reference.source_reference != null) {
                 best = b.symbol_reference;
                 debug ("best is now the symbol_referenece => %p (%s)", best, best.to_string ());
             }
-        } else {
+        } else if (best is Vala.DataType) { // field types
+            var dt = (Vala.DataType)best;
+            debug ("[%s] is a DataType, using data_type: [%s] @ %s", best.to_string (), dt.data_type.type_name, dt.data_type.source_reference.to_string ());
+            best = dt.data_type;
+        } else { // return null
             try {
                 client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
             } catch (Error e) {

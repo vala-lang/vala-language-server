@@ -155,6 +155,12 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         m.accept_children (this);
     }
 
+    public override void visit_data_type (Vala.DataType dt) {
+        if (this.match (dt))
+            result.add (dt);
+        dt.accept_children (this);
+    }
+
     public override void visit_declaration_statement (Vala.DeclarationStatement stmt) {
         if (this.match (stmt))
             result.add (stmt);
