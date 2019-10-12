@@ -54,6 +54,32 @@ class Vls.TextDocument : Object {
     }
 }
 
+class DummyDataType : Vala.DataType {
+    public override Vala.DataType copy () {
+        return new DummyDataType ();
+    }
+
+    public override string to_string () {
+        return "(null)";
+    }
+}
+
+void print_expr (Vala.Expression e) {
+    var dummy = new DummyDataType ();
+    debug ("======= Expression ========");
+    debug (@"> $(e.to_string ()) <");
+    debug (@"formal_target_type = $(e.formal_target_type ?? dummy)");
+    debug (@"formal_value_type = $(e.formal_value_type ?? dummy)");
+    debug (@"lvalue = $(e.lvalue)");
+    debug (@"parent_statement = $(e.parent_statement)");
+    debug (@"symbol_reference = $(e.symbol_reference)");
+    debug (@"target_type = $(e.target_type)");
+    debug (@"target_value.value_type = $(e.target_value != null ? e.target_value.value_type.to_string () : "(null)")");
+    debug (@"target_value.actual_value_type = $(e.target_value != null ? e.target_value.actual_value_type.to_string () : "(null)")");
+    debug (@"value_type = $(e.value_type)");
+    debug ("===========================");
+}
+
 class Vls.Server {
     Jsonrpc.Server server;
     MainLoop loop;
@@ -751,6 +777,11 @@ class Vls.Server {
         var p = parse_variant <LanguageServer.TextDocumentPositionParams> (@params);
         debug ("get definition in %s at %u,%u", p.textDocument.uri,
             p.position.line, p.position.character);
+
+        foreach (var sf in ctx.code_context.get_source_files ().to_array ()) {
+            debug ("=> SF %s", sf.filename);
+        }
+
         var sourcefile = ctx.get_source_file (p.textDocument.uri);
         if (sourcefile == null) {
             debug ("unknown file %s", p.textDocument.uri);
@@ -778,9 +809,12 @@ class Vls.Server {
         foreach (var node in fs.result) {
             if (best == null) {
                 best = node;
-            } else if (best.source_reference.begin.column <= node.source_reference.begin.column &&
-                       node.source_reference.end.column <= best.source_reference.end.column) {
+            } else if (
+                (best.source_reference.begin.column < node.source_reference.begin.column && node.source_reference.end.column <= best.source_reference.end.column) ||
+                (best.source_reference.begin.column <= node.source_reference.begin.column && node.source_reference.end.column < best.source_reference.end.column)) {
                 best = node;
+            } else if (best is Vala.ExpressionStatement) {
+                best = ((Vala.ExpressionStatement)best).expression;
             }
         }
 
@@ -807,8 +841,17 @@ class Vls.Server {
         }
 
         if (best is Vala.Expression && !(best is Vala.Literal)) { // expressions
+            //  if (best is Vala.MemberAccess) {
+            //      var ma = (Vala.MemberAccess)best;
+            //      debug ("============ PARENT ===========");
+            //      if (ma.parent_node is Vala.Expression)
+            //          print_expr (ma.parent_node as Vala.Expression);
+            //      else
+            //          debug ("parent is a %s", ma.parent_node.type_name);
+            //  }
             var b = (Vala.Expression)best;
-            debug ("best (%p) is a Expression", best);
+            debug ("best (%s / %s @ %s) is a Expression", best.to_string (), best.type_name, best.source_reference.to_string ());
+            print_expr (b);
             if (b.symbol_reference != null && b.symbol_reference.source_reference != null) {
                 best = b.symbol_reference;
                 debug ("best is now the symbol_reference => %p (%s / %s @ %s)", best, best.type_name, best.to_string (), best.source_reference.to_string ());
