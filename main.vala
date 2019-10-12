@@ -840,6 +840,16 @@ class Vls.Server {
         }
         */
 
+        if (best == null) {
+            warning ("best == null");
+            try {
+                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+            } catch (Error e) {
+                debug ("[textDocument/definition] failed to reply to client: %s", e.message);
+            }
+            return;
+        }
+
         debug (@"replying... $(best.source_reference.file.filename)");
         try {
             client.reply (id, object_to_variant (new LanguageServer.Location () {
