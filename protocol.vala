@@ -193,6 +193,7 @@ namespace LanguageServer {
             this.kind = kind;
             this.range = new Range.from_sourceref (sym.source_reference);
             this.selectionRange = this.range;
+            this.deprecated = sym.version.deprecated;
         }
 
         public new void Json.Serializable.set_property (ParamSpec pspec, Value value) {
