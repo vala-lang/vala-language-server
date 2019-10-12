@@ -15,3 +15,6 @@ jobs:
     - run: meson build
     - run: ninja -C build
     - uses: elementary/actions/vala-lint@master
+      with:
+        conf: .vala-lint.conf
+        fail: false
