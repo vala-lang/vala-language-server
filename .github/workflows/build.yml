@@ -14,3 +14,7 @@ jobs:
     - run: sudo pip3 install meson
     - run: meson build
     - run: ninja -C build
+    - uses: elementary/actions/vala-lint@master
+      with:
+        conf: .vala-lint.conf
+        fail: false
