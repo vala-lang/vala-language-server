@@ -784,7 +784,7 @@ class Vls.Server {
         var from = (long)Server.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
         var to = (long)Server.get_string_pos (file.content, sr.end.line-1, sr.end.column);
         string contents = file.content [from:to];
-        debug ("Got node: %s @ %s = %s", best.type_name, sr.to_string(), contents);
+        debug ("Got best node: %s @ %s = %s", best.type_name, sr.to_string(), contents);
 
         return (!) best;
     }
@@ -1406,7 +1406,7 @@ class Vls.Server {
         }
 
         foreach (var res in fs.result)
-            debug (@"found $(res.type_name)");
+            debug (@"[textDocument/completion] found $(res.type_name) (semanalyzed = $(res.checked))");
 
         Vala.CodeNode result = get_best (fs, doc.file);
         Vala.CodeNode? peeled = null;
@@ -1414,14 +1414,23 @@ class Vls.Server {
         var json_array = new Json.Array ();
         var completions = new Gee.HashSet<CompletionItem> ();
 
-        debug (@"[textDocument/completion] got $result");
+        debug (@"[textDocument/completion] got $(result.type_name) `$result' (semanalyzed = $(result.checked)))");
         if (result is Vala.MemberAccess) {
             var ma = result as Vala.MemberAccess;
             if (ma.symbol_reference != null) {
                 debug (@"peeling away symbol_reference from MemberAccess: $(ma.symbol_reference.type_name)");
                 peeled = ma.symbol_reference;
-            } else
+            } else {
                 debug ("MemberAccess does not have symbol_reference");
+                if (!ma.checked) {
+                    for (Vala.CodeNode? parent = ma.parent_node; 
+                         parent != null;
+                         parent = parent.parent_node)
+                    {
+                        debug (@"parent ($parent) semanalyzed = $(parent.checked)");
+                    }
+                }
+            }
         }
 
         bool is_instance = true;
