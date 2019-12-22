@@ -26,7 +26,7 @@ class Vls.Context {
                     workaround_038 (_ctx, get_source_files ());
                 }
                 // generate a new code context 
-                _ctx = new Vala.CodeContext ();
+                _ctx = new Vala.CodeContext () { keep_going = true };
                 Vala.CodeContext.push (_ctx);
                 dirty = false;
 
@@ -214,19 +214,11 @@ class Vls.Context {
 
     public void check () {
         this.run (() => {
-            if (report.get_errors () > 0) {
-                return;
-            }
-
             var parser = new Vala.Parser ();
             parser.parse (code_context);
 
             var genie_parser = new Vala.Genie.Parser ();
             genie_parser.parse (code_context);
-
-            if (report.get_errors () > 0) {
-                return;
-            }
 
             code_context.check ();
         });
