@@ -475,7 +475,7 @@ class Vls.Server {
         try {
             client.reply (id, buildDict (
                 capabilities: buildDict (
-                    textDocumentSync: new Variant.int16 (TextDocumentSyncKind.Full),
+                    textDocumentSync: new Variant.int16 (TextDocumentSyncKind.Incremental),
                     definitionProvider: new Variant.boolean (true),
                     documentSymbolProvider: new Variant.boolean (true),
                     completionProvider: buildDict(
