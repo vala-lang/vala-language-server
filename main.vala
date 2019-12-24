@@ -778,7 +778,10 @@ class Vls.Server {
                        node.source_reference.end.column <= best.source_reference.end.column &&
                        // don't get implicit `this` accesses
                        !(best.source_reference.begin.column == node.source_reference.begin.column &&
-                         node.source_reference.end.column == best.source_reference.end.column)) {
+                         node.source_reference.end.column == best.source_reference.end.column &&
+                         node is Vala.MemberAccess && 
+                         ((Vala.MemberAccess)node).member_name == "this" &&
+                         ((Vala.MemberAccess)node).inner == null)) {
                 best = node;
             }
         }
@@ -1444,22 +1447,33 @@ class Vls.Server {
             }
         }
 
-        bool is_instance = true;
-        Vala.TypeSymbol? type_sym = get_type_symbol (result, is_pointer_access, ref is_instance);
+        do {
+            bool is_instance = true;
+            Vala.TypeSymbol? type_sym = get_type_symbol (result, is_pointer_access, ref is_instance);
 
-        // try again
-        if (type_sym == null && peeled != null)
-            type_sym = get_type_symbol (peeled, is_pointer_access, ref is_instance);
+            // try again
+            if (type_sym == null && peeled != null)
+                type_sym = get_type_symbol (peeled, is_pointer_access, ref is_instance);
 
-        if (type_sym != null)
-            add_completions_for_type (type_sym, completions, current_scope, is_instance);
-        // and try some more
-        else if (peeled is Vala.Signal)
-            add_completions_for_signal (peeled as Vala.Signal, completions);
-        else if (peeled is Vala.Namespace)
-            add_completions_for_ns (peeled as Vala.Namespace, completions);
-        else
-            debug ("[textDocument/completion] could not get datatype");
+            if (type_sym != null)
+                add_completions_for_type (type_sym, completions, current_scope, is_instance);
+            // and try some more
+            else if (peeled is Vala.Signal)
+                add_completions_for_signal (peeled as Vala.Signal, completions);
+            else if (peeled is Vala.Namespace)
+                add_completions_for_ns (peeled as Vala.Namespace, completions);
+            else {
+                if (result is Vala.MemberAccess &&
+                    ((Vala.MemberAccess)result).inner != null) {
+                    result = ((Vala.MemberAccess)result).inner;
+                    // maybe our expression was wrapped in extra parentheses:
+                    // (x as T). for example
+                    continue; 
+                }
+                debug ("[textDocument/completion] could not get datatype");
+            }
+            break;      // break by default
+        } while (true);
 
         foreach (CompletionItem comp in completions)
             json_array.add_element (Json.gobject_serialize (comp));
