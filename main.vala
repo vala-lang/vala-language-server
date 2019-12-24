@@ -162,6 +162,7 @@ class Vls.Server {
         notif_handlers["textDocument/didChange"] = this.textDocumentDidChange;
         call_handlers["textDocument/documentSymbol"] = this.textDocumentDocumentSymbol;
         call_handlers["textDocument/completion"] = this.textDocumentCompletion;
+        call_handlers["textDocument/signatureHelp"] = this.textDocumentSignatureHelp;
 
         debug ("Finished constructing");
     }
@@ -479,6 +480,9 @@ class Vls.Server {
                     documentSymbolProvider: new Variant.boolean (true),
                     completionProvider: buildDict(
                         triggerCharacters: new Variant.strv (new string[] {".", ">"})
+                    ),
+                    signatureHelpProvider: buildDict(
+                        triggerCharacters: new Variant.strv (new string[] {"(", ","})
                     )
                 )
             ));
@@ -950,11 +954,6 @@ class Vls.Server {
             if (prop_sym.property_type == null)
                 return null;
             return prop_sym.property_type.to_string ();
-        } else if (sym is Vala.Variable) {
-            var var_sym = sym as Vala.Variable;
-            if (var_sym.variable_type == null)
-                return null;
-            return var_sym.variable_type.to_string ();
         } else if (sym is Vala.Callable) {
             var method_sym = sym as Vala.Callable;
             if (method_sym.return_type == null)
@@ -965,22 +964,34 @@ class Vls.Server {
             foreach (var p in method_sym.get_parameters ()) {
                 if (at_least_one)
                     param_string += ", ";
-                if (p.ellipsis)
-                    param_string += "...";
-                else {
-                    if (p.direction == Vala.ParameterDirection.OUT)
-                        param_string += "out ";
-                    else if (p.direction == Vala.ParameterDirection.REF)
-                        param_string += "ref ";
-                    if (only_type_names)
-                        param_string += p.variable_type.data_type.to_string ();
-                    else
-                        param_string += p.variable_type.to_string ();
-                    param_string += " " + p.name;
-                }
+                param_string += get_symbol_data_type (p, only_type_names);
                 at_least_one = true;
             }
             return @"($param_string) -> " + (ret_type ?? "void");
+        } else if (sym is Vala.Parameter) {
+            var p = sym as Vala.Parameter;
+            string param_string = "";
+            if (p.ellipsis)
+                param_string = "...";
+            else {
+                if (p.direction == Vala.ParameterDirection.OUT)
+                    param_string = "out ";
+                else if (p.direction == Vala.ParameterDirection.REF)
+                    param_string = "ref ";
+                if (only_type_names)
+                    param_string += p.variable_type.data_type.to_string ();
+                else
+                    param_string += p.variable_type.to_string ();
+                param_string += " " + p.name;
+            }
+            return param_string;
+        } else if (sym is Vala.Variable) {
+            // Vala.Parameter is also a variable, so we've already
+            // handled it as a special case
+            var var_sym = sym as Vala.Variable;
+            if (var_sym.variable_type == null)
+                return null;
+            return var_sym.variable_type.to_string ();
         } else if (sym is Vala.Constant) {
             var const_sym = sym as Vala.Constant;
             string type_string = "";
@@ -1388,7 +1399,7 @@ class Vls.Server {
 
         if (idx >= 2 && doc.file.content[idx-2:idx] == "->") {
             is_pointer_access = true;
-            debug ("found pointer access");
+            debug ("[textDocument/completion] found pointer access");
             pos = p.position.translate (0, -2);
         } else if (idx >= 1 && doc.file.content[idx-1:idx] == ".")
             pos = p.position.translate (0, -1);
@@ -1448,7 +1459,7 @@ class Vls.Server {
         else if (peeled is Vala.Namespace)
             add_completions_for_ns (peeled as Vala.Namespace, completions);
         else
-            debug ("could not get datatype");
+            debug ("[textDocument/completion] could not get datatype");
 
         foreach (CompletionItem comp in completions)
             json_array.add_element (Json.gobject_serialize (comp));
@@ -1458,6 +1469,167 @@ class Vls.Server {
             client.reply (id, variant_array);
         } catch (Error e) {
             debug (@"[textDocument/completion] failed to reply to client: $(e.message)");
+        }
+    }
+
+    void textDocumentSignatureHelp (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        var p = parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
+        TextDocument? doc = ctx.get_source_file (p.textDocument.uri);
+        if (doc == null) {
+            debug ("unknown file %s", p.textDocument.uri);
+            try {
+                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+            } catch (Error e) {
+                debug ("[textDocument/signatureHelp] failed to reply to client: %s", e.message);
+            }
+            return;
+        }
+
+        var signatures = new Gee.ArrayList <SignatureInformation> ();
+        var json_array = new Json.Array ();
+        int active_param = 0;
+
+        long idx = (long) get_string_pos (doc.file.content, p.position.line, p.position.character);
+        Position pos = p.position;
+
+        if (idx >= 2 && doc.file.content[idx-2:idx] == "(") {
+            debug ("[textDocument/signatureHelp] possible argument list");
+            pos = p.position.translate (0, -2);
+        } else if (idx >= 1 && doc.file.content[idx-1:idx] == ",") {
+            debug ("[textDocument/signatureHelp] possible ith argument in list");
+            pos = p.position.translate (0, -1);
+        }
+
+        var fs = new FindSymbol (doc.file, pos.to_libvala ());
+
+        // filter the results for MethodCall's and ExpressionStatements
+        var fs_results = fs.result;
+        fs.result = new Gee.ArrayList<Vala.CodeNode> ();
+
+        foreach (var res in fs_results) {
+            debug (@"[textDocument/signatureHelp] found $(res.type_name) (semanalyzed = $(res.checked))");
+            if (res is Vala.ExpressionStatement || res is Vala.MethodCall)
+                fs.result.add (res);
+        }
+
+        if (fs.result.size == 0 && fs_results.size > 0) {
+            // In cases where our cursor is to the right of a method call and
+            // not inside it (most likely because the right parenthesis is omitted),
+            // we might not find any MethodCall or ExpressionStatements, so instead
+            // look at whatever we found and see if it is a child of what we want.
+            foreach (var res in fs_results) {
+                // walk up tree
+                for (Vala.CodeNode? x = res; x != null; x = x.parent_node)
+                    if (x is Vala.ExpressionStatement || x is Vala.MethodCall)
+                        fs.result.add (x);
+            }
+        }
+
+        if (fs.result.size == 0) {
+            debug ("[textDocument/signatureHelp] no results found");
+            try {
+                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+            } catch (Error e) {
+                debug ("[textDocument/signatureHelp] failed to reply to client: %s", e.message);
+            }
+            return;
+        }
+
+        Vala.CodeNode result = get_best (fs, doc.file);
+
+        if (result is Vala.ExpressionStatement) {
+            result = (result as Vala.ExpressionStatement).expression;
+            debug (@"[textDocument/signatureHelp] peeling away expression statement: $(result)");
+        }
+
+        if (result is Vala.MethodCall) {
+            var mc = result as Vala.MethodCall;
+            // TODO: NamedArgument's, whenever they become supported in upstream
+            active_param = mc.initial_argument_count;
+            foreach (var arg in mc.get_argument_list ()) {
+                debug (@"$mc: found argument ($arg)");
+            }
+            var si = new SignatureInformation ();
+            Vala.List<Vala.Parameter>? param_list = null;
+            // if (mc.call.symbol_reference != null) {
+            //     var sym = mc.call.symbol_reference;
+            //     si.label = @"$(sym.name) $(get_symbol_data_type (sym))";
+            //     si.documentation = get_symbol_comment (sym);
+            //     // this is guaranteed, but in theory could be false
+            //     if (sym is Vala.Callable)
+            //         param_list = (sym as Vala.Callable).get_parameters ();
+            // } else {
+
+            // get the method type from the expression
+            Vala.DataType data_type = mc.call.value_type;
+            if (data_type is Vala.CallableType) {
+                var ct = data_type as Vala.CallableType;
+                param_list = ct.get_parameters ();
+
+                // The explicit symbol referenced, like a local variable
+                // or a method. Could be null if we invoke an array element, 
+                // for example.
+                Vala.Symbol? explicit_sym = mc.call.symbol_reference;
+                Vala.Symbol? sym = null;
+                if (ct is Vala.DelegateType)
+                    sym = (ct as Vala.DelegateType).delegate_symbol;
+                else if (ct is Vala.MethodType)
+                    sym = (ct as Vala.MethodType).method_symbol;
+                else if (ct is Vala.SignalType)
+                    sym = (ct as Vala.SignalType).signal_symbol;
+
+                assert (explicit_sym != null || sym != null);
+                
+                if (explicit_sym == null) {
+                    si.label = get_symbol_data_type (sym);
+                    si.documentation = get_symbol_comment (sym);
+                } else {
+                    // TODO: need a function to display symbol names correctly given context
+                    if (sym != null) {
+                        si.label = @"$(explicit_sym.name) $(get_symbol_data_type (sym))";
+                        si.documentation = get_symbol_comment (sym);
+                    } else {
+                        si.label = @"$(explicit_sym.name) $(get_symbol_data_type (explicit_sym))";
+                    }
+                    // try getting the documentation for the explicit symbol
+                    // if the type does not have any documentation
+                    if (si.documentation == null)
+                        si.documentation = get_symbol_comment (explicit_sym);
+                }
+            }
+
+            // }
+            
+            if (param_list != null) {
+                foreach (var parameter in param_list) {
+                    si.parameters.add (new ParameterInformation () {
+                        label = get_symbol_data_type (parameter),
+                        documentation = get_symbol_comment (parameter)
+                    });
+                    debug (@"found parameter $parameter (name = $(parameter.name))");
+                }
+            }
+            signatures.add (si);
+        } else {
+            debug ("[textDocument/signatureHelp] not a method call");
+            try {
+                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+            } catch (Error e) {
+                debug ("[textDocument/signatureHelp] failed to reply to client: %s", e.message);
+            }
+        }
+
+        foreach (var sinfo in signatures)
+            json_array.add_element (Json.gobject_serialize (sinfo));
+
+        try {
+            Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
+            client.reply (id, buildDict (
+                signatures: variant_array,
+                activeParameter: new Variant.int32 (active_param)
+            ));
+        } catch (Error e) {
+            debug (@"[textDocument/signatureHelp] failed to reply to client: $(e.message)");
         }
     }
 
