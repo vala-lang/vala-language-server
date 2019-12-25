@@ -101,6 +101,7 @@ namespace LanguageServer {
         public Range.from_sourceref (Vala.SourceReference sref) {
             this.start = new Position.from_libvala (sref.begin);
             this.end = new Position.from_libvala (sref.end);
+            this.start.character -= 1;
         }
 
         public uint hash () {
@@ -442,5 +443,15 @@ namespace LanguageServer {
     class ParameterInformation : Object {
         public string label { get; set; }
         public MarkupContent documentation { get; set; }
+    }
+
+    class MarkedString : Object {
+        public string language { get; set; }
+        public string value { get; set; }
+    }
+
+    class Hover : Object {
+        public MarkupContent contents { get; set; }
+        public Range range { get; set; }
     }
 }
