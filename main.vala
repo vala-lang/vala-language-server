@@ -1573,7 +1573,11 @@ class Vls.Server {
         if (result is Vala.MethodCall) {
             var mc = result as Vala.MethodCall;
             // TODO: NamedArgument's, whenever they become supported in upstream
-            active_param = mc.initial_argument_count;
+            active_param = mc.initial_argument_count - 1;
+            if (active_param < 0)
+                active_param = 0;
+            else if (mc.extra_comma)
+                active_param++;
             foreach (var arg in mc.get_argument_list ()) {
                 debug (@"$mc: found argument ($arg)");
             }
