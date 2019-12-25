@@ -953,19 +953,28 @@ class Vls.Server {
      * Return the string representation of a symbol's type. This is used as the detailed
      * information for a completion item.
      */
-    public static string? get_symbol_data_type (Vala.Symbol sym, bool only_type_names = false) {
-        if (sym is Vala.Property) {
+    public static string? get_symbol_data_type (Vala.Symbol? sym, bool only_type_names = false, Vala.Symbol? parent = null) {
+        if (sym == null) {
+            return null;
+        } else if (sym is Vala.Property) {
             var prop_sym = sym as Vala.Property;
             if (prop_sym.property_type == null)
-                return null;
+                return null; 
             if (only_type_names)
                 return prop_sym.property_type.to_string ();
-            else
-                return @"$(prop_sym.property_type) $(prop_sym.name)";
+            else {
+                string? parent_str = get_symbol_data_type (parent, only_type_names);
+                if (parent_str != null)
+                    parent_str = @"$(parent_str)::";
+                else
+                    parent_str = "";
+                return @"$(prop_sym.property_type) $parent_str$(prop_sym.name)";
+            }
         } else if (sym is Vala.Callable) {
             var method_sym = sym as Vala.Callable;
             if (method_sym.return_type == null)
                 return null;
+            var creation_method = sym as Vala.CreationMethod;
             string? ret_type = method_sym.return_type.to_string ();
             string param_string = "";
             bool at_least_one = false;
@@ -975,10 +984,26 @@ class Vls.Server {
                 param_string += get_symbol_data_type (p, only_type_names);
                 at_least_one = true;
             }
-            if (only_type_names)
-                return @"($param_string) -> " + (ret_type ?? "void");
-            else
-                return (ret_type ?? "void") + @" $(sym.name) ($param_string)";
+            if (only_type_names) {
+                return @"($param_string) -> " + (ret_type ?? (creation_method != null ? creation_method.class_name : "void"));
+            } else {
+                string? parent_str = get_symbol_data_type (parent, only_type_names);
+                if (creation_method == null) {
+                    if (parent_str != null)
+                        parent_str = @"$parent_str::";
+                    else
+                        parent_str = "";
+                    return (ret_type ?? "void") + @" $parent_str$(sym.name) ($param_string)";
+                } else {
+                    string sym_name = sym.name == ".new" ? (parent_str ?? creation_method.class_name) : sym.name;
+                    string prefix_str = "";
+                    if (parent_str != null)
+                        prefix_str = @"$parent_str::";
+                    else
+                        prefix_str = @"$(creation_method.class_name)::";
+                    return @"$prefix_str$sym_name ($param_string)";
+                }
+            }
         } else if (sym is Vala.Parameter) {
             var p = sym as Vala.Parameter;
             string param_string = "";
@@ -1007,8 +1032,14 @@ class Vls.Server {
                 return null;
             if (only_type_names)
                 return var_sym.variable_type.to_string ();
-            else
-                return @"$(var_sym.variable_type) $(var_sym.name)";
+            else {
+                string? parent_str = get_symbol_data_type (parent, only_type_names);
+                if (parent_str != null)
+                    parent_str = @"$(parent_str)::";
+                else
+                    parent_str = "";
+                return @"$(var_sym.variable_type) $parent_str$(var_sym.name)";
+            }
         } else if (sym is Vala.Constant) {
             var const_sym = sym as Vala.Constant;
             string type_string = "";
@@ -1172,6 +1203,7 @@ class Vls.Server {
 
             foreach (var method_sym in object_type.get_methods ()) {
                 if (method_sym.name == ".new" || method_sym.is_instance_member () != is_instance
+                    || (method_sym is Vala.CreationMethod && is_instance)
                     || !is_symbol_accessible (method_sym, current_scope))
                     continue;
                 completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
@@ -1536,7 +1568,8 @@ class Vls.Server {
 
         foreach (var res in fs_results) {
             debug (@"[textDocument/signatureHelp] found $(res.type_name) (semanalyzed = $(res.checked))");
-            if (res is Vala.ExpressionStatement || res is Vala.MethodCall)
+            if (res is Vala.ExpressionStatement || res is Vala.MethodCall
+             || res is Vala.ObjectCreationExpression)
                 fs.result.add (res);
         }
 
@@ -1570,6 +1603,17 @@ class Vls.Server {
             debug (@"[textDocument/signatureHelp] peeling away expression statement: $(result)");
         }
 
+        var si = new SignatureInformation ();
+        Vala.List<Vala.Parameter>? param_list = null;
+        // The explicit symbol referenced, like a local variable
+        // or a method. Could be null if we invoke an array element, 
+        // for example.
+        Vala.Symbol? explicit_sym = null;
+        // The symbol referenced indirectly
+        Vala.Symbol? type_sym = null;
+        // The parent symbol (useful for creation methods)
+        Vala.Symbol? parent_sym = null;
+
         if (result is Vala.MethodCall) {
             var mc = result as Vala.MethodCall;
             // TODO: NamedArgument's, whenever they become supported in upstream
@@ -1581,75 +1625,76 @@ class Vls.Server {
             foreach (var arg in mc.get_argument_list ()) {
                 debug (@"$mc: found argument ($arg)");
             }
-            var si = new SignatureInformation ();
-            Vala.List<Vala.Parameter>? param_list = null;
-            // if (mc.call.symbol_reference != null) {
-            //     var sym = mc.call.symbol_reference;
-            //     si.label = @"$(sym.name) $(get_symbol_data_type (sym))";
-            //     si.documentation = get_symbol_comment (sym);
-            //     // this is guaranteed, but in theory could be false
-            //     if (sym is Vala.Callable)
-            //         param_list = (sym as Vala.Callable).get_parameters ();
-            // } else {
 
             // get the method type from the expression
             Vala.DataType data_type = mc.call.value_type;
+            explicit_sym = mc.call.symbol_reference;
+
             if (data_type is Vala.CallableType) {
                 var ct = data_type as Vala.CallableType;
                 param_list = ct.get_parameters ();
-
-                // The explicit symbol referenced, like a local variable
-                // or a method. Could be null if we invoke an array element, 
-                // for example.
-                Vala.Symbol? explicit_sym = mc.call.symbol_reference;
-                Vala.Symbol? sym = null;
+ 
                 if (ct is Vala.DelegateType)
-                    sym = (ct as Vala.DelegateType).delegate_symbol;
+                    type_sym = (ct as Vala.DelegateType).delegate_symbol;
                 else if (ct is Vala.MethodType)
-                    sym = (ct as Vala.MethodType).method_symbol;
+                    type_sym = (ct as Vala.MethodType).method_symbol;
                 else if (ct is Vala.SignalType)
-                    sym = (ct as Vala.SignalType).signal_symbol;
+                    type_sym = (ct as Vala.SignalType).signal_symbol;
+            }
+        } else if (result is Vala.ObjectCreationExpression) {
+            var oce = result as Vala.ObjectCreationExpression;
 
-                assert (explicit_sym != null || sym != null);
-                
-                if (explicit_sym == null) {
-                    si.label = get_symbol_data_type (sym);
-                    si.documentation = get_symbol_comment (sym);
-                } else {
-                    // TODO: need a function to display symbol names correctly given context
-                    if (sym != null) {
-                        si.label = get_symbol_data_type (sym);
-                        si.documentation = get_symbol_comment (sym);
-                    } else {
-                        si.label = get_symbol_data_type (explicit_sym);
-                    }
-                    // try getting the documentation for the explicit symbol
-                    // if the type does not have any documentation
-                    if (si.documentation == null)
-                        si.documentation = get_symbol_comment (explicit_sym);
-                }
+            explicit_sym = oce.symbol_reference;
+
+            if (explicit_sym == null && oce.member_name != null) {
+                explicit_sym = oce.member_name.symbol_reference;
+                debug (@"[textDocument/signatureHelp] explicit_sym = $explicit_sym $(explicit_sym.type_name)");
             }
 
-            // }
-            
-            if (param_list != null) {
-                foreach (var parameter in param_list) {
-                    si.parameters.add (new ParameterInformation () {
-                        label = get_symbol_data_type (parameter),
-                        documentation = get_symbol_comment (parameter)
-                    });
-                    debug (@"found parameter $parameter (name = $(parameter.name))");
-                }
-                signatures.add (si);
-            }
+            if (explicit_sym != null && explicit_sym is Vala.Callable)
+                param_list = (explicit_sym as Vala.Callable).get_parameters ();
+
+            parent_sym = explicit_sym.parent_symbol;
         } else {
-            debug ("[textDocument/signatureHelp] not a method call");
+            debug ("[textDocument/signatureHelp] neither a method call nor object creation expr");
             try {
                 client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
             } catch (Error e) {
                 debug ("[textDocument/signatureHelp] failed to reply to client: %s", e.message);
             }
+            return;     // early exit
+        } 
+
+        assert (explicit_sym != null || type_sym != null);
+                
+        if (explicit_sym == null) {
+            si.label = get_symbol_data_type (type_sym);
+            si.documentation = get_symbol_comment (type_sym);
+        } else {
+            // TODO: need a function to display symbol names correctly given context
+            if (type_sym != null) {
+                si.label = get_symbol_data_type (type_sym);
+                si.documentation = get_symbol_comment (type_sym);
+            } else {
+                si.label = get_symbol_data_type (explicit_sym, false, parent_sym);
+            }
+            // try getting the documentation for the explicit symbol
+            // if the type does not have any documentation
+            if (si.documentation == null)
+                si.documentation = get_symbol_comment (explicit_sym);
         }
+
+        if (param_list != null) {
+            foreach (var parameter in param_list) {
+                si.parameters.add (new ParameterInformation () {
+                    label = get_symbol_data_type (parameter),
+                    documentation = get_symbol_comment (parameter)
+                });
+                debug (@"found parameter $parameter (name = $(parameter.name))");
+            }
+            signatures.add (si);
+        }
+
 
         foreach (var sinfo in signatures)
             json_array.add_element (Json.gobject_serialize (sinfo));
