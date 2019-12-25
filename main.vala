@@ -1636,8 +1636,8 @@ class Vls.Server {
                     });
                     debug (@"found parameter $parameter (name = $(parameter.name))");
                 }
+                signatures.add (si);
             }
-            signatures.add (si);
         } else {
             debug ("[textDocument/signatureHelp] not a method call");
             try {
