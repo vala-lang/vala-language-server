@@ -163,6 +163,7 @@ class Vls.Server {
         call_handlers["textDocument/documentSymbol"] = this.textDocumentDocumentSymbol;
         call_handlers["textDocument/completion"] = this.textDocumentCompletion;
         call_handlers["textDocument/signatureHelp"] = this.textDocumentSignatureHelp;
+        call_handlers["textDocument/hover"] = this.textDocumentHover;
 
         debug ("Finished constructing");
     }
@@ -483,7 +484,8 @@ class Vls.Server {
                     ),
                     signatureHelpProvider: buildDict(
                         triggerCharacters: new Variant.strv (new string[] {"(", ","})
-                    )
+                    ),
+                    hoverProvider: new Variant.boolean (true)
                 )
             ));
         } catch (Error e) {
@@ -956,7 +958,10 @@ class Vls.Server {
             var prop_sym = sym as Vala.Property;
             if (prop_sym.property_type == null)
                 return null;
-            return prop_sym.property_type.to_string ();
+            if (only_type_names)
+                return prop_sym.property_type.to_string ();
+            else
+                return @"$(prop_sym.property_type) $(prop_sym.name)";
         } else if (sym is Vala.Callable) {
             var method_sym = sym as Vala.Callable;
             if (method_sym.return_type == null)
@@ -970,7 +975,10 @@ class Vls.Server {
                 param_string += get_symbol_data_type (p, only_type_names);
                 at_least_one = true;
             }
-            return @"($param_string) -> " + (ret_type ?? "void");
+            if (only_type_names)
+                return @"($param_string) -> " + (ret_type ?? "void");
+            else
+                return (ret_type ?? "void") + @" $(sym.name) ($param_string)";
         } else if (sym is Vala.Parameter) {
             var p = sym as Vala.Parameter;
             string param_string = "";
@@ -983,9 +991,12 @@ class Vls.Server {
                     param_string = "ref ";
                 if (only_type_names)
                     param_string += p.variable_type.data_type.to_string ();
-                else
+                else {
                     param_string += p.variable_type.to_string ();
-                param_string += " " + p.name;
+                    param_string += " " + p.name;
+                    if (p.initializer != null)
+                        param_string += @" = $(p.initializer)";
+                }
             }
             return param_string;
         } else if (sym is Vala.Variable) {
@@ -994,7 +1005,10 @@ class Vls.Server {
             var var_sym = sym as Vala.Variable;
             if (var_sym.variable_type == null)
                 return null;
-            return var_sym.variable_type.to_string ();
+            if (only_type_names)
+                return var_sym.variable_type.to_string ();
+            else
+                return @"$(var_sym.variable_type) $(var_sym.name)";
         } else if (sym is Vala.Constant) {
             var const_sym = sym as Vala.Constant;
             string type_string = "";
@@ -1100,7 +1114,7 @@ class Vls.Server {
      * see `vala/valamemberaccess.vala`
      * This determines whether we can access a symbol in the current scope.
      */
-    bool is_symbol_accessible (Vala.Symbol member, Vala.Scope current_scope) {
+    public static bool is_symbol_accessible (Vala.Symbol member, Vala.Scope current_scope) {
         if (member.access == Vala.SymbolAccessibility.PROTECTED && member.parent_symbol is Vala.TypeSymbol) {
             var target_type = (Vala.TypeSymbol) member.parent_symbol;
             bool in_subtype = false;
@@ -1600,10 +1614,10 @@ class Vls.Server {
                 } else {
                     // TODO: need a function to display symbol names correctly given context
                     if (sym != null) {
-                        si.label = @"$(explicit_sym.name) $(get_symbol_data_type (sym))";
+                        si.label = get_symbol_data_type (sym);
                         si.documentation = get_symbol_comment (sym);
                     } else {
-                        si.label = @"$(explicit_sym.name) $(get_symbol_data_type (explicit_sym))";
+                        si.label = get_symbol_data_type (explicit_sym);
                     }
                     // try getting the documentation for the explicit symbol
                     // if the type does not have any documentation
@@ -1644,6 +1658,63 @@ class Vls.Server {
             ));
         } catch (Error e) {
             debug (@"[textDocument/signatureHelp] failed to reply to client: $(e.message)");
+        }
+    }
+
+    void textDocumentHover (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        var p = parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
+        TextDocument? doc = ctx.get_source_file (p.textDocument.uri);
+        if (doc == null) {
+            debug ("unknown file %s", p.textDocument.uri);
+            try {
+                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+            } catch (Error e) {
+                debug ("[textDocument/hover] failed to reply to client: %s", e.message);
+            }
+            return;
+        }
+
+        Position pos = p.position;
+        var fs = new FindSymbol (doc.file, pos.to_libvala ());
+
+        if (fs.result.size == 0) {
+            debug ("[textDocument/hover] no results found");
+            try {
+                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+            } catch (Error e) {
+                debug ("[textDocument/hover] failed to reply to client: %s", e.message);
+            }
+            return;
+        }
+
+        Vala.CodeNode result = get_best (fs, doc.file);
+        var hoverInfo = new Hover () {
+            range = new Range.from_sourceref (result.source_reference)
+        };
+
+        if (result is Vala.Symbol) {
+            hoverInfo.contents = new MarkupContent () {
+                value = get_symbol_data_type (result as Vala.Symbol)
+            };
+        } else if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null) {
+            var sym = (result as Vala.Expression).symbol_reference;
+            hoverInfo.contents = new MarkupContent () {
+                value = get_symbol_data_type (sym)
+            };
+        } else {
+            bool is_instance = true;
+            Vala.TypeSymbol? type_sym = get_type_symbol (result, false, ref is_instance);
+            hoverInfo.contents = new MarkupContent () {
+                value = type_sym != null ? get_symbol_data_type (type_sym, true) : result.to_string ()
+            };
+        }
+
+        debug (@"[textDocument/hover] got $result");
+
+        try {
+            client.reply (id, object_to_variant (hoverInfo));
+        } catch (Error e) {
+            debug ("[textDocument/hover] failed to reply to client: %s", e.message);
         }
     }
 
