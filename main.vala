@@ -59,8 +59,8 @@ class Vls.Server {
     MainLoop loop;
     HashTable<string, string> cc;
     Context ctx;
-    const uint check_update_context_period_ms = 200;
-    const int64 update_context_delay_inc_us = 200 * 1000;
+    const uint check_update_context_period_ms = 400;
+    const int64 update_context_delay_inc_us = check_update_context_period_ms * 1000;
     const int64 update_context_delay_max_us = 1000 * 1000;
 
     HashTable<string, NotificationHandler> notif_handlers;
