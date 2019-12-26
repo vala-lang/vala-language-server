@@ -1401,10 +1401,16 @@ class Vls.Server {
      * Use this to complete members of a signal.
      */
     void add_completions_for_signal (Vala.Signal sig, Gee.Set<CompletionItem> completions) {
+        string arg_list = "";
+        foreach (var p in sig.get_parameters ()) {
+            if (arg_list != "")
+                arg_list += ", ";
+            arg_list += get_symbol_data_type (p);
+        }
         completions.add_all_array (new CompletionItem []{
-            new CompletionItem.for_signal ("connect", @"($(get_symbol_data_type (sig))) -> uint", "Connect signal"),
-            new CompletionItem.for_signal ("connect_after", @"($(get_symbol_data_type (sig))) -> uint", "Connect signal after default handler"),
-            new CompletionItem.for_signal ("disconnect", "(uint id) -> void", "Disconnect signal")
+            new CompletionItem.for_signal ("connect", @"uint connect ($arg_list)", "Connect signal"),
+            new CompletionItem.for_signal ("connect_after", @"uint connect_after ($arg_list)", "Connect signal after default handler"),
+            new CompletionItem.for_signal ("disconnect", "void disconnect (uint id)", "Disconnect signal")
         });
     }
 
@@ -1576,6 +1582,8 @@ class Vls.Server {
             }
             return;
         }
+        // force context update if necessary
+        require_updated_context ();
 
         var signatures = new Gee.ArrayList <SignatureInformation> ();
         var json_array = new Json.Array ();
@@ -1584,7 +1592,7 @@ class Vls.Server {
         long idx = (long) get_string_pos (doc.file.content, p.position.line, p.position.character);
         Position pos = p.position;
 
-        if (idx >= 2 && doc.file.content[idx-2:idx] == "(") {
+        if (idx >= 2 && doc.file.content[idx-1:idx] == "(") {
             debug ("[textDocument/signatureHelp] possible argument list");
             pos = p.position.translate (0, -2);
         } else if (idx >= 1 && doc.file.content[idx-1:idx] == ",") {
