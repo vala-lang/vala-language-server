@@ -59,6 +59,10 @@ class Vls.Server {
     MainLoop loop;
     HashTable<string, string> cc;
     Context ctx;
+    const uint check_update_context_period_ms = 200;
+    const int64 update_context_delay_inc_us = 200 * 1000;
+    const int64 update_context_delay_max_us = 1000 * 1000;
+
     HashTable<string, NotificationHandler> notif_handlers;
     HashTable<string, CallHandler> call_handlers;
     InitializeParams init_params;
@@ -491,6 +495,12 @@ class Vls.Server {
         } catch (Error e) {
             debug (@"initialize: failed to reply to client: $(e.message)");
         }
+
+        // listen for context update requests
+        Timeout.add(check_update_context_period_ms, () => {
+            check_update_context ();
+            return true;
+        });
     }
 
     // BFS for file
@@ -605,13 +615,12 @@ class Vls.Server {
             ctx.invalidate ();
         }
 
-        // compile everything if context is dirty
-        if (ctx.dirty) {
-            ctx.check ();
-        }
-
-        publishDiagnostics (client);
+        request_context_update (client);
     }
+
+    Jsonrpc.Client? update_context_client = null;
+    int64 update_context_requests = 0;
+    int64 update_context_time_us = 0;
 
     void textDocumentDidChange (Jsonrpc.Client client, Variant @params) {
         var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
@@ -664,14 +673,35 @@ class Vls.Server {
         }
         source.file.content = sb.str;
 
-        // if we're at this point, the file is present in the context
-        // any change we make invalidates the context
-        ctx.invalidate ();
+        request_context_update (client);
+    }
 
-        // we have to update everything
-        ctx.check ();
+    void request_context_update (Jsonrpc.Client client) {
+        update_context_client = client;
+        update_context_requests += 1;
+        int64 delay_us = int64.min (update_context_delay_inc_us * update_context_requests, update_context_delay_max_us);
+        update_context_time_us = get_monotonic_time () + delay_us;
+        debug (@"Context update (re-)scheduled in $((int) (delay_us / 1000)) ms");
+    }
 
-        publishDiagnostics (client);
+    void check_update_context () {
+        if (update_context_requests > 0 && get_monotonic_time () >= update_context_time_us) {
+            update_context_requests = 0;
+            update_context_time_us = 0;
+            ctx.invalidate ();
+            ctx.check ();
+            publishDiagnostics (update_context_client);
+        }
+    }
+
+    void require_updated_context () {
+        if (update_context_requests > 0) {
+            update_context_requests = 0;
+            update_context_time_us = 0;
+            ctx.invalidate ();
+            ctx.check ();
+            publishDiagnostics (update_context_client);
+        }
     }
 
     void publishDiagnostics (Jsonrpc.Client client, string? doc_uri = null) {
@@ -1442,6 +1472,8 @@ class Vls.Server {
             }
             return;
         }
+        // force context update if necessary
+        require_updated_context ();
         bool is_pointer_access = false;
         long idx = (long) get_string_pos (doc.file.content, p.position.line, p.position.character);
         Position pos = p.position;
