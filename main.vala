@@ -1643,6 +1643,15 @@ class Vls.Server {
             }
         } else if (result is Vala.ObjectCreationExpression) {
             var oce = result as Vala.ObjectCreationExpression;
+            // TODO: NamedArgument's, whenever they become supported in upstream
+            active_param = oce.initial_argument_count - 1;
+            if (active_param < 0)
+                active_param = 0;
+            else if (oce.extra_comma)
+                active_param++;
+            foreach (var arg in oce.get_argument_list ()) {
+                debug (@"$oce: found argument ($arg)");
+            }
 
             explicit_sym = oce.symbol_reference;
 
