@@ -1119,7 +1119,10 @@ class Vls.Server {
                     at_least_one = true;
                 }
             }
-            return type_string;
+            if (object_sym is Vala.Class)
+                return (only_type_names ? "" : "class ") + @"$type_string";
+            else
+                return (only_type_names ? "" : "interface ") + @"$type_string";
         } else if (sym is Vala.ErrorCode) {
             var err_val = (sym as Vala.ErrorCode).value;
             return err_val != null ? err_val.to_string () : null;
@@ -1143,11 +1146,14 @@ class Vls.Server {
             if (struct_sym.base_type != null)
                 type_string += ": " + struct_sym.base_type.to_string ();
 
-            return type_string;
+            return (only_type_names ? "" : "struct ") + @"$type_string";
         } else if (sym is Vala.ErrorDomain) {
             // don't do this if LSP ever gets CompletionItemKind.Error
             var err_sym = sym as Vala.ErrorDomain;
-            return @"(errordomain) $err_sym";
+            return @"errordomain $err_sym";
+        } else if (sym is Vala.Namespace) {
+            var ns_sym = sym as Vala.Namespace;
+            return @"$ns_sym";
         } else {
             debug (@"get_symbol_data_type: unsupported symbol $(sym.type_name)");
         }
@@ -1159,7 +1165,7 @@ class Vls.Server {
             return null;
         string comment = sym.comment.content;
         try {
-            comment = /^\s*\*(.*)/m.replace (comment, comment.length, 0, "\\1\n");
+            comment = /^\s*\*(.*)/m.replace (comment, comment.length, 0, "\\1");
         } catch (RegexError e) {
             warning (@"failed to parse comment...\n$comment\n...");
             comment = "(failed to parse comment)";
@@ -1791,23 +1797,37 @@ class Vls.Server {
         };
 
         if (result is Vala.Symbol) {
-            hoverInfo.contents = new MarkupContent () {
+            hoverInfo.contents.add (new MarkedString () {
+                language = "vala",
                 value = get_symbol_data_type (result as Vala.Symbol)
-            };
+            });
+            var comment = get_symbol_comment (result as Vala.Symbol);
+            if (comment != null) {
+                hoverInfo.contents.add (new MarkedString () {
+                    value = comment.value
+                });
+            }
         } else if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null) {
             var sym = (result as Vala.Expression).symbol_reference;
-            hoverInfo.contents = new MarkupContent () {
-                value = get_symbol_data_type (sym)
-            };
+            hoverInfo.contents.add (new MarkedString () {
+                language = "vala",
+                value = get_symbol_data_type (sym, result is Vala.Literal)
+            });
+        } else if (result is Vala.CastExpression) {
+            hoverInfo.contents.add (new MarkedString () {
+                language = "vala",
+                value = @"$result"
+            });
         } else {
             bool is_instance = true;
             Vala.TypeSymbol? type_sym = get_type_symbol (result, false, ref is_instance);
-            hoverInfo.contents = new MarkupContent () {
+            hoverInfo.contents.add (new MarkedString () {
+                language = "vala",
                 value = type_sym != null ? get_symbol_data_type (type_sym, true) : result.to_string ()
-            };
+            });
         }
 
-        debug (@"[textDocument/hover] got $result");
+        debug (@"[textDocument/hover] got $result $(result.type_name)");
 
         try {
             client.reply (id, object_to_variant (hoverInfo));
