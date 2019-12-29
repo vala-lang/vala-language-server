@@ -747,9 +747,9 @@ class Vls.Server {
     delegate void OnContextUpdatedFunc (bool request_cancelled);
 
     /**
-     * Rather than satisfying all requests in check_update_context (),
+     * Rather than satisfying all requests in `check_update_context ()`,
      * to avoid race conditions, we have to spawn a timeout to check for 
-     * the right conditions to call on_context_updated_func ().
+     * the right conditions to call `on_context_updated_func ()`.
      */
     void wait_for_context_update (Variant id, owned OnContextUpdatedFunc on_context_updated_func) {
         // we've already updated the context
@@ -889,15 +889,20 @@ class Vls.Server {
         foreach (var node in fs.result) {
             if (best == null) {
                 best = node;
-            } else if (best.source_reference.begin.column <= node.source_reference.begin.column &&
-                       node.source_reference.end.column <= best.source_reference.end.column &&
-                       // don't get implicit `this` accesses
-                       !(best.source_reference.begin.column == node.source_reference.begin.column &&
-                         node.source_reference.end.column == best.source_reference.end.column &&
-                         node is Vala.MemberAccess && 
-                         ((Vala.MemberAccess)node).member_name == "this" &&
-                         ((Vala.MemberAccess)node).inner == null)) {
-                best = node;
+            } else {
+                var best_begin = new Position.from_libvala (best.source_reference.begin);
+                var best_end = new Position.from_libvala (best.source_reference.end);
+                var node_begin = new Position.from_libvala (node.source_reference.begin);
+                var node_end = new Position.from_libvala (node.source_reference.end);
+
+                if (best_begin.compare (node_begin) <= 0 && node_end.compare (best_end) <= 0 &&
+                    // don't get implicit `this` accesses
+                    !(best.source_reference.begin.column == node.source_reference.begin.column &&
+                        node.source_reference.end.column == best.source_reference.end.column &&
+                        node is Vala.MemberAccess && 
+                        ((Vala.MemberAccess)node).member_name == "this" &&
+                        ((Vala.MemberAccess)node).inner == null))
+                    best = node;
             }
         }
 
@@ -1739,7 +1744,7 @@ class Vls.Server {
                 pos = p.position.translate (0, -1);
             }
 
-            var fs = new FindSymbol (doc.file, pos.to_libvala ());
+            var fs = new FindSymbol (doc.file, pos.to_libvala (), true);
 
             // filter the results for MethodCall's and ExpressionStatements
             var fs_results = fs.result;
