@@ -1097,6 +1097,7 @@ class Vls.Server {
                 return null;
             var creation_method = sym as Vala.CreationMethod;
             string? ret_type = method_sym.return_type.to_string ();
+            string delg_type = (method_sym is Vala.Delegate) ? "delegate " : "";
             string param_string = "";
             bool at_least_one = false;
             foreach (var p in method_sym.get_parameters ()) {
@@ -1106,7 +1107,7 @@ class Vls.Server {
                 at_least_one = true;
             }
             if (only_type_names) {
-                return @"($param_string) -> " + (ret_type ?? (creation_method != null ? creation_method.class_name : "void"));
+                return @"$delg_type($param_string) -> " + (ret_type ?? (creation_method != null ? creation_method.class_name : "void"));
             } else {
                 string? parent_str = parent != null ? parent.to_string () : null;
                 if (creation_method == null) {
@@ -1114,7 +1115,7 @@ class Vls.Server {
                         parent_str = @"$parent_str::";
                     else
                         parent_str = "";
-                    return (ret_type ?? "void") + @" $parent_str$(sym.name) ($param_string)";
+                    return delg_type + (ret_type ?? "void") + @" $parent_str$(sym.name) ($param_string)";
                 } else {
                     string sym_name = sym.name == ".new" ? (parent_str ?? creation_method.class_name) : sym.name;
                     string prefix_str = "";
@@ -1122,7 +1123,7 @@ class Vls.Server {
                         prefix_str = @"$parent_str::";
                     else
                         prefix_str = @"$(creation_method.class_name)::";
-                    return @"$prefix_str$sym_name ($param_string)";
+                    return @"$delg_type$prefix_str$sym_name ($param_string)";
                 }
             }
         } else if (sym is Vala.Parameter) {
@@ -1245,6 +1246,9 @@ class Vls.Server {
         } else if (sym is Vala.Namespace) {
             var ns_sym = sym as Vala.Namespace;
             return @"$ns_sym";
+        } else if (sym is Vala.Enum) {
+            var enum_sym = sym as Vala.Enum;
+            return (only_type_names ? "" : "enum ") + @"$(enum_sym.name)";
         } else {
             debug (@"get_symbol_data_type: unsupported symbol $(sym.type_name)");
         }
@@ -1963,6 +1967,12 @@ class Vls.Server {
                     language = "vala",
                     value = get_symbol_data_type (sym, result is Vala.Literal)
                 });
+                var comment = get_symbol_comment (sym);
+                if (comment != null) {
+                    hoverInfo.contents.add (new MarkedString () {
+                        value = comment.value
+                    });
+                }
             } else if (result is Vala.CastExpression) {
                 hoverInfo.contents.add (new MarkedString () {
                     language = "vala",
