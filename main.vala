@@ -1587,7 +1587,6 @@ class Vls.Server {
         bool is_pointer_access = false;
         long idx = (long) get_string_pos (doc.file.content, p.position.line, p.position.character);
         Position pos = p.position;
-        Position end_pos = pos;
 
         if (idx >= 2 && doc.file.content[idx-2:idx] == "->") {
             is_pointer_access = true;
@@ -1609,7 +1608,7 @@ class Vls.Server {
                 return;
             }
 
-            var fs = new FindSymbol (doc.file, pos.to_libvala (), true, end_pos.to_libvala ());
+            var fs = new FindSymbol (doc.file, pos.to_libvala (), true);
 
             if (fs.result.size == 0) {
                 debug ("[textDocument/completion] no results found");
