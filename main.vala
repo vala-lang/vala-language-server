@@ -1620,6 +1620,7 @@ class Vls.Server {
             Vala.Scope current_scope = get_current_scope (result);
             var json_array = new Json.Array ();
             var completions = new Gee.HashSet<CompletionItem> ();
+            bool oce_in_ma = false;
 
             debug (@"[textDocument/completion] got $(result.type_name) `$result' (semanalyzed = $(result.checked)))");
 
@@ -1650,7 +1651,12 @@ class Vls.Server {
                     type_sym = get_type_symbol (peeled, is_pointer_access, ref is_instance);
 
                 if (type_sym != null)
-                    add_completions_for_type (type_sym, completions, current_scope, is_instance);
+                    // We presume OCEs are not instances in get_type_symbol (),
+                    // since we might be completing members from within an OCE.
+                    // However, if we're completing members outside of an OCE,
+                    // (we have an OCE within a MemberAccess) then we treat the 
+                    // OCE as an instance.
+                    add_completions_for_type (type_sym, completions, current_scope, is_instance || oce_in_ma);
                 // and try some more
                 else if (peeled is Vala.Signal)
                     add_completions_for_signal (peeled as Vala.Signal, completions);
@@ -1661,6 +1667,8 @@ class Vls.Server {
                         ((Vala.MemberAccess)result).inner != null) {
                         result = ((Vala.MemberAccess)result).inner;
                         debug (@"[textDocument/completion] trying MemberAccess.inner");
+                        // (new Object ()).
+                        oce_in_ma = result is Vala.ObjectCreationExpression;
                         // maybe our expression was wrapped in extra parentheses:
                         // (x as T). for example
                         continue; 
@@ -1669,6 +1677,7 @@ class Vls.Server {
                         ((Vala.ObjectCreationExpression)result).member_name != null) {
                         result = ((Vala.ObjectCreationExpression)result).member_name;
                         debug (@"[textDocument/completion] trying ObjectCreationExpression.member_name");
+                        oce_in_ma = false;
                         // maybe our object creation expression contains a member access
                         // from a namespace or some other type
                         // new Vls. for example
