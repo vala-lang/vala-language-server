@@ -2,12 +2,15 @@
 
 ### Features
 - [x] diagnostics
-- [ ] code completion (in progress)
+- [ ] code completion
+    - [ ] basic (in progress)
+    - [ ] advanced
 - [x] document symbol outline
 - [x] goto definition
 - [ ] symbol references
 - [ ] goto implementation
-- [ ] hover
+- [x] signature help
+- [x] hover
 
 #### build systems / environments:
 - [x] meson
