@@ -220,6 +220,9 @@ class Vls.Context {
             var genie_parser = new Vala.Genie.Parser ();
             genie_parser.parse (code_context);
 
+            var gir_parser = new Vala.GirParser ();
+            gir_parser.parse (code_context);
+
             code_context.check ();
         });
     }
