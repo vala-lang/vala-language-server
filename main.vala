@@ -42,7 +42,7 @@ class Vls.TextDocument : Object {
         var type = Vala.SourceFileType.NONE;
         if (uri.has_suffix (".vala") || uri.has_suffix (".gs"))
             type = Vala.SourceFileType.SOURCE;
-        else if (uri.has_suffix (".vapi"))
+        else if (uri.has_suffix (".vapi") || uri.has_suffix (".gir"))
             type = Vala.SourceFileType.PACKAGE;
 
         file = new Vala.SourceFile (ctx.code_context, type, filename, content);
