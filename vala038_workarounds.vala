@@ -29,7 +29,10 @@ namespace Vls {
         assert (ns.get_namespaces ().size == 0);
     }
 
-    private static void break_symbol_refs (Vala.Symbol sym) {
+    private static void break_symbol_refs (Vala.Symbol? sym) {
+        if (sym == null)
+            return;
+
         // do some specific things for specific symbols
         if (sym is Vala.Namespace)
             break_ns_refs (sym as Vala.Namespace);
@@ -50,18 +53,8 @@ namespace Vls {
         break_code_node_refs (ud);
     }
 
-    private void break_source_reference_refs (Vala.SourceReference sr) {
-        foreach (var ud in sr.using_directives)
-            break_using_directive_refs (ud);
-        sr.using_directives.clear ();
-        assert (sr.using_directives.size == 0);
-    }
-
     private void break_code_node_refs (Vala.CodeNode cn) {
-        if (cn.source_reference != null) {
-            break_source_reference_refs (cn.source_reference);
-            cn.source_reference = null;
-        }
+        cn.source_reference = null;
     }
 
 
