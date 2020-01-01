@@ -6,6 +6,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
     private Gee.List<DocumentSymbol> top_level_syms;
     private Gee.TreeMap<Range, DocumentSymbol> syms_flat;
     private Gee.List<DocumentSymbol> all_syms;
+    private Gee.HashMap<string, DocumentSymbol> ns_name_to_dsym;
 
     public ListSymbols (Vala.SourceFile file) {
         this.file = file;
@@ -13,6 +14,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
         this.containers = new Gee.LinkedList<DocumentSymbol> ();
         this.syms_flat = new Gee.TreeMap<Range, DocumentSymbol> ((r1, r2) => r1.start.compare (r2.start));
         this.all_syms = new Gee.LinkedList<DocumentSymbol> ();
+        this.ns_name_to_dsym = new Gee.HashMap<string, DocumentSymbol> ();
         this.visit_source_file (file);
     }
 
@@ -24,14 +26,24 @@ class Vls.ListSymbols : Vala.CodeVisitor {
         return all_syms;
     }
 
-    public DocumentSymbol? add_symbol (Vala.Symbol sym, SymbolKind kind) {
-        var current_sym = containers.is_empty ? null : containers.peek_head ();
-        var dsym = new DocumentSymbol.from_vala_symbol (sym, kind);
+    public DocumentSymbol? add_symbol (Vala.Symbol sym, SymbolKind kind, bool adding_parent = false) {
+        var current_sym = (containers.is_empty || adding_parent) ? null : containers.peek_head ();
+        DocumentSymbol? dsym;
+        string sym_full_name = sym.get_full_name ();
+        bool unique = true;
+
+        if (sym is Vala.Namespace && ns_name_to_dsym.has_key (sym_full_name)) {
+            dsym = ns_name_to_dsym [sym_full_name];
+            unique = false;
+        } else {
+            dsym = new DocumentSymbol.from_vala_symbol (sym, kind);
+        }
 
         // handle conflicts
         if (syms_flat.has_key (dsym.range)) {
             var existing_sym = syms_flat [dsym.range];
-            debug (@"found dup! $(existing_sym.name) and $(dsym.name)");
+            var dsym_name = dsym.kind == Constructor && dsym.name == null ? "(contruct block)" : (dsym.name ?? "(unknown)");
+            debug (@"found dup! $(existing_sym.name) ($(existing_sym.kind)) and $(dsym_name) ($(dsym.kind))");
             if (existing_sym.kind == dsym.kind)
                 return existing_sym;
             else if (existing_sym.kind == Class && dsym.kind == Constructor)
@@ -41,6 +53,8 @@ class Vls.ListSymbols : Vala.CodeVisitor {
                 existing_sym.kind = dsym.kind;
                 return existing_sym;
             } else if (existing_sym.kind == Property && dsym.kind == Field)
+                return existing_sym;
+            else if (existing_sym.kind == Function && dsym.kind == Method)
                 return existing_sym;
         }
 
@@ -62,12 +76,35 @@ class Vls.ListSymbols : Vala.CodeVisitor {
                 return null;
         }
 
-        if (current_sym != null)
-            current_sym.children.add (dsym);
-        else
-            top_level_syms.add (dsym);
-        syms_flat [dsym.range] = dsym;
-        all_syms.add (dsym);
+        if (unique) {
+            if (current_sym != null) {
+                debug (@"adding $(dsym.name) to current_sym $(current_sym.name)");
+                current_sym.children.add (dsym);
+            } else {
+                if (sym.parent_symbol is Vala.Namespace 
+                    && sym.parent_symbol.to_string () != "(root namespace)") {
+                    DocumentSymbol parent_dsym;
+                    if (!ns_name_to_dsym.has_key (sym.parent_symbol.get_full_name ())) {
+                        parent_dsym = (!) add_symbol (sym.parent_symbol, SymbolKind.Namespace, true);
+                    } else
+                        parent_dsym = ns_name_to_dsym [sym.parent_symbol.get_full_name ()];
+                    debug (@"adding $(dsym.name) to $(parent_dsym.name)");
+                    parent_dsym.children.add (dsym);
+                } else {
+                    debug (@"adding $(dsym.name) to top_level_syms");
+                    top_level_syms.add (dsym);
+                }
+            }
+
+
+            if (sym is Vala.Namespace) {
+                debug (@"\tadding $(dsym.name) to ns_name_to_dsym");
+                ns_name_to_dsym [sym_full_name] = dsym;
+            }
+            syms_flat [dsym.range] = dsym;
+            all_syms.add (dsym);
+        }
+
         return dsym;
     }
 
@@ -321,7 +358,10 @@ class Vls.ListSymbols : Vala.CodeVisitor {
 
     public override void visit_namespace (Vala.Namespace ns) {
         if (ns.source_reference != null && ns.source_reference.file != file) return;
+        var dsym = add_symbol (ns, Namespace);
+        containers.offer_head (dsym);
         ns.accept_children (this);
+        containers.poll_head ();
     }
 
     public override void visit_null_literal (Vala.NullLiteral lit) {

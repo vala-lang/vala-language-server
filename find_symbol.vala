@@ -14,6 +14,10 @@ class Vls.FindSymbol : Vala.CodeVisitor {
             return false;
         }
 
+        if (sr.file != file) {
+            return false;
+        }
+
         if (sr.begin.line > sr.end.line) {
             warning (@"wtf vala: $(node.type_name): $sr");
             return false;

@@ -25,12 +25,16 @@ subdir('gnome-builder')
 
 src = files([
     'main.vala',
+    'find_symbol.vala',
+    'list_symbols.vala',
+    'projects/buildtarget.vala',
+    'projects/compilation.vala',
+    'projects/mesontarget.vala',
+    'projects/simpletarget.vala',
     'protocol.vala',
     'reporter.vala',
-    'context.vala',
+    'textdocument.vala',
     'vala038_workarounds.vala',
-    'list_symbols.vala',
-    'find_symbol.vala',
 ])
 
 if host_machine.system() == 'windows'

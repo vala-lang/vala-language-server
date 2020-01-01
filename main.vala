@@ -1,59 +1,6 @@
 using LanguageServer;
 using Gee;
 
-class Meson.TargetSource : Object {
-    public string language { get; set; }
-    public string[] compiler { get; set; }
-    public string[] parameters { get; set; }
-    public string[] sources { get; set; }
-}
-
-// currently unused
-class Meson.Target : Object {
-    public string name { get; set; }
-    public string id { get; set; }
-    public string defined_in { get; set; }
-    public string[] filename { get; set; }
-    public bool build_by_default { get; set; }
-}
-
-class Vls.TextDocument : Object {
-    private Context ctx;
-    private string filename;
-
-    public Vala.SourceFile file;
-    public string uri;
-    public int version;
-
-    public TextDocument (Context ctx,
-                         string filename,
-                         string? content = null,
-                         int version = 0) throws ConvertError, FileError {
-
-        if (!FileUtils.test (filename, FileTest.EXISTS)) {
-            throw new FileError.NOENT ("file %s does not exist".printf (filename));
-        }
-
-        this.uri = Filename.to_uri (filename);
-        this.filename = filename;
-        this.version = version;
-        this.ctx = ctx;
-
-        var type = Vala.SourceFileType.NONE;
-        if (uri.has_suffix (".vala") || uri.has_suffix (".gs"))
-            type = Vala.SourceFileType.SOURCE;
-        else if (uri.has_suffix (".vapi") || uri.has_suffix (".gir"))
-            type = Vala.SourceFileType.PACKAGE;
-
-        file = new Vala.SourceFile (ctx.code_context, type, filename, content);
-        if (type == Vala.SourceFileType.SOURCE) {
-            var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib", null));
-            file.add_using_directive (ns_ref);
-            ctx.add_using ("GLib");
-        }
-    }
-}
-
 class Vls.Request {
     private int64? int_value;
     private string? string_value;
@@ -88,19 +35,25 @@ class Vls.Request {
     }
 }
 
+errordomain Vls.ProjectError {
+    INTROSPECT,
+    JSON
+}
+
 class Vls.Server {
     Jsonrpc.Server server;
     MainLoop loop;
-    HashTable<string, string> cc;
-    Context ctx;
+
+    HashTable<string, NotificationHandler> notif_handlers;
+    HashTable<string, CallHandler> call_handlers;
+    InitializeParams init_params;
+
     const uint check_update_context_period_ms = 200;
     const int64 update_context_delay_inc_us = check_update_context_period_ms * 50;
     const int64 update_context_delay_max_us = 1000 * 1000;
     const uint wait_for_context_update_delay_ms = 500;
 
-    HashTable<string, NotificationHandler> notif_handlers;
-    HashTable<string, CallHandler> call_handlers;
-    InitializeParams init_params;
+    HashSet<BuildTarget> builds;
     HashSet<Request> pending_requests;
 
     [CCode (has_target = false)]
@@ -120,15 +73,10 @@ class Vls.Server {
 
         this.loop = loop;
 
-        this.cc = new HashTable<string, string> (str_hash, str_equal);
-
-        Timeout.add (10000, () => {
-            debug ("listening...");
+        Timeout.add (60 * 1000, () => {
+            debug (@"listening...");
             return true;
         });
-
-        // libvala setup
-        this.ctx = new Vls.Context ();
 
         this.server = new Jsonrpc.Server ();
 
@@ -168,12 +116,13 @@ class Vls.Server {
         // disable SIGPIPE?
         // Process.@signal (ProcessSignal.PIPE, signum => {} );
 
-
         server.accept_io_stream (new SimpleIOStream (input_stream, output_stream));
 
-        notif_handlers = new HashTable <string, NotificationHandler> (str_hash, str_equal);
-        call_handlers = new HashTable <string, CallHandler> (str_hash, str_equal);
-        pending_requests = new HashSet <Request> (Request.hash, Request.equal);
+        notif_handlers = new HashTable<string, NotificationHandler> (str_hash, str_equal);
+        call_handlers = new HashTable<string, CallHandler> (str_hash, str_equal);
+
+        builds = new HashSet<BuildTarget> (BuildTarget.hash, BuildTarget.equal);
+        pending_requests = new HashSet<Request> (Request.hash, Request.equal);
 
         server.notification.connect ((client, method, @params) => {
             debug (@"Got notification! $method");
@@ -236,284 +185,143 @@ class Vls.Server {
         }
     }
 
-    bool is_source_file (string filename) {
-        return filename.has_suffix (".vapi") || filename.has_suffix (".vala")
-            || filename.has_suffix (".gs");
-    }
-
-//    bool is_c_source_file (string filename) {
-//        return filename.has_suffix (".c") || filename.has_suffix (".h");
-//    }
-
-    void meson_analyze_build_dir (Jsonrpc.Client client, string rootdir, string builddir) {
-        string[] spawn_args = {"meson", "introspect", builddir, "--targets"};
-        string[]? spawn_env = null; // Environ.get ();
-        string proc_stdout;
-        string proc_stderr;
-        int proc_status;
-
-        debug (@"analyzing build directory $rootdir ...");
-        try {
-            Process.spawn_sync (rootdir,
-                spawn_args, spawn_env,
-                SpawnFlags.SEARCH_PATH,
-                null,
-                out proc_stdout,
-                out proc_stderr,
-                out proc_status
-            );
-        } catch (SpawnError e) {
-            showMessage (client, @"Failed to spawn $(spawn_args[0]): $(e.message)", MessageType.Error);
-            debug (@"failed to spawn process: $(e.message)");
-            return;
-        }
-
-        if (proc_status != 0) {
-            showMessage (client,
-                @"Failed to analyze build dir: meson terminated with error code $proc_status. Output:\n $proc_stderr",
-                MessageType.Error);
-            debug (@"failed to analyze build dir: meson terminated with error code $proc_status. Output:\n $proc_stderr");
-            return;
-        }
-
-        // we should have a list of targets in JSON format
-        string targets_json = proc_stdout;
-        var targets_parser = new Json.Parser.immutable_new ();
-        try {
-            targets_parser.load_from_data (targets_json);
-        } catch (Error e) {
-            debug (@"failed to load targets for build dir $(builddir): $(e.message)");
-            return;
-        }
-
-        // for every target, get all target_files
-        targets_parser.get_root ().get_array ().foreach_element ((_1, _2, node) => {
-            var target_obj = node.get_object ();
-            Json.Node target_sources_array = target_obj.get_member ("target_sources");
-            if (target_sources_array == null)
-                return;
-            target_sources_array.get_array ().foreach_element ((_1, _2, node) => {
-                var target_source = Json.gobject_deserialize (typeof (Meson.TargetSource), node) as Meson.TargetSource;
-                if (target_source.language != "vala") return;
-
-                // get all packages
-                for (int i = 0; i < target_source.parameters.length; i++) {
-                    string param = target_source.parameters[i];
-                    if (param.index_of ("--pkg") == 0) {
-                        if (param == "--pkg") {
-                            if (i + 1 < target_source.parameters.length) {
-                                // the next argument is the package name
-                                ctx.add_package (target_source.parameters[i + 1]);
-                                i++;
-                            }
-                        } else {
-                            int idx = param.index_of ("=");
-                            if (idx != -1) {
-                                // --pkg={package}
-                                ctx.add_package (param.substring (idx + 1));
-                            }
-                        }
-                    } else if (param.index_of ("--vapidir") == 0) {
-                        if (param == "--vapidir") {
-                            if (i + 1 < target_source.parameters.length) {
-                                ctx.add_vapidir (target_source.parameters[i + 1]);
-                                i++;
-                            }
-                        } else {
-                            int idx = param.index_of ("=");
-                            if (idx != -1) {
-                                // --vapidir={vapidir}
-                                ctx.add_vapidir (param.substring (idx + 1));
-                            }
-                        }
-                    }
-                }
-
-                // get all source files
-                foreach (string source in target_source.sources) {
-                    if (!Path.is_absolute (source))
-                        source = Path.build_filename (builddir, source);
-                    try {
-                        ctx.add_source_file (new TextDocument (ctx, source));
-                        debug (@"Adding text document: $source");
-                    } catch (Error e) {
-                        debug (@"Failed to create text document: $(e.message)");
-                    }
-                }
-            });
-        });
-    }
-
-    string? mesonConfigure (Jsonrpc.Client client, string mesonBuild) {
-        string configDir;
-        try {
-            configDir = DirUtils.make_tmp ("vls-meson-XXXXXX");
-        } catch (FileError e) {
-            debug (@"error: $(e.message)");
-            return null;
-        }
-
-        string[] spawn_args = {"meson", "setup", ".", Path.get_dirname (mesonBuild)};
-        string[]? spawn_env = null; // Environ.get ();
-        string proc_stdout;
-        string proc_stderr;
-        int proc_status;
-
-        debug (@"Running meson for $mesonBuild in dir $configDir");
-
-        try {
-            Process.spawn_sync (configDir, spawn_args, spawn_env, SpawnFlags.SEARCH_PATH, null,
-                                out proc_stdout, out proc_stderr, out proc_status);
-        } catch (SpawnError e) {
-            debug (@"error: $(e.message)");
-            return null;
-        }
-
-        if (proc_status != 0) {
-            showMessage (client,
-                @"Failed to set up build dir: meson terminated with error code $proc_status. Output:\n$proc_stdout\n$proc_stderr",
-                MessageType.Error);
-            debug (@"failed to set up build dir: meson terminated with error code $proc_status. Output:\n$proc_stdout\n$proc_stderr");
-            return null;
-        }
-
-        debug (@"meson exited with 0. stdout:\n$proc_stdout\n\nstderr:\n$proc_stderr");
-
-        return configDir;
-    }
-
-    bool cc_analyze (string root_dir) {
-        debug ("looking for compile_commands.json in %s", root_dir);
-        string ccjson = findCompileCommands (root_dir);
-        if (ccjson != null) {
-            debug ("found at %s", ccjson);
-            var parser = new Json.Parser.immutable_new ();
-            try {
-                parser.load_from_file (ccjson);
-                var ccnode = parser.get_root ().get_array ();
-                ccnode.foreach_element ((arr, index, node) => {
-                    var o = node.get_object ();
-                    string dir = o.get_string_member ("directory");
-                    string file = o.get_string_member ("file");
-                    string path = File.new_for_path (Path.build_filename (dir, file)).get_path ();
-                    string cmd = o.get_string_member ("command");
-                    debug ("got args for %s", path);
-                    cc.insert (path, cmd);
-                });
-            } catch (Error e) {
-                debug ("failed to parse %s: %s", ccjson, e.message);
-                return false;
-            }
-        } else
-            return false;
-
-        // analyze compile_commands.json
-        foreach (string filename in ctx.get_filenames ()) {
-            debug ("analyzing args for %s", filename);
-            string command = cc[filename];
-            if (command != null) {
-                MatchInfo minfo;
-                if (/--pkg[= ](\S+)/.match (command, 0, out minfo)) {
-                    try {
-                        do {
-                            ctx.add_package (minfo.fetch (1));
-                            debug (@"adding package $(minfo.fetch (1))");
-                        } while (minfo.next ());
-                    } catch (Error e) {
-                        debug (@"regex match error: $(e.message)");
-                    }
-                }
-
-                if (/--vapidir[= ](\S+)/.match (command, 0, out minfo)) {
-                    try {
-                        do {
-                            ctx.add_vapidir (minfo.fetch (1));
-                            debug (@"adding package $(minfo.fetch (1))");
-                        } while (minfo.next ());
-                    } catch (Error e) {
-                        debug (@"regex match error: $(e.message)");
-                    }
-                }
-            }
-        }
-
-        return true;
-    }
-
-    void add_vala_files (File dir) throws Error {
-        var enumerator = dir.enumerate_children ("standard::*", FileQueryInfoFlags.NOFOLLOW_SYMLINKS);
-        FileInfo info;
-
-        try {
-            while ((info = enumerator.next_file (null)) != null) {
-                if (info.get_file_type () == FileType.DIRECTORY)
-                    add_vala_files (enumerator.get_child (info));
-                else {
-                    var file = enumerator.get_child (info);
-                    string fname = file.get_path ();
-                    if (is_source_file (fname)) {
-                        try {
-                            var doc = new TextDocument (ctx, fname);
-                            ctx.add_source_file (doc);
-                            debug (@"Adding text document: $fname");
-                        } catch (Error e) {
-                            debug (@"Failed to create text document: $(e.message)");
-                        }
-                    }
-                }
-            }
-        } catch (Error e) {
-            debug (@"Error adding files: $(e.message)");
-        }
-    }
-
-    void default_analyze_build_dir (Jsonrpc.Client client, string root_dir) {
-        try {
-            add_vala_files (File.new_for_path (root_dir));
-        } catch (Error e) {
-            debug (@"Error adding files $(e.message)n");
-        }
-    }
-
     void initialize (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         init_params = parse_variant<InitializeParams> (@params);
 
-        string root_path = init_params.rootPath != null ? init_params.rootPath : init_params.rootUri;
-        debug (@"Root path is $root_path");
+        File root_dir = init_params.rootPath != null ? 
+            File.new_for_path (init_params.rootPath) :
+            File.new_for_uri (init_params.rootUri);
+        if (!root_dir.is_native ()) {
+            showMessage (client, "Non-native files not supported", MessageType.Error);
+            error ("Non-native files not supported");
+        }
+        string root_path = (!) root_dir.get_path ();
+        debug (@"[initialize] root path is $root_path");
 
-        string? meson = findFile (root_path, "meson.build");
-        if (meson != null) {
-            string? ninja = findFile (root_path, "build.ninja");
+        // here is where we determine our project backend(s)
+        var meson_files = new ArrayList<string> ();
+        try {
+            find_files (root_dir, "meson.build", 1, null, meson_files);
+        } catch (Error e) {
+            debug (@"[initialize] could not search for meson files: $(e.message)");
+        }
+        // look for top-level meson file
+        if (meson_files.size == 1) {
+            // This is a meson project, do we have a build directory in place?
+            // Because we have a Meson script in the root dir, we can guess 
+            // that a subdir with a build.ninja script is a Meson build dir.
+            var ninja_files = new ArrayList<string> ();
+            try {
+                find_files (root_dir, "build.ninja", -1, null, ninja_files);
+            } catch (Error e) {
+                debug (@"[initialize] could not search for ninja files: $(e.message)");
+            }
+            if (ninja_files.size == 0) {
+                // configure in a temporary directory
+                string[] spawn_args = {"meson", "setup", ".", root_path};
+                string build_dir = "";
+                string proc_stdout, proc_stderr;
+                int proc_status = -1;
+                // run configure
+                try {
+                    build_dir = DirUtils.make_tmp (@"vls-meson-$(str_hash (root_path))-XXXXXX");
+                    Process.spawn_sync (
+                        build_dir, 
+                        spawn_args, 
+                        null, 
+                        SpawnFlags.SEARCH_PATH, 
+                        null,
+                        out proc_stdout,
+                        out proc_stderr,
+                        out proc_status);
+                } catch (FileError e) {
+                    showMessage (client, @"Failed to make temporary directory: $(e.message)", MessageType.Error);
+                } catch (SpawnError e) {
+                    showMessage (client, @"Failed to spawn meson setup: $(e.message)", MessageType.Error);
+                }
 
-            if (ninja == null) {
-                // TODO: build again
-                // ninja = findFile (root_path, "build.ninja");
+                if (proc_status == 0)
+                    ninja_files.add (Path.build_filename (build_dir, "build.ninja"));
+                else
+                    showMessage (
+                        client, 
+                        @"Failed to configure Meson in `$build_dir': process exited with error code $proc_status", 
+                        MessageType.Error);
             }
 
-            // test again
-            if (ninja != null) {
-                debug ("Found meson project: %s\nninja: %s", meson, ninja);
-                meson_analyze_build_dir (client, root_path, Path.get_dirname (ninja));
-            } else {
-                debug ("Found meson.build but not build.ninja: %s", meson);
-                string? configDir = mesonConfigure (client, meson);
-                if (configDir != null) {
-                    meson_analyze_build_dir (client, root_path, configDir);
+            // For each Ninja build script found, attempt to Meson introspect its
+            // containing directory, and if we can then create Meson targets.
+            foreach (var ninja_file in ninja_files) {
+                string build_dir = Path.get_dirname (ninja_file);
+                string[] spawn_args = {"meson", "introspect", ".", "--targets"};
+                string proc_stdout, proc_stderr;
+                int proc_status;
+
+                try {
+                    Process.spawn_sync (
+                        build_dir,
+                        spawn_args,
+                        null,
+                        SpawnFlags.SEARCH_PATH,
+                        null,
+                        out proc_stdout,
+                        out proc_stderr,
+                        out proc_status);
+
+                    if (proc_status != 0)
+                        throw new ProjectError.INTROSPECT (@"Failed to introspect in $build_dir: process exited with status $proc_status");
+
+                    // if everything went well, parse the targets from JSON
+                    var targets_parser = new Json.Parser.immutable_new ();
+                    targets_parser.load_from_data (proc_stdout);
+
+                    int nth = 0;
+                    foreach (var node in targets_parser.get_root ().get_array ().get_elements ()) {
+                        var target_info = Json.gobject_deserialize (typeof (Meson.TargetInfo), node) 
+                            as Meson.TargetInfo;
+                        if (target_info == null)
+                            throw new ProjectError.JSON (@"Could not parse target #$(nth)'s JSON");
+                        builds.add (new MesonTarget (target_info, build_dir));
+                        nth++;
+                    }
+                } catch (SpawnError e) {
+                    showMessage (client, @"Failed to spawn meson introspect: $(e.message)", MessageType.Error);
+                } catch (ProjectError e) {
+                    showMessage (client, e.message, MessageType.Error);
+                } catch (Error e) {
+                    showMessage (client, @"Failed to parse meson targets: $(e.message)", MessageType.Error);
                 }
             }
         } else {
-            // this isn't a Meson project
-            // 1. but do we have compiler_commands.json?
-            if (!cc_analyze (root_path)) {
-                debug ("No meson project and compile_commands found. Adding all Vala files in %s", root_path);
-                default_analyze_build_dir (client, root_path);
+            try {
+                // we don't support anything else, so just create a default target
+                builds.add (new SimpleTarget (root_path));
+            } catch (Error e) {
+                showMessage (client, @"Failed to add simple target for project: $(e.message)", MessageType.Error);
+                debug (@"Failed to add SimpleTarget: $(e.message)");
             }
         }
 
-        // compile everything ahead of time
-        if (ctx.dirty) {
-            ctx.check ();
+        // sanity checking
+        var text_documents = new HashMap<string, TextDocument> ();
+        foreach (var build_target in builds) {
+            foreach (var compilation in build_target) {
+                foreach (var document in compilation) {
+                    if (text_documents.has_key (document.uri)) {
+                        var other_document = text_documents[document.uri];
+                        var target1 = document.compilation.parent_target;
+                        var target2 = other_document.compilation.parent_target;
+                        error (@"[initialize] the same text document $(document.uri) appears twice in $(target1) and $(target2)!");
+                    } else {
+                        text_documents[document.uri] = document;
+                    }
+                }
+            }
         }
+
+        // compile everything
+        foreach (var build_target in builds)
+            build_target.compile ();
 
         try {
             client.reply (id, buildDict (
@@ -531,55 +339,53 @@ class Vls.Server {
                 )
             ));
         } catch (Error e) {
-            debug (@"initialize: failed to reply to client: $(e.message)");
+            debug (@"[initialize] failed to reply to client: $(e.message)");
         }
 
         // listen for context update requests
-        Timeout.add(check_update_context_period_ms, () => {
+        Timeout.add (check_update_context_period_ms, () => {
             check_update_context ();
             return true;
         });
     }
 
-    // BFS for file
-    string? findFile (string dirname, string target, int max_depth = -1) {
+    /**
+     * List all files matching target from the current directory (dir).
+     */
+    ArrayList<string> find_files (File dir, 
+                                  string target, 
+                                  int max_depth = -1, 
+                                  Cancellable? cancellable = null,
+                                  ArrayList<string> results = new ArrayList<string> ()) 
+                                  throws Error {
         if (max_depth == 0)
-            return null;
+            return results;
 
-        Dir dir = null;
-        try {
-            dir = Dir.open (dirname, 0);
-        } catch (FileError e) {
-            debug ("dirname=%s, target=%s, error=%s", dirname, target, e.message);
-            return null;
+        FileEnumerator enumerator = dir.enumerate_children (
+            "standard::*",
+            FileQueryInfoFlags.NOFOLLOW_SYMLINKS,
+            cancellable);
+
+        FileInfo? info = null;
+        while ((cancellable == null || !cancellable.is_cancelled ()) &&
+                (info = enumerator.next_file (cancellable)) != null) {
+            if (info.get_file_type () == FileType.DIRECTORY) {
+                find_files (
+                    enumerator.get_child (info), 
+                    target, 
+                    max_depth < 0 ? -1 : max_depth - 1, 
+                    cancellable,
+                    results);
+            } else if (!info.get_is_backup () && !info.get_is_hidden ()){
+                if (info.get_name () == target)
+                    results.add (enumerator.get_child (info).get_path ());
+            }
         }
 
-        string name;
-        var dirs_to_search = new GLib.List<string> ();
-        while ((name = dir.read_name ()) != null) {
-            string path = Path.build_filename (dirname, name);
-            if (name == target)
-                return path;
+        if (cancellable != null && cancellable.is_cancelled ())
+            throw new IOError.CANCELLED ("Operation was cancelled");
 
-            if (FileUtils.test (path, FileTest.IS_DIR))
-                dirs_to_search.append (path);
-        }
-
-        foreach (string path in dirs_to_search) {
-            string r = findFile(path, target, max_depth < 0 ? -1 : max_depth - 1);
-            if (r != null)
-                return r;
-        }
-        return null;
-    }
-
-    string findCompileCommands (string filename) {
-        string r = null, p = filename;
-        do {
-            r = findFile (p, "compile_commands.json", 1);
-            p = Path.get_dirname (p);
-        } while (r == null && p != "/" && p != ".");
-        return r;
+        return results;
     }
 
     T? parse_variant<T> (Variant variant) {
@@ -617,6 +423,26 @@ class Vls.Server {
             debug (@"[cancelRequest] request $req not found");
     }
 
+    TextDocument? lookup_source_file (string uri) {
+        string? filename = File.new_for_uri (uri).get_path ();
+        assert (filename != null);
+        foreach (var build_target in builds) {
+            var document = build_target.lookup_source_file (filename);
+            if (document != null)
+                return document;
+        }
+        debug (@"could not find source file for `$filename'");
+        return null;
+    }
+
+    void reply_null (Variant id, Jsonrpc.Client client, string method) {
+        try {
+            client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+        } catch (Error e) {
+            debug (@"[$method] failed to reply to client: $(e.message)");
+        }
+    }
+
     void textDocumentDidOpen (Jsonrpc.Client client, Variant @params) {
         var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
 
@@ -625,49 +451,19 @@ class Vls.Server {
         string fileContents = (string) document.lookup_value ("text",       VariantType.STRING);
 
         if (languageId != "vala") {
-            warning (@"$languageId file sent to vala language server");
+            debug (@"[textDocument/didOpen] $languageId file sent to vala language server");
             return;
         }
 
-        string filename;
-        try {
-            filename = Filename.from_uri (uri);
-        } catch (Error e) {
-            debug (@"failed to convert URI $uri to filename: $(e.message)");
+        TextDocument? doc = lookup_source_file (uri);
+
+        // do nothing if this file does not belong to a project
+        if (doc == null)
             return;
-        }
 
-        var file = File.new_for_uri (uri);
-        foreach (string vapidir in ctx.code_context.vapi_directories) {
-            if (file.get_path ().has_prefix (vapidir)) {
-                debug ("%s is in vapidir %s. Not adding", filename, vapidir);
-                return;
-            }
-        }
-        if (file.get_path ().has_prefix ("/usr/share/vala")
-         || file.get_path ().has_prefix ("/usr/share/vala-0.40")) { // TODO: don't hardcode these
-            debug ("%s is in system vapidir. Not adding", filename);
-            return;
-        }
-
-
-        if (ctx.get_source_file (uri) == null) {
-            TextDocument doc;
-            try {
-                doc = new TextDocument (ctx, filename, fileContents);
-            } catch (Error e) {
-                debug (@"failed to create text document: $(e.message)");
-                return;
-            }
-
-            debug ("adding source file %s", uri);
-            ctx.add_source_file (doc);
-        } else {
-            debug ("updating contents of %s", uri);
-            ctx.get_source_file (uri).file.content = fileContents;
-            ctx.invalidate ();
-        }
-
+        debug (@"opened a file; requesting context update");
+        doc.content = fileContents;
+        // TODO: handle possible content invalidation
         request_context_update (client);
     }
 
@@ -681,29 +477,19 @@ class Vls.Server {
 
         var uri = (string) document.lookup_value ("uri", VariantType.STRING);
         var version = (int64) document.lookup_value ("version", VariantType.INT64);
-        TextDocument? source = ctx.get_source_file (uri);
+        TextDocument? source = lookup_source_file (uri);
 
         if (source == null) {
-            debug (@"no document found for $uri");
+            debug (@"[textDocument/didChange] no document found for $uri");
             return;
         }
 
-        if (source.file.content == null) {
-            char* ptr = source.file.get_mapped_contents ();
-
-            if (ptr == null) {
-                debug (@"$uri: get_mapped_contents() failed");
-            }
-            source.file.content = (string) ptr;
-
-            if (source.file.content == null) {
-                debug (@"$uri: content is NULL");
-                return;
-            }
+        if (source.content == null) {
+            error (@"[textDocument/didChange] source content is null!");
         }
 
         if (source.version >= version) {
-            debug (@"rejecting outdated version of $uri");
+            debug (@"[textDocument/didChange] rejecting outdated version of $uri");
             return;
         }
 
@@ -711,7 +497,7 @@ class Vls.Server {
 
         var iter = changes.iterator ();
         Variant? elem = null;
-        var sb = new StringBuilder (source.file.content);
+        var sb = new StringBuilder (source.content);
         while ((elem = iter.next_value ()) != null) {
             var changeEvent = parse_variant<TextDocumentContentChangeEvent> (elem);
 
@@ -724,8 +510,9 @@ class Vls.Server {
                 sb.insert ((ssize_t) pos, changeEvent.text);
             }
         }
-        source.file.content = sb.str;
+        source.content = sb.str;
 
+        source.compilation.invalidate ();
         request_context_update (client);
     }
 
@@ -734,16 +521,17 @@ class Vls.Server {
         update_context_requests += 1;
         int64 delay_us = int64.min (update_context_delay_inc_us * update_context_requests, update_context_delay_max_us);
         update_context_time_us = get_monotonic_time () + delay_us;
-        debug (@"Context update (re-)scheduled in $((int) (delay_us / 1000)) ms");
+        debug (@"Context(s) update (re-)scheduled in $((int) (delay_us / 1000)) ms");
     }
 
     void check_update_context () {
         if (update_context_requests > 0 && get_monotonic_time () >= update_context_time_us) {
+            foreach (var target in builds) {
+                if (target.compile ())
+                    publishDiagnostics (target, update_context_client);
+            }
             update_context_requests = 0;
             update_context_time_us = 0;
-            ctx.invalidate ();
-            ctx.check ();
-            publishDiagnostics (update_context_client);
         }
     }
 
@@ -761,14 +549,18 @@ class Vls.Server {
         else {
             var req = new Request (id);
             if (pending_requests.add (req))
-                warning (@"Request ($req): request already in pending requests, this should not happen");
+                debug (@"Request ($req): request already in pending requests, this should not happen");
             else
                 debug (@"Request ($req): added request to pending requests");
             wait_for_context_update_aux (req, (owned) on_context_updated_func);
         }
     }
 
+    /**
+     * Execute `on_context_updated_func ()` or wait.
+     */
     void wait_for_context_update_aux (Request req, owned OnContextUpdatedFunc on_context_updated_func) {
+        // we've already updated the context
         if (update_context_requests == 0) {
             if (!pending_requests.remove (req)) {
                 debug (@"Request ($req): context updated but request cancelled");
@@ -790,23 +582,24 @@ class Vls.Server {
         }
     }
 
-    void publishDiagnostics (Jsonrpc.Client client, string? doc_uri = null) {
-        Collection<TextDocument> docs;
-        TextDocument? doc = doc_uri == null ? null : ctx.get_source_file (doc_uri);
+    ArrayList<TextDocument> list_all_documents () {
+        var documents = new ArrayList<TextDocument> ();
+        foreach (var build_target in builds)
+            foreach (var compilation in build_target)
+                foreach (var document in compilation)
+                    documents.add (document);
+        return documents;
+    }
 
-        if (doc != null) {
-            docs = new ArrayList<TextDocument> ();
-            docs.add (doc);
-        } else {
-            docs = ctx.get_source_files ();
-        }
-
-        foreach (var document in docs) {
+    void publishDiagnostics (BuildTarget target, Jsonrpc.Client client) {
+        // TODO: make this faster by only going over the reporter of each compilation once
+        foreach (var document in list_all_documents ()) {
             var source = document.file;
             string uri = document.uri;
+            var compilation = document.compilation;
             var array = new Json.Array ();
 
-            ctx.report.errorlist.foreach (err => {
+            compilation.reporter.errorlist.foreach (err => {
                 if (err.loc != null) {
                     if (err.loc.file != source)
                         return;
@@ -835,7 +628,7 @@ class Vls.Server {
                     }));
             });
 
-            ctx.report.warnlist.foreach (err => {
+            compilation.reporter.warnlist.foreach (err => {
                 if (err.loc != null) {
                     if (err.loc.file != source)
                         return;
@@ -882,11 +675,11 @@ class Vls.Server {
                 continue;
             }
 
-            debug (@"textDocument/publishDiagnostics: $uri");
+            debug (@"[textDocument/publishDiagnostics] publishing diagnostics for $uri");
         }
     }
 
-    Vala.CodeNode get_best (FindSymbol fs, Vala.SourceFile file) {
+    Vala.CodeNode get_best (FindSymbol fs, TextDocument file) {
         Vala.CodeNode? best = null;
 
         foreach (var node in fs.result) {
@@ -937,16 +730,9 @@ class Vls.Server {
 
     void textDocumentDefinition (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = parse_variant <LanguageServer.TextDocumentPositionParams> (@params);
-        debug ("get definition in %s at %u,%u", p.textDocument.uri,
-            p.position.line, p.position.character);
-        var sourcefile = ctx.get_source_file (p.textDocument.uri);
+        TextDocument? sourcefile = lookup_source_file (p.textDocument.uri);
         if (sourcefile == null) {
-            debug ("unknown file %s", p.textDocument.uri);
-            try {
-                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-            } catch (Error e) {
-                debug ("[textDocument/definition] failed to reply to client: %s", e.message);
-            }
+            reply_null (id, client, "textDocument/documentSymbol");
             return;
         }
         var file = sourcefile.file;
@@ -972,7 +758,7 @@ class Vls.Server {
                 return;
             }
 
-            Vala.CodeNode? best = get_best (fs, file);
+            Vala.CodeNode? best = get_best (fs, sourcefile);
 
             if (best is Vala.Expression && !(best is Vala.Literal)) {
                 var b = (Vala.Expression)best;
@@ -989,21 +775,6 @@ class Vls.Server {
                 }
                 return;
             }
-
-            /*
-            string uri = null;
-            foreach (var sourcefile in ctx.code_context.get_source_files ()) {
-                if (best.source_reference.file == sourcefile) {
-                    uri = "file://" + sourcefile.filename;
-                    break;
-                }
-            }
-            if (uri == null) {
-                debug ("error: couldn't find source file for %s", best.source_reference.file.filename);
-                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-                return;
-            }
-            */
 
             debug (@"replying... $(best.source_reference.file.filename)");
             try {
@@ -1027,10 +798,16 @@ class Vls.Server {
     }
 
     void textDocumentDocumentSymbol (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var p = parse_variant<LanguageServer.DocumentSymbolParams> (@params);
+        var p = parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
+        TextDocument? doc = lookup_source_file (p.textDocument.uri);
+        if (doc == null) {
+            reply_null (id, client, "textDocument/documentSymbol");
+            return;
+        }
 
         wait_for_context_update (id, request_cancelled => {
             if (request_cancelled) {
+                reply_null (id, client, "textDocument/documentSymbol");
                 try {
                     client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
                 } catch (Error e) {
@@ -1039,19 +816,8 @@ class Vls.Server {
                 return;
             }
 
-            var sourcefile = ctx.get_source_file (p.textDocument.uri);
-            if (sourcefile == null) {
-                debug ("unknown file %s", p.textDocument.uri);
-                try {
-                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-                } catch (Error e) {
-                    debug("[textDocument/documentSymbol] failed to reply to client: %s", e.message);
-                }
-                return;
-            }
-
             var array = new Json.Array ();
-            var syms = new ListSymbols (sourcefile.file);
+            var syms = new ListSymbols (doc.file);
             if (init_params.capabilities.textDocument.documentSymbol.hierarchicalDocumentSymbolSupport)
                 foreach (var dsym in syms) {
                     debug(@"found $(dsym.name)");
@@ -1139,9 +905,10 @@ class Vls.Server {
                     param_string = "out ";
                 else if (p.direction == Vala.ParameterDirection.REF)
                     param_string = "ref ";
-                if (only_type_names)
-                    param_string += p.variable_type.data_type.to_string ();
-                else {
+                if (only_type_names) {
+                    if (p.variable_type.data_type != null)
+                        param_string += p.variable_type.data_type.to_string ();
+                } else {
                     param_string += p.variable_type.to_string ();
                     param_string += " " + p.name;
                     if (p.initializer != null)
@@ -1524,7 +1291,10 @@ class Vls.Server {
     /**
      * Find the type of a symbol in the code.
      */
-    Vala.TypeSymbol? get_type_symbol (Vala.CodeNode symbol, bool is_pointer, ref bool is_instance) {
+    Vala.TypeSymbol? get_type_symbol (Vala.CodeContext code_context, 
+                                      Vala.CodeNode symbol, 
+                                      bool is_pointer, 
+                                      ref bool is_instance) {
         Vala.DataType? data_type = null;
         Vala.TypeSymbol? type_symbol = null;
         if (symbol is Vala.Variable) {
@@ -1546,7 +1316,7 @@ class Vls.Server {
                             type_symbol = err_type.error_domain;
                         else {
                             // this is a generic error
-                            Vala.Symbol? sym = ctx.code_context.root.scope.lookup ("GLib");
+                            Vala.Symbol? sym = code_context.root.scope.lookup ("GLib");
                             if (sym != null)
                                 sym = sym.scope.lookup ("Error");
                             else
@@ -1577,37 +1347,29 @@ class Vls.Server {
 
     void textDocumentCompletion (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
-        TextDocument? doc = ctx.get_source_file (p.textDocument.uri);
+        TextDocument? doc = lookup_source_file (p.textDocument.uri);
         if (doc == null) {
             debug ("unknown file %s", p.textDocument.uri);
-            try {
-                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-            } catch (Error e) {
-                debug ("[textDocument/completion] failed to reply to client: %s", e.message);
-            }
+            reply_null (id, client, "textDocument/completion");
             return;
         }
         bool is_pointer_access = false;
-        long idx = (long) get_string_pos (doc.file.content, p.position.line, p.position.character);
+        long idx = (long) get_string_pos (doc.content, p.position.line, p.position.character);
         Position pos = p.position;
 
-        if (idx >= 2 && doc.file.content[idx-2:idx] == "->") {
+        if (idx >= 2 && doc.content[idx-2:idx] == "->") {
             is_pointer_access = true;
             debug ("[textDocument/completion] found pointer access");
             pos = p.position.translate (0, -2);
-        } else if (idx >= 1 && doc.file.content[idx-1:idx] == ".") {
+        } else if (idx >= 1 && doc.content[idx-1:idx] == ".") {
             pos = p.position.translate (0, -1);
-        } else if (idx >= 4 && doc.file.content[idx-4:idx] == "new ") {
+        } else if (idx >= 4 && doc.content[idx-4:idx] == "new ") {
             pos = p.position.translate (0, -4);
         }
 
         wait_for_context_update (id, request_cancelled => {
             if (request_cancelled) {
-                try {
-                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-                } catch (Error e) {
-                    debug ("[textDocument/completion] failed to reply to client: %s", e.message);
-                }
+                reply_null (id, client, "textDocument/completion");
                 return;
             }
 
@@ -1615,18 +1377,14 @@ class Vls.Server {
 
             if (fs.result.size == 0) {
                 debug ("[textDocument/completion] no results found");
-                try {
-                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-                } catch (Error e) {
-                    debug ("[textDocument/completion] failed to reply to client: %s", e.message);
-                }
+                reply_null (id, client, "textDocument/completion");
                 return;
             }
 
             foreach (var res in fs.result)
                 debug (@"[textDocument/completion] found $(res.type_name) (semanalyzed = $(res.checked))");
 
-            Vala.CodeNode result = get_best (fs, doc.file);
+            Vala.CodeNode result = get_best (fs, doc);
             Vala.CodeNode? peeled = null;
             Vala.Scope current_scope = get_current_scope (result);
             var json_array = new Json.Array ();
@@ -1655,11 +1413,13 @@ class Vls.Server {
                 }
 
                 bool is_instance = true;
-                Vala.TypeSymbol? type_sym = get_type_symbol (result, is_pointer_access, ref is_instance);
+                Vala.TypeSymbol? type_sym = get_type_symbol (doc.compilation.code_context, 
+                                                             result, is_pointer_access, ref is_instance);
 
                 // try again
                 if (type_sym == null && peeled != null)
-                    type_sym = get_type_symbol (peeled, is_pointer_access, ref is_instance);
+                    type_sym = get_type_symbol (doc.compilation.code_context,
+                                                peeled, is_pointer_access, ref is_instance);
 
                 if (type_sym != null)
                     // We presume OCEs are not instances in get_type_symbol (),
@@ -1714,24 +1474,16 @@ class Vls.Server {
 
     void textDocumentSignatureHelp (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
-        TextDocument? doc = ctx.get_source_file (p.textDocument.uri);
+        TextDocument? doc = lookup_source_file (p.textDocument.uri);
         if (doc == null) {
             debug ("unknown file %s", p.textDocument.uri);
-            try {
-                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-            } catch (Error e) {
-                debug ("[textDocument/signatureHelp] failed to reply to client: %s", e.message);
-            }
+            reply_null (id, client, "textDocument/signatureHelp");
             return;
         }
 
         wait_for_context_update (id, request_cancelled => {
             if (request_cancelled) {
-                try {
-                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-                } catch (Error e) {
-                    debug ("[textDocument/completion] failed to reply to client: %s", e.message);
-                }
+                reply_null (id, client, "textDocument/signatureHelp");
                 return;
             }
 
@@ -1739,13 +1491,13 @@ class Vls.Server {
             var json_array = new Json.Array ();
             int active_param = 0;
 
-            long idx = (long) get_string_pos (doc.file.content, p.position.line, p.position.character);
+            long idx = (long) get_string_pos (doc.content, p.position.line, p.position.character);
             Position pos = p.position;
 
-            if (idx >= 2 && doc.file.content[idx-1:idx] == "(") {
+            if (idx >= 2 && doc.content[idx-1:idx] == "(") {
                 debug ("[textDocument/signatureHelp] possible argument list");
                 pos = p.position.translate (0, -2);
-            } else if (idx >= 1 && doc.file.content[idx-1:idx] == ",") {
+            } else if (idx >= 1 && doc.content[idx-1:idx] == ",") {
                 debug ("[textDocument/signatureHelp] possible ith argument in list");
                 pos = p.position.translate (0, -1);
             }
@@ -1778,15 +1530,11 @@ class Vls.Server {
 
             if (fs.result.size == 0) {
                 debug ("[textDocument/signatureHelp] no results found");
-                try {
-                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-                } catch (Error e) {
-                    debug ("[textDocument/signatureHelp] failed to reply to client: %s", e.message);
-                }
+                reply_null (id, client, "textDocument/signatureHelp");
                 return;
             }
 
-            Vala.CodeNode result = get_best (fs, doc.file);
+            Vala.CodeNode result = get_best (fs, doc);
 
             if (result is Vala.ExpressionStatement) {
                 result = (result as Vala.ExpressionStatement).expression;
@@ -1857,11 +1605,7 @@ class Vls.Server {
                 parent_sym = explicit_sym.parent_symbol;
             } else {
                 debug ("[textDocument/signatureHelp] neither a method call nor (complete) object creation expr");
-                try {
-                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-                } catch (Error e) {
-                    debug ("[textDocument/signatureHelp] failed to reply to client: %s", e.message);
-                }
+                reply_null (id, client, "textDocument/signatureHelp");
                 return;     // early exit
             } 
 
@@ -1913,25 +1657,16 @@ class Vls.Server {
 
     void textDocumentHover (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
-        TextDocument? doc = ctx.get_source_file (p.textDocument.uri);
+        TextDocument? doc = lookup_source_file (p.textDocument.uri);
         if (doc == null) {
-            debug ("unknown file %s", p.textDocument.uri);
-            try {
-                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-            } catch (Error e) {
-                debug ("[textDocument/hover] failed to reply to client: %s", e.message);
-            }
+            reply_null (id, client, "textDocument/hover");
             return;
         }
 
         Position pos = p.position;
         wait_for_context_update (id, request_cancelled => {
             if (request_cancelled) {
-                try {
-                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-                } catch (Error e) {
-                    debug ("[textDocument/completion] failed to reply to client: %s", e.message);
-                }
+                reply_null (id, client, "textDocument/hover");
                 return;
             }
 
@@ -1939,15 +1674,11 @@ class Vls.Server {
 
             if (fs.result.size == 0) {
                 debug ("[textDocument/hover] no results found");
-                try {
-                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-                } catch (Error e) {
-                    debug ("[textDocument/hover] failed to reply to client: %s", e.message);
-                }
+                reply_null (id, client, "textDocument/hover");
                 return;
             }
 
-            Vala.CodeNode result = get_best (fs, doc.file);
+            Vala.CodeNode result = get_best (fs, doc);
             var hoverInfo = new Hover () {
                 range = new Range.from_sourceref (result.source_reference)
             };
@@ -1982,7 +1713,8 @@ class Vls.Server {
                 });
             } else {
                 bool is_instance = true;
-                Vala.TypeSymbol? type_sym = get_type_symbol (result, false, ref is_instance);
+                Vala.TypeSymbol? type_sym = get_type_symbol (doc.compilation.code_context,
+                                                             result, false, ref is_instance);
                 hoverInfo.contents.add (new MarkedString () {
                     language = "vala",
                     value = type_sym != null ? get_symbol_data_type (type_sym, true) : result.to_string ()
@@ -2000,13 +1732,8 @@ class Vls.Server {
     }
 
     void shutdown (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        ctx.clear ();
-        try {
-            client.reply (id, buildDict (null));
-        } catch (Error e) {
-            debug (@"shutdown: failed to reply to client: $(e.message)");
-        }
-        debug ("shutting down...n");
+        reply_null (id, client, "shutdown");
+        debug ("shutting down...");
     }
 
     void exit (Jsonrpc.Client client, Variant @params) {
