@@ -307,19 +307,27 @@ class Vls.Server {
 
         // sanity checking
         var text_documents = new HashMap<string, TextDocument> ();
+        var build_targets_to_remove = new ArrayList<BuildTarget> ();
         foreach (var build_target in builds) {
             foreach (var compilation in build_target) {
                 foreach (var document in compilation) {
                     if (text_documents.has_key (document.uri)) {
                         var other_document = text_documents[document.uri];
-                        var target1 = document.compilation.parent_target;
-                        var target2 = other_document.compilation.parent_target;
-                        error (@"[initialize] the same text document $(document.uri) appears twice in $(target1) and $(target2)!");
+                        var target1 = other_document.compilation.parent_target;
+                        var target2 = document.compilation.parent_target;
+                        debug (@"[$method] the same text document $(document.uri) appears twice in $(target1) and $(target2)!");
+                        debug (@"[$method] will remove $(target2)");
+                        build_targets_to_remove.add (target2);
                     } else {
                         text_documents[document.uri] = document;
                     }
                 }
             }
+        }
+
+        foreach (var build_target in build_targets_to_remove) {
+            builds.remove (build_target);
+            warning (@"[$method] removed build target $(build_target)!");
         }
 
         // compile everything

@@ -1,5 +1,3 @@
-using Vala;
-
 class Vls.TextDocument : Object {
     public weak Compilation compilation { get; private set; }
     private string filename;
