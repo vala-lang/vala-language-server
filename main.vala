@@ -4,17 +4,20 @@ using Gee;
 class Vls.Request {
     private int64? int_value;
     private string? string_value;
+    private string? method;
 
-    public Request (Variant id) {
+    public Request (Variant id, string? method = null) {
         assert (id.is_of_type (VariantType.INT64) || id.is_of_type (VariantType.STRING));
         if (id.is_of_type (VariantType.INT64))
             int_value = (int64) id;
         else
             string_value = (string) id;
+        this.method = method;
     }
 
     public string to_string () {
-        return int_value != null ? int_value.to_string () : string_value;
+        string id_string = int_value != null ? int_value.to_string () : string_value;
+        return id_string + (method != null ? @":$method" : "");
     }
 
     public static uint hash (Request req) {
@@ -463,7 +466,7 @@ class Vls.Server {
 
         debug (@"opened a file; requesting context update");
         doc.content = fileContents;
-        // TODO: handle possible content invalidation
+        doc.compilation.invalidate ();
         request_context_update (client);
     }
 
@@ -527,8 +530,8 @@ class Vls.Server {
     void check_update_context () {
         if (update_context_requests > 0 && get_monotonic_time () >= update_context_time_us) {
             foreach (var target in builds) {
-                if (target.compile ())
-                    publishDiagnostics (target, update_context_client);
+                target.compile ();
+                publishDiagnostics (target, update_context_client);
             }
             update_context_requests = 0;
             update_context_time_us = 0;
@@ -732,18 +735,15 @@ class Vls.Server {
         var p = parse_variant <LanguageServer.TextDocumentPositionParams> (@params);
         TextDocument? sourcefile = lookup_source_file (p.textDocument.uri);
         if (sourcefile == null) {
-            reply_null (id, client, "textDocument/documentSymbol");
+            debug (@"[$method] file `$(p.textDocument.uri)' not found");
+            reply_null (id, client, method);
             return;
         }
         var file = sourcefile.file;
 
         wait_for_context_update (id, request_cancelled => {
             if (request_cancelled) {
-                try {
-                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-                } catch (Error e) {
-                    debug ("[textDocument/completion] failed to reply to client: %s", e.message);
-                }
+                reply_null (id, client, method);
                 return;
             }
 
@@ -801,13 +801,15 @@ class Vls.Server {
         var p = parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
         TextDocument? doc = lookup_source_file (p.textDocument.uri);
         if (doc == null) {
-            reply_null (id, client, "textDocument/documentSymbol");
+            debug (@"[$method] file `$(p.textDocument.uri)' not found");
+            reply_null (id, client, method);
             return;
         }
 
         wait_for_context_update (id, request_cancelled => {
             if (request_cancelled) {
-                reply_null (id, client, "textDocument/documentSymbol");
+                debug (@"[$method] file `$(p.textDocument.uri)' not found");
+                reply_null (id, client, method);
                 try {
                     client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
                 } catch (Error e) {
@@ -1349,8 +1351,8 @@ class Vls.Server {
         var p = parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
         TextDocument? doc = lookup_source_file (p.textDocument.uri);
         if (doc == null) {
-            debug ("unknown file %s", p.textDocument.uri);
-            reply_null (id, client, "textDocument/completion");
+            debug (@"[$method] failed to find file $(p.textDocument.uri)");
+            reply_null (id, client, method);
             return;
         }
         bool is_pointer_access = false;
@@ -1659,6 +1661,7 @@ class Vls.Server {
         var p = parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
         TextDocument? doc = lookup_source_file (p.textDocument.uri);
         if (doc == null) {
+            debug (@"file `$(p.textDocument.uri)' not found");
             reply_null (id, client, "textDocument/hover");
             return;
         }
