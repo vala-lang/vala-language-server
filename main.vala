@@ -284,8 +284,12 @@ class Vls.Server {
                             as Meson.TargetInfo;
                         if (target_info == null)
                             throw new ProjectError.JSON (@"Could not parse target #$(nth)'s JSON");
-                        builds.add (new MesonTarget (target_info, build_dir));
-                        nth++;
+                        try {
+                            builds.add (new MesonTarget (target_info, build_dir));
+                            nth++;
+                        } catch (Error e) {
+                            showMessage (client, @"Failed to parse meson target #$nth: $(e.message)", MessageType.Error);
+                        }
                     }
                 } catch (SpawnError e) {
                     showMessage (client, @"Failed to spawn meson introspect: $(e.message)", MessageType.Error);
