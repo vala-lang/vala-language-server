@@ -22,7 +22,7 @@ class Vls.MesonTarget : BuildTarget {
                 if (/^--\w*[\w-]*\w+$/.match (param)) {
                     if (param == "--pkg" || param == "--vapidir" ||
                         param == "--girdir" || param == "--metadatadir" ||
-                        param == "--gresourcesdir") {
+                        param == "--gresourcesdir" || param == "--define") {
                         if (i+1 < target_source.parameters.length) {
                             // the next argument is the value
                             if (!args.has_key (param))
@@ -68,7 +68,8 @@ class Vls.MesonTarget : BuildTarget {
                     args["--vapidir"],
                     args["--girdir"],
                     args["--metadatadir"],
-                    args["--gresourcesdir"]);
+                    args["--gresourcesdir"],
+                    args["--define"]);
 
             // add source files to compilation
             foreach (string source in target_source.sources) {

@@ -13,6 +13,7 @@ class Vls.Compilation : Object {
     private HashSet<string> _gir_dirs;
     private HashSet<string> _metadata_dirs;
     private HashSet<string> _gresources_dirs;
+    private HashSet<string> _defines;
 
     // compiler flags
 
@@ -130,7 +131,8 @@ class Vls.Compilation : Object {
                         Collection<string>? vapi_dirs = null,
                         Collection<string>? gir_dirs = null,
                         Collection<string>? metadata_dirs = null,
-                        Collection<string>? gresources_dirs = null) {
+                        Collection<string>? gresources_dirs = null,
+                        Collection<string>? defines = null) {
         this.parent_target = parent;
 
         _packages = new HashSet<string> ();
@@ -149,6 +151,9 @@ class Vls.Compilation : Object {
         _gresources_dirs = new HashSet<string> ();
         if (gresources_dirs != null)
             _gresources_dirs.add_all (gresources_dirs);
+        _defines = new HashSet<string> ();
+        if (defines != null)
+            _defines.add_all (defines);
 
         this.experimental = experimental;
         this.experimental_non_null = experimental_non_null;
