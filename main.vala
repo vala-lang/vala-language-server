@@ -1000,7 +1000,8 @@ class Vls.Server {
             else
                 return (only_type_names ? "" : "interface ") + @"$type_string";
         } else if (sym is Vala.ErrorCode) {
-            var err_val = (sym as Vala.ErrorCode).value;
+            var err_sym = sym as Vala.ErrorCode;
+            var err_val = err_sym.value;
             return err_val != null ? err_val.to_string () : null;
         } else if (sym is Vala.Struct) {
             var struct_sym = sym as Vala.Struct;
@@ -1173,14 +1174,18 @@ class Vls.Server {
 
             // get members of supertypes
             if (is_instance) {
-                if (object_type is Vala.Class)
-                    foreach (var base_type in (object_type as Vala.Class).get_base_types ())
+                if (object_type is Vala.Class) {
+                    var class_sym = object_type as Vala.Class;
+                    foreach (var base_type in class_sym.get_base_types ())
                         add_completions_for_type (base_type.data_type,
                                                   completions, current_scope, is_instance, seen_props);
-                if (object_type is Vala.Interface)
-                    foreach (var base_type in (object_type as Vala.Interface).get_prerequisites ())
+                }
+                if (object_type is Vala.Interface) {
+                    var iface_sym = object_type as Vala.Interface;
+                    foreach (var base_type in iface_sym.get_prerequisites ())
                         add_completions_for_type (base_type.data_type,
                                                   completions, current_scope, is_instance, seen_props);
+                }
             }
         } else if (type is Vala.Enum) {
             /**
@@ -1312,9 +1317,11 @@ class Vls.Server {
         Vala.DataType? data_type = null;
         Vala.TypeSymbol? type_symbol = null;
         if (symbol is Vala.Variable) {
-            data_type = (symbol as Vala.Variable).variable_type;
+            var var_sym = symbol as Vala.Variable;
+            data_type = var_sym.variable_type;
         } else if (symbol is Vala.Expression) {
-            data_type = (symbol as Vala.Expression).value_type;
+            var expr = symbol as Vala.Expression;
+            data_type = expr.value_type;
             if (symbol is Vala.ObjectCreationExpression)
                 is_instance = false;
         }
@@ -1341,7 +1348,8 @@ class Vls.Server {
                                 debug (@"could not get type symbol for $(data_type.type_name)");
                         }
                     } else if (data_type is Vala.PointerType && is_pointer) {
-                        data_type = (data_type as Vala.PointerType).base_type;
+                        var ptype = data_type as Vala.PointerType;
+                        data_type = ptype.base_type;
                         debug (@"peeled base_type $(data_type.type_name) from pointer type");
                         continue;       // try again
                     } else {
@@ -1551,7 +1559,8 @@ class Vls.Server {
             Vala.CodeNode result = get_best (fs, doc);
 
             if (result is Vala.ExpressionStatement) {
-                result = (result as Vala.ExpressionStatement).expression;
+                var estmt = result as Vala.ExpressionStatement;
+                result = estmt.expression;
                 debug (@"[textDocument/signatureHelp] peeling away expression statement: $(result)");
             }
 
@@ -1586,12 +1595,16 @@ class Vls.Server {
                     var ct = data_type as Vala.CallableType;
                     param_list = ct.get_parameters ();
      
-                    if (ct is Vala.DelegateType)
-                        type_sym = (ct as Vala.DelegateType).delegate_symbol;
-                    else if (ct is Vala.MethodType)
-                        type_sym = (ct as Vala.MethodType).method_symbol;
-                    else if (ct is Vala.SignalType)
-                        type_sym = (ct as Vala.SignalType).signal_symbol;
+                    if (ct is Vala.DelegateType) {
+                        var dt = ct as Vala.DelegateType;
+                        type_sym = dt.delegate_symbol;
+                    } else if (ct is Vala.MethodType) {
+                        var mt = ct as Vala.MethodType;
+                        type_sym = mt.method_symbol;
+                    } else if (ct is Vala.SignalType) {
+                        var st = ct as Vala.SignalType;
+                        type_sym = st.signal_symbol;
+                    }
                 }
             } else if (result is Vala.ObjectCreationExpression
                     && !((Vala.ObjectCreationExpression)result).is_incomplete) {
@@ -1613,8 +1626,10 @@ class Vls.Server {
                     debug (@"[textDocument/signatureHelp] explicit_sym = $explicit_sym $(explicit_sym.type_name)");
                 }
 
-                if (explicit_sym != null && explicit_sym is Vala.Callable)
-                    param_list = (explicit_sym as Vala.Callable).get_parameters ();
+                if (explicit_sym != null && explicit_sym is Vala.Callable) {
+                    var callable_sym = explicit_sym as Vala.Callable;
+                    param_list = callable_sym.get_parameters ();
+                }
 
                 parent_sym = explicit_sym.parent_symbol;
             } else {
@@ -1710,7 +1725,8 @@ class Vls.Server {
                     });
                 }
             } else if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null) {
-                var sym = (result as Vala.Expression).symbol_reference;
+                var expr = result as Vala.Expression;
+                var sym = expr.symbol_reference;
                 hoverInfo.contents.add (new MarkedString () {
                     language = "vala",
                     value = get_symbol_data_type (sym, result is Vala.Literal)
