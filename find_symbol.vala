@@ -3,13 +3,13 @@ using LanguageServer;
 class Vls.FindSymbol : Vala.CodeVisitor {
     private LanguageServer.Position pos;
     private Vala.SourceFile file;
+    public bool search_multiline { get; private set; }
     public Gee.List<Vala.CodeNode> result;
 
     bool match (Vala.CodeNode node) {
         var sr = node.source_reference;
-
         if (sr == null) {
-            //  debug ("node %s [%s] has no source reference", node.type_name, node.to_string ());
+            // debug ("node %s has no source reference", node.type_name);
             return false;
         }
 
@@ -18,26 +18,33 @@ class Vls.FindSymbol : Vala.CodeVisitor {
             return false;
         }
 
-        if (sr.begin.line != sr.end.line) {
-            //  var from = (long)Server.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
-            //  var to = (long)Server.get_string_pos (file.content, sr.end.line-1, sr.end.column);
-            //  string contents = file.content [from:to];
-            //  stderr.printf ("Multiline node: %s: %s", node.type_name, sr.to_string ());
-            //  stderr.printf ("\n\t%s", contents.replace ("\n", " "));
-            //  stderr.printf ("\n");
+        if (!search_multiline) {
+            if (sr.begin.line != sr.end.line) {
+                //  var from = (long)Server.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
+                //  var to = (long)Server.get_string_pos (file.content, sr.end.line-1, sr.end.column);
+                //  string contents = file.content [from:to];
+                //  stderr.printf ("Multiline node: %s: %s", node.type_name, sr.to_string ());
+                //  stderr.printf ("\n\t%s", contents.replace ("\n", " "));
+                //  stderr.printf ("\n");
 
-            return false;
-        }
+                return false;
+            }
 
-        if (sr.begin.line != pos.line) {
-            return false;
-        }
-
-        if (sr.begin.column - 1 <= pos.character && pos.character <= sr.end.column) {
-            debug ("Got node: %s (%s) @ %s", node.type_name, node.to_string (), sr.to_string ());
-            return true;
+            if (sr.begin.line != pos.line) {
+                return false;
+            }
+            if (sr.begin.column - 1 <= pos.character && pos.character <= sr.end.column) {
+                debug ("Got node: %s (%s) @ %s", node.type_name, node.to_string (), sr.to_string ());
+                return true;
+            } else {
+                return false;
+            }
+        } else if (node is Vala.Statement) {
+            return false;       // we only want to find symbols, right?
         } else {
-            return false;
+            var begin = new Position () { line = sr.begin.line, character = sr.begin.column - 1 };
+            var end = new Position () { line = sr.end.line, character = sr.end.column };
+            return begin.compare (pos) <= 0 && pos.compare (end) <= 0;
         }
     }
 
@@ -45,9 +52,11 @@ class Vls.FindSymbol : Vala.CodeVisitor {
      * TODO: are children of a CodeNode guaranteed to have a source_reference within the parent?
      * if so, this can be much faster
      */
-    public FindSymbol (Vala.SourceFile file, LanguageServer.Position pos) {
+    public FindSymbol (Vala.SourceFile file, LanguageServer.Position pos, 
+                        bool search_multiline = false) {
         this.pos = pos;
         this.file = file;
+        this.search_multiline = search_multiline;
         result = new Gee.ArrayList<Vala.CodeNode> ();
         this.visit_source_file (file);
     }
@@ -156,12 +165,6 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         m.accept_children (this);
     }
 
-    public override void visit_data_type (Vala.DataType dt) {
-        if (this.match (dt))
-            result.add (dt);
-        dt.accept_children (this);
-    }
-
     public override void visit_declaration_statement (Vala.DeclarationStatement stmt) {
         if (this.match (stmt))
             result.add (stmt);
@@ -234,12 +237,6 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         stmt.accept_children (this);
     }
 
-    public override void visit_formal_parameter (Vala.Parameter p) {
-        if (this.match (p))
-            result.add (p);
-        p.accept_children (this);
-    }
-
     public override void visit_if_statement (Vala.IfStatement stmt) {
         if (this.match (stmt))
             result.add (stmt);
@@ -299,12 +296,6 @@ class Vls.FindSymbol : Vala.CodeVisitor {
     }
 
     public override void visit_method_call (Vala.MethodCall expr) {
-        if (this.match (expr))
-            result.add (expr);
-        expr.accept_children (this);
-    }
-
-    public override void visit_named_argument (Vala.NamedArgument expr) {
         if (this.match (expr))
             result.add (expr);
         expr.accept_children (this);
@@ -425,12 +416,6 @@ class Vls.FindSymbol : Vala.CodeVisitor {
     }
 
     public override void visit_type_check (Vala.TypeCheck expr) {
-        if (this.match (expr))
-            result.add (expr);
-        expr.accept_children (this);
-    }
-
-    public override void visit_unary_expression (Vala.UnaryExpression expr) {
         if (this.match (expr))
             result.add (expr);
         expr.accept_children (this);

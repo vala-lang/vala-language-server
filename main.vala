@@ -1497,7 +1497,7 @@ class Vls.Server {
         } else if (idx >= 1 && doc.file.content[idx-1:idx] == ".")
             pos = p.position.translate (0, -1);
 
-        var fs = new FindSymbol (doc.file, pos.to_libvala ());
+        var fs = new FindSymbol (doc.file, pos.to_libvala (), true);
 
         if (fs.result.size == 0) {
             debug ("[textDocument/completion] no results found");

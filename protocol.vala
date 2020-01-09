@@ -68,7 +68,7 @@ namespace LanguageServer {
         public Position to_libvala () {
             return new Position () {
                 line = this.line + 1,
-                     character = this.character
+                character = this.character
             };
         }
 
@@ -77,7 +77,7 @@ namespace LanguageServer {
             character = sloc.column;
         }
 
-        public Position translate(int dl = 0, int dc = 0) {
+        public Position translate (int dl = 0, int dc = 0) {
             return new Position () {
                 line = this.line + dl,
                 character = this.character + dc
