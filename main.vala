@@ -54,18 +54,54 @@ class Vls.TextDocument : Object {
     }
 }
 
+class Vls.Request {
+    private int64? int_value;
+    private string? string_value;
+
+    public Request (Variant id) {
+        assert (id.is_of_type (VariantType.INT64) || id.is_of_type (VariantType.STRING));
+        if (id.is_of_type (VariantType.INT64))
+            int_value = (int64) id;
+        else
+            string_value = (string) id;
+    }
+
+    public string to_string () {
+        return int_value != null ? int_value.to_string () : string_value;
+    }
+
+    public static uint hash (Request req) {
+        if (req.int_value != null)
+            return GLib.int64_hash (req.int_value);
+        else
+            return GLib.str_hash (req.string_value);
+    }
+
+    public static bool equal (Request reqA, Request reqB) {
+        if (reqA.int_value != null) {
+            assert (reqB.int_value != null);
+            return reqA.int_value == reqB.int_value;
+        } else {
+            assert (reqB.string_value != null);
+            return reqA.string_value == reqB.string_value;
+        }
+    }
+}
+
 class Vls.Server {
     Jsonrpc.Server server;
     MainLoop loop;
     HashTable<string, string> cc;
     Context ctx;
-    const uint check_update_context_period_ms = 400;
-    const int64 update_context_delay_inc_us = check_update_context_period_ms * 1000;
+    const uint check_update_context_period_ms = 200;
+    const int64 update_context_delay_inc_us = check_update_context_period_ms * 50;
     const int64 update_context_delay_max_us = 1000 * 1000;
+    const uint wait_for_context_update_delay_ms = 500;
 
     HashTable<string, NotificationHandler> notif_handlers;
     HashTable<string, CallHandler> call_handlers;
     InitializeParams init_params;
+    HashSet<Request> pending_requests;
 
     [CCode (has_target = false)]
     delegate void NotificationHandler (Vls.Server self, Jsonrpc.Client client, Variant @params);
@@ -137,6 +173,7 @@ class Vls.Server {
 
         notif_handlers = new HashTable <string, NotificationHandler> (str_hash, str_equal);
         call_handlers = new HashTable <string, CallHandler> (str_hash, str_equal);
+        pending_requests = new HashSet <Request> (Request.hash, Request.equal);
 
         server.notification.connect ((client, method, @params) => {
             debug (@"Got notification! $method");
@@ -168,6 +205,7 @@ class Vls.Server {
         call_handlers["textDocument/completion"] = this.textDocumentCompletion;
         call_handlers["textDocument/signatureHelp"] = this.textDocumentSignatureHelp;
         call_handlers["textDocument/hover"] = this.textDocumentHover;
+        notif_handlers["$/cancelRequest"] = this.cancelRequest;
 
         debug ("Finished constructing");
     }
@@ -484,7 +522,7 @@ class Vls.Server {
                     definitionProvider: new Variant.boolean (true),
                     documentSymbolProvider: new Variant.boolean (true),
                     completionProvider: buildDict(
-                        triggerCharacters: new Variant.strv (new string[] {".", ">"})
+                        triggerCharacters: new Variant.strv (new string[] {".", ">", " "})
                     ),
                     signatureHelpProvider: buildDict(
                         triggerCharacters: new Variant.strv (new string[] {"(", ","})
@@ -562,6 +600,18 @@ class Vls.Server {
         }
 
         return linepos + 1 + charno;
+    }
+
+    void cancelRequest (Jsonrpc.Client client, Variant @params) {
+        Variant? id = @params.lookup_value ("id", null);
+        if (id == null)
+            return;
+
+        var req = new Request (id);
+        if (pending_requests.remove (req))
+            debug (@"[cancelRequest] cancelled request $req");
+        else
+            debug (@"[cancelRequest] request $req not found");
     }
 
     void textDocumentDidOpen (Jsonrpc.Client client, Variant @params) {
@@ -694,13 +744,46 @@ class Vls.Server {
         }
     }
 
-    void require_updated_context () {
-        if (update_context_requests > 0) {
-            update_context_requests = 0;
-            update_context_time_us = 0;
-            ctx.invalidate ();
-            ctx.check ();
-            publishDiagnostics (update_context_client);
+    delegate void OnContextUpdatedFunc (bool request_cancelled);
+
+    /**
+     * Rather than satisfying all requests in check_update_context (),
+     * to avoid race conditions, we have to spawn a timeout to check for 
+     * the right conditions to call on_context_updated_func ().
+     */
+    void wait_for_context_update (Variant id, owned OnContextUpdatedFunc on_context_updated_func) {
+        // we've already updated the context
+        if (update_context_requests == 0)
+            on_context_updated_func (false);
+        else {
+            var req = new Request (id);
+            if (pending_requests.add (req))
+                warning (@"Request ($req): request already in pending requests, this should not happen");
+            else
+                debug (@"Request ($req): added request to pending requests");
+            wait_for_context_update_aux (req, (owned) on_context_updated_func);
+        }
+    }
+
+    void wait_for_context_update_aux (Request req, owned OnContextUpdatedFunc on_context_updated_func) {
+        if (update_context_requests == 0) {
+            if (!pending_requests.remove (req)) {
+                debug (@"Request ($req): context updated but request cancelled");
+                on_context_updated_func (true);
+            } else {
+                debug (@"Request ($req): context updated");
+                on_context_updated_func (false);
+            }
+        } else {
+            Timeout.add (wait_for_context_update_delay_ms, () => {
+                if (pending_requests.contains (req))
+                    wait_for_context_update_aux (req, (owned) on_context_updated_func);
+                else {
+                    debug (@"Request ($req): cancelled before context update");
+                    on_context_updated_func (true);
+                }
+                return false;
+            });
         }
     }
 
@@ -858,125 +941,128 @@ class Vls.Server {
             }
             return;
         }
-        var fs = new FindSymbol (sourcefile.file, p.position.to_libvala ());
+        var file = sourcefile.file;
 
-        if (fs.result.size == 0) {
-            debug ("no results :(");
-            try {
-                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-            } catch (Error e) {
-                debug ("[textDocument/definition] failed to reply to client: %s", e.message);
-            }
-            return;
-        }
-
-        Vala.CodeNode? best = get_best (fs, file);
-
-        if (best is Vala.Expression && !(best is Vala.Literal)) { // expressions
-            var b = (Vala.Expression)best;
-            debug ("best (%s / %s @ %s) is a Expression", best.to_string (), best.type_name, best.source_reference.to_string ());
-            if (b.symbol_reference != null && b.symbol_reference.source_reference != null) {
-                best = b.symbol_reference;
-                debug ("best is now the symbol_reference => %p (%s / %s @ %s)", best, best.type_name, best.to_string (), best.source_reference.to_string ());
-            }
-        } else if (best is Vala.DelegateType) {
-            best = ((Vala.DelegateType)best).delegate_symbol;
-        } else if (best is Vala.DataType) { // field types
-            var dt = (Vala.DataType)best;
-            debug ("[%s] is a DataType, using data_type: [%s] @ %s", best.to_string (), dt.data_type.type_name, dt.data_type.source_reference.to_string ());
-            best = dt.data_type;
-        } else { // return null
-            debug ("best is a %s, returning null", best.type_name);
-            try {
-                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-            } catch (Error e) {
-                debug ("[textDocument/definition] failed to reply to client: %s", e.message);
-            }
-            return;
-        }
-
-        /*
-        string uri = null;
-        foreach (var sourcefile in ctx.code_context.get_source_files ()) {
-            if (best.source_reference.file == sourcefile) {
-                uri = "file://" + sourcefile.filename;
-                break;
-            }
-        }
-        if (uri == null) {
-            debug ("error: couldn't find source file for %s", best.source_reference.file.filename);
-            client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-            return;
-        }
-        */
-
-        if (best == null) {
-            warning ("best == null");
-            try {
-                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-            } catch (Error e) {
-                debug ("[textDocument/definition] failed to reply to client: %s", e.message);
-            }
-            return;
-        }
-
-        debug (@"replying... $(best.source_reference.file.filename)");
-        try {
-            client.reply (id, object_to_variant (new LanguageServer.Location () {
-                uri = "file://" + best.source_reference.file.filename,
-                range = new Range () {
-                    start = new Position () {
-                        line = best.source_reference.begin.line - 1,
-                        character = best.source_reference.begin.column - 1
-                    },
-                    end = new Position () {
-                        line = best.source_reference.end.line - 1,
-                        character = best.source_reference.end.column
-                    }
+        wait_for_context_update (id, request_cancelled => {
+            if (request_cancelled) {
+                try {
+                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+                } catch (Error e) {
+                    debug ("[textDocument/completion] failed to reply to client: %s", e.message);
                 }
-            }));
-        } catch (Error e) {
-            debug ("[textDocument/definition] failed to reply to client: %s", e.message);
-        }
+                return;
+            }
+
+            var fs = new FindSymbol (file, p.position.to_libvala ());
+
+            if (fs.result.size == 0) {
+                try {
+                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+                } catch (Error e) {
+                    debug("[textDocument/definition] failed to reply to client: %s", e.message);
+                }
+                return;
+            }
+
+            Vala.CodeNode? best = get_best (fs, file);
+
+            if (best is Vala.Expression && !(best is Vala.Literal)) {
+                var b = (Vala.Expression)best;
+                debug ("best (%p) is a Expression (symbol_reference = %p)", best, b.symbol_reference);
+                if (b.symbol_reference != null && b.symbol_reference.source_reference != null) {
+                    best = b.symbol_reference;
+                    debug ("best is now the symbol_referenece => %p (%s)", best, best.to_string ());
+                }
+            } else {
+                try {
+                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+                } catch (Error e) {
+                    debug("[textDocument/definition] failed to reply to client: %s", e.message);
+                }
+                return;
+            }
+
+            /*
+            string uri = null;
+            foreach (var sourcefile in ctx.code_context.get_source_files ()) {
+                if (best.source_reference.file == sourcefile) {
+                    uri = "file://" + sourcefile.filename;
+                    break;
+                }
+            }
+            if (uri == null) {
+                debug ("error: couldn't find source file for %s", best.source_reference.file.filename);
+                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+                return;
+            }
+            */
+
+            debug (@"replying... $(best.source_reference.file.filename)");
+            try {
+                client.reply (id, object_to_variant (new LanguageServer.Location () {
+                    uri = "file://" + best.source_reference.file.filename,
+                    range = new Range () {
+                        start = new Position () {
+                            line = best.source_reference.begin.line - 1,
+                            character = best.source_reference.begin.column - 1
+                        },
+                        end = new Position () {
+                            line = best.source_reference.end.line - 1,
+                            character = best.source_reference.end.column
+                        }
+                    }
+                }));
+            } catch (Error e) {
+                debug("[textDocument/definition] failed to reply to client: %s", e.message);
+            }
+        });
     }
 
     void textDocumentDocumentSymbol (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = parse_variant<LanguageServer.DocumentSymbolParams> (@params);
 
-        if (ctx.dirty)
-            ctx.check ();
+        wait_for_context_update (id, request_cancelled => {
+            if (request_cancelled) {
+                try {
+                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+                } catch (Error e) {
+                    debug ("[textDocument/completion] failed to reply to client: %s", e.message);
+                }
+                return;
+            }
 
-        var sourcefile = ctx.get_source_file (p.textDocument.uri);
-        if (sourcefile == null) {
-            debug ("unknown file %s", p.textDocument.uri);
+            var sourcefile = ctx.get_source_file (p.textDocument.uri);
+            if (sourcefile == null) {
+                debug ("unknown file %s", p.textDocument.uri);
+                try {
+                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+                } catch (Error e) {
+                    debug("[textDocument/documentSymbol] failed to reply to client: %s", e.message);
+                }
+                return;
+            }
+
+            var array = new Json.Array ();
+            var syms = new ListSymbols (sourcefile.file);
+            if (init_params.capabilities.textDocument.documentSymbol.hierarchicalDocumentSymbolSupport)
+                foreach (var dsym in syms) {
+                    debug(@"found $(dsym.name)");
+                    array.add_element (Json.gobject_serialize (dsym));
+                }
+            else {
+                foreach (var dsym in syms.flattened ()) {
+                    debug(@"found $(dsym.name)");
+                    array.add_element (Json.gobject_serialize (new SymbolInformation.from_document_symbol (dsym, p.textDocument.uri)));
+                }
+            }
+
             try {
-                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+                Variant result = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (array), null);
+                client.reply (id, result);
             } catch (Error e) {
-                debug ("[textDocument/documentSymbol] failed to reply to client: %s", e.message);
+                debug (@"[textDocument/documentSymbol] failed to reply to client: $(e.message)");
             }
-            return;
-        }
-
-        var array = new Json.Array ();
-        var syms = new ListSymbols (sourcefile.file);
-        if (init_params.capabilities.textDocument.documentSymbol.hierarchicalDocumentSymbolSupport)
-            foreach (var dsym in syms) {
-                debug (@"found $(dsym.name)");
-                array.add_element (Json.gobject_serialize (dsym));
-            }
-        else {
-            foreach (var dsym in syms.flattened ()) {
-                debug (@"found $(dsym.name)");
-                array.add_element (Json.gobject_serialize (new SymbolInformation.from_document_symbol (dsym, p.textDocument.uri)));
-            }
-        }
-
-        try {
-            Variant result = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (array), null);
-            client.reply (id, result);
-        } catch (Error e) {
-            debug (@"[textDocument/documentSymbol] failed to reply to client: $(e.message)");
-        }
+        });
     }
 
     /**
@@ -1017,7 +1103,7 @@ class Vls.Server {
             if (only_type_names) {
                 return @"($param_string) -> " + (ret_type ?? (creation_method != null ? creation_method.class_name : "void"));
             } else {
-                string? parent_str = get_symbol_data_type (parent, only_type_names);
+                string? parent_str = parent != null ? parent.to_string () : null;
                 if (creation_method == null) {
                     if (parent_str != null)
                         parent_str = @"$parent_str::";
@@ -1235,13 +1321,16 @@ class Vls.Server {
              */
             var object_type = type as Vala.ObjectTypeSymbol;
 
-            debug (@"completion: type is object $(object_type.name)\n");
+            debug (@"completion: type is object $(object_type.name) (is_instance = $is_instance)\n");
 
             foreach (var method_sym in object_type.get_methods ()) {
-                if (method_sym.name == ".new" || method_sym.is_instance_member () != is_instance
+                if (method_sym.name == ".new" 
+                    // Vala.CreationMethods are treated as instance methods for some reason
+                    || (!(method_sym is Vala.CreationMethod) && method_sym.is_instance_member () != is_instance)
                     || (method_sym is Vala.CreationMethod && is_instance)
-                    || !is_symbol_accessible (method_sym, current_scope))
+                    || !is_symbol_accessible (method_sym, current_scope)) {
                     continue;
+                }
                 completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
             }
 
@@ -1430,6 +1519,8 @@ class Vls.Server {
             data_type = (symbol as Vala.Variable).variable_type;
         } else if (symbol is Vala.Expression) {
             data_type = (symbol as Vala.Expression).value_type;
+            if (symbol is Vala.ObjectCreationExpression)
+                is_instance = false;
         }
 
         if (data_type != null) {
@@ -1484,96 +1575,121 @@ class Vls.Server {
             }
             return;
         }
-        // force context update if necessary
-        require_updated_context ();
         bool is_pointer_access = false;
         long idx = (long) get_string_pos (doc.file.content, p.position.line, p.position.character);
         Position pos = p.position;
+        Position end_pos = pos;
 
         if (idx >= 2 && doc.file.content[idx-2:idx] == "->") {
             is_pointer_access = true;
             debug ("[textDocument/completion] found pointer access");
             pos = p.position.translate (0, -2);
-        } else if (idx >= 1 && doc.file.content[idx-1:idx] == ".")
+        } else if (idx >= 1 && doc.file.content[idx-1:idx] == ".") {
             pos = p.position.translate (0, -1);
-
-        var fs = new FindSymbol (doc.file, pos.to_libvala (), true);
-
-        if (fs.result.size == 0) {
-            debug ("[textDocument/completion] no results found");
-            try {
-                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-            } catch (Error e) {
-                debug ("[textDocument/completion] failed to reply to client: %s", e.message);
-            }
-            return;
+        } else if (idx >= 4 && doc.file.content[idx-4:idx] == "new ") {
+            pos = p.position.translate (0, -4);
         }
 
-        foreach (var res in fs.result)
-            debug (@"[textDocument/completion] found $(res.type_name) (semanalyzed = $(res.checked))");
+        wait_for_context_update (id, request_cancelled => {
+            if (request_cancelled) {
+                try {
+                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+                } catch (Error e) {
+                    debug ("[textDocument/completion] failed to reply to client: %s", e.message);
+                }
+                return;
+            }
 
-        Vala.CodeNode result = get_best (fs, doc.file);
-        Vala.CodeNode? peeled = null;
-        Vala.Scope current_scope = get_current_scope (result);
-        var json_array = new Json.Array ();
-        var completions = new Gee.HashSet<CompletionItem> ();
+            var fs = new FindSymbol (doc.file, pos.to_libvala (), true, end_pos.to_libvala ());
 
-        debug (@"[textDocument/completion] got $(result.type_name) `$result' (semanalyzed = $(result.checked)))");
-        if (result is Vala.MemberAccess) {
-            var ma = result as Vala.MemberAccess;
-            if (ma.symbol_reference != null) {
-                debug (@"peeling away symbol_reference from MemberAccess: $(ma.symbol_reference.type_name)");
-                peeled = ma.symbol_reference;
-            } else {
-                debug ("MemberAccess does not have symbol_reference");
-                if (!ma.checked) {
-                    for (Vala.CodeNode? parent = ma.parent_node; 
-                         parent != null;
-                         parent = parent.parent_node)
-                    {
-                        debug (@"parent ($parent) semanalyzed = $(parent.checked)");
+            if (fs.result.size == 0) {
+                debug ("[textDocument/completion] no results found");
+                try {
+                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+                } catch (Error e) {
+                    debug ("[textDocument/completion] failed to reply to client: %s", e.message);
+                }
+                return;
+            }
+
+            foreach (var res in fs.result)
+                debug (@"[textDocument/completion] found $(res.type_name) (semanalyzed = $(res.checked))");
+
+            Vala.CodeNode result = get_best (fs, doc.file);
+            Vala.CodeNode? peeled = null;
+            Vala.Scope current_scope = get_current_scope (result);
+            var json_array = new Json.Array ();
+            var completions = new Gee.HashSet<CompletionItem> ();
+
+            debug (@"[textDocument/completion] got $(result.type_name) `$result' (semanalyzed = $(result.checked)))");
+
+            do {
+                if (result is Vala.MemberAccess) {
+                    var ma = result as Vala.MemberAccess;
+                    if (ma.symbol_reference != null) {
+                        debug (@"peeling away symbol_reference from MemberAccess: $(ma.symbol_reference.type_name)");
+                        peeled = ma.symbol_reference;
+                    } else {
+                        debug ("MemberAccess does not have symbol_reference");
+                        if (!ma.checked) {
+                            for (Vala.CodeNode? parent = ma.parent_node; 
+                                parent != null;
+                                parent = parent.parent_node)
+                            {
+                                debug (@"parent ($parent) semanalyzed = $(parent.checked)");
+                            }
+                        }
                     }
                 }
-            }
-        }
 
-        do {
-            bool is_instance = true;
-            Vala.TypeSymbol? type_sym = get_type_symbol (result, is_pointer_access, ref is_instance);
+                bool is_instance = true;
+                Vala.TypeSymbol? type_sym = get_type_symbol (result, is_pointer_access, ref is_instance);
 
-            // try again
-            if (type_sym == null && peeled != null)
-                type_sym = get_type_symbol (peeled, is_pointer_access, ref is_instance);
+                // try again
+                if (type_sym == null && peeled != null)
+                    type_sym = get_type_symbol (peeled, is_pointer_access, ref is_instance);
 
-            if (type_sym != null)
-                add_completions_for_type (type_sym, completions, current_scope, is_instance);
-            // and try some more
-            else if (peeled is Vala.Signal)
-                add_completions_for_signal (peeled as Vala.Signal, completions);
-            else if (peeled is Vala.Namespace)
-                add_completions_for_ns (peeled as Vala.Namespace, completions);
-            else {
-                if (result is Vala.MemberAccess &&
-                    ((Vala.MemberAccess)result).inner != null) {
-                    result = ((Vala.MemberAccess)result).inner;
-                    // maybe our expression was wrapped in extra parentheses:
-                    // (x as T). for example
-                    continue; 
+                if (type_sym != null)
+                    add_completions_for_type (type_sym, completions, current_scope, is_instance);
+                // and try some more
+                else if (peeled is Vala.Signal)
+                    add_completions_for_signal (peeled as Vala.Signal, completions);
+                else if (peeled is Vala.Namespace)
+                    add_completions_for_ns (peeled as Vala.Namespace, completions);
+                else {
+                    if (result is Vala.MemberAccess &&
+                        ((Vala.MemberAccess)result).inner != null) {
+                        result = ((Vala.MemberAccess)result).inner;
+                        debug (@"[textDocument/completion] trying MemberAccess.inner");
+                        // maybe our expression was wrapped in extra parentheses:
+                        // (x as T). for example
+                        continue; 
+                    }
+                    if (result is Vala.ObjectCreationExpression &&
+                        ((Vala.ObjectCreationExpression)result).member_name != null) {
+                        result = ((Vala.ObjectCreationExpression)result).member_name;
+                        debug (@"[textDocument/completion] trying ObjectCreationExpression.member_name");
+                        // maybe our object creation expression contains a member access
+                        // from a namespace or some other type
+                        // new Vls. for example
+                        continue;
+                    }
+                    debug ("[textDocument/completion] could not get datatype for %s",
+                            result == null ? "(null)" : @"($(result.type_name)) $result");
                 }
-                debug ("[textDocument/completion] could not get datatype");
+                break;      // break by default
+            } while (true);
+
+            foreach (CompletionItem comp in completions)
+                json_array.add_element (Json.gobject_serialize (comp));
+
+            try {
+                Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
+                client.reply (id, variant_array);
+            } catch (Error e) {
+                debug (@"[textDocument/completion] failed to reply to client: $(e.message)");
             }
-            break;      // break by default
-        } while (true);
-
-        foreach (CompletionItem comp in completions)
-            json_array.add_element (Json.gobject_serialize (comp));
-
-        try {
-            Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
-            client.reply (id, variant_array);
-        } catch (Error e) {
-            debug (@"[textDocument/completion] failed to reply to client: $(e.message)");
-        }
+        });
     }
 
     void textDocumentSignatureHelp (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
@@ -1588,181 +1704,191 @@ class Vls.Server {
             }
             return;
         }
-        // force context update if necessary
-        require_updated_context ();
 
-        var signatures = new Gee.ArrayList <SignatureInformation> ();
-        var json_array = new Json.Array ();
-        int active_param = 0;
+        wait_for_context_update (id, request_cancelled => {
+            if (request_cancelled) {
+                try {
+                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+                } catch (Error e) {
+                    debug ("[textDocument/completion] failed to reply to client: %s", e.message);
+                }
+                return;
+            }
 
-        long idx = (long) get_string_pos (doc.file.content, p.position.line, p.position.character);
-        Position pos = p.position;
+            var signatures = new Gee.ArrayList <SignatureInformation> ();
+            var json_array = new Json.Array ();
+            int active_param = 0;
 
-        if (idx >= 2 && doc.file.content[idx-1:idx] == "(") {
-            debug ("[textDocument/signatureHelp] possible argument list");
-            pos = p.position.translate (0, -2);
-        } else if (idx >= 1 && doc.file.content[idx-1:idx] == ",") {
-            debug ("[textDocument/signatureHelp] possible ith argument in list");
-            pos = p.position.translate (0, -1);
-        }
+            long idx = (long) get_string_pos (doc.file.content, p.position.line, p.position.character);
+            Position pos = p.position;
 
-        var fs = new FindSymbol (doc.file, pos.to_libvala ());
+            if (idx >= 2 && doc.file.content[idx-1:idx] == "(") {
+                debug ("[textDocument/signatureHelp] possible argument list");
+                pos = p.position.translate (0, -2);
+            } else if (idx >= 1 && doc.file.content[idx-1:idx] == ",") {
+                debug ("[textDocument/signatureHelp] possible ith argument in list");
+                pos = p.position.translate (0, -1);
+            }
 
-        // filter the results for MethodCall's and ExpressionStatements
-        var fs_results = fs.result;
-        fs.result = new Gee.ArrayList<Vala.CodeNode> ();
+            var fs = new FindSymbol (doc.file, pos.to_libvala ());
 
-        foreach (var res in fs_results) {
-            debug (@"[textDocument/signatureHelp] found $(res.type_name) (semanalyzed = $(res.checked))");
-            if (res is Vala.ExpressionStatement || res is Vala.MethodCall
-             || res is Vala.ObjectCreationExpression)
-                fs.result.add (res);
-        }
+            // filter the results for MethodCall's and ExpressionStatements
+            var fs_results = fs.result;
+            fs.result = new Gee.ArrayList<Vala.CodeNode> ();
 
-        if (fs.result.size == 0 && fs_results.size > 0) {
-            // In cases where our cursor is to the right of a method call and
-            // not inside it (most likely because the right parenthesis is omitted),
-            // we might not find any MethodCall or ExpressionStatements, so instead
-            // look at whatever we found and see if it is a child of what we want.
             foreach (var res in fs_results) {
-                // walk up tree
-                for (Vala.CodeNode? x = res; x != null; x = x.parent_node)
-                    if (x is Vala.ExpressionStatement || x is Vala.MethodCall)
-                        fs.result.add (x);
-            }
-        }
-
-        if (fs.result.size == 0) {
-            debug ("[textDocument/signatureHelp] no results found");
-            try {
-                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-            } catch (Error e) {
-                debug ("[textDocument/signatureHelp] failed to reply to client: %s", e.message);
-            }
-            return;
-        }
-
-        Vala.CodeNode result = get_best (fs, doc.file);
-
-        if (result is Vala.ExpressionStatement) {
-            result = (result as Vala.ExpressionStatement).expression;
-            debug (@"[textDocument/signatureHelp] peeling away expression statement: $(result)");
-        }
-
-        var si = new SignatureInformation ();
-        Vala.List<Vala.Parameter>? param_list = null;
-        // The explicit symbol referenced, like a local variable
-        // or a method. Could be null if we invoke an array element, 
-        // for example.
-        Vala.Symbol? explicit_sym = null;
-        // The symbol referenced indirectly
-        Vala.Symbol? type_sym = null;
-        // The parent symbol (useful for creation methods)
-        Vala.Symbol? parent_sym = null;
-
-        if (result is Vala.MethodCall) {
-            var mc = result as Vala.MethodCall;
-            // TODO: NamedArgument's, whenever they become supported in upstream
-            active_param = mc.initial_argument_count - 1;
-            if (active_param < 0)
-                active_param = 0;
-            else if (mc.extra_comma)
-                active_param++;
-            foreach (var arg in mc.get_argument_list ()) {
-                debug (@"$mc: found argument ($arg)");
+                debug (@"[textDocument/signatureHelp] found $(res.type_name) (semanalyzed = $(res.checked))");
+                if (res is Vala.ExpressionStatement || res is Vala.MethodCall
+                 || res is Vala.ObjectCreationExpression)
+                    fs.result.add (res);
             }
 
-            // get the method type from the expression
-            Vala.DataType data_type = mc.call.value_type;
-            explicit_sym = mc.call.symbol_reference;
-
-            if (data_type is Vala.CallableType) {
-                var ct = data_type as Vala.CallableType;
-                param_list = ct.get_parameters ();
- 
-                if (ct is Vala.DelegateType)
-                    type_sym = (ct as Vala.DelegateType).delegate_symbol;
-                else if (ct is Vala.MethodType)
-                    type_sym = (ct as Vala.MethodType).method_symbol;
-                else if (ct is Vala.SignalType)
-                    type_sym = (ct as Vala.SignalType).signal_symbol;
-            }
-        } else if (result is Vala.ObjectCreationExpression) {
-            var oce = result as Vala.ObjectCreationExpression;
-            // TODO: NamedArgument's, whenever they become supported in upstream
-            active_param = oce.initial_argument_count - 1;
-            if (active_param < 0)
-                active_param = 0;
-            else if (oce.extra_comma)
-                active_param++;
-            foreach (var arg in oce.get_argument_list ()) {
-                debug (@"$oce: found argument ($arg)");
+            if (fs.result.size == 0 && fs_results.size > 0) {
+                // In cases where our cursor is to the right of a method call and
+                // not inside it (most likely because the right parenthesis is omitted),
+                // we might not find any MethodCall or ExpressionStatements, so instead
+                // look at whatever we found and see if it is a child of what we want.
+                foreach (var res in fs_results) {
+                    // walk up tree
+                    for (Vala.CodeNode? x = res; x != null; x = x.parent_node)
+                        if (x is Vala.ExpressionStatement || x is Vala.MethodCall)
+                            fs.result.add (x);
+                }
             }
 
-            explicit_sym = oce.symbol_reference;
-
-            if (explicit_sym == null && oce.member_name != null) {
-                explicit_sym = oce.member_name.symbol_reference;
-                debug (@"[textDocument/signatureHelp] explicit_sym = $explicit_sym $(explicit_sym.type_name)");
+            if (fs.result.size == 0) {
+                debug ("[textDocument/signatureHelp] no results found");
+                try {
+                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+                } catch (Error e) {
+                    debug ("[textDocument/signatureHelp] failed to reply to client: %s", e.message);
+                }
+                return;
             }
 
-            if (explicit_sym != null && explicit_sym is Vala.Callable)
-                param_list = (explicit_sym as Vala.Callable).get_parameters ();
+            Vala.CodeNode result = get_best (fs, doc.file);
 
-            parent_sym = explicit_sym.parent_symbol;
-        } else {
-            debug ("[textDocument/signatureHelp] neither a method call nor object creation expr");
-            try {
-                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-            } catch (Error e) {
-                debug ("[textDocument/signatureHelp] failed to reply to client: %s", e.message);
+            if (result is Vala.ExpressionStatement) {
+                result = (result as Vala.ExpressionStatement).expression;
+                debug (@"[textDocument/signatureHelp] peeling away expression statement: $(result)");
             }
-            return;     // early exit
-        } 
 
-        assert (explicit_sym != null || type_sym != null);
-                
-        if (explicit_sym == null) {
-            si.label = get_symbol_data_type (type_sym);
-            si.documentation = get_symbol_comment (type_sym);
-        } else {
-            // TODO: need a function to display symbol names correctly given context
-            if (type_sym != null) {
+            var si = new SignatureInformation ();
+            Vala.List<Vala.Parameter>? param_list = null;
+            // The explicit symbol referenced, like a local variable
+            // or a method. Could be null if we invoke an array element, 
+            // for example.
+            Vala.Symbol? explicit_sym = null;
+            // The symbol referenced indirectly
+            Vala.Symbol? type_sym = null;
+            // The parent symbol (useful for creation methods)
+            Vala.Symbol? parent_sym = null;
+
+            if (result is Vala.MethodCall) {
+                var mc = result as Vala.MethodCall;
+                // TODO: NamedArgument's, whenever they become supported in upstream
+                active_param = mc.initial_argument_count - 1;
+                if (active_param < 0)
+                    active_param = 0;
+                else if (mc.extra_comma)
+                    active_param++;
+                foreach (var arg in mc.get_argument_list ()) {
+                    debug (@"$mc: found argument ($arg)");
+                }
+
+                // get the method type from the expression
+                Vala.DataType data_type = mc.call.value_type;
+                explicit_sym = mc.call.symbol_reference;
+
+                if (data_type is Vala.CallableType) {
+                    var ct = data_type as Vala.CallableType;
+                    param_list = ct.get_parameters ();
+     
+                    if (ct is Vala.DelegateType)
+                        type_sym = (ct as Vala.DelegateType).delegate_symbol;
+                    else if (ct is Vala.MethodType)
+                        type_sym = (ct as Vala.MethodType).method_symbol;
+                    else if (ct is Vala.SignalType)
+                        type_sym = (ct as Vala.SignalType).signal_symbol;
+                }
+            } else if (result is Vala.ObjectCreationExpression
+                    && !((Vala.ObjectCreationExpression)result).is_incomplete) {
+                var oce = result as Vala.ObjectCreationExpression;
+                // TODO: NamedArgument's, whenever they become supported in upstream
+                active_param = oce.initial_argument_count - 1;
+                if (active_param < 0)
+                    active_param = 0;
+                else if (oce.extra_comma)
+                    active_param++;
+                foreach (var arg in oce.get_argument_list ()) {
+                    debug (@"$oce: found argument ($arg)");
+                }
+
+                explicit_sym = oce.symbol_reference;
+
+                if (explicit_sym == null && oce.member_name != null) {
+                    explicit_sym = oce.member_name.symbol_reference;
+                    debug (@"[textDocument/signatureHelp] explicit_sym = $explicit_sym $(explicit_sym.type_name)");
+                }
+
+                if (explicit_sym != null && explicit_sym is Vala.Callable)
+                    param_list = (explicit_sym as Vala.Callable).get_parameters ();
+
+                parent_sym = explicit_sym.parent_symbol;
+            } else {
+                debug ("[textDocument/signatureHelp] neither a method call nor (complete) object creation expr");
+                try {
+                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+                } catch (Error e) {
+                    debug ("[textDocument/signatureHelp] failed to reply to client: %s", e.message);
+                }
+                return;     // early exit
+            } 
+
+            assert (explicit_sym != null || type_sym != null);
+                    
+            if (explicit_sym == null) {
                 si.label = get_symbol_data_type (type_sym);
                 si.documentation = get_symbol_comment (type_sym);
             } else {
-                si.label = get_symbol_data_type (explicit_sym, false, parent_sym);
+                // TODO: need a function to display symbol names correctly given context
+                if (type_sym != null) {
+                    si.label = get_symbol_data_type (type_sym);
+                    si.documentation = get_symbol_comment (type_sym);
+                } else {
+                    si.label = get_symbol_data_type (explicit_sym, false, parent_sym);
+                }
+                // try getting the documentation for the explicit symbol
+                // if the type does not have any documentation
+                if (si.documentation == null)
+                    si.documentation = get_symbol_comment (explicit_sym);
             }
-            // try getting the documentation for the explicit symbol
-            // if the type does not have any documentation
-            if (si.documentation == null)
-                si.documentation = get_symbol_comment (explicit_sym);
-        }
 
-        if (param_list != null) {
-            foreach (var parameter in param_list) {
-                si.parameters.add (new ParameterInformation () {
-                    label = get_symbol_data_type (parameter),
-                    documentation = get_symbol_comment (parameter)
-                });
-                debug (@"found parameter $parameter (name = $(parameter.name))");
+            if (param_list != null) {
+                foreach (var parameter in param_list) {
+                    si.parameters.add (new ParameterInformation () {
+                        label = get_symbol_data_type (parameter),
+                        documentation = get_symbol_comment (parameter)
+                    });
+                    debug (@"found parameter $parameter (name = $(parameter.name))");
+                }
+                signatures.add (si);
             }
-            signatures.add (si);
-        }
 
 
-        foreach (var sinfo in signatures)
-            json_array.add_element (Json.gobject_serialize (sinfo));
+            foreach (var sinfo in signatures)
+                json_array.add_element (Json.gobject_serialize (sinfo));
 
-        try {
-            Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
-            client.reply (id, buildDict (
-                signatures: variant_array,
-                activeParameter: new Variant.int32 (active_param)
-            ));
-        } catch (Error e) {
-            debug (@"[textDocument/signatureHelp] failed to reply to client: $(e.message)");
-        }
+            try {
+                Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
+                client.reply (id, buildDict (
+                    signatures: variant_array,
+                    activeParameter: new Variant.int32 (active_param)
+                ));
+            } catch (Error e) {
+                debug (@"[textDocument/signatureHelp] failed to reply to client: $(e.message)");
+            }
+        });
     }
 
     void textDocumentHover (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
@@ -1779,61 +1905,72 @@ class Vls.Server {
         }
 
         Position pos = p.position;
-        var fs = new FindSymbol (doc.file, pos.to_libvala ());
+        wait_for_context_update (id, request_cancelled => {
+            if (request_cancelled) {
+                try {
+                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+                } catch (Error e) {
+                    debug ("[textDocument/completion] failed to reply to client: %s", e.message);
+                }
+                return;
+            }
 
-        if (fs.result.size == 0) {
-            debug ("[textDocument/hover] no results found");
+            var fs = new FindSymbol (doc.file, pos.to_libvala ());
+
+            if (fs.result.size == 0) {
+                debug ("[textDocument/hover] no results found");
+                try {
+                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+                } catch (Error e) {
+                    debug ("[textDocument/hover] failed to reply to client: %s", e.message);
+                }
+                return;
+            }
+
+            Vala.CodeNode result = get_best (fs, doc.file);
+            var hoverInfo = new Hover () {
+                range = new Range.from_sourceref (result.source_reference)
+            };
+
+            if (result is Vala.Symbol) {
+                hoverInfo.contents.add (new MarkedString () {
+                    language = "vala",
+                    value = get_symbol_data_type (result as Vala.Symbol)
+                });
+                var comment = get_symbol_comment (result as Vala.Symbol);
+                if (comment != null) {
+                    hoverInfo.contents.add (new MarkedString () {
+                        value = comment.value
+                    });
+                }
+            } else if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null) {
+                var sym = (result as Vala.Expression).symbol_reference;
+                hoverInfo.contents.add (new MarkedString () {
+                    language = "vala",
+                    value = get_symbol_data_type (sym, result is Vala.Literal)
+                });
+            } else if (result is Vala.CastExpression) {
+                hoverInfo.contents.add (new MarkedString () {
+                    language = "vala",
+                    value = @"$result"
+                });
+            } else {
+                bool is_instance = true;
+                Vala.TypeSymbol? type_sym = get_type_symbol (result, false, ref is_instance);
+                hoverInfo.contents.add (new MarkedString () {
+                    language = "vala",
+                    value = type_sym != null ? get_symbol_data_type (type_sym, true) : result.to_string ()
+                });
+            }
+
+            debug (@"[textDocument/hover] got $result $(result.type_name)");
+
             try {
-                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+                client.reply (id, object_to_variant (hoverInfo));
             } catch (Error e) {
                 debug ("[textDocument/hover] failed to reply to client: %s", e.message);
             }
-            return;
-        }
-
-        Vala.CodeNode result = get_best (fs, doc.file);
-        var hoverInfo = new Hover () {
-            range = new Range.from_sourceref (result.source_reference)
-        };
-
-        if (result is Vala.Symbol) {
-            hoverInfo.contents.add (new MarkedString () {
-                language = "vala",
-                value = get_symbol_data_type (result as Vala.Symbol)
-            });
-            var comment = get_symbol_comment (result as Vala.Symbol);
-            if (comment != null) {
-                hoverInfo.contents.add (new MarkedString () {
-                    value = comment.value
-                });
-            }
-        } else if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null) {
-            var sym = (result as Vala.Expression).symbol_reference;
-            hoverInfo.contents.add (new MarkedString () {
-                language = "vala",
-                value = get_symbol_data_type (sym, result is Vala.Literal)
-            });
-        } else if (result is Vala.CastExpression) {
-            hoverInfo.contents.add (new MarkedString () {
-                language = "vala",
-                value = @"$result"
-            });
-        } else {
-            bool is_instance = true;
-            Vala.TypeSymbol? type_sym = get_type_symbol (result, false, ref is_instance);
-            hoverInfo.contents.add (new MarkedString () {
-                language = "vala",
-                value = type_sym != null ? get_symbol_data_type (type_sym, true) : result.to_string ()
-            });
-        }
-
-        debug (@"[textDocument/hover] got $result $(result.type_name)");
-
-        try {
-            client.reply (id, object_to_variant (hoverInfo));
-        } catch (Error e) {
-            debug ("[textDocument/hover] failed to reply to client: %s", e.message);
-        }
+        });
     }
 
     void shutdown (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {

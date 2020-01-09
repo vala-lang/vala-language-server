@@ -2,6 +2,7 @@ using LanguageServer;
 
 class Vls.FindSymbol : Vala.CodeVisitor {
     private LanguageServer.Position pos;
+    private LanguageServer.Position? end_pos;
     private Vala.SourceFile file;
     public bool search_multiline { get; private set; }
     public Gee.List<Vala.CodeNode> result;
@@ -18,6 +19,9 @@ class Vls.FindSymbol : Vala.CodeVisitor {
             return false;
         }
 
+        var begin = new Position () { line = sr.begin.line, character = sr.begin.column - 1 };
+        var end = new Position () { line = sr.end.line, character = sr.end.column };
+
         if (!search_multiline) {
             if (sr.begin.line != sr.end.line) {
                 //  var from = (long)Server.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
@@ -33,18 +37,15 @@ class Vls.FindSymbol : Vala.CodeVisitor {
             if (sr.begin.line != pos.line) {
                 return false;
             }
-            if (sr.begin.column - 1 <= pos.character && pos.character <= sr.end.column) {
-                debug ("Got node: %s (%s) @ %s", node.type_name, node.to_string (), sr.to_string ());
-                return true;
-            } else {
-                return false;
-            }
-        } else if (node is Vala.Statement) {
+        } else if (node is Vala.Statement || node is Vala.LambdaExpression) {
             return false;       // we only want to find symbols, right?
+        }
+
+        if (begin.compare (pos) <= 0 && pos.compare (end) <= 0 && (end_pos == null || end.compare (end_pos) <= 0)) {
+            debug ("Got node: %s (%s) @ %s", node.type_name, node.to_string (), sr.to_string ());
+            return true;
         } else {
-            var begin = new Position () { line = sr.begin.line, character = sr.begin.column - 1 };
-            var end = new Position () { line = sr.end.line, character = sr.end.column };
-            return begin.compare (pos) <= 0 && pos.compare (end) <= 0;
+            return false;
         }
     }
 
@@ -53,8 +54,10 @@ class Vls.FindSymbol : Vala.CodeVisitor {
      * if so, this can be much faster
      */
     public FindSymbol (Vala.SourceFile file, LanguageServer.Position pos, 
-                        bool search_multiline = false) {
+                        bool search_multiline = false,
+                        LanguageServer.Position? end_pos = null) {
         this.pos = pos;
+        this.end_pos = end_pos;
         this.file = file;
         this.search_multiline = search_multiline;
         result = new Gee.ArrayList<Vala.CodeNode> ();
