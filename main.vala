@@ -1704,7 +1704,7 @@ class Vls.Server {
                 return;
             }
 
-            var fs = new FindSymbol (doc.file, pos.to_libvala ());
+            var fs = new FindSymbol (doc.file, pos.to_libvala (), true);
 
             if (fs.result.size == 0) {
                 debug ("[textDocument/hover] no results found");
