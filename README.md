@@ -2,24 +2,26 @@
 
 ### Features
 - [x] diagnostics
-- [ ] code completion
-    - [ ] basic (in progress)
-    - [ ] advanced
+- [x] code completion
+    - [x] basic (member access completion)
+    - [ ] advanced (context-sensitive suggestions)
 - [x] document symbol outline
 - [x] goto definition
 - [ ] symbol references
 - [ ] goto implementation
 - [x] signature help
 - [x] hover
+- [x] symbol documentation
+    - [x] basic (from comments)
+    - [ ] advanced (from GIR and VAPI files)
 
 #### build systems / environments:
 - [x] meson
 - [ ] cmake
-- [x] `compiler_commands.json`
 
 ### Dependencies
 - `jsonrpc-glib-1.0`
-- `libvala-dev`
+- `libvala-0.48` or later
 
 ### Setup
 ```
