@@ -240,6 +240,10 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         edomain.accept_children (this);
     }
 
+    // note: do NOT implement visit_expression (), since
+    // this will, in most cases, be redundant and dramatically
+    // slow down FindSymbol
+
     public override void visit_expression_statement (Vala.ExpressionStatement stmt) {
         if (this.match (stmt))
             result.add (stmt);
@@ -397,7 +401,8 @@ class Vls.FindSymbol : Vala.CodeVisitor {
     public override void visit_return_statement (Vala.ReturnStatement stmt) {
         if (this.match (stmt))
             result.add (stmt);
-        stmt.accept_children (this);
+        if (stmt.return_expression != null)
+            stmt.return_expression.accept_children (this);
     }
 
     public override void visit_signal (Vala.Signal sig) {
