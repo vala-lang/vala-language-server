@@ -334,10 +334,6 @@ class Vls.Server {
             warning (@"[$method] removed build target $(build_target)!");
         }
 
-        // compile everything
-        foreach (var build_target in builds)
-            build_target.compile ();
-
         try {
             client.reply (id, buildDict (
                 capabilities: buildDict (
@@ -355,6 +351,12 @@ class Vls.Server {
             ));
         } catch (Error e) {
             debug (@"[initialize] failed to reply to client: $(e.message)");
+        }
+
+        // compile everything
+        foreach (var build_target in builds) {
+            build_target.compile ();
+            publishDiagnostics (build_target, client);
         }
 
         // listen for context update requests
@@ -602,100 +604,89 @@ class Vls.Server {
         }
     }
 
-    ArrayList<TextDocument> list_all_documents () {
-        var documents = new ArrayList<TextDocument> ();
-        foreach (var build_target in builds)
-            foreach (var compilation in build_target)
-                foreach (var document in compilation)
-                    documents.add (document);
-        return documents;
-    }
-
     void publishDiagnostics (BuildTarget target, Jsonrpc.Client client) {
-        // TODO: make this faster by only going over the reporter of each compilation once
-        foreach (var document in list_all_documents ()) {
-            var source = document.file;
-            string uri = document.uri;
-            var compilation = document.compilation;
-            var array = new Json.Array ();
+        var docs_not_published = new HashMap<string,TextDocument> ();
 
-            compilation.reporter.errorlist.foreach (err => {
-                if (err.loc != null) {
-                    if (err.loc.file != source)
-                        return;
+        foreach (var compilation in target)
+            foreach (var doc in compilation)
+                docs_not_published[doc.uri] = doc;
 
-                    var diag = new Diagnostic () {
-                        range = new Range () {
-                            start = new Position () {
-                                line = err.loc.begin.line - 1,
-                                character = err.loc.begin.column - 1
-                            },
-                            end = new Position () {
-                                line = err.loc.end.line - 1,
-                                character = err.loc.end.column
-                            }
+        foreach (var compilation in target) {
+            var file_to_doc = new HashMap<Vala.SourceFile,TextDocument> ();
+            var doc_diags = new HashMap<TextDocument,Json.Array> ();
+
+            foreach (var document in compilation)
+                file_to_doc[document.file] = document;
+            
+            compilation.reporter.messages.foreach (err => {
+                if (err.loc == null) {
+                    warning (@"got diagnostic without source");
+                    return;
+                }
+                assert (err.loc.file != null);
+                if (!file_to_doc.has_key (err.loc.file)) {
+                    warning (@"diagnostic has source not in compilation! - $(err.message)");
+                    return;
+                }
+
+                var diag = new Diagnostic () {
+                    range = new Range () {
+                        start = new Position () {
+                            line = err.loc.begin.line - 1,
+                            character = err.loc.begin.column - 1
                         },
-                        severity = DiagnosticSeverity.Error,
-                        message = err.message
-                    };
+                        end = new Position () {
+                            line = err.loc.end.line - 1,
+                            character = err.loc.end.column
+                        }
+                    },
+                    severity = err.severity,
+                    message = err.message
+                };
 
-                    var node = Json.gobject_serialize (diag);
-                    array.add_element (node);
-                } else
-                    array.add_element (Json.gobject_serialize (new Diagnostic () {
-                        severity = DiagnosticSeverity.Error,
-                        message = err.message
-                    }));
+                var node = Json.gobject_serialize (diag);
+                if (!doc_diags.has_key (file_to_doc[err.loc.file]))
+                    doc_diags[file_to_doc[err.loc.file]] = new Json.Array ();
+                doc_diags[file_to_doc[err.loc.file]].add_element (node);
             });
 
-            compilation.reporter.warnlist.foreach (err => {
-                if (err.loc != null) {
-                    if (err.loc.file != source)
-                        return;
+            // at the end, report diags for each text document
+            foreach (var entry in doc_diags.entries) {
+                Variant diags_variant_array;
 
-                    var diag = new Diagnostic () {
-                        range = new Range () {
-                            start = new Position () {
-                                line = err.loc.begin.line - 1,
-                                character = err.loc.begin.column - 1
-                            },
-                            end = new Position () {
-                                line = err.loc.end.line - 1,
-                                character = err.loc.end.column
-                            }
-                        },
-                        severity = DiagnosticSeverity.Warning,
-                        message = err.message
-                    };
-
-                    var node = Json.gobject_serialize (diag);
-                    array.add_element (node);
-                } else
-                    array.add_element (Json.gobject_serialize (new Diagnostic () {
-                        severity = DiagnosticSeverity.Warning,
-                        message = err.message
-                    }));
-            });
-
-            Variant result;
-            try {
-                result = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (array), null);
-            } catch (Error e) {
-                debug (@"failed to create diagnostics: $(e.message)");
-                continue;
+                docs_not_published.unset (entry.key.uri);
+                try {
+                    diags_variant_array = Json.gvariant_deserialize (
+                        new Json.Node.alloc ().init_array (entry.value),
+                        null);
+                } catch (Error e) {
+                    warning (@"[publishDiagnostics] failed to deserialize diags for `$(entry.key.uri)': $(e.message)");
+                    continue;
+                }
+                try {
+                    client.send_notification (
+                        "textDocument/publishDiagnostics",
+                        buildDict (
+                            uri: new Variant.string (entry.key.uri),
+                            diagnostics: diags_variant_array
+                        ));
+                } catch (Error e) {
+                    debug (@"[publishDiagnostics] failed to notify client: $(e.message)");
+                }
             }
+        }
 
+        foreach (var entry in docs_not_published.entries) {
             try {
-                client.send_notification ("textDocument/publishDiagnostics", buildDict (
-                    uri: new Variant.string (uri),
-                    diagnostics: result
-                ));
+                client.send_notification (
+                    "textDocument/publishDiagnostics",
+                    buildDict (
+                        uri: new Variant.string (entry.key),
+                        diagnostics: new Variant.array (VariantType.VARIANT, new Variant[]{})
+                    ));
             } catch (Error e) {
-                debug (@"publishDiagnostics: failed to notify client: $(e.message)");
-                continue;
+                debug (@"[publishDiagnostics] failed to publish empty diags for $(entry.key): $(e.message)");
             }
-
-            debug (@"[textDocument/publishDiagnostics] publishing diagnostics for $uri");
         }
     }
 
