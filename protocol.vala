@@ -76,6 +76,13 @@ namespace LanguageServer {
             line = sloc.line - 1;
             character = sloc.column;
         }
+
+        public Position translate(int dl = 0, int dc = 0) {
+            return new Position () {
+                line = this.line + dl,
+                character = this.character + dc
+            };
+        }
     }
 
     class Range : Object, Gee.Hashable<Range> {
@@ -270,6 +277,112 @@ namespace LanguageServer {
         Event = 24,
         Operator = 25,
         TypeParameter = 26
+    }
+
+    class CompletionList : Object, Json.Serializable {
+        public bool isIncomplete { get; set; }
+        public Gee.List<CompletionItem> items { get; private set; default = new Gee.LinkedList<CompletionItem> (); }
+
+        public new void Json.Serializable.set_property (ParamSpec pspec, Value value) {
+            base.set_property (pspec.get_name (), value);
+        }
+
+        public new Value Json.Serializable.get_property (ParamSpec pspec) {
+            Value val = Value(pspec.value_type);
+            base.get_property (pspec.get_name (), ref val);
+            return val;
+        }
+
+        public unowned ParamSpec? find_property (string name) {
+            return this.get_class ().find_property (name);
+        }
+
+        public Json.Node serialize_property (string property_name, Value value, ParamSpec pspec) {
+            if (property_name != "items")
+                return default_serialize_property (property_name, value, pspec);
+            var node = new Json.Node (Json.NodeType.ARRAY);
+            node.init_array (new Json.Array ());
+            var array = node.get_array ();
+            foreach (var child in items)
+                array.add_element (Json.gobject_serialize (child));
+            return node;
+        }
+
+        public bool deserialize_property (string property_name, out Value value, ParamSpec pspec, Json.Node property_node) {
+            error ("deserialization not supported");
+        }
+
+    }
+
+    class CompletionItem : Object, Gee.Hashable<CompletionItem> {
+        public string label { get; set; }
+        public CompletionItemKind kind { get; set; }
+        public string detail { get; set; }
+        public MarkupContent documentation { get; set; }
+        private uint _hash;
+        protected string _hash_string;
+
+        private CompletionItem () {}
+
+        public CompletionItem.from_symbol (Vala.Symbol sym, CompletionItemKind kind) {
+            this.label = sym.name;
+            this.kind = kind;
+            this.detail = Vls.Server.get_symbol_data_type (sym);
+            this.documentation = Vls.Server.get_symbol_comment (sym);
+            this._hash_string = @"$label $(Vls.Server.get_symbol_data_type (sym, true)) $kind";
+            this._hash = _hash_string.hash ();
+        }
+
+        public CompletionItem.for_signal (string label, string detail, string documentation) {
+            this.label = label;
+            this.kind = CompletionItemKind.Method;
+            this.detail = detail;
+            this.documentation = new MarkupContent () { value = documentation };
+            this._hash_string = @"$label $kind";
+            this._hash = _hash_string.hash ();
+        }
+
+        public uint hash () {
+            return this._hash;
+        }
+
+        public bool equal_to (CompletionItem other) {
+            return other._hash_string == this._hash_string;
+        }
+    }
+
+    class MarkupContent : Object {
+        public string kind { get; set; default = "plaintext"; }
+        public string value { get; set; }
+    }
+    
+    [CCode (default_value = "LANGUAGE_SERVER_COMPLETION_ITEM_KIND_Text")]
+    enum CompletionItemKind {
+        Text = 1,
+        Method = 2,
+        Function = 3,
+        Constructor = 4,
+        Field = 5,
+        Variable = 6,
+        Class = 7,
+        Interface = 8,
+        Module = 9,
+        Property = 10,
+        Unit = 11,
+        Value = 12,
+        Enum = 13,
+        Keyword = 14,
+        Snippet = 15,
+        Color = 16,
+        File = 17,
+        Reference = 18,
+        Folder = 19,
+        EnumMember = 20,
+        Constant = 21,
+        Struct = 22,
+        Event = 23,
+        Operator = 24,
+        TypeParameter = 25
     }
 
     class TextDocumentClientCapabilities : Object {
