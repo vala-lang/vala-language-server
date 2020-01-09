@@ -916,8 +916,8 @@ class Vls.Server {
                 else if (p.direction == Vala.ParameterDirection.REF)
                     param_string = "ref ";
                 if (only_type_names) {
-                    if (p.variable_type.data_type != null)
-                        param_string += p.variable_type.data_type.to_string ();
+                    if (p.variable_type.type_symbol != null)
+                        param_string += p.variable_type.type_symbol.to_string ();
                 } else {
                     param_string += p.variable_type.to_string ();
                     param_string += " " + p.name;
@@ -1173,13 +1173,13 @@ class Vls.Server {
                 if (object_type is Vala.Class) {
                     var class_sym = object_type as Vala.Class;
                     foreach (var base_type in class_sym.get_base_types ())
-                        add_completions_for_type (base_type.data_type,
+                        add_completions_for_type (base_type.type_symbol,
                                                   completions, current_scope, is_instance, seen_props);
                 }
                 if (object_type is Vala.Interface) {
                     var iface_sym = object_type as Vala.Interface;
                     foreach (var base_type in iface_sym.get_prerequisites ())
-                        add_completions_for_type (base_type.data_type,
+                        add_completions_for_type (base_type.type_symbol,
                                                   completions, current_scope, is_instance, seen_props);
                 }
             }
@@ -1324,7 +1324,7 @@ class Vls.Server {
 
         if (data_type != null) {
             do {
-                if (data_type.data_type == null) {
+                if (data_type.type_symbol== null) {
                     if (data_type is Vala.ErrorType) {
                         var err_type = data_type as Vala.ErrorType;
                         if (err_type.error_code != null)
@@ -1352,7 +1352,7 @@ class Vls.Server {
                         debug (@"could not get type symbol from $(data_type.type_name)");
                     }
                 } else
-                    type_symbol = data_type.data_type;
+                    type_symbol = data_type.type_symbol;
                 break;
             } while (true);
         } else if (symbol is Vala.TypeSymbol) {
@@ -1712,6 +1712,14 @@ class Vls.Server {
             var hoverInfo = new Hover () {
                 range = new Range.from_sourceref (result.source_reference)
             };
+
+            if (result is Vala.DataType) {
+                var dt = result as Vala.DataType;
+                if (dt.type_symbol != null)
+                    result = dt.type_symbol;
+                else if (dt.symbol != null)
+                    result = dt.symbol;
+            }
 
             if (result is Vala.Symbol) {
                 hoverInfo.contents.add (new MarkedString () {
