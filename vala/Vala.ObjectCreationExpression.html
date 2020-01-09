@@ -27,11 +27,16 @@
         </ul>
         <hr class="navi_hr"/>
         <ul class="navi_main">
+          <li class="property"><a href="Vala.ObjectCreationExpression.extra_comma.html">extra_comma</a></li>
+          <li class="property"><a href="Vala.ObjectCreationExpression.initial_argument_count.html">initial_argument_count</a></li>
+          <li class="property"><a href="Vala.ObjectCreationExpression.is_incomplete.html">is_incomplete</a></li>
           <li class="property"><a href="Vala.ObjectCreationExpression.is_yield_expression.html">is_yield_expression</a></li>
           <li class="property"><a href="Vala.ObjectCreationExpression.member_name.html">member_name</a></li>
           <li class="property"><a href="Vala.ObjectCreationExpression.struct_creation.html">struct_creation</a></li>
           <li class="property"><a href="Vala.ObjectCreationExpression.type_reference.html">type_reference</a></li>
           <li class="creation_method"><a href="Vala.ObjectCreationExpression.ObjectCreationExpression.html">ObjectCreationExpression</a></li>
+          <li class="creation_method"><a href="Vala.ObjectCreationExpression.ObjectCreationExpression.incomplete.html">
+              ObjectCreationExpression.incomplete</a></li>
           <li class="virtual_method"><a href="Vala.ObjectCreationExpression.accept.html">accept</a></li>
           <li class="virtual_method"><a href="Vala.ObjectCreationExpression.accept_children.html">accept_children</a></li>
           <li class="method"><a href="Vala.ObjectCreationExpression.add_argument.html">add_argument</a></li>
@@ -48,6 +53,9 @@
           <li class="virtual_method"><a href="Vala.ObjectCreationExpression.replace_expression.html">replace_expression</a></li>
           <li class="virtual_method"><a href="Vala.ObjectCreationExpression.replace_type.html">replace_type</a></li>
           <li class="field"><a href="Vala.ObjectCreationExpression._data_type.html">_data_type</a></li>
+          <li class="field"><a href="Vala.ObjectCreationExpression._extra_comma.html">_extra_comma</a></li>
+          <li class="field"><a href="Vala.ObjectCreationExpression._initial_argument_count.html">_initial_argument_count</a></li>
+          <li class="field"><a href="Vala.ObjectCreationExpression._is_incomplete.html">_is_incomplete</a></li>
           <li class="field"><a href="Vala.ObjectCreationExpression._is_yield_expression.html">_is_yield_expression</a></li>
           <li class="field"><a href="Vala.ObjectCreationExpression._member_name.html">_member_name</a></li>
           <li class="field"><a href="Vala.ObjectCreationExpression._struct_creation.html">_struct_creation</a></li>
@@ -82,6 +90,21 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Properties:</h3>
         <ul class="navi_inline">
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.ObjectCreationExpression.extra_comma.html" class="property">extra_comma</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">For language servers, whether there is an extra comma at the end of 
+                the argument list.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.ObjectCreationExpression.initial_argument_count.html" class="property">initial_argument_count</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">For language servers, the number of completed arguments from the left.
+              </span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.ObjectCreationExpression.is_incomplete.html" class="property">is_incomplete</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">For language servers, whether the object creation expression is 
+                incomplete.</span>
+            </div></li>
           <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.ObjectCreationExpression.is_yield_expression.html" class="property">is_yield_expression</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
@@ -105,6 +128,11 @@
           <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.ObjectCreationExpression.ObjectCreationExpression.html" class="creation_method">ObjectCreationExpression</a></b> (<span class="main_type"><a href="Vala.MemberAccess.html" class="class">MemberAccess</a></span>? member_name, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? source_reference = <span class="main_literal">null</span>)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Creates a new object creation expression.</span>
+            </div></li>
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Vala.ObjectCreationExpression.ObjectCreationExpression.incomplete.html" class="creation_method">ObjectCreationExpression.incomplete</a></b> (<span class="main_type"><a href="Vala.MemberAccess.html" class="class">MemberAccess</a></span>? member_name, <span class="main_type"><a href="Vala.SourceReference.html" class="class">SourceReference</a></span>? source_reference = <span class="main_literal">null</span>)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Creates a new incomplete object creation expression, such as `new ...'
+              </span>
             </div></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
@@ -134,9 +162,9 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span>&gt; <b><a href="Vala.ObjectCreationExpression.get_argument_list.html" class="method">get_argument_list</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span>&gt; <b><a href="Vala.ObjectCreationExpression.get_argument_list.html" class="method">get_argument_list</a></b> ()
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns a copy of the argument list.</span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the argument list.</span>
             </div></li>
           <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Vala.ObjectCreationExpression.get_defined_variables.html" class="virtual_method">get_defined_variables</a></b> (<span class="main_type"><a href="../gee/Vala.Collection.html" class="abstract_class">Collection</a></span>&lt;<span class="main_type"><a href="Vala.Variable.html" class="class">Variable</a></span>&gt; collection)
             </span>
@@ -146,7 +174,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.MemberInitializer.html" class="class">MemberInitializer</a></span>&gt; <b><a href="Vala.ObjectCreationExpression.get_object_initializer.html" class="method">get_object_initializer</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.MemberInitializer.html" class="class">MemberInitializer</a></span>&gt; <b><a href="Vala.ObjectCreationExpression.get_object_initializer.html" class="method">get_object_initializer</a></b> ()
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Returns the object initializer.</span>
             </div></li>
@@ -177,6 +205,18 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.ObjectCreationExpression._extra_comma.html" class="field">_extra_comma</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.ObjectCreationExpression._initial_argument_count.html" class="field">_initial_argument_count</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.ObjectCreationExpression._is_incomplete.html" class="field">_is_incomplete</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.ObjectCreationExpression._is_yield_expression.html" class="field">_is_yield_expression</a></b>
             </span>
             <div class="leaf_brief_description">
@@ -200,8 +240,8 @@
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-131')">All known members inherited from class Vala.Expression</div>
-          <div class="content" id="box-content-131">
+          <div class="headline" onclick="toggle_box (this, 'box-content-33')">All known members inherited from class Vala.Expression</div>
+          <div class="content" id="box-content-33">
             <div class="column">
               <ul class="navi_inline">
                 <li class="field"><a href="Vala.Expression._formal_target_type.html">_formal_target_type</a></li>
@@ -237,8 +277,8 @@
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-132')">All known members inherited from class Vala.CodeNode</div>
-          <div class="content" id="box-content-132">
+          <div class="headline" onclick="toggle_box (this, 'box-content-34')">All known members inherited from class Vala.CodeNode</div>
+          <div class="content" id="box-content-34">
             <div class="column">
               <ul class="navi_inline">
                 <li class="field"><a href="Vala.CodeNode._checked.html">_checked</a></li>

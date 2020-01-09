@@ -31,6 +31,7 @@
           <li class="enum"><a href="Vala.Parser.RecoveryState.html">RecoveryState</a></li>
           <li class="struct"><a href="Vala.Parser.TokenInfo.html">TokenInfo</a></li>
           <li class="constant"><a href="Vala.Parser.BUFFER_SIZE.html">BUFFER_SIZE</a></li>
+          <li class="property"><a href="Vala.Parser.lsp_mode.html">lsp_mode</a></li>
           <li class="creation_method"><a href="Vala.Parser.Parser.html">Parser</a></li>
           <li class="method"><a href="Vala.Parser.accept.html">accept</a></li>
           <li class="method"><a href="Vala.Parser.current.html">current</a></li>
@@ -166,6 +167,7 @@
           <li class="method"><a href="Vala.Parser.skip_type_argument_list.html">skip_type_argument_list</a></li>
           <li class="virtual_method"><a href="Vala.Parser.visit_source_file.html">visit_source_file</a></li>
           <li class="field"><a href="Vala.Parser._empty_type_parameter_list.html">_empty_type_parameter_list</a></li>
+          <li class="field"><a href="Vala.Parser._lsp_mode.html">_lsp_mode</a></li>
           <li class="field"><a href="Vala.Parser.comment.html">comment</a></li>
           <li class="field"><a href="Vala.Parser.context.html">context</a></li>
           <li class="field"><a href="Vala.Parser.index.html">index</a></li>
@@ -208,6 +210,13 @@
         <h3 class="main_title">Constants:</h3>
         <ul class="navi_inline">
           <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> <b><a href="Vala.Parser.BUFFER_SIZE.html" class="constant">BUFFER_SIZE</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+        </ul>
+        <h3 class="main_title">Properties:</h3>
+        <ul class="navi_inline">
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Parser.lsp_mode.html" class="property">lsp_mode</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -310,7 +319,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span>&gt; <b><a href="Vala.Parser.parse_argument_list.html" class="method">parse_argument_list</a></b> () <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Expression.html" class="abstract_class">Expression</a></span>&gt; <b><a href="Vala.Parser.parse_argument_list.html" class="method">parse_argument_list</a></b> (<span class="main_keyword">out</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> extra_comma) <span class="main_keyword">throws</span> <span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -722,7 +731,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.report_parse_error.html" class="method">report_parse_error</a></b> (<span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span> e)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">void</span> <b><a href="Vala.Parser.report_parse_error.html" class="method">report_parse_error</a></b> (<span class="main_type"><a href="Vala.ParseError.html" class="errordomain">ParseError</a></span> e, <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> advance = <span class="main_literal">true</span>)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -761,6 +770,10 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.Parser._lsp_mode.html" class="field">_lsp_mode</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.Comment.html" class="class">Comment</a></span> <b><a href="Vala.Parser.comment.html" class="field">comment</a></b>
             </span>
             <div class="leaf_brief_description">
@@ -788,8 +801,8 @@
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-181')">All known members inherited from class Vala.CodeVisitor</div>
-          <div class="content" id="box-content-181">
+          <div class="headline" onclick="toggle_box (this, 'box-content-1')">All known members inherited from class Vala.CodeVisitor</div>
+          <div class="content" id="box-content-1">
             <div class="column">
               <ul class="navi_inline">
                 <li class="virtual_method"><a href="Vala.CodeVisitor.visit_addressof_expression.html">visit_addressof_expression</a></li>

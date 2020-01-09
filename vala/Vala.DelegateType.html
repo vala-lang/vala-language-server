@@ -33,14 +33,15 @@
           <li class="virtual_method"><a href="Vala.DelegateType.check.html">check</a></li>
           <li class="virtual_method"><a href="Vala.DelegateType.compatible.html">compatible</a></li>
           <li class="virtual_method"><a href="Vala.DelegateType.copy.html">copy</a></li>
-          <li class="virtual_method"><a href="Vala.DelegateType.get_parameters.html">get_parameters</a></li>
-          <li class="virtual_method"><a href="Vala.DelegateType.get_return_type.html">get_return_type</a></li>
+          <li class="virtual_method"><a href="Vala.DelegateType.equals.html">equals</a></li>
+          <li class="method"><a href="Vala.DelegateType.get_destroy_field.html">get_destroy_field</a></li>
+          <li class="virtual_method"><a href="Vala.DelegateType.get_member.html">get_member</a></li>
+          <li class="method"><a href="Vala.DelegateType.get_target_field.html">get_target_field</a></li>
           <li class="virtual_method"><a href="Vala.DelegateType.is_accessible.html">is_accessible</a></li>
           <li class="virtual_method"><a href="Vala.DelegateType.is_disposable.html">is_disposable</a></li>
-          <li class="virtual_method"><a href="Vala.DelegateType.is_invokable.html">is_invokable</a></li>
-          <li class="virtual_method"><a href="Vala.DelegateType.to_qualified_string.html">to_qualified_string</a></li>
-          <li class="field"><a href="Vala.DelegateType._delegate_symbol.html">_delegate_symbol</a></li>
           <li class="field"><a href="Vala.DelegateType._is_called_once.html">_is_called_once</a></li>
+          <li class="field"><a href="Vala.DelegateType.destroy_field.html">destroy_field</a></li>
+          <li class="field"><a href="Vala.DelegateType.target_field.html">target_field</a></li>
         </ul>
       </div>
       <div class="site_content">
@@ -69,7 +70,7 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Properties:</h3>
         <ul class="navi_inline">
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Vala.Delegate.html" class="class">Delegate</a></span> <b><a href="Vala.DelegateType.delegate_symbol.html" class="property">delegate_symbol</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.Delegate.html" class="class">Delegate</a></span> <b><a href="Vala.DelegateType.delegate_symbol.html" class="property">delegate_symbol</a></b> { <span class="main_keyword">get</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -99,11 +100,19 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Parameter.html" class="class">Parameter</a></span>&gt;? <b><a href="Vala.DelegateType.get_parameters.html" class="virtual_method">get_parameters</a></b> ()
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.DelegateType.equals.html" class="virtual_method">equals</a></b> (<span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span> type2)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><a href="Vala.DataType.html" class="abstract_class">DataType</a></span>? <b><a href="Vala.DelegateType.get_return_type.html" class="virtual_method">get_return_type</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.DelegateDestroyField.html" class="class">DelegateDestroyField</a></span> <b><a href="Vala.DelegateType.get_destroy_field.html" class="method">get_destroy_field</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span>? <b><a href="Vala.DelegateType.get_member.html" class="virtual_method">get_member</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> member_name)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.DelegateTargetField.html" class="class">DelegateTargetField</a></span> <b><a href="Vala.DelegateType.get_target_field.html" class="method">get_target_field</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -115,69 +124,68 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.DelegateType.is_invokable.html" class="virtual_method">is_invokable</a></b> ()
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.DelegateType.to_qualified_string.html" class="virtual_method">to_qualified_string</a></b> (<span class="main_type"><a href="Vala.Scope.html" class="class">Scope</a></span>? scope)
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Vala.Delegate.html" class="class">Delegate</a></span> <b><a href="Vala.DelegateType._delegate_symbol.html" class="field">_delegate_symbol</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.DelegateType._is_called_once.html" class="field">_is_called_once</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.DelegateType._is_called_once.html" class="field">_is_called_once</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.DelegateDestroyField.html" class="class">DelegateDestroyField</a></span>? <b><a href="Vala.DelegateType.destroy_field.html" class="field">destroy_field</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="Vala.DelegateTargetField.html" class="class">DelegateTargetField</a></span>? <b><a href="Vala.DelegateType.target_field.html" class="field">target_field</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-147')">All known members inherited from class Vala.CallableType</div>
-          <div class="content" id="box-content-147">
+          <div class="headline" onclick="toggle_box (this, 'box-content-10')">All known members inherited from class Vala.CallableType</div>
+          <div class="content" id="box-content-10">
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="property"><a href="Vala.CallableType.callable_symbol.html">callable_symbol</a></li>
+                <li class="virtual_method"><a href="Vala.CallableType.get_parameters.html">get_parameters</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="virtual_method"><a href="Vala.CallableType.get_return_type.html">get_return_type</a></li>
+                <li class="virtual_method"><a href="Vala.CallableType.is_invokable.html">is_invokable</a></li>
+              </ul>
+            </div>
             <div class="column">
               <ul class="navi_inline">
                 <li class="virtual_method"><a href="Vala.CallableType.to_prototype_string.html">to_prototype_string</a></li>
               </ul>
             </div>
-            <div class="column">
-              <ul class="navi_inline">
-              </ul>
-            </div>
-            <div class="column">
-              <ul class="navi_inline">
-              </ul>
-            </div>
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-148')">All known members inherited from class Vala.DataType</div>
-          <div class="content" id="box-content-148">
+          <div class="headline" onclick="toggle_box (this, 'box-content-11')">All known members inherited from class Vala.DataType</div>
+          <div class="content" id="box-content-11">
             <div class="column">
               <ul class="navi_inline">
-                <li class="field"><a href="Vala.DataType._data_type.html">_data_type</a></li>
                 <li class="field"><a href="Vala.DataType._empty_type_list.html">_empty_type_list</a></li>
                 <li class="field"><a href="Vala.DataType._floating_reference.html">_floating_reference</a></li>
                 <li class="field"><a href="Vala.DataType._is_dynamic.html">_is_dynamic</a></li>
                 <li class="field"><a href="Vala.DataType._nullable.html">_nullable</a></li>
+                <li class="field"><a href="Vala.DataType._symbol.html">_symbol</a></li>
                 <li class="field"><a href="Vala.DataType._value_owned.html">_value_owned</a></li>
                 <li class="virtual_method"><a href="Vala.DataType.accept.html">accept</a></li>
                 <li class="virtual_method"><a href="Vala.DataType.accept_children.html">accept_children</a></li>
                 <li class="method"><a href="Vala.DataType.add_type_argument.html">add_type_argument</a></li>
                 <li class="virtual_method"><a href="Vala.DataType.compatible.html">compatible</a></li>
                 <li class="abstract_method"><a href="Vala.DataType.copy.html">copy</a></li>
-                <li class="property"><a href="Vala.DataType.data_type.html">data_type</a></li>
                 <li class="virtual_method"><a href="Vala.DataType.equals.html">equals</a></li>
                 <li class="property"><a href="Vala.DataType.floating_reference.html">floating_reference</a></li>
+                <li class="virtual_method"><a href="Vala.DataType.get_actual_type.html">get_actual_type</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="virtual_method"><a href="Vala.DataType.get_actual_type.html">get_actual_type</a></li>
                 <li class="virtual_method"><a href="Vala.DataType.get_member.html">get_member</a></li>
                 <li class="virtual_method"><a href="Vala.DataType.get_parameters.html">get_parameters</a></li>
                 <li class="virtual_method"><a href="Vala.DataType.get_pointer_member.html">get_pointer_member</a></li>
@@ -191,11 +199,11 @@
                 <li class="property"><a href="Vala.DataType.is_dynamic.html">is_dynamic</a></li>
                 <li class="virtual_method"><a href="Vala.DataType.is_invokable.html">is_invokable</a></li>
                 <li class="method"><a href="Vala.DataType.is_non_null_simple_type.html">is_non_null_simple_type</a></li>
+                <li class="method"><a href="Vala.DataType.is_real_non_null_struct_type.html">is_real_non_null_struct_type</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="method"><a href="Vala.DataType.is_real_non_null_struct_type.html">is_real_non_null_struct_type</a></li>
                 <li class="virtual_method"><a href="Vala.DataType.is_real_struct_type.html">is_real_struct_type</a></li>
                 <li class="virtual_method"><a href="Vala.DataType.is_reference_type_or_type_parameter.html">is_reference_type_or_type_parameter</a>
                 </li>
@@ -204,18 +212,20 @@
                 <li class="method"><a href="Vala.DataType.remove_all_type_arguments.html">remove_all_type_arguments</a></li>
                 <li class="virtual_method"><a href="Vala.DataType.replace_type.html">replace_type</a></li>
                 <li class="virtual_method"><a href="Vala.DataType.stricter.html">stricter</a></li>
+                <li class="property"><a href="Vala.DataType.symbol.html">symbol</a></li>
                 <li class="virtual_method"><a href="Vala.DataType.to_prototype_string.html">to_prototype_string</a></li>
                 <li class="virtual_method"><a href="Vala.DataType.to_qualified_string.html">to_qualified_string</a></li>
                 <li class="virtual_method"><a href="Vala.DataType.to_string.html">to_string</a></li>
                 <li class="field"><a href="Vala.DataType.type_argument_list.html">type_argument_list</a></li>
+                <li class="property"><a href="Vala.DataType.type_symbol.html">type_symbol</a></li>
                 <li class="property"><a href="Vala.DataType.value_owned.html">value_owned</a></li>
               </ul>
             </div>
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-149')">All known members inherited from class Vala.CodeNode</div>
-          <div class="content" id="box-content-149">
+          <div class="headline" onclick="toggle_box (this, 'box-content-12')">All known members inherited from class Vala.CodeNode</div>
+          <div class="content" id="box-content-12">
             <div class="column">
               <ul class="navi_inline">
                 <li class="field"><a href="Vala.CodeNode._checked.html">_checked</a></li>

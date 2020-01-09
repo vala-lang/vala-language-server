@@ -101,8 +101,8 @@
           <p>Represents a node in the symbol tree.</p>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-100')">All known sub-classes:</div>
-          <div class="content" id="box-content-100">
+          <div class="headline" onclick="toggle_box (this, 'box-content-274')">All known sub-classes:</div>
+          <div class="content" id="box-content-274">
             <div class="column">
               <ul class="navi_inline">
                 <li class="class"><a href="Vala.ArrayCopyMethod.html">ArrayCopyMethod</a></li>
@@ -115,6 +115,8 @@
                 <li class="class"><a href="Vala.Constructor.html">Constructor</a></li>
                 <li class="class"><a href="Vala.CreationMethod.html">CreationMethod</a></li>
                 <li class="class"><a href="Vala.Delegate.html">Delegate</a></li>
+                <li class="class"><a href="Vala.DelegateDestroyField.html">DelegateDestroyField</a></li>
+                <li class="class"><a href="Vala.DelegateTargetField.html">DelegateTargetField</a></li>
                 <li class="class"><a href="Vala.Destructor.html">Destructor</a></li>
                 <li class="class"><a href="Vala.DynamicMethod.html">DynamicMethod</a></li>
               </ul>
@@ -129,14 +131,16 @@
                 <li class="class"><a href="Vala.ErrorDomain.html">ErrorDomain</a></li>
                 <li class="class"><a href="Vala.Field.html">Field</a></li>
                 <li class="class"><a href="Vala.ForeachStatement.html">ForeachStatement</a></li>
+                <li class="class"><a href="Vala.GenericDestroyField.html">GenericDestroyField</a></li>
+                <li class="class"><a href="Vala.GenericDupField.html">GenericDupField</a></li>
                 <li class="class"><a href="Vala.Interface.html">Interface</a></li>
                 <li class="class"><a href="Vala.LocalVariable.html">LocalVariable</a></li>
                 <li class="class"><a href="Vala.Method.html">Method</a></li>
-                <li class="class"><a href="Vala.Namespace.html">Namespace</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
+                <li class="class"><a href="Vala.Namespace.html">Namespace</a></li>
                 <li class="abstract_class"><a href="Vala.ObjectTypeSymbol.html">ObjectTypeSymbol</a></li>
                 <li class="class"><a href="Vala.Parameter.html">Parameter</a></li>
                 <li class="class"><a href="Vala.Property.html">Property</a></li>
@@ -149,6 +153,24 @@
                 <li class="abstract_class"><a href="Vala.TypeSymbol.html">TypeSymbol</a></li>
                 <li class="class"><a href="Vala.UnresolvedSymbol.html">UnresolvedSymbol</a></li>
                 <li class="class"><a href="Vala.Variable.html">Variable</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="box">
+          <div class="headline" onclick="toggle_box (this, 'box-content-275')">Required by:</div>
+          <div class="content" id="box-content-275">
+            <div class="column">
+              <ul class="navi_inline">
+                <li class="interface"><a href="Vala.Callable.html">Callable</a></li>
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
+              </ul>
+            </div>
+            <div class="column">
+              <ul class="navi_inline">
               </ul>
             </div>
           </div>
@@ -205,11 +227,11 @@
             </span>
             <div class="leaf_brief_description"><span class="brief_description">The symbol name.</span>
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Vala.Scope.html" class="class">Scope</a></span> <b><a href="Vala.Symbol.owner.html" class="property">owner</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.Scope.html" class="class">Scope</a></span> <b><a href="Vala.Symbol.owner.html" class="property">owner</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">The scope this symbol is a part of</span>
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><span class="abstract_class">Symbol</span></span>? <b><a href="Vala.Symbol.parent_symbol.html" class="property">parent_symbol</a></b> { <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><span class="abstract_class">Symbol</span></span>? <b><a href="Vala.Symbol.parent_symbol.html" class="property">parent_symbol</a></b> { <span class="main_keyword">get</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">The parent of this symbol.</span>
             </div></li>
@@ -380,7 +402,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Vala.Scope.html" class="class">Scope</a></span> <b><a href="Vala.Symbol._owner.html" class="field">_owner</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.Scope.html" class="class">Scope</a></span> <b><a href="Vala.Symbol._owner.html" class="field">_owner</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -399,8 +421,8 @@
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-101')">All known members inherited from class Vala.CodeNode</div>
-          <div class="content" id="box-content-101">
+          <div class="headline" onclick="toggle_box (this, 'box-content-276')">All known members inherited from class Vala.CodeNode</div>
+          <div class="content" id="box-content-276">
             <div class="column">
               <ul class="navi_inline">
                 <li class="field"><a href="Vala.CodeNode._checked.html">_checked</a></li>

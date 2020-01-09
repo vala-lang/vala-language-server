@@ -38,6 +38,9 @@
           <li class="property"><a href="Vala.SemanticAnalyzer.current_symbol.html">current_symbol</a></li>
           <li class="property"><a href="Vala.SemanticAnalyzer.current_type_symbol.html">current_type_symbol</a></li>
           <li class="static_method"><a href="Vala.SemanticAnalyzer.create_temp_access.html">create_temp_access</a></li>
+          <li class="static_method"><a href="Vala.SemanticAnalyzer.find_parent_method.html">find_parent_method</a></li>
+          <li class="static_method"><a href="Vala.SemanticAnalyzer.find_parent_method_or_property_accessor.html">
+              find_parent_method_or_property_accessor</a></li>
           <li class="static_method"><a href="Vala.SemanticAnalyzer.find_parent_type_symbol.html">find_parent_type_symbol</a></li>
           <li class="static_method"><a href="Vala.SemanticAnalyzer.get_actual_type.html">get_actual_type</a></li>
           <li class="static_method"><a href="Vala.SemanticAnalyzer.get_data_type_for_symbol.html">get_data_type_for_symbol</a></li>
@@ -51,11 +54,11 @@
           <li class="method"><a href="Vala.SemanticAnalyzer.check_argument.html">check_argument</a></li>
           <li class="method"><a href="Vala.SemanticAnalyzer.check_arguments.html">check_arguments</a></li>
           <li class="method"><a href="Vala.SemanticAnalyzer.check_print_format.html">check_print_format</a></li>
+          <li class="method"><a href="Vala.SemanticAnalyzer.check_type.html">check_type</a></li>
+          <li class="method"><a href="Vala.SemanticAnalyzer.check_type_argument.html">check_type_argument</a></li>
+          <li class="method"><a href="Vala.SemanticAnalyzer.check_type_arguments.html">check_type_arguments</a></li>
           <li class="method"><a href="Vala.SemanticAnalyzer.check_variadic_arguments.html">check_variadic_arguments</a></li>
           <li class="method"><a href="Vala.SemanticAnalyzer.find_current_method.html">find_current_method</a></li>
-          <li class="method"><a href="Vala.SemanticAnalyzer.find_parent_method.html">find_parent_method</a></li>
-          <li class="method"><a href="Vala.SemanticAnalyzer.find_parent_method_or_property_accessor.html">find_parent_method_or_property_accessor</a>
-          </li>
           <li class="method"><a href="Vala.SemanticAnalyzer.get_arithmetic_result_type.html">get_arithmetic_result_type</a></li>
           <li class="method"><a href="Vala.SemanticAnalyzer.get_arithmetic_struct.html">get_arithmetic_struct</a></li>
           <li class="method"><a href="Vala.SemanticAnalyzer.get_value_type_for_symbol.html">get_value_type_for_symbol</a></li>
@@ -64,15 +67,24 @@
           <li class="method"><a href="Vala.SemanticAnalyzer.is_in_constructor.html">is_in_constructor</a></li>
           <li class="method"><a href="Vala.SemanticAnalyzer.is_in_destructor.html">is_in_destructor</a></li>
           <li class="method"><a href="Vala.SemanticAnalyzer.is_in_instance_method.html">is_in_instance_method</a></li>
+          <li class="method"><a href="Vala.SemanticAnalyzer.is_nullable_value_type_argument.html">is_nullable_value_type_argument</a></li>
+          <li class="method"><a href="Vala.SemanticAnalyzer.is_reference_type_argument.html">is_reference_type_argument</a></li>
+          <li class="method"><a href="Vala.SemanticAnalyzer.is_signed_integer_type_argument.html">is_signed_integer_type_argument</a></li>
           <li class="method"><a href="Vala.SemanticAnalyzer.is_type_accessible.html">is_type_accessible</a></li>
+          <li class="method"><a href="Vala.SemanticAnalyzer.is_unsigned_integer_type_argument.html">is_unsigned_integer_type_argument</a></li>
           <li class="method"><a href="Vala.SemanticAnalyzer.visit_member_initializer.html">visit_member_initializer</a></li>
           <li class="virtual_method"><a href="Vala.SemanticAnalyzer.visit_source_file.html">visit_source_file</a></li>
           <li class="field">_current_source_file</li>
           <li class="field"><a href="Vala.SemanticAnalyzer._current_symbol.html">_current_symbol</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.bool_type.html">bool_type</a></li>
+          <li class="field"><a href="Vala.SemanticAnalyzer.char_type.html">char_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.context.html">context</a></li>
+          <li class="field"><a href="Vala.SemanticAnalyzer.delegate_target_destroy_type.html">delegate_target_destroy_type</a></li>
+          <li class="field"><a href="Vala.SemanticAnalyzer.delegate_target_type.html">delegate_target_type</a></li>
+          <li class="field"><a href="Vala.SemanticAnalyzer.destroy_notify.html">destroy_notify</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.double_type.html">double_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.garray_type.html">garray_type</a></li>
+          <li class="field"><a href="Vala.SemanticAnalyzer.generics_dup_func_type.html">generics_dup_func_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.gerror_type.html">gerror_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.glist_type.html">glist_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.gslist_type.html">gslist_type</a></li>
@@ -81,6 +93,8 @@
           <li class="field"><a href="Vala.SemanticAnalyzer.gvaluearray_type.html">gvaluearray_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.gvariant_type.html">gvariant_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.insert_block.html">insert_block</a></li>
+          <li class="field"><a href="Vala.SemanticAnalyzer.int16_type.html">int16_type</a></li>
+          <li class="field"><a href="Vala.SemanticAnalyzer.int32_type.html">int32_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.int8_type.html">int8_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.int_type.html">int_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.list_type.html">list_type</a></li>
@@ -95,6 +109,9 @@
           <li class="field"><a href="Vala.SemanticAnalyzer.tuple_type.html">tuple_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.type_type.html">type_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.uchar_type.html">uchar_type</a></li>
+          <li class="field"><a href="Vala.SemanticAnalyzer.uint16_type.html">uint16_type</a></li>
+          <li class="field"><a href="Vala.SemanticAnalyzer.uint32_type.html">uint32_type</a></li>
+          <li class="field"><a href="Vala.SemanticAnalyzer.uint8_type.html">uint8_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.uint_type.html">uint_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.ulong_type.html">ulong_type</a></li>
           <li class="field"><a href="Vala.SemanticAnalyzer.unichar_type.html">unichar_type</a></li>

@@ -75,6 +75,8 @@
           <li class="abstract_class"><a href="Vala.DataType.html">DataType</a></li>
           <li class="class"><a href="Vala.DeclarationStatement.html">DeclarationStatement</a></li>
           <li class="class"><a href="Vala.Delegate.html">Delegate</a></li>
+          <li class="class"><a href="Vala.DelegateDestroyField.html">DelegateDestroyField</a></li>
+          <li class="class"><a href="Vala.DelegateTargetField.html">DelegateTargetField</a></li>
           <li class="class"><a href="Vala.DelegateType.html">DelegateType</a></li>
           <li class="class"><a href="Vala.DeleteStatement.html">DeleteStatement</a></li>
           <li class="class"><a href="Vala.Destructor.html">Destructor</a></li>
@@ -98,6 +100,8 @@
           <li class="class"><a href="Vala.FlowAnalyzer.html">FlowAnalyzer</a></li>
           <li class="class"><a href="Vala.ForStatement.html">ForStatement</a></li>
           <li class="class"><a href="Vala.ForeachStatement.html">ForeachStatement</a></li>
+          <li class="class"><a href="Vala.GenericDestroyField.html">GenericDestroyField</a></li>
+          <li class="class"><a href="Vala.GenericDupField.html">GenericDupField</a></li>
           <li class="class"><a href="Vala.GenericType.html">GenericType</a></li>
           <li class="class"><a href="Vala.GirComment.html">GirComment</a></li>
           <li class="class"><a href="Vala.GirParser.html">GirParser</a></li>
@@ -176,6 +180,7 @@
           <li class="class"><a href="Vala.UsedAttr.html">UsedAttr</a></li>
           <li class="class"><a href="Vala.UsingDirective.html">UsingDirective</a></li>
           <li class="abstract_class"><a href="Vala.ValueType.html">ValueType</a></li>
+          <li class="class"><a href="Vala.VarType.html">VarType</a></li>
           <li class="class"><a href="Vala.Variable.html">Variable</a></li>
           <li class="class"><a href="Vala.VersionAttribute.html">VersionAttribute</a></li>
           <li class="class"><a href="Vala.VoidType.html">VoidType</a></li>
@@ -282,6 +287,10 @@
               variable or constant declaration statement in the source code.</span></li>
           <li class="class"><a href="Vala.Delegate.html">Delegate</a> - <span class="brief_description">Represents a function callback type.</span>
           </li>
+          <li class="class"><a href="Vala.DelegateDestroyField.html">DelegateDestroyField</a> - <span class="brief_description">Represents the 
+              Delegate.destroy field.</span></li>
+          <li class="class"><a href="Vala.DelegateTargetField.html">DelegateTargetField</a> - <span class="brief_description">Represents the 
+              Delegate.target field.</span></li>
           <li class="class"><a href="Vala.DelegateType.html">DelegateType</a> - <span class="brief_description">The type of an instance of a delegate.
             </span></li>
           <li class="class"><a href="Vala.DeleteStatement.html">DeleteStatement</a> - <span class="brief_description">Represents a delete statement 
@@ -323,6 +332,10 @@
               in the source code.</span></li>
           <li class="class"><a href="Vala.ForeachStatement.html">ForeachStatement</a> - <span class="brief_description">Represents a foreach statement
               in the source code. Foreach statements iterate over the elements of a collection.</span></li>
+          <li class="class"><a href="Vala.GenericDestroyField.html">GenericDestroyField</a> - <span class="brief_description">Represents the 
+              Generic.destroy field.</span></li>
+          <li class="class"><a href="Vala.GenericDupField.html">GenericDupField</a> - <span class="brief_description">Represents the Generic.dup 
+              field.</span></li>
           <li class="class"><a href="Vala.GenericType.html">GenericType</a> - <span class="brief_description">The type of a generic type parameter.
             </span></li>
           <li class="class"><a href="Vala.GirComment.html">GirComment</a> - <span class="brief_description">A documentation comment used by valadoc
@@ -465,6 +478,7 @@
             </span></li>
           <li class="abstract_class"><a href="Vala.ValueType.html">ValueType</a> - <span class="brief_description">A value type, i.e. a struct or an 
               enum type.</span></li>
+          <li class="class"><a href="Vala.VarType.html">VarType</a> - <span class="brief_description">A to be inferred data type.</span></li>
           <li class="class"><a href="Vala.Variable.html">Variable</a></li>
           <li class="class"><a href="Vala.VersionAttribute.html">VersionAttribute</a> - <span class="brief_description">Represents a [Version] 
               attribute</span></li>
@@ -499,11 +513,11 @@
         </ul>
         <h3 class="main_title">Constants:</h3>
         <ul class="navi_inline">
-          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.API_VERSION.html" class="constant">API_VERSION</a></b>
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.API_VERSION.html" class="constant">API_VERSION</a></b>
             </span>
             <div class="leaf_brief_description"><span class="brief_description">The API version string</span>
             </div></li>
-          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.BUILD_VERSION.html" class="constant">BUILD_VERSION</a></b>
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="Vala.BUILD_VERSION.html" class="constant">BUILD_VERSION</a></b>
             </span>
             <div class="leaf_brief_description"><span class="brief_description">The full build-version string generated by the build-system</span>
             </div></li>

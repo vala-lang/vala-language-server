@@ -97,7 +97,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><span>V</span></span> <b><a href="GLib.HashTable.@get.html" class="method">@get</a></b> (<span class="main_type"><span>K</span></span> key)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><span>V</span></span> <b><a href="GLib.HashTable.@get.html" class="method">@get</a></b> (<span class="main_type"><span>K</span></span> key)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -113,7 +113,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><span>V</span></span> <b><a href="GLib.HashTable.find.html" class="method">find</a></b> (<span class="main_type"><a href="GLib.HRFunc.html" class="delegate">HRFunc</a></span>&lt;<span class="main_type"><span>K</span></span>,<span class="main_type"><span>V</span></span>&gt; predicate)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><span>V</span></span> <b><a href="GLib.HashTable.find.html" class="method">find</a></b> (<span class="main_type"><a href="GLib.HRFunc.html" class="delegate">HRFunc</a></span>&lt;<span class="main_type"><span>K</span></span>,<span class="main_type"><span>V</span></span>&gt; predicate)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -129,15 +129,15 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="GLib.List.html" class="class">List</a></span>&lt;<span class="main_keyword">weak</span> <span class="main_type"><span>K</span></span>&gt; <b><a href="GLib.HashTable.get_keys.html" class="method">get_keys</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="GLib.List.html" class="class">List</a></span>&lt;<span class="main_keyword">unowned</span> <span class="main_type"><span>K</span></span>&gt; <b><a href="GLib.HashTable.get_keys.html" class="method">get_keys</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> (<span class="main_keyword">weak</span> <span class="main_type"><span>K</span></span>)[] <b><a href="GLib.HashTable.get_keys_as_array.html" class="method">get_keys_as_array</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> (<span class="main_keyword">unowned</span> <span class="main_type"><span>K</span></span>)[] <b><a href="GLib.HashTable.get_keys_as_array.html" class="method">get_keys_as_array</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="GLib.List.html" class="class">List</a></span>&lt;<span class="main_keyword">weak</span> <span class="main_type"><span>V</span></span>&gt; <b><a href="GLib.HashTable.get_values.html" class="method">get_values</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="GLib.List.html" class="class">List</a></span>&lt;<span class="main_keyword">unowned</span> <span class="main_type"><span>V</span></span>&gt; <b><a href="GLib.HashTable.get_values.html" class="method">get_values</a></b> ()
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -145,11 +145,11 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><span>V</span></span> <b><a href="GLib.HashTable.lookup.html" class="method">lookup</a></b> (<span class="main_type"><span>K</span></span> key)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><span>V</span></span> <b><a href="GLib.HashTable.lookup.html" class="method">lookup</a></b> (<span class="main_type"><span>K</span></span> key)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="bool.html" class="struct">bool</a></span> <b><a href="GLib.HashTable.lookup_extended.html" class="method">lookup_extended</a></b> (<span class="main_type"><span>K</span></span> lookup_key, <span class="main_keyword">out</span> <span class="main_type"><span>K</span></span> orig_key, <span class="main_keyword">out</span> <span class="main_type"><span>V</span></span> value)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="bool.html" class="struct">bool</a></span> <b><a href="GLib.HashTable.lookup_extended.html" class="method">lookup_extended</a></b> (<span class="main_type"><span>K</span></span> lookup_key, <span class="main_keyword">out</span> <span class="main_keyword">unowned</span> <span class="main_type"><span>K</span></span> orig_key, <span class="main_keyword">out</span> <span class="main_keyword">unowned</span> <span class="main_type"><span>V</span></span> value)
             </span>
             <div class="leaf_brief_description">
             </div></li>

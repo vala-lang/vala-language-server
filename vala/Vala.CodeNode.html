@@ -95,8 +95,8 @@
           <p>Code nodes get created by the parser and are used throughout the whole compilation process.</p>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-96')">All known sub-classes:</div>
-          <div class="content" id="box-content-96">
+          <div class="headline" onclick="toggle_box (this, 'box-content-324')">All known sub-classes:</div>
+          <div class="content" id="box-content-324">
             <div class="column">
               <ul class="navi_inline">
                 <li class="class"><a href="Vala.AddressofExpression.html">AddressofExpression</a></li>
@@ -128,6 +128,8 @@
                 <li class="abstract_class"><a href="Vala.DataType.html">DataType</a></li>
                 <li class="class"><a href="Vala.DeclarationStatement.html">DeclarationStatement</a></li>
                 <li class="class"><a href="Vala.Delegate.html">Delegate</a></li>
+                <li class="class"><a href="Vala.DelegateDestroyField.html">DelegateDestroyField</a></li>
+                <li class="class"><a href="Vala.DelegateTargetField.html">DelegateTargetField</a></li>
                 <li class="class"><a href="Vala.DelegateType.html">DelegateType</a></li>
                 <li class="class"><a href="Vala.DeleteStatement.html">DeleteStatement</a></li>
                 <li class="class"><a href="Vala.Destructor.html">Destructor</a></li>
@@ -154,6 +156,8 @@
                 <li class="class"><a href="Vala.FloatingType.html">FloatingType</a></li>
                 <li class="class"><a href="Vala.ForStatement.html">ForStatement</a></li>
                 <li class="class"><a href="Vala.ForeachStatement.html">ForeachStatement</a></li>
+                <li class="class"><a href="Vala.GenericDestroyField.html">GenericDestroyField</a></li>
+                <li class="class"><a href="Vala.GenericDupField.html">GenericDupField</a></li>
                 <li class="class"><a href="Vala.GenericType.html">GenericType</a></li>
                 <li class="class"><a href="Vala.IfStatement.html">IfStatement</a></li>
                 <li class="class"><a href="Vala.InitializerList.html">InitializerList</a></li>
@@ -182,11 +186,11 @@
                 <li class="class"><a href="Vala.Parameter.html">Parameter</a></li>
                 <li class="class"><a href="Vala.PointerIndirection.html">PointerIndirection</a></li>
                 <li class="class"><a href="Vala.PointerType.html">PointerType</a></li>
-                <li class="class"><a href="Vala.PostfixExpression.html">PostfixExpression</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
+                <li class="class"><a href="Vala.PostfixExpression.html">PostfixExpression</a></li>
                 <li class="class"><a href="Vala.Property.html">Property</a></li>
                 <li class="class"><a href="Vala.PropertyAccessor.html">PropertyAccessor</a></li>
                 <li class="class"><a href="Vala.PropertyPrototype.html">PropertyPrototype</a></li>
@@ -222,6 +226,7 @@
                 <li class="class"><a href="Vala.UnresolvedType.html">UnresolvedType</a></li>
                 <li class="class"><a href="Vala.UsingDirective.html">UsingDirective</a></li>
                 <li class="abstract_class"><a href="Vala.ValueType.html">ValueType</a></li>
+                <li class="class"><a href="Vala.VarType.html">VarType</a></li>
                 <li class="class"><a href="Vala.Variable.html">Variable</a></li>
                 <li class="class"><a href="Vala.VoidType.html">VoidType</a></li>
                 <li class="class"><a href="Vala.WhileStatement.html">WhileStatement</a></li>
@@ -231,16 +236,15 @@
           </div>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-97')">Required by:</div>
-          <div class="content" id="box-content-97">
+          <div class="headline" onclick="toggle_box (this, 'box-content-325')">Required by:</div>
+          <div class="content" id="box-content-325">
             <div class="column">
               <ul class="navi_inline">
-                <li class="interface"><a href="Vala.Callable.html">Callable</a></li>
+                <li class="interface"><a href="Vala.Statement.html">Statement</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="interface"><a href="Vala.Statement.html">Statement</a></li>
               </ul>
             </div>
             <div class="column">
@@ -265,7 +269,7 @@
             <div class="leaf_brief_description"><span class="brief_description">Specifies whether a fatal error has been detected in this code node.
               </span>
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><span class="abstract_class">CodeNode</span></span>? <b><a href="Vala.CodeNode.parent_node.html" class="property">parent_node</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><span class="abstract_class">CodeNode</span></span>? <b><a href="Vala.CodeNode.parent_node.html" class="property">parent_node</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Parent of this code node.</span>
             </div></li>
@@ -346,7 +350,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>? <b><a href="Vala.CodeNode.get_attribute.html" class="method">get_attribute</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span>? <b><a href="Vala.CodeNode.get_attribute.html" class="method">get_attribute</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Returns the specified attribute.</span>
             </div></li>
@@ -354,7 +358,7 @@
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Returns the bool value of the specified attribute argument.</span>
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Vala.AttributeCache.html" class="class">AttributeCache</a></span>? <b><a href="Vala.CodeNode.get_attribute_cache.html" class="method">get_attribute_cache</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> index)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.AttributeCache.html" class="class">AttributeCache</a></span>? <b><a href="Vala.CodeNode.get_attribute_cache.html" class="method">get_attribute_cache</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> index)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Returns the attribute cache at the specified index.</span>
             </div></li>
@@ -378,7 +382,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span> <b><a href="Vala.CodeNode.get_or_create_attribute.html" class="method">get_or_create_attribute</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.Attribute.html" class="class">Attribute</a></span> <b><a href="Vala.CodeNode.get_or_create_attribute.html" class="method">get_or_create_attribute</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -441,7 +445,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">weak</span> <span class="main_type"><span class="abstract_class">CodeNode</span></span>? <b><a href="Vala.CodeNode._parent_node.html" class="field">_parent_node</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_type"><span class="abstract_class">CodeNode</span></span>? <b><a href="Vala.CodeNode._parent_node.html" class="field">_parent_node</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>

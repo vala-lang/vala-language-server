@@ -27,12 +27,14 @@
         </ul>
         <hr class="navi_hr"/>
         <ul class="navi_main">
-          <li class="property"><a href="Vala.DataType.data_type.html">data_type</a></li>
           <li class="property"><a href="Vala.DataType.floating_reference.html">floating_reference</a></li>
           <li class="property"><a href="Vala.DataType.is_dynamic.html">is_dynamic</a></li>
           <li class="property"><a href="Vala.DataType.nullable.html">nullable</a></li>
+          <li class="property"><a href="Vala.DataType.symbol.html">symbol</a></li>
+          <li class="property"><a href="Vala.DataType.type_symbol.html">type_symbol</a></li>
           <li class="property"><a href="Vala.DataType.value_owned.html">value_owned</a></li>
           <li class="creation_method"><a href="Vala.DataType.DataType.html">DataType</a></li>
+          <li class="creation_method"><a href="Vala.DataType.DataType.with_symbol.html">DataType.with_symbol</a></li>
           <li class="virtual_method"><a href="Vala.DataType.accept.html">accept</a></li>
           <li class="virtual_method"><a href="Vala.DataType.accept_children.html">accept_children</a></li>
           <li class="method"><a href="Vala.DataType.add_type_argument.html">add_type_argument</a></li>
@@ -62,11 +64,11 @@
           <li class="virtual_method"><a href="Vala.DataType.to_prototype_string.html">to_prototype_string</a></li>
           <li class="virtual_method"><a href="Vala.DataType.to_qualified_string.html">to_qualified_string</a></li>
           <li class="virtual_method"><a href="Vala.DataType.to_string.html">to_string</a></li>
-          <li class="field"><a href="Vala.DataType._data_type.html">_data_type</a></li>
           <li class="field"><a href="Vala.DataType._empty_type_list.html">_empty_type_list</a></li>
           <li class="field"><a href="Vala.DataType._floating_reference.html">_floating_reference</a></li>
           <li class="field"><a href="Vala.DataType._is_dynamic.html">_is_dynamic</a></li>
           <li class="field"><a href="Vala.DataType._nullable.html">_nullable</a></li>
+          <li class="field"><a href="Vala.DataType._symbol.html">_symbol</a></li>
           <li class="field"><a href="Vala.DataType._value_owned.html">_value_owned</a></li>
           <li class="field"><a href="Vala.DataType.type_argument_list.html">type_argument_list</a></li>
         </ul>
@@ -89,8 +91,8 @@
           <p>A reference to a data type. This is used to specify static types of expressions.</p>
         </div>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-175')">All known sub-classes:</div>
-          <div class="content" id="box-content-175">
+          <div class="headline" onclick="toggle_box (this, 'box-content-318')">All known sub-classes:</div>
+          <div class="content" id="box-content-318">
             <div class="column">
               <ul class="navi_inline">
                 <li class="class"><a href="Vala.ArrayType.html">ArrayType</a></li>
@@ -101,11 +103,11 @@
                 <li class="class"><a href="Vala.EnumValueType.html">EnumValueType</a></li>
                 <li class="class"><a href="Vala.ErrorType.html">ErrorType</a></li>
                 <li class="class"><a href="Vala.FieldPrototype.html">FieldPrototype</a></li>
+                <li class="class"><a href="Vala.FloatingType.html">FloatingType</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="class"><a href="Vala.FloatingType.html">FloatingType</a></li>
                 <li class="class"><a href="Vala.GenericType.html">GenericType</a></li>
                 <li class="class"><a href="Vala.IntegerType.html">IntegerType</a></li>
                 <li class="class"><a href="Vala.InterfaceType.html">InterfaceType</a></li>
@@ -113,17 +115,18 @@
                 <li class="class"><a href="Vala.MethodType.html">MethodType</a></li>
                 <li class="class"><a href="Vala.NullType.html">NullType</a></li>
                 <li class="class"><a href="Vala.ObjectType.html">ObjectType</a></li>
+                <li class="class"><a href="Vala.PointerType.html">PointerType</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="class"><a href="Vala.PointerType.html">PointerType</a></li>
                 <li class="class"><a href="Vala.PropertyPrototype.html">PropertyPrototype</a></li>
                 <li class="abstract_class"><a href="Vala.ReferenceType.html">ReferenceType</a></li>
                 <li class="class"><a href="Vala.SignalType.html">SignalType</a></li>
                 <li class="class"><a href="Vala.StructValueType.html">StructValueType</a></li>
                 <li class="class"><a href="Vala.UnresolvedType.html">UnresolvedType</a></li>
                 <li class="abstract_class"><a href="Vala.ValueType.html">ValueType</a></li>
+                <li class="class"><a href="Vala.VarType.html">VarType</a></li>
                 <li class="class"><a href="Vala.VoidType.html">VoidType</a></li>
               </ul>
             </div>
@@ -136,10 +139,6 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Properties:</h3>
         <ul class="navi_inline">
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Vala.TypeSymbol.html" class="abstract_class">TypeSymbol</a></span> <b><a href="Vala.DataType.data_type.html" class="property">data_type</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The referred data type.</span>
-            </div></li>
           <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.DataType.floating_reference.html" class="property">floating_reference</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Specifies that the expression transfers a floating reference.</span>
@@ -152,6 +151,14 @@
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Specifies that the expression may be null.</span>
             </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span>? <b><a href="Vala.DataType.symbol.html" class="property">symbol</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">private</span> <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The referred symbol.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.TypeSymbol.html" class="abstract_class">TypeSymbol</a></span>? <b><a href="Vala.DataType.type_symbol.html" class="property">type_symbol</a></b> { <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The referred type symbol.</span>
+            </div></li>
           <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.DataType.value_owned.html" class="property">value_owned</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Specifies that the expression or variable owns the value.</span>
@@ -160,6 +167,10 @@
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
           <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <b><a href="Vala.DataType.DataType.html" class="creation_method">DataType</a></b> ()
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <b><a href="Vala.DataType.DataType.with_symbol.html" class="creation_method">DataType.with_symbol</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span>? symbol)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -199,21 +210,21 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Parameter.html" class="class">Parameter</a></span>&gt;? <b><a href="Vala.DataType.get_parameters.html" class="virtual_method">get_parameters</a></b> ()
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.Parameter.html" class="class">Parameter</a></span>&gt;? <b><a href="Vala.DataType.get_parameters.html" class="virtual_method">get_parameters</a></b> ()
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns copy of the list of invocation parameters.</span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the list of invocation parameters.</span>
             </div></li>
           <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span>? <b><a href="Vala.DataType.get_pointer_member.html" class="virtual_method">get_pointer_member</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> member_name)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_type"><span class="abstract_class">DataType</span></span>? <b><a href="Vala.DataType.get_return_type.html" class="virtual_method">get_return_type</a></b> ()
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">unowned</span> <span class="main_type"><span class="abstract_class">DataType</span></span>? <b><a href="Vala.DataType.get_return_type.html" class="virtual_method">get_return_type</a></b> ()
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Returns the return type of this invokable.</span>
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><span class="abstract_class">DataType</span></span>&gt; <b><a href="Vala.DataType.get_type_arguments.html" class="method">get_type_arguments</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><span class="abstract_class">DataType</span></span>&gt; <b><a href="Vala.DataType.get_type_arguments.html" class="method">get_type_arguments</a></b> ()
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns a copy of the list of generic type arguments.</span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the list of generic type arguments.</span>
             </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Vala.DataType.get_type_signature.html" class="method">get_type_signature</a></b> (<span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span>? symbol = <span class="main_literal">null</span>)
             </span>
@@ -291,10 +302,6 @@
         </ul>
         <h3 class="main_title">Fields:</h3>
         <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Vala.TypeSymbol.html" class="abstract_class">TypeSymbol</a></span> <b><a href="Vala.DataType._data_type.html" class="field">_data_type</a></b>
-            </span>
-            <div class="leaf_brief_description">
-            </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">static</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><span class="abstract_class">DataType</span></span>&gt; <b><a href="Vala.DataType._empty_type_list.html" class="field">_empty_type_list</a></b>
             </span>
             <div class="leaf_brief_description">
@@ -311,6 +318,10 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.Symbol.html" class="abstract_class">Symbol</a></span>? <b><a href="Vala.DataType._symbol.html" class="field">_symbol</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.DataType._value_owned.html" class="field">_value_owned</a></b>
             </span>
             <div class="leaf_brief_description">
@@ -322,8 +333,8 @@
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
-          <div class="headline" onclick="toggle_box (this, 'box-content-176')">All known members inherited from class Vala.CodeNode</div>
-          <div class="content" id="box-content-176">
+          <div class="headline" onclick="toggle_box (this, 'box-content-319')">All known members inherited from class Vala.CodeNode</div>
+          <div class="content" id="box-content-319">
             <div class="column">
               <ul class="navi_inline">
                 <li class="field"><a href="Vala.CodeNode._checked.html">_checked</a></li>

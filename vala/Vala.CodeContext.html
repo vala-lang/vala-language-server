@@ -51,6 +51,7 @@
           <li class="property"><a href="Vala.CodeContext.hide_internal.html">hide_internal</a></li>
           <li class="property"><a href="Vala.CodeContext.includedir.html">includedir</a></li>
           <li class="property"><a href="Vala.CodeContext.internal_header_filename.html">internal_header_filename</a></li>
+          <li class="property"><a href="Vala.CodeContext.keep_going.html">keep_going</a></li>
           <li class="property"><a href="Vala.CodeContext.mem_profiler.html">mem_profiler</a></li>
           <li class="property"><a href="Vala.CodeContext.metadata_directories.html">metadata_directories</a></li>
           <li class="property"><a href="Vala.CodeContext.module_init_method.html">module_init_method</a></li>
@@ -107,6 +108,7 @@
           <li class="method"><a href="Vala.CodeContext.require_glib_version.html">require_glib_version</a></li>
           <li class="method"><a href="Vala.CodeContext.set_target_glib_version.html">set_target_glib_version</a></li>
           <li class="method"><a href="Vala.CodeContext.write_dependencies.html">write_dependencies</a></li>
+          <li class="method"><a href="Vala.CodeContext.write_external_dependencies.html">write_external_dependencies</a></li>
           <li class="field"><a href="Vala.CodeContext._abi_stability.html">_abi_stability</a></li>
           <li class="field"><a href="Vala.CodeContext._analyzer.html">_analyzer</a></li>
           <li class="field"><a href="Vala.CodeContext._assert.html">_assert</a></li>
@@ -131,6 +133,7 @@
           <li class="field"><a href="Vala.CodeContext._hide_internal.html">_hide_internal</a></li>
           <li class="field"><a href="Vala.CodeContext._includedir.html">_includedir</a></li>
           <li class="field"><a href="Vala.CodeContext._internal_header_filename.html">_internal_header_filename</a></li>
+          <li class="field"><a href="Vala.CodeContext._keep_going.html">_keep_going</a></li>
           <li class="field"><a href="Vala.CodeContext._mem_profiler.html">_mem_profiler</a></li>
           <li class="field"><a href="Vala.CodeContext._metadata_directories.html">_metadata_directories</a></li>
           <li class="field"><a href="Vala.CodeContext._module_init_method.html">_module_init_method</a></li>
@@ -281,6 +284,10 @@
           <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Vala.CodeContext.internal_header_filename.html" class="property">internal_header_filename</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Output internal C header file.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CodeContext.keep_going.html" class="property">keep_going</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Continue as much as possible after an error.</span>
             </div></li>
           <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CodeContext.mem_profiler.html" class="property">mem_profiler</a></b> { <span class="main_keyword">get</span>; <span class="main_keyword">set</span>; }
             </span>
@@ -453,9 +460,9 @@
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Resolve and analyze.</span>
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>&gt; <b><a href="Vala.CodeContext.get_c_source_files.html" class="method">get_c_source_files</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>&gt; <b><a href="Vala.CodeContext.get_c_source_files.html" class="method">get_c_source_files</a></b> ()
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns a copy of the list of C source files.</span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the list of C source files.</span>
             </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Vala.CodeContext.get_file_path.html" class="method">get_file_path</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> basename, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? versioned_data_dir, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? data_dir, <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>[] directories)
             </span>
@@ -473,17 +480,17 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>&gt; <b><a href="Vala.CodeContext.get_packages.html" class="method">get_packages</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>&gt; <b><a href="Vala.CodeContext.get_packages.html" class="method">get_packages</a></b> ()
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns a copy of the list of used packages.</span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the list of used packages.</span>
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Vala.SourceFile.html" class="class">SourceFile</a></span>? <b><a href="Vala.CodeContext.get_source_file.html" class="method">get_source_file</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> filename)
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.SourceFile.html" class="class">SourceFile</a></span>? <b><a href="Vala.CodeContext.get_source_file.html" class="method">get_source_file</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> filename)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Returns the source file for a given path.</span>
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.SourceFile.html" class="class">SourceFile</a></span>&gt; <b><a href="Vala.CodeContext.get_source_files.html" class="method">get_source_files</a></b> ()
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="../gee/Vala.List.html" class="abstract_class">List</a></span>&lt;<span class="main_type"><a href="Vala.SourceFile.html" class="class">SourceFile</a></span>&gt; <b><a href="Vala.CodeContext.get_source_files.html" class="method">get_source_files</a></b> ()
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Returns a copy of the list of source files.</span>
+            <div class="leaf_brief_description"><span class="brief_description">Returns the list of source files.</span>
             </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Vala.CodeContext.get_vapi_path.html" class="method">get_vapi_path</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> pkg)
             </span>
@@ -519,6 +526,10 @@
             <div class="leaf_brief_description"><span class="brief_description">Set the target version of glib for code generation.</span>
             </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeContext.write_dependencies.html" class="method">write_dependencies</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> filename)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Vala.CodeContext.write_external_dependencies.html" class="method">write_external_dependencies</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> filename)
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -618,6 +629,10 @@
             <div class="leaf_brief_description">
             </div></li>
           <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>? <b><a href="Vala.CodeContext._internal_header_filename.html" class="field">_internal_header_filename</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_basic_type"><a href="../glib-2.0/bool.html" class="struct">bool</a></span> <b><a href="Vala.CodeContext._keep_going.html" class="field">_keep_going</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -729,7 +744,7 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.Map.html" class="abstract_class">Map</a></span>&lt;<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>,<span class="main_keyword">weak</span> <span class="main_type"><a href="Vala.SourceFile.html" class="class">SourceFile</a></span>&gt; <b><a href="Vala.CodeContext.source_files_map.html" class="field">source_files_map</a></b>
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_type"><a href="../gee/Vala.Map.html" class="abstract_class">Map</a></span>&lt;<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span>,<span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.SourceFile.html" class="class">SourceFile</a></span>&gt; <b><a href="Vala.CodeContext.source_files_map.html" class="field">source_files_map</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>

@@ -39,6 +39,7 @@
           <li class="namespace"><a href="GLib.Markup.html">GLib.Markup</a></li>
           <li class="namespace"><a href="GLib.Math.html">GLib.Math</a></li>
           <li class="namespace"><a href="GLib.Memory.html">GLib.Memory</a></li>
+          <li class="namespace"><a href="GLib.OsInfoKey.html">GLib.OsInfoKey</a></li>
           <li class="namespace"><a href="GLib.Path.html">GLib.Path</a></li>
           <li class="namespace"><a href="GLib.Priority.html">GLib.Priority</a></li>
           <li class="namespace"><a href="GLib.Process.html">GLib.Process</a></li>
@@ -83,6 +84,9 @@
           <li class="struct"><a href="unichar2.html">unichar2</a></li>
           <li class="struct"><a href="ushort.html">ushort</a></li>
           <li class="struct"><a href="va_list.html">va_list</a></li>
+          <li class="constant"><a href="EINVAL.html">EINVAL</a></li>
+          <li class="constant"><a href="ERANGE.html">ERANGE</a></li>
+          <li class="field"><a href="errno.html">errno</a></li>
         </ul>
       </div>
       <div class="site_content">
@@ -118,11 +122,13 @@
             <li class="class"><a href="GLib.KeyFile.html">KeyFile</a></li>
             <li class="class"><a href="GLib.List.html">List</a></li>
             <li class="class"><a href="GLib.MainContext.html">MainContext</a></li>
+            <li class="class"><a href="GLib.MainContextPusher.html">MainContextPusher</a></li>
             <li class="class"><a href="GLib.MainLoop.html">MainLoop</a></li>
             <li class="class"><a href="GLib.MappedFile.html">MappedFile</a></li>
             <li class="class"><a href="GLib.MarkupParseContext.html">MarkupParseContext</a></li>
             <li class="class"><a href="GLib.MatchInfo.html">MatchInfo</a></li>
             <li class="class"><a href="GLib.MemVTable.html">MemVTable</a></li>
+            <li class="class"><a href="GLib.MutexLocker.html">MutexLocker</a></li>
             <li class="class"><a href="GLib.Node.html">Node</a></li>
             <li class="class"><a href="GLib.ObjectPath.html">ObjectPath</a></li>
             <li class="class"><a href="GLib.OptionContext.html">OptionContext</a></li>
@@ -172,7 +178,6 @@
             <li class="struct"><a href="GLib.LogField.html">LogField</a></li>
             <li class="struct"><a href="GLib.MarkupParser.html">MarkupParser</a></li>
             <li class="struct"><a href="GLib.Mutex.html">Mutex</a></li>
-            <li class="struct"><a href="GLib.MutexLocker.html">MutexLocker</a></li>
             <li class="struct"><a href="GLib.Once.html">Once</a></li>
             <li class="struct"><a href="GLib.OptionEntry.html">OptionEntry</a></li>
             <li class="struct"><a href="GLib.Pid.html">Pid</a></li>
@@ -257,7 +262,7 @@
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.OPTION_REMAINING.html" class="constant">OPTION_REMAINING</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.OPTION_REMAINING.html" class="constant">OPTION_REMAINING</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
@@ -429,6 +434,10 @@
               <div class="leaf_brief_description">
               </div></li>
             <li class="delegate"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">delegate</span> <span class="main_basic_type"><a href="bool.html" class="struct">bool</a></span> <b><a href="GLib.SourceDispatchFunc.html" class="delegate">SourceDispatchFunc</a></b> (<span class="main_type"><a href="GLib.Source.html" class="abstract_class">Source</a></span> source, <span class="main_type"><a href="GLib.SourceFunc.html" class="delegate">SourceFunc</a></span>? _callback)
+              </span>
+              <div class="leaf_brief_description">
+              </div></li>
+            <li class="delegate"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">delegate</span> <span class="main_keyword">void</span> <b><a href="GLib.SourceDisposeFunc.html" class="delegate">SourceDisposeFunc</a></b> (<span class="main_type"><a href="GLib.Source.html" class="abstract_class">Source</a></span> source)
               </span>
               <div class="leaf_brief_description">
               </div></li>
@@ -615,15 +624,15 @@
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="bool.html" class="struct">bool</a></span> <b><a href="GLib.get_charset.html" class="method">get_charset</a></b> (<span class="main_keyword">out</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> charset)
+            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="bool.html" class="struct">bool</a></span> <b><a href="GLib.get_charset.html" class="method">get_charset</a></b> (<span class="main_keyword">out</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> charset)
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="bool.html" class="struct">bool</a></span> <b><a href="GLib.get_console_charset.html" class="method">get_console_charset</a></b> (<span class="main_keyword">out</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span>[] charsets)
+            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="bool.html" class="struct">bool</a></span> <b><a href="GLib.get_console_charset.html" class="method">get_console_charset</a></b> (<span class="main_keyword">out</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span>[] charsets)
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="bool.html" class="struct">bool</a></span> <b><a href="GLib.get_filename_charsets.html" class="method">get_filename_charsets</a></b> (<span class="main_keyword">out</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span>[] charsets)
+            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="bool.html" class="struct">bool</a></span> <b><a href="GLib.get_filename_charsets.html" class="method">get_filename_charsets</a></b> (<span class="main_keyword">out</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span>[] charsets)
               </span>
               <div class="leaf_brief_description">
               </div></li>
@@ -636,6 +645,10 @@
               <div class="leaf_brief_description">
               </div></li>
             <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="int64.html" class="struct">int64</a></span> <b><a href="GLib.get_real_time.html" class="method">get_real_time</a></b> ()
+              </span>
+              <div class="leaf_brief_description">
+              </div></li>
+            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.gettext.html" class="method">gettext</a></b> (<span class="main_basic_type"><a href="string.html" class="class">string</a></span> str)
               </span>
               <div class="leaf_brief_description">
               </div></li>
@@ -800,6 +813,10 @@
               <div class="leaf_brief_description">
               </div></li>
             <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="GLib.warning.html" class="method">warning</a></b> (<span class="main_basic_type"><a href="string.html" class="class">string</a></span> format, ...)
+              </span>
+              <div class="leaf_brief_description">
+              </div></li>
+            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="GLib.warning_once.html" class="method">warning_once</a></b> (<span class="main_basic_type"><a href="string.html" class="class">string</a></span> format, ...)
               </span>
               <div class="leaf_brief_description">
               </div></li>
@@ -970,23 +987,23 @@
           <li class="namespace"><a href="GLib.CharacterSet.html">CharacterSet</a></li>
           <h3 class="main_title">Constants:</h3>
           <ul class="navi_inline">
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.CharacterSet.A_2_Z.html" class="constant">A_2_Z</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.CharacterSet.A_2_Z.html" class="constant">A_2_Z</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.CharacterSet.DIGITS.html" class="constant">DIGITS</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.CharacterSet.DIGITS.html" class="constant">DIGITS</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.CharacterSet.LATINC.html" class="constant">LATINC</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.CharacterSet.LATINC.html" class="constant">LATINC</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.CharacterSet.LATINS.html" class="constant">LATINS</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.CharacterSet.LATINS.html" class="constant">LATINS</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.CharacterSet.a_2_z.html" class="constant">a_2_z</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.CharacterSet.a_2_z.html" class="constant">a_2_z</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
@@ -1071,6 +1088,10 @@
               <div class="leaf_brief_description">
               </div></li>
             <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Environment.get_host_name.html" class="method">get_host_name</a></b> ()
+              </span>
+              <div class="leaf_brief_description">
+              </div></li>
+            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span>? <b><a href="GLib.Environment.get_os_info.html" class="method">get_os_info</a></b> (<span class="main_basic_type"><a href="string.html" class="class">string</a></span> key_name)
               </span>
               <div class="leaf_brief_description">
               </div></li>
@@ -1163,6 +1184,10 @@
               <div class="leaf_brief_description">
               </div></li>
             <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="int.html" class="struct">int</a></span> <b><a href="GLib.FileUtils.error_from_errno.html" class="method">error_from_errno</a></b> (<span class="main_basic_type"><a href="int.html" class="struct">int</a></span> err_no)
+              </span>
+              <div class="leaf_brief_description">
+              </div></li>
+            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="int.html" class="struct">int</a></span> <b><a href="GLib.FileUtils.fsync.html" class="method">fsync</a></b> (<span class="main_basic_type"><a href="int.html" class="struct">int</a></span> fd)
               </span>
               <div class="leaf_brief_description">
               </div></li>
@@ -1326,115 +1351,115 @@
           <li class="namespace"><a href="GLib.KeyFileDesktop.html">KeyFileDesktop</a></li>
           <h3 class="main_title">Constants:</h3>
           <ul class="navi_inline">
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.GROUP.html" class="constant">GROUP</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.GROUP.html" class="constant">GROUP</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_ACTIONS.html" class="constant">KEY_ACTIONS</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_ACTIONS.html" class="constant">KEY_ACTIONS</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_CATEGORIES.html" class="constant">KEY_CATEGORIES</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_CATEGORIES.html" class="constant">KEY_CATEGORIES</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_COMMENT.html" class="constant">KEY_COMMENT</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_COMMENT.html" class="constant">KEY_COMMENT</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_DBUS_ACTIVATABLE.html" class="constant">KEY_DBUS_ACTIVATABLE</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_DBUS_ACTIVATABLE.html" class="constant">KEY_DBUS_ACTIVATABLE</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_EXEC.html" class="constant">KEY_EXEC</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_EXEC.html" class="constant">KEY_EXEC</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_FULLNAME.html" class="constant">KEY_FULLNAME</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_FULLNAME.html" class="constant">KEY_FULLNAME</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_GENERIC_NAME.html" class="constant">KEY_GENERIC_NAME</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_GENERIC_NAME.html" class="constant">KEY_GENERIC_NAME</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_GETTEXT_DOMAIN.html" class="constant">KEY_GETTEXT_DOMAIN</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_GETTEXT_DOMAIN.html" class="constant">KEY_GETTEXT_DOMAIN</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_HIDDEN.html" class="constant">KEY_HIDDEN</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_HIDDEN.html" class="constant">KEY_HIDDEN</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_ICON.html" class="constant">KEY_ICON</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_ICON.html" class="constant">KEY_ICON</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_KEYWORDS.html" class="constant">KEY_KEYWORDS</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_KEYWORDS.html" class="constant">KEY_KEYWORDS</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_MIME_TYPE.html" class="constant">KEY_MIME_TYPE</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_MIME_TYPE.html" class="constant">KEY_MIME_TYPE</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_NAME.html" class="constant">KEY_NAME</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_NAME.html" class="constant">KEY_NAME</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_NOT_SHOW_IN.html" class="constant">KEY_NOT_SHOW_IN</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_NOT_SHOW_IN.html" class="constant">KEY_NOT_SHOW_IN</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_NO_DISPLAY.html" class="constant">KEY_NO_DISPLAY</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_NO_DISPLAY.html" class="constant">KEY_NO_DISPLAY</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_ONLY_SHOW_IN.html" class="constant">KEY_ONLY_SHOW_IN</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_ONLY_SHOW_IN.html" class="constant">KEY_ONLY_SHOW_IN</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_PATH.html" class="constant">KEY_PATH</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_PATH.html" class="constant">KEY_PATH</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_STARTUP_NOTIFY.html" class="constant">KEY_STARTUP_NOTIFY</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_STARTUP_NOTIFY.html" class="constant">KEY_STARTUP_NOTIFY</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_STARTUP_WM_CLASS.html" class="constant">KEY_STARTUP_WM_CLASS</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_STARTUP_WM_CLASS.html" class="constant">KEY_STARTUP_WM_CLASS</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_TERMINAL.html" class="constant">KEY_TERMINAL</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_TERMINAL.html" class="constant">KEY_TERMINAL</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_TRY_EXEC.html" class="constant">KEY_TRY_EXEC</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_TRY_EXEC.html" class="constant">KEY_TRY_EXEC</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_TYPE.html" class="constant">KEY_TYPE</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_TYPE.html" class="constant">KEY_TYPE</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_URL.html" class="constant">KEY_URL</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_URL.html" class="constant">KEY_URL</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_VERSION.html" class="constant">KEY_VERSION</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.KEY_VERSION.html" class="constant">KEY_VERSION</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.TYPE_APPLICATION.html" class="constant">TYPE_APPLICATION</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.TYPE_APPLICATION.html" class="constant">TYPE_APPLICATION</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.TYPE_DIRECTORY.html" class="constant">TYPE_DIRECTORY</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.TYPE_DIRECTORY.html" class="constant">TYPE_DIRECTORY</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.TYPE_LINK.html" class="constant">TYPE_LINK</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.KeyFileDesktop.TYPE_LINK.html" class="constant">TYPE_LINK</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
@@ -1442,7 +1467,7 @@
           <li class="namespace"><a href="GLib.Log.html">Log</a></li>
           <h3 class="main_title">Constants:</h3>
           <ul class="navi_inline">
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Log.FILE.html" class="constant">FILE</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Log.FILE.html" class="constant">FILE</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
@@ -1450,7 +1475,7 @@
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Log.METHOD.html" class="constant">METHOD</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Log.METHOD.html" class="constant">METHOD</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
@@ -2196,6 +2221,54 @@
               <div class="leaf_brief_description">
               </div></li>
           </ul>
+          <li class="namespace"><a href="GLib.OsInfoKey.html">OsInfoKey</a></li>
+          <h3 class="main_title">Constants:</h3>
+          <ul class="navi_inline">
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.OsInfoKey.BUG_REPORT_URL.html" class="constant">BUG_REPORT_URL</a></b>
+              </span>
+              <div class="leaf_brief_description">
+              </div></li>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.OsInfoKey.DOCUMENTATION_URL.html" class="constant">DOCUMENTATION_URL</a></b>
+              </span>
+              <div class="leaf_brief_description">
+              </div></li>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.OsInfoKey.HOME_URL.html" class="constant">HOME_URL</a></b>
+              </span>
+              <div class="leaf_brief_description">
+              </div></li>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.OsInfoKey.ID.html" class="constant">ID</a></b>
+              </span>
+              <div class="leaf_brief_description">
+              </div></li>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.OsInfoKey.NAME.html" class="constant">NAME</a></b>
+              </span>
+              <div class="leaf_brief_description">
+              </div></li>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.OsInfoKey.PRETTY_NAME.html" class="constant">PRETTY_NAME</a></b>
+              </span>
+              <div class="leaf_brief_description">
+              </div></li>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.OsInfoKey.PRIVACY_POLICY_URL.html" class="constant">PRIVACY_POLICY_URL</a></b>
+              </span>
+              <div class="leaf_brief_description">
+              </div></li>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.OsInfoKey.SUPPORT_URL.html" class="constant">SUPPORT_URL</a></b>
+              </span>
+              <div class="leaf_brief_description">
+              </div></li>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.OsInfoKey.VERSION.html" class="constant">VERSION</a></b>
+              </span>
+              <div class="leaf_brief_description">
+              </div></li>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.OsInfoKey.VERSION_CODENAME.html" class="constant">VERSION_CODENAME</a></b>
+              </span>
+              <div class="leaf_brief_description">
+              </div></li>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.OsInfoKey.VERSION_ID.html" class="constant">VERSION_ID</a></b>
+              </span>
+              <div class="leaf_brief_description">
+              </div></li>
+          </ul>
           <li class="namespace"><a href="GLib.Path.html">Path</a></li>
           <h3 class="main_title">Constants:</h3>
           <ul class="navi_inline">
@@ -2203,7 +2276,7 @@
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Path.DIR_SEPARATOR_S.html" class="constant">DIR_SEPARATOR_S</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Path.DIR_SEPARATOR_S.html" class="constant">DIR_SEPARATOR_S</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
@@ -2211,7 +2284,7 @@
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Path.SEARCHPATH_SEPARATOR_S.html" class="constant">SEARCHPATH_SEPARATOR_S</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Path.SEARCHPATH_SEPARATOR_S.html" class="constant">SEARCHPATH_SEPARATOR_S</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
@@ -2510,7 +2583,7 @@
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="GLib.Test.init.html" class="method">init</a></b> (<span class="main_keyword">ref</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span>[] args, ...)
+            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="GLib.Test.init.html" class="method">init</a></b> (<span class="main_keyword">ref</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span>[] args, ...)
               </span>
               <div class="leaf_brief_description">
               </div></li>
@@ -2694,23 +2767,23 @@
           <li class="namespace"><a href="GLib.Uri.html">Uri</a></li>
           <h3 class="main_title">Constants:</h3>
           <ul class="navi_inline">
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Uri.RESERVED_CHARS_ALLOWED_IN_PATH.html" class="constant">RESERVED_CHARS_ALLOWED_IN_PATH</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Uri.RESERVED_CHARS_ALLOWED_IN_PATH.html" class="constant">RESERVED_CHARS_ALLOWED_IN_PATH</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Uri.RESERVED_CHARS_ALLOWED_IN_PATH_ELEMENT.html" class="constant">RESERVED_CHARS_ALLOWED_IN_PATH_ELEMENT</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Uri.RESERVED_CHARS_ALLOWED_IN_PATH_ELEMENT.html" class="constant">RESERVED_CHARS_ALLOWED_IN_PATH_ELEMENT</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Uri.RESERVED_CHARS_ALLOWED_IN_USERINFO.html" class="constant">RESERVED_CHARS_ALLOWED_IN_USERINFO</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Uri.RESERVED_CHARS_ALLOWED_IN_USERINFO.html" class="constant">RESERVED_CHARS_ALLOWED_IN_USERINFO</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Uri.RESERVED_CHARS_GENERIC_DELIMITERS.html" class="constant">RESERVED_CHARS_GENERIC_DELIMITERS</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Uri.RESERVED_CHARS_GENERIC_DELIMITERS.html" class="constant">RESERVED_CHARS_GENERIC_DELIMITERS</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Uri.RESERVED_CHARS_SUBCOMPONENT_DELIMITERS.html" class="constant">RESERVED_CHARS_SUBCOMPONENT_DELIMITERS</a></b>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> <b><a href="GLib.Uri.RESERVED_CHARS_SUBCOMPONENT_DELIMITERS.html" class="constant">RESERVED_CHARS_SUBCOMPONENT_DELIMITERS</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
@@ -2826,6 +2899,10 @@
               <div class="leaf_brief_description">
               </div></li>
             <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="uint.html" class="struct">uint</a></span> <b><a href="GLib.Version.@2_62.html" class="constant">@2_62</a></b>
+              </span>
+              <div class="leaf_brief_description">
+              </div></li>
+            <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="uint.html" class="struct">uint</a></span> <b><a href="GLib.Version.@2_64.html" class="constant">@2_64</a></b>
               </span>
               <div class="leaf_brief_description">
               </div></li>
@@ -2973,6 +3050,24 @@
           <li class="struct"><a href="unichar2.html">unichar2</a></li>
           <li class="struct"><a href="ushort.html">ushort</a></li>
           <li class="struct"><a href="va_list.html">va_list</a></li>
+        </ul>
+        <h3 class="main_title">Constants:</h3>
+        <ul class="navi_inline">
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">internal</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="int.html" class="struct">int</a></span> <b><a href="EINVAL.html" class="constant">EINVAL</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">internal</span> <span class="main_keyword">const</span> <span class="main_basic_type"><a href="int.html" class="struct">int</a></span> <b><a href="ERANGE.html" class="constant">ERANGE</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+        </ul>
+        <h3 class="main_title">Fields:</h3>
+        <ul class="navi_inline">
+          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">internal</span> <span class="main_basic_type"><a href="int.html" class="struct">int</a></span> <b><a href="errno.html" class="field">errno</a></b>
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
         </ul>
       </div>
     </div><br/>

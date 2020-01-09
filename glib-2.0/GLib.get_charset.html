@@ -42,6 +42,7 @@
           <li class="namespace"><a href="GLib.Markup.html">Markup</a></li>
           <li class="namespace"><a href="GLib.Math.html">Math</a></li>
           <li class="namespace"><a href="GLib.Memory.html">Memory</a></li>
+          <li class="namespace"><a href="GLib.OsInfoKey.html">OsInfoKey</a></li>
           <li class="namespace"><a href="GLib.Path.html">Path</a></li>
           <li class="namespace"><a href="GLib.Priority.html">Priority</a></li>
           <li class="namespace"><a href="GLib.Process.html">Process</a></li>
@@ -117,11 +118,13 @@
           <li class="class"><a href="GLib.KeyFile.html">KeyFile</a></li>
           <li class="class"><a href="GLib.List.html">List</a></li>
           <li class="class"><a href="GLib.MainContext.html">MainContext</a></li>
+          <li class="class"><a href="GLib.MainContextPusher.html">MainContextPusher</a></li>
           <li class="class"><a href="GLib.MainLoop.html">MainLoop</a></li>
           <li class="class"><a href="GLib.MappedFile.html">MappedFile</a></li>
           <li class="class"><a href="GLib.MarkupParseContext.html">MarkupParseContext</a></li>
           <li class="class"><a href="GLib.MatchInfo.html">MatchInfo</a></li>
           <li class="class"><a href="GLib.MemVTable.html">MemVTable</a></li>
+          <li class="class"><a href="GLib.MutexLocker.html">MutexLocker</a></li>
           <li class="class"><a href="GLib.Node.html">Node</a></li>
           <li class="class"><a href="GLib.ObjectPath.html">ObjectPath</a></li>
           <li class="class"><a href="GLib.OptionContext.html">OptionContext</a></li>
@@ -168,7 +171,6 @@
           <li class="struct"><a href="GLib.LogField.html">LogField</a></li>
           <li class="struct"><a href="GLib.MarkupParser.html">MarkupParser</a></li>
           <li class="struct"><a href="GLib.Mutex.html">Mutex</a></li>
-          <li class="struct"><a href="GLib.MutexLocker.html">MutexLocker</a></li>
           <li class="struct"><a href="GLib.Once.html">Once</a></li>
           <li class="struct"><a href="GLib.OptionEntry.html">OptionEntry</a></li>
           <li class="struct"><a href="GLib.Pid.html">Pid</a></li>
@@ -233,6 +235,7 @@
           <li class="delegate"><a href="GLib.SourceCallbackUnrefFunc.html">SourceCallbackUnrefFunc</a></li>
           <li class="delegate"><a href="GLib.SourceCheckFunc.html">SourceCheckFunc</a></li>
           <li class="delegate"><a href="GLib.SourceDispatchFunc.html">SourceDispatchFunc</a></li>
+          <li class="delegate"><a href="GLib.SourceDisposeFunc.html">SourceDisposeFunc</a></li>
           <li class="delegate"><a href="GLib.SourceDummyMarshal.html">SourceDummyMarshal</a></li>
           <li class="delegate"><a href="GLib.SourceFinalizeFunc.html">SourceFinalizeFunc</a></li>
           <li class="delegate"><a href="GLib.SourceFunc.html">SourceFunc</a></li>
@@ -284,6 +287,7 @@
           <li class="method"><a href="GLib.get_monotonic_time.html">get_monotonic_time</a></li>
           <li class="method"><a href="GLib.get_num_processors.html">get_num_processors</a></li>
           <li class="method"><a href="GLib.get_real_time.html">get_real_time</a></li>
+          <li class="method"><a href="GLib.gettext.html">gettext</a></li>
           <li class="method"><a href="GLib.info.html">info</a></li>
           <li class="method"><a href="GLib.likely.html">likely</a></li>
           <li class="method"><a href="GLib.log.html">log</a></li>
@@ -325,6 +329,7 @@
           <li class="method"><a href="GLib.warn_if_fail.html">warn_if_fail</a></li>
           <li class="method"><a href="GLib.warn_if_reached.html">warn_if_reached</a></li>
           <li class="method"><a href="GLib.warning.html">warning</a></li>
+          <li class="method"><a href="GLib.warning_once.html">warning_once</a></li>
           <li class="field"><a href="GLib.direct_equal.html">direct_equal</a></li>
           <li class="field"><a href="GLib.direct_hash.html">direct_hash</a></li>
           <li class="field"><a href="GLib.errno.html">errno</a></li>
@@ -349,7 +354,7 @@
         <h1 class="main_title">get_charset</h1>
         <hr class="main_hr"/>
         <h2 class="main_title">Description:</h2>
-        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="bool.html" class="struct">bool</a></span> <b><span class="method">get_charset</span></b> (<span class="main_keyword">out</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> charset)
+        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><a href="bool.html" class="struct">bool</a></span> <b><span class="method">get_charset</span></b> (<span class="main_keyword">out</span> <span class="main_keyword">unowned</span> <span class="main_basic_type"><a href="string.html" class="class">string</a></span> charset)
         </div><br/>
         <div class="namespace_note"><b>Namespace:</b> <a href="GLib.html">GLib</a>
         </div>

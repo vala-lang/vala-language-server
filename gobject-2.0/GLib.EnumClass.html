@@ -27,6 +27,9 @@
         </ul>
         <hr class="navi_hr"/>
         <ul class="navi_main">
+          <li class="static_method"><a href="GLib.EnumClass.complete_type_info.html">complete_type_info</a></li>
+          <li class="static_method"><a href="GLib.EnumClass.register_static.html">register_static</a></li>
+          <li class="static_method"><a href="GLib.EnumClass.to_string.html">to_string</a></li>
           <li class="method"><a href="GLib.EnumClass.get_value.html">get_value</a></li>
           <li class="method"><a href="GLib.EnumClass.get_value_by_name.html">get_value_by_name</a></li>
           <li class="method"><a href="GLib.EnumClass.get_value_by_nick.html">get_value_by_nick</a></li>
@@ -48,13 +51,28 @@
 </map>
 
         <h2 class="main_title">Description:</h2>
-        <div class="main_code_definition">[ <span class="main_type">CCode</span> ( lower_case_csuffix = <span class="main_literal">"enum"</span> ) ]<br/><span class="main_keyword">public</span> <span class="main_keyword">class</span> <b><span class="class">EnumClass</span></b> : <span class="main_type"><a href="GLib.TypeClass.html" class="class">TypeClass</a></span>
+        <div class="main_code_definition">[ <span class="main_type">CCode</span> ( has_type_id = <span class="main_literal">false</span> ,  lower_case_csuffix = <span class="main_literal">"enum"</span> ) ]<br/><span class="main_keyword">public</span> <span class="main_keyword">class</span> <b><span class="class">EnumClass</span></b> : <span class="main_type"><a href="GLib.TypeClass.html" class="class">TypeClass</a></span>
         </div><br/>
         <div class="namespace_note"><b>Namespace:</b> <a href="GLib.html">GLib</a>
         </div>
         <div class="package_note"><b>Package:</b> <a href="index.htm">gobject-2.0</a>
         </div>
         <h2 class="main_title">Content:</h2>
+        <h3 class="main_title">Static methods:</h3>
+        <ul class="navi_inline">
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_keyword">void</span> <b><a href="GLib.EnumClass.complete_type_info.html" class="static_method">complete_type_info</a></b> (<span class="main_type"><a href="GLib.Type.html" class="struct">Type</a></span> g_enum_type, <span class="main_keyword">out</span> <span class="main_type"><a href="GLib.TypeInfo.html" class="struct">TypeInfo</a></span> info, <span class="main_type"><a href="GLib.EnumValue.html" class="struct">EnumValue</a></span>[] const_values)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_type"><a href="GLib.Type.html" class="struct">Type</a></span> <b><a href="GLib.EnumClass.register_static.html" class="static_method">register_static</a></b> (<span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> name, <span class="main_type"><a href="GLib.EnumValue.html" class="struct">EnumValue</a></span>[] const_static_values)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_basic_type"><a href="../glib-2.0/string.html" class="class">string</a></span> <b><a href="GLib.EnumClass.to_string.html" class="static_method">to_string</a></b> (<span class="main_type"><a href="GLib.Type.html" class="struct">Type</a></span> g_enum_type, <span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> value)
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+        </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="GLib.EnumValue.html" class="struct">EnumValue</a></span>? <b><a href="GLib.EnumClass.get_value.html" class="method">get_value</a></b> (<span class="main_basic_type"><a href="../glib-2.0/int.html" class="struct">int</a></span> value)

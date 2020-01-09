@@ -126,7 +126,7 @@
         </ul>
         <h3 class="main_title">Constants:</h3>
         <ul class="navi_inline">
-          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_type"><a href="Vala.GVariantModule.BasicTypeInfo.html" class="struct">BasicTypeInfo</a></span>[] <b><a href="Vala.GVariantModule.basic_types.html" class="constant">basic_types</a></b>
+          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">private</span> <span class="main_keyword">const</span> <span class="main_type"><a href="Vala.GVariantModule.BasicTypeInfo.html" class="struct">BasicTypeInfo</a></span>[] <b><a href="Vala.GVariantModule.basic_types.html" class="constant">basic_types</a></b>
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -464,6 +464,7 @@
                 <li class="virtual_method"><a href="Vala.GTypeModule.generate_class_struct_declaration.html">generate_class_struct_declaration</a>
                 </li>
                 <li class="virtual_method"><a href="Vala.GTypeModule.generate_interface_declaration.html">generate_interface_declaration</a></li>
+                <li class="virtual_method"><a href="Vala.GTypeModule.generate_method_declaration.html">generate_method_declaration</a></li>
                 <li class="virtual_method"><a href="Vala.GTypeModule.generate_parameter.html">generate_parameter</a></li>
                 <li class="method"><a href="Vala.GTypeModule.generate_struct_field_declaration.html">generate_struct_field_declaration</a></li>
                 <li class="method"><a href="Vala.GTypeModule.generate_struct_method_declaration.html">generate_struct_method_declaration</a></li>
@@ -776,9 +777,6 @@
                 <li class="field"><a href="Vala.CCodeBaseModule.ccode_attribute_cache_index.html">ccode_attribute_cache_index</a></li>
                 <li class="field"><a href="Vala.CCodeBaseModule.cfile.html">cfile</a></li>
                 <li class="field"><a href="Vala.CCodeBaseModule.char_type.html">char_type</a></li>
-                <li class="method"><a href="Vala.CCodeBaseModule.check_type.html">check_type</a></li>
-                <li class="method"><a href="Vala.CCodeBaseModule.check_type_argument.html">check_type_argument</a></li>
-                <li class="method"><a href="Vala.CCodeBaseModule.check_type_arguments.html">check_type_arguments</a></li>
                 <li class="field"><a href="Vala.CCodeBaseModule.class_finalize_context.html">class_finalize_context</a></li>
                 <li class="field"><a href="Vala.CCodeBaseModule.class_init_context.html">class_init_context</a></li>
                 <li class="field"><a href="Vala.CCodeBaseModule.closure_struct.html">closure_struct</a></li>
@@ -867,11 +865,11 @@
                 <li class="field"><a href="Vala.CCodeBaseModule.gerror.html">gerror</a></li>
                 <li class="field"><a href="Vala.CCodeBaseModule.gerror_type.html">gerror_type</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.get_array_length_cexpr.html">get_array_length_cexpr</a></li>
+                <li class="virtual_method"><a href="Vala.CCodeBaseModule.get_array_length_cexpression.html">get_array_length_cexpression</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="virtual_method"><a href="Vala.CCodeBaseModule.get_array_length_cexpression.html">get_array_length_cexpression</a></li>
                 <li class="virtual_method"><a href="Vala.CCodeBaseModule.get_array_length_cname.html">get_array_length_cname</a></li>
                 <li class="virtual_method"><a href="Vala.CCodeBaseModule.get_array_length_cvalue.html">get_array_length_cvalue</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.get_array_lengths.html">get_array_lengths</a></li>
@@ -879,13 +877,14 @@
                 <li class="virtual_method"><a href="Vala.CCodeBaseModule.get_array_size_cname.html">get_array_size_cname</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.get_array_size_cvalue.html">get_array_size_cvalue</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.get_block_id.html">get_block_id</a></li>
+                <li class="method"><a href="Vala.CCodeBaseModule.get_boolean_cconstant.html">get_boolean_cconstant</a></li>
+                <li class="static_method"><a href="Vala.CCodeBaseModule.get_callable_creturn_type.html">get_callable_creturn_type</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.get_ccode_declarator_suffix.html">get_ccode_declarator_suffix</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.get_ccodenode.html">get_ccodenode</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.get_cexpression.html">get_cexpression</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.get_ctype.html">get_ctype</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.get_cvalue.html">get_cvalue</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.get_cvalue_.html">get_cvalue_</a></li>
-                <li class="static_method"><a href="Vala.CCodeBaseModule.get_data_type_for_symbol.html">get_data_type_for_symbol</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.get_delegate_target.html">get_delegate_target</a></li>
                 <li class="virtual_method"><a href="Vala.CCodeBaseModule.get_delegate_target_cexpression.html">get_delegate_target_cexpression</a>
                 </li>
@@ -930,6 +929,7 @@
                 <li class="method"><a href="Vala.CCodeBaseModule.get_symbol_lock_name.html">get_symbol_lock_name</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.get_temp_variable.html">get_temp_variable</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.get_this_cexpression.html">get_this_cexpression</a></li>
+                <li class="method"><a href="Vala.CCodeBaseModule.get_this_interface_cexpression.html">get_this_interface_cexpression</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.get_this_type.html">get_this_type</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.get_type_id_expression.html">get_type_id_expression</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.get_value_getter_function.html">get_value_getter_function</a></li>
@@ -969,30 +969,27 @@
                 <li class="field"><a href="Vala.CCodeBaseModule.int8_type.html">int8_type</a></li>
                 <li class="field"><a href="Vala.CCodeBaseModule.int_type.html">int_type</a></li>
                 <li class="field"><a href="Vala.CCodeBaseModule.internal_header_file.html">internal_header_file</a></li>
-                <li class="method"><a href="Vala.CCodeBaseModule.is_compact_class_destructor_call.html">is_compact_class_destructor_call</a></li>
-                <li class="method"><a href="Vala.CCodeBaseModule.is_constant_ccode_expression.html">is_constant_ccode_expression</a></li>
-                <li class="method"><a href="Vala.CCodeBaseModule.is_foreach_element_variable.html">is_foreach_element_variable</a></li>
+                <li class="static_method"><a href="Vala.CCodeBaseModule.is_compact_class_destructor_call.html">is_compact_class_destructor_call</a>
+                </li>
+                <li class="static_method"><a href="Vala.CCodeBaseModule.is_constant_ccode_expression.html">is_constant_ccode_expression</a></li>
+                <li class="static_method"><a href="Vala.CCodeBaseModule.is_foreach_element_variable.html">is_foreach_element_variable</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.is_in_constructor.html">is_in_constructor</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.is_in_coroutine.html">is_in_coroutine</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.is_in_destructor.html">is_in_destructor</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.is_in_generic_type.html">is_in_generic_type</a></li>
-                <li class="method"><a href="Vala.CCodeBaseModule.is_limited_generic_type.html">is_limited_generic_type</a></li>
+                <li class="static_method"><a href="Vala.CCodeBaseModule.is_limited_generic_type.html">is_limited_generic_type</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.is_lvalue_access_allowed.html">is_lvalue_access_allowed</a></li>
-                <li class="method"><a href="Vala.CCodeBaseModule.is_nullable_value_type_argument.html">is_nullable_value_type_argument</a></li>
-                <li class="method"><a href="Vala.CCodeBaseModule.is_pure_ccode_expression.html">is_pure_ccode_expression</a></li>
-                <li class="method"><a href="Vala.CCodeBaseModule.is_reference_type_argument.html">is_reference_type_argument</a></li>
-                <li class="method"><a href="Vala.CCodeBaseModule.is_signed_integer_type_argument.html">is_signed_integer_type_argument</a></li>
+                <li class="static_method"><a href="Vala.CCodeBaseModule.is_pure_ccode_expression.html">is_pure_ccode_expression</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.is_simple_struct_creation.html">is_simple_struct_creation</a></li>
-                <li class="method"><a href="Vala.CCodeBaseModule.is_unsigned_integer_type_argument.html">is_unsigned_integer_type_argument</a></li>
                 <li class="field"><a href="Vala.CCodeBaseModule.line_directive_stack.html">line_directive_stack</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.load_temp_value.html">load_temp_value</a></li>
                 <li class="abstract_method"><a href="Vala.CCodeBaseModule.load_this_parameter.html">load_this_parameter</a></li>
+                <li class="abstract_method"><a href="Vala.CCodeBaseModule.load_variable.html">load_variable</a></li>
+                <li class="field"><a href="Vala.CCodeBaseModule.long_type.html">long_type</a></li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="abstract_method"><a href="Vala.CCodeBaseModule.load_variable.html">load_variable</a></li>
-                <li class="field"><a href="Vala.CCodeBaseModule.long_type.html">long_type</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.make_comparable_cexpression.html">make_comparable_cexpression</a></li>
                 <li class="virtual_method"><a href="Vala.CCodeBaseModule.method_has_wrapper.html">method_has_wrapper</a></li>
                 <li class="field"><a href="Vala.CCodeBaseModule.method_inner_error_var_count.html">method_inner_error_var_count</a></li>
@@ -1005,6 +1002,7 @@
                 <li class="field"><a href="Vala.CCodeBaseModule.next_variant_function_id.html">next_variant_function_id</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.no_implicit_copy.html">no_implicit_copy</a></li>
                 <li class="field"><a href="Vala.CCodeBaseModule.param_spec_struct.html">param_spec_struct</a></li>
+                <li class="field"><a href="Vala.CCodeBaseModule.pointer_type.html">pointer_type</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.pop_context.html">pop_context</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.pop_function.html">pop_function</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.pop_line.html">pop_line</a></li>
@@ -1019,10 +1017,11 @@
                 <li class="field"><a href="Vala.CCodeBaseModule.requires_array_free.html">requires_array_free</a></li>
                 <li class="field"><a href="Vala.CCodeBaseModule.requires_array_length.html">requires_array_length</a></li>
                 <li class="field"><a href="Vala.CCodeBaseModule.requires_array_move.html">requires_array_move</a></li>
+                <li class="field"><a href="Vala.CCodeBaseModule.requires_array_n_elements.html">requires_array_n_elements</a></li>
                 <li class="field"><a href="Vala.CCodeBaseModule.requires_assert.html">requires_assert</a></li>
                 <li class="field"><a href="Vala.CCodeBaseModule.requires_clear_mutex.html">requires_clear_mutex</a></li>
-                <li class="method"><a href="Vala.CCodeBaseModule.requires_copy.html">requires_copy</a></li>
-                <li class="method"><a href="Vala.CCodeBaseModule.requires_destroy.html">requires_destroy</a></li>
+                <li class="static_method"><a href="Vala.CCodeBaseModule.requires_copy.html">requires_copy</a></li>
+                <li class="static_method"><a href="Vala.CCodeBaseModule.requires_destroy.html">requires_destroy</a></li>
                 <li class="field"><a href="Vala.CCodeBaseModule.reserved_identifiers.html">reserved_identifiers</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.return_default_value.html">return_default_value</a></li>
                 <li class="method"><a href="Vala.CCodeBaseModule.return_out_parameter.html">return_out_parameter</a></li>
@@ -1071,7 +1070,6 @@
                 <li class="virtual_method"><a href="Vala.CCodeBaseModule.visit_expression.html">visit_expression</a></li>
                 <li class="virtual_method"><a href="Vala.CCodeBaseModule.visit_expression_statement.html">visit_expression_statement</a></li>
                 <li class="virtual_method"><a href="Vala.CCodeBaseModule.visit_field.html">visit_field</a></li>
-                <li class="virtual_method"><a href="Vala.CCodeBaseModule.visit_formal_parameter.html">visit_formal_parameter</a></li>
                 <li class="virtual_method"><a href="Vala.CCodeBaseModule.visit_initializer_list.html">visit_initializer_list</a></li>
                 <li class="virtual_method"><a href="Vala.CCodeBaseModule.visit_integer_literal.html">visit_integer_literal</a></li>
                 <li class="virtual_method"><a href="Vala.CCodeBaseModule.visit_lambda_expression.html">visit_lambda_expression</a></li>
