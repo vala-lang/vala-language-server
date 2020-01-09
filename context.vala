@@ -30,12 +30,7 @@ class Vls.Context {
                 Vala.CodeContext.push (_ctx);
                 dirty = false;
 
-                string version = Config.libvala_version;
-                string[] parts = version.split (".");
-                assert (parts.length == 3);
-                assert (parts[0] == "0");
-                // var minor = int.parse (parts[1]);
-
+                // string version = Config.libvala_version;
                 _ctx.report = new Reporter ();
                 _ctx.profile = Vala.Profile.GOBJECT;
                 _ctx.add_define ("GOBJECT");

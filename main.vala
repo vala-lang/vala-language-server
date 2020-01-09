@@ -161,6 +161,7 @@ class Vls.Server {
         notif_handlers["textDocument/didOpen"] = this.textDocumentDidOpen;
         notif_handlers["textDocument/didChange"] = this.textDocumentDidChange;
         call_handlers["textDocument/documentSymbol"] = this.textDocumentDocumentSymbol;
+        call_handlers["textDocument/completion"] = this.textDocumentCompletion;
 
         debug ("Finished constructing");
     }
@@ -475,7 +476,10 @@ class Vls.Server {
                 capabilities: buildDict (
                     textDocumentSync: new Variant.int16 (TextDocumentSyncKind.Full),
                     definitionProvider: new Variant.boolean (true),
-                    documentSymbolProvider: new Variant.boolean (true)
+                    documentSymbolProvider: new Variant.boolean (true),
+                    completionProvider: buildDict(
+                        triggerCharacters: new Variant.strv (new string[] {".", ">"})
+                    )
                 )
             ));
         } catch (Error e) {
@@ -760,6 +764,47 @@ class Vls.Server {
         }
     }
 
+    Vala.CodeNode get_best (FindSymbol fs, Vala.SourceFile file) {
+        Vala.CodeNode? best = null;
+
+        foreach (var node in fs.result) {
+            if (best == null) {
+                best = node;
+            } else if (best.source_reference.begin.column <= node.source_reference.begin.column &&
+                       node.source_reference.end.column <= best.source_reference.end.column &&
+                       // don't get implicit `this` accesses
+                       !(best.source_reference.begin.column == node.source_reference.begin.column &&
+                         node.source_reference.end.column == best.source_reference.end.column)) {
+                best = node;
+            }
+        }
+
+        assert (best != null);
+        var sr = best.source_reference;
+        var from = (long)Server.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
+        var to = (long)Server.get_string_pos (file.content, sr.end.line-1, sr.end.column);
+        string contents = file.content [from:to];
+        debug ("Got node: %s @ %s = %s", best.type_name, sr.to_string(), contents);
+
+        return (!) best;
+    }
+
+    Vala.Scope get_current_scope (Vala.CodeNode code_node) {
+        Vala.Scope? best = null;
+
+        for (Vala.CodeNode? node = code_node; node != null; node = node.parent_node) {
+            if (node is Vala.Symbol) {
+                var sym = (Vala.Symbol) node;
+                best = sym.scope;
+                break;
+            }
+        }
+
+        assert (best != null);
+
+        return (!) best;
+    }
+
     void textDocumentDefinition (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = parse_variant <LanguageServer.TextDocumentPositionParams> (@params);
         debug ("get definition in %s at %u,%u", p.textDocument.uri,
@@ -786,41 +831,7 @@ class Vls.Server {
             return;
         }
 
-        Vala.CodeNode best = null;
-
-        foreach (var node in fs.result) {
-            if (best == null) {
-                best = node;
-            } else if (
-                (best.source_reference.begin.column < node.source_reference.begin.column && node.source_reference.end.column <= best.source_reference.end.column) ||
-                (best.source_reference.begin.column <= node.source_reference.begin.column && node.source_reference.end.column < best.source_reference.end.column)) {
-                best = node;
-            } else if (best is Vala.ExpressionStatement) {
-                best = ((Vala.ExpressionStatement)best).expression;
-            }
-        }
-
-        {
-            assert (best != null);
-            var sr = best.source_reference;
-            var file = ctx.get_source_file (@"file://$(sr.file.filename)");
-            string contents;
-            if (file != null) {
-                debug ("have %s", sr.file.filename);
-                contents = file.file.content;
-            } else {
-                debug ("reading %s", sr.file.filename);
-                try {
-                    FileUtils.get_contents (sr.file.filename, out contents);
-                } catch (Error e) {
-                    warning (e.message);
-                }
-            }
-            var from = (long)Server.get_string_pos (contents, sr.begin.line - 1, sr.begin.column - 1);
-            var to = (long)Server.get_string_pos (contents, sr.end.line - 1, sr.end.column);
-            string piece = contents [from:to];
-            debug ("Got node: %s @ %s = %s", best.type_name, sr.to_string (), piece);
-        }
+        Vala.CodeNode? best = get_best (fs, file);
 
         if (best is Vala.Expression && !(best is Vala.Literal)) { // expressions
             var b = (Vala.Expression)best;
@@ -926,6 +937,518 @@ class Vls.Server {
             client.reply (id, result);
         } catch (Error e) {
             debug (@"[textDocument/documentSymbol] failed to reply to client: $(e.message)");
+        }
+    }
+
+    /**
+     * Return the string representation of a symbol's type. This is used as the detailed
+     * information for a completion item.
+     */
+    public static string? get_symbol_data_type (Vala.Symbol sym, bool only_type_names = false) {
+        if (sym is Vala.Property) {
+            var prop_sym = sym as Vala.Property;
+            if (prop_sym.property_type == null)
+                return null;
+            return prop_sym.property_type.to_string ();
+        } else if (sym is Vala.Variable) {
+            var var_sym = sym as Vala.Variable;
+            if (var_sym.variable_type == null)
+                return null;
+            return var_sym.variable_type.to_string ();
+        } else if (sym is Vala.Callable) {
+            var method_sym = sym as Vala.Callable;
+            if (method_sym.return_type == null)
+                return null;
+            string? ret_type = method_sym.return_type.to_string ();
+            string param_string = "";
+            bool at_least_one = false;
+            foreach (var p in method_sym.get_parameters ()) {
+                if (at_least_one)
+                    param_string += ", ";
+                if (p.ellipsis)
+                    param_string += "...";
+                else {
+                    if (p.direction == Vala.ParameterDirection.OUT)
+                        param_string += "out ";
+                    else if (p.direction == Vala.ParameterDirection.REF)
+                        param_string += "ref ";
+                    if (only_type_names)
+                        param_string += p.variable_type.data_type.to_string ();
+                    else
+                        param_string += p.variable_type.to_string ();
+                    param_string += " " + p.name;
+                }
+                at_least_one = true;
+            }
+            return @"($param_string) -> " + (ret_type ?? "void");
+        } else if (sym is Vala.Constant) {
+            var const_sym = sym as Vala.Constant;
+            string type_string = "";
+            if (const_sym.value != null)
+                type_string += const_sym.value.to_string ();
+            if (const_sym.type_reference == null)
+                return type_string;
+            type_string = @"($(const_sym.type_reference)) $type_string";
+            return type_string;
+        } else if (sym is Vala.ObjectTypeSymbol) {
+            var object_sym = sym as Vala.ObjectTypeSymbol;
+            string type_string = object_sym.to_string ();
+            bool at_least_one = false;
+
+            foreach (var type_param in object_sym.get_type_parameters ()) {
+                if (!at_least_one)
+                    type_string += "<";
+                else
+                    type_string += ",";
+                type_string += type_param.name;
+                at_least_one = true;
+            }
+
+            if (at_least_one)
+                type_string += ">";
+
+            at_least_one = false;
+            if (sym is Vala.Class) {
+                var class_sym = sym as Vala.Class;
+                at_least_one = false;
+                foreach (var base_type in class_sym.get_base_types ()) {
+                    if (!at_least_one)
+                        type_string += ": ";
+                    else
+                        type_string += ", ";
+                    type_string += base_type.to_string ();
+                    at_least_one = true;
+                }
+            } else if (sym is Vala.Interface) {
+                var iface_sym = sym as Vala.Interface;
+                foreach (var prereq_type in iface_sym.get_prerequisites ()) {
+                    if (!at_least_one)
+                        type_string += ": ";
+                    else
+                        type_string += ", ";
+                    type_string += prereq_type.to_string ();
+                    at_least_one = true;
+                }
+            }
+            return type_string;
+        } else if (sym is Vala.ErrorCode) {
+            var err_val = (sym as Vala.ErrorCode).value;
+            return err_val != null ? err_val.to_string () : null;
+        } else if (sym is Vala.Struct) {
+            var struct_sym = sym as Vala.Struct;
+            string type_string = struct_sym.to_string ();
+            bool at_least_one = false;
+
+            foreach (var type_param in struct_sym.get_type_parameters ()) {
+                if (!at_least_one)
+                    type_string += "<";
+                else
+                    type_string += ",";
+                type_string += type_param.name;
+                at_least_one = true;
+            }
+
+            if (at_least_one)
+                type_string += ">";
+
+            if (struct_sym.base_type != null)
+                type_string += ": " + struct_sym.base_type.to_string ();
+
+            return type_string;
+        } else if (sym is Vala.ErrorDomain) {
+            // don't do this if LSP ever gets CompletionItemKind.Error
+            var err_sym = sym as Vala.ErrorDomain;
+            return @"(errordomain) $err_sym";
+        } else {
+            debug (@"get_symbol_data_type: unsupported symbol $(sym.type_name)");
+        }
+        return null;
+    }
+
+    public static LanguageServer.MarkupContent? get_symbol_comment (Vala.Symbol sym) {
+        if (sym.comment == null)
+            return null;
+        string comment = sym.comment.content;
+        try {
+            comment = /^\s*\*(.*)/m.replace (comment, comment.length, 0, "\\1\n");
+        } catch (RegexError e) {
+            warning (@"failed to parse comment...\n$comment\n...");
+            comment = "(failed to parse comment)";
+        }
+
+        return new MarkupContent () {
+            kind = "markdown",
+            value = comment
+        };
+    }
+
+    /**
+     * see `vala/valamemberaccess.vala`
+     * This determines whether we can access a symbol in the current scope.
+     */
+    bool is_symbol_accessible (Vala.Symbol member, Vala.Scope current_scope) {
+        if (member.access == Vala.SymbolAccessibility.PROTECTED && member.parent_symbol is Vala.TypeSymbol) {
+            var target_type = (Vala.TypeSymbol) member.parent_symbol;
+            bool in_subtype = false;
+
+            for (Vala.Symbol? this_symbol = current_scope.owner; 
+                 this_symbol != null;
+                 this_symbol = this_symbol.parent_symbol) {
+                if (this_symbol == target_type) {
+                    in_subtype = true;
+                    break;
+                }
+
+                var cl = this_symbol as Vala.Class;
+                if (cl != null && cl.is_subtype_of (target_type)) {
+                    in_subtype = true;
+                    break;
+                }
+            }
+
+            return in_subtype;
+        } else if (member.access == Vala.SymbolAccessibility.PRIVATE) {
+            var target_type = member.parent_symbol;
+            bool in_target_type = false;
+
+            for (Vala.Symbol? this_symbol = current_scope.owner;
+                 this_symbol != null;
+                 this_symbol = this_symbol.parent_symbol) {
+                if (this_symbol == target_type) {
+                    in_target_type = true;
+                    break;
+                }
+            }
+
+            return in_target_type;
+        }
+        return true;
+    }
+
+    /**
+     * List all relevant members of a type. This is where completion options are generated.
+     */
+    void add_completions_for_type (Vala.TypeSymbol type, 
+                                   Gee.Set<CompletionItem> completions, 
+                                   Vala.Scope current_scope,
+                                   bool is_instance,
+                                   Gee.Set<string> seen_props = new Gee.HashSet<string> ()) {
+        if (type is Vala.ObjectTypeSymbol) {
+            /**
+             * Complete the members of this object, such as the fields,
+             * properties, and methods.
+             */
+            var object_type = type as Vala.ObjectTypeSymbol;
+
+            debug (@"completion: type is object $(object_type.name)\n");
+
+            foreach (var method_sym in object_type.get_methods ()) {
+                if (method_sym.name == ".new" || method_sym.is_instance_member () != is_instance
+                    || !is_symbol_accessible (method_sym, current_scope))
+                    continue;
+                completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
+            }
+
+            foreach (var signal_sym in object_type.get_signals ()) {
+                if (signal_sym.is_instance_member () != is_instance 
+                    || !is_symbol_accessible (signal_sym, current_scope))
+                    continue;
+                completions.add (new CompletionItem.from_symbol (signal_sym, CompletionItemKind.Event));
+            }
+
+            foreach (var prop_sym in object_type.get_properties ()) {
+                if (prop_sym.is_instance_member () != is_instance
+                    || !is_symbol_accessible (prop_sym, current_scope))
+                    continue;
+                completions.add (new CompletionItem.from_symbol (prop_sym, CompletionItemKind.Property));
+                seen_props.add (prop_sym.name);
+            }
+
+            foreach (var field_sym in object_type.get_fields ()) {
+                if (field_sym.name[0] == '_' && seen_props.contains (field_sym.name[1:field_sym.name.length])
+                    || field_sym.is_instance_member () != is_instance
+                    || !is_symbol_accessible (field_sym, current_scope))
+                    continue;
+                completions.add (new CompletionItem.from_symbol (field_sym, CompletionItemKind.Field));
+            }
+
+            // get inner types and constants
+            if (!is_instance) {
+                foreach (var constant_sym in object_type.get_constants ()) {
+                    if (!is_symbol_accessible (constant_sym, current_scope))
+                        continue;
+                    completions.add (new CompletionItem.from_symbol (constant_sym, CompletionItemKind.Constant));
+                }
+
+                foreach (var class_sym in object_type.get_classes ())
+                    completions.add (new CompletionItem.from_symbol (class_sym, CompletionItemKind.Class));
+
+                foreach (var struct_sym in object_type.get_structs ())
+                    completions.add (new CompletionItem.from_symbol (struct_sym, CompletionItemKind.Struct));
+
+                foreach (var enum_sym in object_type.get_enums ())
+                    completions.add (new CompletionItem.from_symbol (enum_sym, CompletionItemKind.Enum));
+
+                foreach (var delegate_sym in object_type.get_delegates ())
+                    completions.add (new CompletionItem.from_symbol (delegate_sym, CompletionItemKind.Event));
+            }
+
+            // get members of supertypes
+            if (is_instance) {
+                if (object_type is Vala.Class)
+                    foreach (var base_type in (object_type as Vala.Class).get_base_types ())
+                        add_completions_for_type (base_type.data_type,
+                                                  completions, current_scope, is_instance, seen_props);
+                if (object_type is Vala.Interface)
+                    foreach (var base_type in (object_type as Vala.Interface).get_prerequisites ())
+                        add_completions_for_type (base_type.data_type,
+                                                  completions, current_scope, is_instance, seen_props);
+            }
+        } else if (type is Vala.Enum) {
+            /**
+             * Complete members of this enum, such as the values, methods,
+             * and constants.
+             */
+            var enum_type = type as Vala.Enum;
+
+            foreach (var method_sym in enum_type.get_methods ()) {
+                if (method_sym.is_instance_member () != is_instance
+                    || !is_symbol_accessible (method_sym, current_scope))
+                    continue;
+                completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
+            }
+
+            if (!is_instance) {
+                foreach (var constant_sym in enum_type.get_constants ()) {
+                    if (!is_symbol_accessible (constant_sym, current_scope))
+                        continue;
+                    completions.add (new CompletionItem.from_symbol (constant_sym, CompletionItemKind.Constant));
+                }
+                foreach (var value_sym in enum_type.get_values ())
+                    completions.add (new CompletionItem.from_symbol (value_sym, CompletionItemKind.EnumMember));
+            }
+        } else if (type is Vala.ErrorDomain) {
+            /**
+             * Get all the members of the error domain, such as the error
+             * codes and the methods.
+             */
+            var errdomain_type = type as Vala.ErrorDomain;
+
+            foreach (var code_sym in errdomain_type.get_codes ()) {
+                if (code_sym.is_instance_member () != is_instance)
+                    continue;
+                completions.add (new CompletionItem.from_symbol (code_sym, CompletionItemKind.Value));
+            }
+
+            foreach (var method_sym in errdomain_type.get_methods ()) {
+                if (method_sym.is_instance_member () != is_instance
+                    || !is_symbol_accessible (method_sym, current_scope))
+                    continue;
+                completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
+            }
+        } else if (type is Vala.Struct) {
+            /**
+             * Gets all of the members of the struct.
+             */
+            var struct_type = type as Vala.Struct;
+
+            foreach (var field_sym in struct_type.get_fields ()) {
+                // struct fields are always public
+                if (field_sym.is_instance_member () != is_instance)
+                    continue;
+                completions.add (new CompletionItem.from_symbol (field_sym, CompletionItemKind.Field));
+            }
+
+            foreach (var method_sym in struct_type.get_methods ()) {
+                if (method_sym.is_instance_member () != is_instance
+                    || !is_symbol_accessible (method_sym, current_scope))
+                    continue;
+                completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
+            }
+
+            foreach (var prop_sym in struct_type.get_properties ()) {
+                if (prop_sym.is_instance_member () != is_instance
+                    || !is_symbol_accessible (prop_sym, current_scope))
+                    continue;
+                completions.add (new CompletionItem.from_symbol (prop_sym, CompletionItemKind.Property));
+            }
+
+            if (!is_instance) {
+                foreach (var constant_sym in struct_type.get_constants ()) {
+                    if (!is_symbol_accessible (constant_sym, current_scope))
+                        continue;
+                    completions.add (new CompletionItem.from_symbol (constant_sym, CompletionItemKind.Constant));
+                }
+            }
+        } else {
+            debug (@"other type node $(type).\n");
+        }
+    }
+
+    /**
+     * Use this when we're completing members of a namespace.
+     */
+    void add_completions_for_ns (Vala.Namespace ns, Gee.Set<CompletionItem> completions) {
+        foreach (var class_sym in ns.get_classes ())
+            completions.add (new CompletionItem.from_symbol (class_sym, CompletionItemKind.Class));
+        foreach (var const_sym in ns.get_constants ())
+            completions.add (new CompletionItem.from_symbol (const_sym, CompletionItemKind.Constant));
+        foreach (var iface_sym in ns.get_interfaces ())
+            completions.add (new CompletionItem.from_symbol (iface_sym, CompletionItemKind.Interface));
+        foreach (var struct_sym in ns.get_structs ())
+            completions.add (new CompletionItem.from_symbol (struct_sym, CompletionItemKind.Struct));
+        foreach (var method_sym in ns.get_methods ())
+            completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
+        foreach (var enum_sym in ns.get_enums ())
+            completions.add (new CompletionItem.from_symbol (enum_sym, CompletionItemKind.Enum));
+        foreach (var err_sym in ns.get_error_domains ())
+            completions.add (new CompletionItem.from_symbol (err_sym, CompletionItemKind.Enum));
+        foreach (var ns_sym in ns.get_namespaces ())
+            completions.add (new CompletionItem.from_symbol (ns_sym, CompletionItemKind.Module));
+    }
+
+    /**
+     * Use this to complete members of a signal.
+     */
+    void add_completions_for_signal (Vala.Signal sig, Gee.Set<CompletionItem> completions) {
+        completions.add_all_array (new CompletionItem []{
+            new CompletionItem.for_signal ("connect", @"($(get_symbol_data_type (sig))) -> uint", "Connect signal"),
+            new CompletionItem.for_signal ("connect_after", @"($(get_symbol_data_type (sig))) -> uint", "Connect signal after default handler"),
+            new CompletionItem.for_signal ("disconnect", "(uint id) -> void", "Disconnect signal")
+        });
+    }
+
+    /**
+     * Find the type of a symbol in the code.
+     */
+    Vala.TypeSymbol? get_type_symbol (Vala.CodeNode symbol, bool is_pointer, ref bool is_instance) {
+        Vala.DataType? data_type = null;
+        Vala.TypeSymbol? type_symbol = null;
+        if (symbol is Vala.Variable) {
+            data_type = (symbol as Vala.Variable).variable_type;
+        } else if (symbol is Vala.Expression) {
+            data_type = (symbol as Vala.Expression).value_type;
+        }
+
+        if (data_type != null) {
+            do {
+                if (data_type.data_type == null) {
+                    if (data_type is Vala.ErrorType) {
+                        var err_type = data_type as Vala.ErrorType;
+                        if (err_type.error_code != null)
+                            type_symbol = err_type.error_code;
+                        else if (err_type.error_domain != null)
+                            type_symbol = err_type.error_domain;
+                        else {
+                            // this is a generic error
+                            Vala.Symbol? sym = ctx.code_context.root.scope.lookup ("GLib");
+                            if (sym != null)
+                                sym = sym.scope.lookup ("Error");
+                            else
+                                debug ("get_type_symbol(): GLib not found");
+                            if (sym != null)
+                                type_symbol = sym as Vala.TypeSymbol;
+                            else
+                                debug (@"could not get type symbol for $(data_type.type_name)");
+                        }
+                    } else if (data_type is Vala.PointerType && is_pointer) {
+                        data_type = (data_type as Vala.PointerType).base_type;
+                        debug (@"peeled base_type $(data_type.type_name) from pointer type");
+                        continue;       // try again
+                    } else {
+                        debug (@"could not get type symbol from $(data_type.type_name)");
+                    }
+                } else
+                    type_symbol = data_type.data_type;
+                break;
+            } while (true);
+        } else if (symbol is Vala.TypeSymbol) {
+            type_symbol = symbol as Vala.TypeSymbol;
+            is_instance = false;
+        }
+
+        return type_symbol;
+    }
+
+    void textDocumentCompletion (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        var p = parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
+        TextDocument? doc = ctx.get_source_file (p.textDocument.uri);
+        if (doc == null) {
+            debug ("unknown file %s", p.textDocument.uri);
+            try {
+                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+            } catch (Error e) {
+                debug ("[textDocument/completion] failed to reply to client: %s", e.message);
+            }
+            return;
+        }
+        bool is_pointer_access = false;
+        long idx = (long) get_string_pos (doc.file.content, p.position.line, p.position.character);
+        Position pos = p.position;
+
+        if (idx >= 2 && doc.file.content[idx-2:idx] == "->") {
+            is_pointer_access = true;
+            debug ("found pointer access");
+            pos = p.position.translate (0, -2);
+        } else if (idx >= 1 && doc.file.content[idx-1:idx] == ".")
+            pos = p.position.translate (0, -1);
+
+        var fs = new FindSymbol (doc.file, pos.to_libvala ());
+
+        if (fs.result.size == 0) {
+            debug ("[textDocument/completion] no results found");
+            try {
+                client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+            } catch (Error e) {
+                debug ("[textDocument/completion] failed to reply to client: %s", e.message);
+            }
+            return;
+        }
+
+        foreach (var res in fs.result)
+            debug (@"found $(res.type_name)");
+
+        Vala.CodeNode result = get_best (fs, doc.file);
+        Vala.CodeNode? peeled = null;
+        Vala.Scope current_scope = get_current_scope (result);
+        var json_array = new Json.Array ();
+        var completions = new Gee.HashSet<CompletionItem> ();
+
+        debug (@"[textDocument/completion] got $result");
+        if (result is Vala.MemberAccess) {
+            var ma = result as Vala.MemberAccess;
+            if (ma.symbol_reference != null) {
+                debug (@"peeling away symbol_reference from MemberAccess: $(ma.symbol_reference.type_name)");
+                peeled = ma.symbol_reference;
+            } else
+                debug ("MemberAccess does not have symbol_reference");
+        }
+
+        bool is_instance = true;
+        Vala.TypeSymbol? type_sym = get_type_symbol (result, is_pointer_access, ref is_instance);
+
+        // try again
+        if (type_sym == null && peeled != null)
+            type_sym = get_type_symbol (peeled, is_pointer_access, ref is_instance);
+
+        if (type_sym != null)
+            add_completions_for_type (type_sym, completions, current_scope, is_instance);
+        // and try some more
+        else if (peeled is Vala.Signal)
+            add_completions_for_signal (peeled as Vala.Signal, completions);
+        else if (peeled is Vala.Namespace)
+            add_completions_for_ns (peeled as Vala.Namespace, completions);
+        else
+            debug ("could not get datatype");
+
+        foreach (CompletionItem comp in completions)
+            json_array.add_element (Json.gobject_serialize (comp));
+
+        try {
+            Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
+            client.reply (id, variant_array);
+        } catch (Error e) {
+            debug (@"[textDocument/completion] failed to reply to client: $(e.message)");
         }
     }
 
