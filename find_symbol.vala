@@ -172,6 +172,12 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         m.accept_children (this);
     }
 
+    public override void visit_data_type (Vala.DataType type) {
+        if (this.match (type))
+            result.add (type);
+        type.accept_children (this);
+    }
+
     public override void visit_declaration_statement (Vala.DeclarationStatement stmt) {
         if (this.match (stmt))
             result.add (stmt);
@@ -188,6 +194,12 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         if (this.match (stmt))
             result.add (stmt);
         stmt.accept_children (this);
+    }
+    
+    public override void visit_destructor (Vala.Destructor dtor) {
+        if (this.match (dtor))
+            result.add (dtor);
+        dtor.accept_children (this);
     }
 
     public override void visit_do_statement (Vala.DoStatement stmt) {
@@ -212,6 +224,12 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         if (this.match (en))
             result.add (en);
         en.accept_children (this);
+    }
+
+    public override void visit_error_code (Vala.ErrorCode ecode) {
+        if (this.match (ecode))
+            result.add (ecode);
+        ecode.accept_children (this);
     }
 
     public override void visit_error_domain (Vala.ErrorDomain edomain) {
@@ -350,6 +368,12 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         prop.accept_children (this);
     }
 
+    public override void visit_property_accessor (Vala.PropertyAccessor acc) {
+        if (this.match (acc))
+            result.add (acc);
+        acc.accept_children (this);
+    }
+
     public override void visit_real_literal (Vala.RealLiteral lit) {
         if (this.match (lit))
             result.add (lit);
@@ -360,6 +384,12 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         if (this.match (expr))
             result.add (expr);
         expr.accept_children (this);
+    }
+
+    public override void visit_regex_literal (Vala.RegexLiteral lit) {
+        if (this.match (lit))
+            result.add (lit);
+        lit.accept_children (this);
     }
 
     public override void visit_return_statement (Vala.ReturnStatement stmt) {
@@ -416,6 +446,12 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         stmt.accept_children (this);
     }
 
+    public override void visit_template (Vala.Template tmpl) {
+        if (this.match (tmpl))
+            result.add (tmpl);
+        tmpl.accept_children (this);
+    }
+
     public override void visit_throw_statement (Vala.ThrowStatement stmt) {
         if (this.match (stmt))
             result.add (stmt);
@@ -434,9 +470,34 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         expr.accept_children (this);
     }
 
+    public override void visit_type_parameter (Vala.TypeParameter p) {
+        if (this.match (p))
+            result.add (p);
+        p.accept_children (this);
+    }
+
+    public override void visit_typeof_expression (Vala.TypeofExpression expr) {
+        if (this.match (expr))
+            result.add (expr);
+        expr.accept_children (this);
+    }
+
     public override void visit_unary_expression (Vala.UnaryExpression expr) {
         if (this.match (expr))
             result.add (expr);
         expr.accept_children (this);
+    }
+
+    public override void visit_unlock_statement (Vala.UnlockStatement stmt) {
+        stmt.accept_children (this);
+    }
+
+    public override void visit_using_directive (Vala.UsingDirective ud) {
+        if (this.match (ud.namespace_symbol))
+            result.add (ud.namespace_symbol);
+    }
+
+    public override void visit_yield_statement (Vala.YieldStatement stmt) {
+        stmt.accept_children (this);
     }
 }
