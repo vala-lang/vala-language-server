@@ -542,7 +542,10 @@ class Vls.Server {
     }
 
     // BFS for file
-    string? findFile (string dirname, string target) {
+    string? findFile (string dirname, string target, int max_depth = -1) {
+        if (max_depth == 0)
+            return null;
+
         Dir dir = null;
         try {
             dir = Dir.open (dirname, 0);
@@ -563,7 +566,7 @@ class Vls.Server {
         }
 
         foreach (string path in dirs_to_search) {
-            string r = findFile (path, target);
+            string r = findFile(path, target, max_depth < 0 ? -1 : max_depth - 1);
             if (r != null)
                 return r;
         }
@@ -573,7 +576,7 @@ class Vls.Server {
     string findCompileCommands (string filename) {
         string r = null, p = filename;
         do {
-            r = findFile (p, "compile_commands.json");
+            r = findFile (p, "compile_commands.json", 1);
             p = Path.get_dirname (p);
         } while (r == null && p != "/" && p != ".");
         return r;
