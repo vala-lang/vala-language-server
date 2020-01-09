@@ -563,7 +563,7 @@ class Vls.Server {
             on_context_updated_func (false);
         else {
             var req = new Request (id);
-            if (pending_requests.add (req))
+            if (!pending_requests.add (req))
                 debug (@"Request ($req): request already in pending requests, this should not happen");
             else
                 debug (@"Request ($req): added request to pending requests");
