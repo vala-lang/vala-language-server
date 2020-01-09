@@ -1,9 +1,11 @@
 project('vala-language-server', 'vala', 'c')
 
 valac = meson.get_compiler('vala')
-libvala_version = run_command(valac, '--api-version').stdout().strip()
+# libvala_version = run_command(valac, '--api-version').stdout().strip()
+# 
+# libvala = dependency('libvala-@0@'.format(libvala_version))
 
-libvala = dependency('libvala-@0@'.format(libvala_version))
+libvala = dependency('libvala-0.48')
 
 deps = [
     dependency('glib-2.0'),
