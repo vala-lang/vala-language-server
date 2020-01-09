@@ -541,12 +541,17 @@ class Vls.Server {
 
     void check_update_context () {
         if (update_context_requests > 0 && get_monotonic_time () >= update_context_time_us) {
+            update_context_requests = 0;
+            update_context_time_us = 0;
+            /* This must come after the resetting of the two variables above,
+             * since it's possible for publishDiagnostics to eventually call
+             * one of our JSON-RPC callbacks through g_main_context_iteration (),
+             * if we get a new message while sending the textDocument/publishDiagnostics
+             * notifications. */
             foreach (var target in builds) {
                 target.compile ();
                 publishDiagnostics (target, update_context_client);
             }
-            update_context_requests = 0;
-            update_context_time_us = 0;
         }
     }
 
@@ -1638,8 +1643,12 @@ class Vls.Server {
                 return;     // early exit
             } 
 
-            assert (explicit_sym != null || type_sym != null);
-                    
+            if (explicit_sym == null && type_sym == null) {
+                debug ("[$method] could not get explicit_sym and type_sym from $(result.type_name)");
+                reply_null (id, client, method);
+                return;
+            }
+
             if (explicit_sym == null) {
                 si.label = get_symbol_data_type (type_sym);
                 si.documentation = get_symbol_comment (type_sym);
