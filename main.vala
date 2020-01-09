@@ -1579,13 +1579,12 @@ class Vls.Server {
 
             if (result is Vala.MethodCall) {
                 var mc = result as Vala.MethodCall;
+                var arg_list = mc.get_argument_list ();
                 // TODO: NamedArgument's, whenever they become supported in upstream
                 active_param = mc.initial_argument_count - 1;
                 if (active_param < 0)
                     active_param = 0;
-                else if (mc.extra_comma)
-                    active_param++;
-                foreach (var arg in mc.get_argument_list ()) {
+                foreach (var arg in arg_list) {
                     debug (@"$mc: found argument ($arg)");
                 }
 
@@ -1611,13 +1610,12 @@ class Vls.Server {
             } else if (result is Vala.ObjectCreationExpression
                     && !((Vala.ObjectCreationExpression)result).is_incomplete) {
                 var oce = result as Vala.ObjectCreationExpression;
+                var arg_list = oce.get_argument_list ();
                 // TODO: NamedArgument's, whenever they become supported in upstream
                 active_param = oce.initial_argument_count - 1;
                 if (active_param < 0)
                     active_param = 0;
-                else if (oce.extra_comma)
-                    active_param++;
-                foreach (var arg in oce.get_argument_list ()) {
+                foreach (var arg in arg_list) {
                     debug (@"$oce: found argument ($arg)");
                 }
 
