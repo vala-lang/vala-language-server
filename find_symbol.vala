@@ -244,6 +244,12 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         stmt.accept_children (this);
     }
 
+    public override void visit_formal_parameter (Vala.Parameter p) {
+        if (this.match (p))
+            result.add (p);
+        p.accept_children (this);
+    }
+
     public override void visit_if_statement (Vala.IfStatement stmt) {
         if (this.match (stmt))
             result.add (stmt);
@@ -423,6 +429,12 @@ class Vls.FindSymbol : Vala.CodeVisitor {
     }
 
     public override void visit_type_check (Vala.TypeCheck expr) {
+        if (this.match (expr))
+            result.add (expr);
+        expr.accept_children (this);
+    }
+
+    public override void visit_unary_expression (Vala.UnaryExpression expr) {
         if (this.match (expr))
             result.add (expr);
         expr.accept_children (this);
