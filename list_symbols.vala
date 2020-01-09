@@ -74,7 +74,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
         }
 
         if (dsym.kind == Method || dsym.kind == Function) {
-            if (/_lambda\d+_/.match (dsym.name))
+            if (dsym.name != null && /_lambda\d+_/.match (dsym.name))
                 return null;
         }
 
@@ -348,9 +348,11 @@ class Vls.ListSymbols : Vala.CodeVisitor {
             if (kind == Method || kind == Function || kind == Constructor) return;
         }
         var dsym = add_symbol (m, containers.is_empty ? SymbolKind.Function : SymbolKind.Method);
-        containers.offer_head (dsym);
+        if (dsym != null)
+            containers.offer_head (dsym);
         m.accept_children (this);
-        containers.poll_head ();
+        if (dsym != null)
+            containers.poll_head ();
     }
 
     public override void visit_method_call (Vala.MethodCall expr) {

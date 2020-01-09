@@ -197,7 +197,7 @@ namespace LanguageServer {
         public Gee.List<DocumentSymbol> children { get; private set; default = new Gee.LinkedList<DocumentSymbol> (); }
 
         public DocumentSymbol.from_vala_symbol (Vala.Symbol sym, SymbolKind kind) {
-            this.name = sym.name;
+            this.name = sym.name ?? "(??)";
             this.kind = kind;
             this.range = new Range.from_sourceref (sym.source_reference);
             this.selectionRange = this.range;
