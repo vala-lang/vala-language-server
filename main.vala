@@ -775,6 +775,12 @@ class Vls.Server {
                     best = b.symbol_reference;
                     debug ("best is now the symbol_referenece => %p (%s)", best, best.to_string ());
                 }
+            } else if (best is Vala.DataType) {
+                var dt = best as Vala.DataType;
+                if (dt.type_symbol != null)
+                    best = dt.type_symbol;
+                else if (dt.symbol != null)
+                    best = dt.symbol;
             } else {
                 try {
                     client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
