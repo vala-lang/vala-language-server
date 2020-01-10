@@ -948,6 +948,11 @@ class Vls.Server {
                     parent_str = "";
                 return @"$(var_sym.variable_type) $parent_str$(var_sym.name)";
             }
+        } else if (sym is Vala.EnumValue) {
+            var ev_sym = sym as Vala.EnumValue;
+            if (ev_sym.value != null)
+                return @"$ev_sym = $(ev_sym.value)";
+            return get_symbol_data_type (ev_sym.parent_symbol, true);
         } else if (sym is Vala.Constant) {
             var const_sym = sym as Vala.Constant;
             string type_string = "";
@@ -1003,8 +1008,9 @@ class Vls.Server {
                 return (only_type_names ? "" : "interface ") + @"$type_string";
         } else if (sym is Vala.ErrorCode) {
             var err_sym = sym as Vala.ErrorCode;
-            var err_val = err_sym.value;
-            return err_val != null ? err_val.to_string () : null;
+            if (err_sym.value != null)
+                return @"$err_sym = $(err_sym.value)";
+            return get_symbol_data_type (err_sym.parent_symbol, true);
         } else if (sym is Vala.Struct) {
             var struct_sym = sym as Vala.Struct;
             string type_string = struct_sym.to_string ();
@@ -1029,6 +1035,8 @@ class Vls.Server {
         } else if (sym is Vala.ErrorDomain) {
             // don't do this if LSP ever gets CompletionItemKind.Error
             var err_sym = sym as Vala.ErrorDomain;
+            if (only_type_names)
+                return err_sym.to_string ();
             return @"errordomain $err_sym";
         } else if (sym is Vala.Namespace) {
             var ns_sym = sym as Vala.Namespace;
