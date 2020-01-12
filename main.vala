@@ -341,7 +341,7 @@ class Vls.Server {
                     definitionProvider: new Variant.boolean (true),
                     documentSymbolProvider: new Variant.boolean (true),
                     completionProvider: buildDict(
-                        triggerCharacters: new Variant.strv (new string[] {".", ">", " "})
+                        triggerCharacters: new Variant.strv (new string[] {".", ">"})
                     ),
                     signatureHelpProvider: buildDict(
                         triggerCharacters: new Variant.strv (new string[] {"(", ","})
@@ -1117,6 +1117,7 @@ class Vls.Server {
                                    Gee.Set<CompletionItem> completions, 
                                    Vala.Scope current_scope,
                                    bool is_instance,
+                                   bool in_oce,
                                    Gee.Set<string> seen_props = new Gee.HashSet<string> ()) {
         if (type is Vala.ObjectTypeSymbol) {
             /**
@@ -1125,55 +1126,63 @@ class Vls.Server {
              */
             var object_type = type as Vala.ObjectTypeSymbol;
 
-            debug (@"completion: type is object $(object_type.name) (is_instance = $is_instance)\n");
+            debug (@"completion: type is object $(object_type.name) (is_instance = $is_instance, in_oce = $in_oce)\n");
 
             foreach (var method_sym in object_type.get_methods ()) {
-                if (method_sym.name == ".new" 
-                    // Vala.CreationMethods are treated as instance methods for some reason
-                    || (!(method_sym is Vala.CreationMethod) && method_sym.is_instance_member () != is_instance)
-                    || (method_sym is Vala.CreationMethod && is_instance)
-                    || !is_symbol_accessible (method_sym, current_scope)) {
+                if (method_sym.name == ".new") {
                     continue;
+                } else if (is_instance && !in_oce) {
+                    // for instance symbols, show only instance members
+                    // except for creation methods, which are treated as instance members
+                    if (!method_sym.is_instance_member () || method_sym is Vala.CreationMethod)
+                        continue;
+                } else if (in_oce) {
+                    // only show creation methods for non-instance symbols within an OCE
+                    if (!(method_sym is Vala.CreationMethod))
+                        continue;
+                } else {
+                    // only show static methods for non-instance symbols
+                    if (method_sym.is_instance_member ())
+                        continue;
                 }
+                // finally, check whether the symbol is accessible
+                if (!is_symbol_accessible (method_sym, current_scope))
+                    continue;
                 completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
             }
 
-            foreach (var signal_sym in object_type.get_signals ()) {
-                if (signal_sym.is_instance_member () != is_instance 
-                    || !is_symbol_accessible (signal_sym, current_scope))
-                    continue;
-                completions.add (new CompletionItem.from_symbol (signal_sym, CompletionItemKind.Event));
-            }
+            if (!in_oce && is_instance) {
+                foreach (var signal_sym in object_type.get_signals ()) {
+                    if (signal_sym.is_instance_member () != is_instance 
+                        || !is_symbol_accessible (signal_sym, current_scope))
+                        continue;
+                    completions.add (new CompletionItem.from_symbol (signal_sym, CompletionItemKind.Event));
+                }
 
-            foreach (var prop_sym in object_type.get_properties ()) {
-                if (prop_sym.is_instance_member () != is_instance
-                    || !is_symbol_accessible (prop_sym, current_scope))
-                    continue;
-                completions.add (new CompletionItem.from_symbol (prop_sym, CompletionItemKind.Property));
-                seen_props.add (prop_sym.name);
-            }
+                foreach (var prop_sym in object_type.get_properties ()) {
+                    if (prop_sym.is_instance_member () != is_instance
+                        || !is_symbol_accessible (prop_sym, current_scope))
+                        continue;
+                    completions.add (new CompletionItem.from_symbol (prop_sym, CompletionItemKind.Property));
+                    seen_props.add (prop_sym.name);
+                }
 
-            foreach (var field_sym in object_type.get_fields ()) {
-                if (field_sym.name[0] == '_' && seen_props.contains (field_sym.name[1:field_sym.name.length])
-                    || field_sym.is_instance_member () != is_instance
-                    || !is_symbol_accessible (field_sym, current_scope))
-                    continue;
-                completions.add (new CompletionItem.from_symbol (field_sym, CompletionItemKind.Field));
+                foreach (var field_sym in object_type.get_fields ()) {
+                    if (field_sym.name[0] == '_' && seen_props.contains (field_sym.name[1:field_sym.name.length])
+                        || field_sym.is_instance_member () != is_instance
+                        || !is_symbol_accessible (field_sym, current_scope))
+                        continue;
+                    completions.add (new CompletionItem.from_symbol (field_sym, CompletionItemKind.Field));
+                }
             }
 
             // get inner types and constants
-            if (!is_instance) {
+            if (!is_instance && !in_oce) {
                 foreach (var constant_sym in object_type.get_constants ()) {
                     if (!is_symbol_accessible (constant_sym, current_scope))
                         continue;
                     completions.add (new CompletionItem.from_symbol (constant_sym, CompletionItemKind.Constant));
                 }
-
-                foreach (var class_sym in object_type.get_classes ())
-                    completions.add (new CompletionItem.from_symbol (class_sym, CompletionItemKind.Class));
-
-                foreach (var struct_sym in object_type.get_structs ())
-                    completions.add (new CompletionItem.from_symbol (struct_sym, CompletionItemKind.Struct));
 
                 foreach (var enum_sym in object_type.get_enums ())
                     completions.add (new CompletionItem.from_symbol (enum_sym, CompletionItemKind.Enum));
@@ -1182,19 +1191,28 @@ class Vls.Server {
                     completions.add (new CompletionItem.from_symbol (delegate_sym, CompletionItemKind.Event));
             }
 
-            // get members of supertypes
-            if (is_instance) {
+            // if we're inside an OCE (which are treated as instances), get only inner types
+            if (!is_instance || in_oce) {
+                foreach (var class_sym in object_type.get_classes ())
+                    completions.add (new CompletionItem.from_symbol (class_sym, CompletionItemKind.Class));
+
+                foreach (var struct_sym in object_type.get_structs ())
+                    completions.add (new CompletionItem.from_symbol (struct_sym, CompletionItemKind.Struct));
+            }
+
+            // get instance members of supertypes
+            if (is_instance && !in_oce) {
                 if (object_type is Vala.Class) {
                     var class_sym = object_type as Vala.Class;
                     foreach (var base_type in class_sym.get_base_types ())
                         add_completions_for_type (base_type.type_symbol,
-                                                  completions, current_scope, is_instance, seen_props);
+                                                  completions, current_scope, is_instance, in_oce, seen_props);
                 }
                 if (object_type is Vala.Interface) {
                     var iface_sym = object_type as Vala.Interface;
                     foreach (var base_type in iface_sym.get_prerequisites ())
                         add_completions_for_type (base_type.type_symbol,
-                                                  completions, current_scope, is_instance, seen_props);
+                                                  completions, current_scope, is_instance, in_oce, seen_props);
                 }
             }
         } else if (type is Vala.Enum) {
@@ -1332,13 +1350,11 @@ class Vls.Server {
         } else if (symbol is Vala.Expression) {
             var expr = symbol as Vala.Expression;
             data_type = expr.value_type;
-            if (symbol is Vala.ObjectCreationExpression)
-                is_instance = false;
         }
 
         if (data_type != null) {
             do {
-                if (data_type.type_symbol== null) {
+                if (data_type.type_symbol == null) {
                     if (data_type is Vala.ErrorType) {
                         var err_type = data_type as Vala.ErrorType;
                         if (err_type.error_code != null)
@@ -1391,7 +1407,7 @@ class Vls.Server {
 
         if (idx >= 2 && doc.content[idx-2:idx] == "->") {
             is_pointer_access = true;
-            debug ("[textDocument/completion] found pointer access");
+            debug (@"[$method] found pointer access");
             pos = p.position.translate (0, -2);
         } else if (idx >= 1 && doc.content[idx-1:idx] == ".") {
             pos = p.position.translate (0, -1);
@@ -1401,33 +1417,45 @@ class Vls.Server {
 
         wait_for_context_update (id, request_cancelled => {
             if (request_cancelled) {
-                reply_null (id, client, "textDocument/completion");
+                reply_null (id, client, method);
                 return;
             }
+
+            debug (@"[$method] FindSymbol @ $(pos.to_libvala ())");
 
             var fs = new FindSymbol (doc.file, pos.to_libvala (), true);
 
             if (fs.result.size == 0) {
-                debug ("[textDocument/completion] no results found");
-                reply_null (id, client, "textDocument/completion");
+                debug ("[$method] no results found");
+                reply_null (id, client, method);
                 return;
             }
 
-            foreach (var res in fs.result)
-                debug (@"[textDocument/completion] found $(res.type_name) (semanalyzed = $(res.checked))");
+            bool in_oce = false;
+
+            foreach (var res in fs.result) {
+                debug (@"[$method] found $(res.type_name) (semanalyzed = $(res.checked))");
+                in_oce |= res is Vala.ObjectCreationExpression;
+            }
 
             Vala.CodeNode result = get_best (fs, doc);
             Vala.CodeNode? peeled = null;
             Vala.Scope current_scope = get_current_scope (result);
             var json_array = new Json.Array ();
             var completions = new Gee.HashSet<CompletionItem> ();
-            bool oce_in_ma = false;
 
-            debug (@"[textDocument/completion] got $(result.type_name) `$result' (semanalyzed = $(result.checked)))");
+            debug (@"[$method] got $(result.type_name) `$result' (semanalyzed = $(result.checked)))");
 
             do {
                 if (result is Vala.MemberAccess) {
                     var ma = result as Vala.MemberAccess;
+                    for (Vala.Expression? code_node = ma.inner; code_node != null; ) {
+                        debug (@"[$method] MA inner: $code_node");
+                        if (code_node is Vala.MemberAccess)
+                            code_node = ((Vala.MemberAccess)code_node).inner;
+                        else
+                            code_node = null;
+                    }
                     if (ma.symbol_reference != null) {
                         debug (@"peeling away symbol_reference from MemberAccess: $(ma.symbol_reference.type_name)");
                         peeled = ma.symbol_reference;
@@ -1454,12 +1482,7 @@ class Vls.Server {
                                                 peeled, is_pointer_access, ref is_instance);
 
                 if (type_sym != null)
-                    // We presume OCEs are not instances in get_type_symbol (),
-                    // since we might be completing members from within an OCE.
-                    // However, if we're completing members outside of an OCE,
-                    // (we have an OCE within a MemberAccess) then we treat the 
-                    // OCE as an instance.
-                    add_completions_for_type (type_sym, completions, current_scope, is_instance || oce_in_ma);
+                    add_completions_for_type (type_sym, completions, current_scope, is_instance, in_oce);
                 // and try some more
                 else if (peeled is Vala.Signal)
                     add_completions_for_signal (peeled as Vala.Signal, completions);
@@ -1467,11 +1490,13 @@ class Vls.Server {
                     add_completions_for_ns (peeled as Vala.Namespace, completions);
                 else {
                     if (result is Vala.MemberAccess &&
-                        ((Vala.MemberAccess)result).inner != null) {
+                        ((Vala.MemberAccess)result).inner != null &&
+                        // don't try inner if the outer expression already has a symbol reference
+                        peeled == null) {
                         result = ((Vala.MemberAccess)result).inner;
-                        debug (@"[textDocument/completion] trying MemberAccess.inner");
+                        debug (@"[$method] trying MemberAccess.inner");
                         // (new Object ()).
-                        oce_in_ma = result is Vala.ObjectCreationExpression;
+                        in_oce = false;
                         // maybe our expression was wrapped in extra parentheses:
                         // (x as T). for example
                         continue; 
@@ -1479,14 +1504,14 @@ class Vls.Server {
                     if (result is Vala.ObjectCreationExpression &&
                         ((Vala.ObjectCreationExpression)result).member_name != null) {
                         result = ((Vala.ObjectCreationExpression)result).member_name;
-                        debug (@"[textDocument/completion] trying ObjectCreationExpression.member_name");
-                        oce_in_ma = false;
+                        debug (@"[$method] trying ObjectCreationExpression.member_name");
+                        in_oce = true;
                         // maybe our object creation expression contains a member access
                         // from a namespace or some other type
                         // new Vls. for example
                         continue;
                     }
-                    debug ("[textDocument/completion] could not get datatype for %s",
+                    debug ("[%s] could not get datatype for %s", method,
                             result == null ? "(null)" : @"($(result.type_name)) $result");
                 }
                 break;      // break by default
@@ -1499,7 +1524,7 @@ class Vls.Server {
                 Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
                 client.reply (id, variant_array);
             } catch (Error e) {
-                debug (@"[textDocument/completion] failed to reply to client: $(e.message)");
+                debug (@"[$method] failed to reply to client: $(e.message)");
             }
         });
     }
