@@ -47,7 +47,9 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         this.pos = pos;
         this.file = file;
         result = new Gee.ArrayList<Vala.CodeNode> ();
+        Vala.CodeContext.push (file.context);
         this.visit_source_file (file);
+        Vala.CodeContext.pop ();
     }
 
     public override void visit_source_file (Vala.SourceFile file) {

@@ -15,7 +15,9 @@ class Vls.CodeNodeUI : Vala.CodeVisitor {
             typeof(string), // source_reference
             typeof(bool)); // error
 
+        Vala.CodeContext.push (file.context);
         this.visit_source_file (file);
+        Vala.CodeContext.pop ();
 
         var scrollview = new Gtk.ScrolledWindow (null, null);
 
@@ -53,13 +55,17 @@ class Vls.CodeNodeUI : Vala.CodeVisitor {
 
     string get_code (Vala.CodeNode node) {
         var sr = node.source_reference;
+
+        if (sr == null || sr.file.content == null)
+            return "";
+
         var from = (long)get_string_pos (sr.file.content, sr.begin.line-1, sr.begin.column-1);
         var to = (long)get_string_pos (sr.file.content, sr.end.line-1, sr.end.column);
         return sr.file.content [from:to];
     }
 
-    void add_iter_to_path (Vala.SourceReference sr, Gtk.TreeIter iter) {
-        if (highlight != null) {
+    void add_iter_to_path (Vala.SourceReference? sr, Gtk.TreeIter iter) {
+        if (highlight != null && sr != null) {
             if ((sr.begin.line <= highlight.source_reference.begin.line && highlight.source_reference.end.line <= sr.end.line)
             || (sr.begin.column <= highlight.source_reference.begin.column && highlight.source_reference.end.column <= sr.end.column)) {
                 Gtk.TreeIter parent;
@@ -99,7 +105,11 @@ class Vls.CodeNodeUI : Vala.CodeVisitor {
         if (e.symbol_reference != null) {
             row += "; symbol_ref =";
         }
-        store.insert_with_values (out thisTree, current, -1, 0, row, 1, e.type_name, 2, e.source_reference.to_string (), 3, e.error, -1);
+        store.insert_with_values (out thisTree, current, -1,
+                                  0, row,
+                                  1, e.type_name,
+                                  2, e.source_reference == null ? "" : e.source_reference.to_string (),
+                                  3, e.error, -1);
         current = thisTree;
         add_iter_to_path (e.source_reference, thisTree);
 
@@ -118,7 +128,9 @@ class Vls.CodeNodeUI : Vala.CodeVisitor {
         Gtk.TreeIter thisTree, old = current;
         string contents = get_code (st);
 
-        store.insert_with_values (out thisTree, current, -1, 0, contents, 1, st.type_name, 2, st.source_reference.to_string (), 3, st.error, -1);
+        store.insert_with_values (out thisTree, current, -1, 0, contents, 1, st.type_name, 2,
+                                  st.source_reference == null ? "" : st.source_reference.to_string (),
+                                  3, st.error, -1);
         current = thisTree;
         add_iter_to_path (st.source_reference, thisTree);
         st.accept_children (this);
@@ -276,7 +288,12 @@ class Vls.CodeNodeUI : Vala.CodeVisitor {
                 : ""
             : "";
 
-        store.insert_with_values (out thisTree, current, -1, 0, @"$contents:value_type=$(vt):target_type=$(tt):target_value=$(tvvt)", 1, expr.type_name, 2, expr.source_reference.to_string (), 3, expr.error, -1);
+        store.insert_with_values (out thisTree, current, -1,
+                                  0, @"$contents:value_type=$(vt):target_type=$(tt):target_value=$(tvvt)",
+                                  1, expr.type_name,
+                                  2, expr.source_reference == null ? "" : expr.source_reference.to_string (),
+                                  3, expr.error,
+                                  -1);
         current = thisTree;
         expr.accept_children (this);
         current = old;

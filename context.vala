@@ -32,7 +32,7 @@ class Vls.Context {
 
                 string version = Config.libvala_version;
                 string[] parts = version.split(".");
-                assert (parts.length == 3);
+                //assert (parts.length == 3);
                 assert (parts[0] == "0");
                 // var minor = int.parse (parts[1]);
 
