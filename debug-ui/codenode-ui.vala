@@ -86,7 +86,12 @@ class Vls.CodeNodeUI : Vala.CodeVisitor {
 
     private void visit_symbol (Vala.Symbol sym) {
         Gtk.TreeIter thisTree, old = current;
-        store.insert_with_values (out thisTree, current, -1, 0, sym.name, 1, sym.type_name, 2, sym.source_reference.to_string (), 3, sym.error, -1);
+        store.insert_with_values (out thisTree, current, -1,
+                                  0, sym.name,
+                                  1, sym.type_name,
+                                  2, sym.source_reference.to_string (),
+                                  3, sym.error,
+                                  -1);
         current = thisTree;
         add_iter_to_path (sym.source_reference, thisTree);
         sym.accept_children (this);
@@ -97,19 +102,18 @@ class Vls.CodeNodeUI : Vala.CodeVisitor {
         Gtk.TreeIter thisTree, old = current;
         string? row = null;
         if (e.value_type != null)
-            row = e.value_type.to_string ();
-        if (row == null || row.strip () == "") {
-            row = get_code (e);
-        }
+            row = @"value_type[$(e.value_type)] ";
+        row += "code[" + get_code (e) + "] ";
 
         if (e.symbol_reference != null) {
-            row += "; symbol_ref =";
+            row += @"symbol_ref[$(e.symbol_reference)]";
         }
         store.insert_with_values (out thisTree, current, -1,
                                   0, row,
                                   1, e.type_name,
                                   2, e.source_reference == null ? "" : e.source_reference.to_string (),
-                                  3, e.error, -1);
+                                  3, e.error,
+                                  -1);
         current = thisTree;
         add_iter_to_path (e.source_reference, thisTree);
 
@@ -184,7 +188,21 @@ class Vls.CodeNodeUI : Vala.CodeVisitor {
     public override void visit_creation_method (Vala.CreationMethod m) {
         this.visit_symbol (m);
     }
-    //  public virtual void visit_data_type (Vala.DataType type);
+
+    public override void visit_data_type (Vala.DataType type) {
+        Gtk.TreeIter thisTree, old = current;
+        store.insert_with_values (out thisTree, current, -1,
+                                  0, type.to_string(), //type.symbol != null ? type.symbol.name : "<unknown symbol>",
+                                  1, type.type_name, //type.symbol != null ? type.symbol.type_name : "<unknown symbol>",
+                                  2, type.source_reference == null ? "" : type.source_reference.to_string (),
+                                  3, type.error,
+                                  -1);
+        current = thisTree;
+        add_iter_to_path (type.source_reference, thisTree);
+        type.accept_children (this);
+        current = old;
+    }
+
     public override void visit_declaration_statement (Vala.DeclarationStatement stmt) {
         this.visit_statement (stmt);
     }
@@ -289,7 +307,7 @@ class Vls.CodeNodeUI : Vala.CodeVisitor {
             : "";
 
         store.insert_with_values (out thisTree, current, -1,
-                                  0, @"$contents:value_type=$(vt):target_type=$(tt):target_value=$(tvvt)",
+                                  0, @"code[$contents] value_type[$(vt)] target_type[$(tt)] target_value[$(tvvt)]",
                                   1, expr.type_name,
                                   2, expr.source_reference == null ? "" : expr.source_reference.to_string (),
                                   3, expr.error,
