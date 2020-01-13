@@ -191,9 +191,10 @@ class Vls.CodeNodeUI : Vala.CodeVisitor {
 
     public override void visit_data_type (Vala.DataType type) {
         Gtk.TreeIter thisTree, old = current;
+        var sym = type.symbol != null ? type.symbol.to_string () : "unknown symbol";
         store.insert_with_values (out thisTree, current, -1,
-                                  0, type.to_string(), //type.symbol != null ? type.symbol.name : "<unknown symbol>",
-                                  1, type.type_name, //type.symbol != null ? type.symbol.type_name : "<unknown symbol>",
+                                  0, @"t[$type] sym[$sym]",
+                                  1, type.type_name,
                                   2, type.source_reference == null ? "" : type.source_reference.to_string (),
                                   3, type.error,
                                   -1);
