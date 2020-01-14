@@ -3,7 +3,7 @@
 ### Features
 - [x] diagnostics
 - [x] code completion
-    - [x] basic (member access completion)
+    - [x] basic (member access and scope-visible completion)
     - [ ] advanced (context-sensitive suggestions)
 - [x] document symbol outline
 - [x] goto definition

@@ -5,6 +5,7 @@ class Vls.FindSymbol : Vala.CodeVisitor {
     private LanguageServer.Position? end_pos;
     private Vala.SourceFile file;
     public bool search_multiline { get; private set; }
+    public bool include_blocks { get; private set; }
     public Gee.List<Vala.CodeNode> result;
     private Gee.HashSet<Vala.CodeNode> seen;
 
@@ -42,7 +43,8 @@ class Vls.FindSymbol : Vala.CodeVisitor {
             if (sr.begin.line != pos.line) {
                 return false;
             }
-        } else if (node is Vala.Statement || node is Vala.LambdaExpression) {
+        } else if ((node is Vala.Statement && !(include_blocks && node is Vala.Block)) || 
+            node is Vala.LambdaExpression) {
             return false;       // we only want to find symbols, right?
         }
 
@@ -60,11 +62,13 @@ class Vls.FindSymbol : Vala.CodeVisitor {
      */
     public FindSymbol (Vala.SourceFile file, LanguageServer.Position pos, 
                         bool search_multiline = false,
+                        bool include_blocks = false,
                         LanguageServer.Position? end_pos = null) {
         this.pos = pos;
         this.end_pos = end_pos;
         this.file = file;
         this.search_multiline = search_multiline;
+        this.include_blocks = include_blocks;
         result = new Gee.ArrayList<Vala.CodeNode> ();
         seen = new Gee.HashSet<Vala.CodeNode> ();
         Vala.CodeContext.push (file.context);
@@ -125,6 +129,8 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         if (seen.contains (b))
             return;
         seen.add (b);
+        if (this.match (b))
+            result.add (b);
         b.accept_children (this);
     }
 
