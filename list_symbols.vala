@@ -1,5 +1,8 @@
 using LanguageServer;
 
+/**
+ * Used to list all symbols defined in a document, usually for outlining.
+ */
 class Vls.ListSymbols : Vala.CodeVisitor {
     private Vala.SourceFile file;
     private Gee.Deque<DocumentSymbol> containers;
@@ -44,8 +47,8 @@ class Vls.ListSymbols : Vala.CodeVisitor {
         // handle conflicts
         if (syms_flat.has_key (dsym.range)) {
             var existing_sym = syms_flat [dsym.range];
-            var dsym_name = dsym.kind == Constructor && dsym.name == null ? "(contruct block)" : (dsym.name ?? "(unknown)");
-            debug (@"found dup! $(existing_sym.name) ($(existing_sym.kind)) and $(dsym_name) ($(dsym.kind))");
+            // var dsym_name = dsym.kind == Constructor && dsym.name == null ? "(contruct block)" : (dsym.name ?? "(unknown)");
+            // debug (@"found dup! $(existing_sym.name) ($(existing_sym.kind)) and $(dsym_name) ($(dsym.kind))");
             if (existing_sym.kind == dsym.kind)
                 return existing_sym;
             else if (existing_sym.kind == Class && dsym.kind == Constructor)
@@ -80,7 +83,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
 
         if (unique) {
             if (current_sym != null) {
-                debug (@"adding $(dsym.name) to current_sym $(current_sym.name)");
+                // debug (@"adding $(dsym.name) to current_sym $(current_sym.name)");
                 current_sym.children.add (dsym);
             } else {
                 if (sym.parent_symbol is Vala.Namespace 
@@ -90,17 +93,17 @@ class Vls.ListSymbols : Vala.CodeVisitor {
                         parent_dsym = (!) add_symbol (sym.parent_symbol, SymbolKind.Namespace, true);
                     } else
                         parent_dsym = ns_name_to_dsym [sym.parent_symbol.get_full_name ()];
-                    debug (@"adding $(dsym.name) to $(parent_dsym.name)");
+                    // debug (@"adding $(dsym.name) to $(parent_dsym.name)");
                     parent_dsym.children.add (dsym);
                 } else {
-                    debug (@"adding $(dsym.name) to top_level_syms");
+                    // debug (@"adding $(dsym.name) to top_level_syms");
                     top_level_syms.add (dsym);
                 }
             }
 
 
             if (sym is Vala.Namespace) {
-                debug (@"\tadding $(dsym.name) to ns_name_to_dsym");
+                // debug (@"\tadding $(dsym.name) to ns_name_to_dsym");
                 ns_name_to_dsym [sym_full_name] = dsym;
             }
             syms_flat [dsym.range] = dsym;
