@@ -714,11 +714,11 @@ class Vls.Server {
         }
 
         assert (best != null);
-        var sr = best.source_reference;
-        var from = (long)Server.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
-        var to = (long)Server.get_string_pos (file.content, sr.end.line-1, sr.end.column);
-        string contents = file.content [from:to];
-        debug ("Got best node: %s @ %s = %s", best.type_name, sr.to_string(), contents);
+        // var sr = best.source_reference;
+        // var from = (long)Server.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
+        // var to = (long)Server.get_string_pos (file.content, sr.end.line-1, sr.end.column);
+        // string contents = file.content [from:to];
+        // debug ("Got best node: %s @ %s = %s", best.type_name, sr.to_string(), contents);
 
         return (!) best;
     }
@@ -836,12 +836,12 @@ class Vls.Server {
             var syms = new ListSymbols (doc.file);
             if (init_params.capabilities.textDocument.documentSymbol.hierarchicalDocumentSymbolSupport)
                 foreach (var dsym in syms) {
-                    debug(@"found $(dsym.name)");
+                    // debug(@"found $(dsym.name)");
                     array.add_element (Json.gobject_serialize (dsym));
                 }
             else {
                 foreach (var dsym in syms.flattened ()) {
-                    debug(@"found $(dsym.name)");
+                    // debug(@"found $(dsym.name)");
                     array.add_element (Json.gobject_serialize (new SymbolInformation.from_document_symbol (dsym, p.textDocument.uri)));
                 }
             }
@@ -1394,7 +1394,7 @@ class Vls.Server {
     }
 
     void textDocumentCompletion (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var p = parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
+        var p = parse_variant<LanguageServer.CompletionParams>(@params);
         TextDocument? doc = lookup_source_file (p.textDocument.uri);
         if (doc == null) {
             debug (@"[$method] failed to find file $(p.textDocument.uri)");
@@ -1404,15 +1404,25 @@ class Vls.Server {
         bool is_pointer_access = false;
         long idx = (long) get_string_pos (doc.content, p.position.line, p.position.character);
         Position pos = p.position;
-
+        bool is_member_access = false;
+        
         if (idx >= 2 && doc.content[idx-2:idx] == "->") {
             is_pointer_access = true;
+            is_member_access = true;
             debug (@"[$method] found pointer access");
             pos = p.position.translate (0, -2);
-        } else if (idx >= 1 && doc.content[idx-1:idx] == ".") {
-            pos = p.position.translate (0, -1);
-        } else if (idx >= 4 && doc.content[idx-4:idx] == "new ") {
-            pos = p.position.translate (0, -4);
+        } else if (p.context != null) {
+            if (p.context.triggerKind == CompletionTriggerKind.TriggerCharacter)
+                is_member_access = true;
+            else if (p.context.triggerKind == CompletionTriggerKind.Invoked)
+                debug (@"[$method] invoked");
+            // TODO: incomplete completions 
+        } else {
+            // try to figure out the completion context without the client's help
+            if (idx >= 1 && doc.content[idx-1:idx] == ".") {
+                pos = p.position.translate (0, -1);
+                is_member_access = true;
+            }
         }
 
         wait_for_context_update (id, request_cancelled => {
@@ -1423,13 +1433,14 @@ class Vls.Server {
 
             debug (@"[$method] FindSymbol @ $(pos.to_libvala ())");
 
-            var fs = new FindSymbol (doc.file, pos.to_libvala (), true);
+            var fs = new FindSymbol (doc.file, pos.to_libvala (), true, !is_member_access);
 
             if (fs.result.size == 0) {
-                debug ("[$method] no results found");
+                debug (@"[$method] no results found" + (is_member_access ? " for member access" : ""));
                 reply_null (id, client, method);
                 return;
             }
+
 
             bool in_oce = false;
 
@@ -1437,85 +1448,139 @@ class Vls.Server {
                 debug (@"[$method] found $(res.type_name) (semanalyzed = $(res.checked))");
                 in_oce |= res is Vala.ObjectCreationExpression;
             }
-
-            Vala.CodeNode result = get_best (fs, doc);
-            Vala.CodeNode? peeled = null;
-            Vala.Scope current_scope = get_current_scope (result);
+            
             var json_array = new Json.Array ();
             var completions = new Gee.HashSet<CompletionItem> ();
 
-            debug (@"[$method] got $(result.type_name) `$result' (semanalyzed = $(result.checked)))");
+            if (!is_member_access) {
+                var fs_results_saved = fs.result;
+                fs.result = new Gee.ArrayList<Vala.CodeNode> ();
 
-            do {
-                if (result is Vala.MemberAccess) {
-                    var ma = result as Vala.MemberAccess;
-                    for (Vala.Expression? code_node = ma.inner; code_node != null; ) {
-                        debug (@"[$method] MA inner: $code_node");
-                        if (code_node is Vala.MemberAccess)
-                            code_node = ((Vala.MemberAccess)code_node).inner;
-                        else
-                            code_node = null;
-                    }
-                    if (ma.symbol_reference != null) {
-                        debug (@"peeling away symbol_reference from MemberAccess: $(ma.symbol_reference.type_name)");
-                        peeled = ma.symbol_reference;
+                // attempt to filter results
+                foreach (var sym in fs_results_saved)
+                    if (sym is Vala.Block || sym is Vala.Symbol)
+                        fs.result.add (sym);
+                if (fs.result.is_empty)
+                    fs.result = fs_results_saved;
+                Vala.CodeNode best = get_best (fs, doc);
+                Vala.Scope best_scope;
+                bool in_instance = false;
+                var seen_props = new Gee.HashSet<string> ();
+
+                if (best is Vala.Block)
+                    best_scope = ((Vala.Block) best).scope;
+                else {
+                    for (Vala.CodeNode? node = best; node != null; node = node.parent_node)
+                        if (node is Vala.Symbol)
+                            best_scope = ((Vala.Symbol) node).scope;
+                    warning (@"[$method] invoke: could not get block from $best ($(best.type_name))");
+                    reply_null (id, client, method);
+                    return;
+                }
+                for (Vala.Scope? current_scope = best_scope;
+                     current_scope != null;
+                     current_scope = current_scope.parent_scope) {
+                    Vala.Symbol owner = current_scope.owner;
+                    if (owner is Vala.Callable || owner is Vala.Statement || owner is Vala.Block) {
+                        if (owner is Vala.Method)
+                            in_instance = ((Vala.Method)owner).this_parameter != null;
+                        var symtab = current_scope.get_symbol_table ();
+                        if (symtab == null)
+                            continue;
+                        foreach (Vala.Symbol sym in symtab.get_values ()) {
+                            if (sym.name == null || sym.name[0] == '.')
+                                continue;
+                            completions.add (new CompletionItem.from_symbol (sym, CompletionItemKind.Variable));
+                        }
+                    } else if (owner is Vala.TypeSymbol) {
+                        add_completions_for_type ((Vala.TypeSymbol) owner, completions, best_scope, in_instance, in_oce, seen_props);
+                    } else if (owner is Vala.Namespace) {
+                        add_completions_for_ns ((Vala.Namespace) owner, completions);
                     } else {
-                        debug ("MemberAccess does not have symbol_reference");
-                        if (!ma.checked) {
-                            for (Vala.CodeNode? parent = ma.parent_node; 
-                                parent != null;
-                                parent = parent.parent_node)
-                            {
-                                debug (@"parent ($parent) semanalyzed = $(parent.checked)");
+                        debug (@"[$method] ignoring owner ($owner) ($(owner.type_name)) of scope");
+                    }
+                }
+                // show members of all imported namespaces
+                foreach (var ud in doc.file.current_using_directives)
+                    add_completions_for_ns ((Vala.Namespace) ud.namespace_symbol, completions);
+            } else {
+                Vala.CodeNode result = get_best (fs, doc);
+                Vala.CodeNode? peeled = null;
+                Vala.Scope current_scope = get_current_scope (result);
+
+                debug (@"[$method] member: got $(result.type_name) `$result' (semanalyzed = $(result.checked)))");
+
+                do {
+                    if (result is Vala.MemberAccess) {
+                        var ma = result as Vala.MemberAccess;
+                        for (Vala.Expression? code_node = ma.inner; code_node != null; ) {
+                            debug (@"[$method] MA inner: $code_node");
+                            if (code_node is Vala.MemberAccess)
+                                code_node = ((Vala.MemberAccess)code_node).inner;
+                            else
+                                code_node = null;
+                        }
+                        if (ma.symbol_reference != null) {
+                            debug (@"peeling away symbol_reference from MemberAccess: $(ma.symbol_reference.type_name)");
+                            peeled = ma.symbol_reference;
+                        } else {
+                            debug ("MemberAccess does not have symbol_reference");
+                            if (!ma.checked) {
+                                for (Vala.CodeNode? parent = ma.parent_node; 
+                                    parent != null;
+                                    parent = parent.parent_node)
+                                {
+                                    debug (@"parent ($parent) semanalyzed = $(parent.checked)");
+                                }
                             }
                         }
                     }
-                }
 
-                bool is_instance = true;
-                Vala.TypeSymbol? type_sym = get_type_symbol (doc.compilation.code_context, 
-                                                             result, is_pointer_access, ref is_instance);
+                    bool is_instance = true;
+                    Vala.TypeSymbol? type_sym = get_type_symbol (doc.compilation.code_context, 
+                                                                result, is_pointer_access, ref is_instance);
 
-                // try again
-                if (type_sym == null && peeled != null)
-                    type_sym = get_type_symbol (doc.compilation.code_context,
-                                                peeled, is_pointer_access, ref is_instance);
+                    // try again
+                    if (type_sym == null && peeled != null)
+                        type_sym = get_type_symbol (doc.compilation.code_context,
+                                                    peeled, is_pointer_access, ref is_instance);
 
-                if (type_sym != null)
-                    add_completions_for_type (type_sym, completions, current_scope, is_instance, in_oce);
-                // and try some more
-                else if (peeled is Vala.Signal)
-                    add_completions_for_signal (peeled as Vala.Signal, completions);
-                else if (peeled is Vala.Namespace)
-                    add_completions_for_ns (peeled as Vala.Namespace, completions);
-                else {
-                    if (result is Vala.MemberAccess &&
-                        ((Vala.MemberAccess)result).inner != null &&
-                        // don't try inner if the outer expression already has a symbol reference
-                        peeled == null) {
-                        result = ((Vala.MemberAccess)result).inner;
-                        debug (@"[$method] trying MemberAccess.inner");
-                        // (new Object ()).
-                        in_oce = false;
-                        // maybe our expression was wrapped in extra parentheses:
-                        // (x as T). for example
-                        continue; 
+                    if (type_sym != null)
+                        add_completions_for_type (type_sym, completions, current_scope, is_instance, in_oce);
+                    // and try some more
+                    else if (peeled is Vala.Signal)
+                        add_completions_for_signal (peeled as Vala.Signal, completions);
+                    else if (peeled is Vala.Namespace)
+                        add_completions_for_ns (peeled as Vala.Namespace, completions);
+                    else {
+                        if (result is Vala.MemberAccess &&
+                            ((Vala.MemberAccess)result).inner != null &&
+                            // don't try inner if the outer expression already has a symbol reference
+                            peeled == null) {
+                            result = ((Vala.MemberAccess)result).inner;
+                            debug (@"[$method] trying MemberAccess.inner");
+                            // (new Object ()).
+                            in_oce = false;
+                            // maybe our expression was wrapped in extra parentheses:
+                            // (x as T). for example
+                            continue; 
+                        }
+                        if (result is Vala.ObjectCreationExpression &&
+                            ((Vala.ObjectCreationExpression)result).member_name != null) {
+                            result = ((Vala.ObjectCreationExpression)result).member_name;
+                            debug (@"[$method] trying ObjectCreationExpression.member_name");
+                            in_oce = true;
+                            // maybe our object creation expression contains a member access
+                            // from a namespace or some other type
+                            // new Vls. for example
+                            continue;
+                        }
+                        debug ("[%s] could not get datatype for %s", method,
+                                result == null ? "(null)" : @"($(result.type_name)) $result");
                     }
-                    if (result is Vala.ObjectCreationExpression &&
-                        ((Vala.ObjectCreationExpression)result).member_name != null) {
-                        result = ((Vala.ObjectCreationExpression)result).member_name;
-                        debug (@"[$method] trying ObjectCreationExpression.member_name");
-                        in_oce = true;
-                        // maybe our object creation expression contains a member access
-                        // from a namespace or some other type
-                        // new Vls. for example
-                        continue;
-                    }
-                    debug ("[%s] could not get datatype for %s", method,
-                            result == null ? "(null)" : @"($(result.type_name)) $result");
-                }
-                break;      // break by default
-            } while (true);
+                    break;      // break by default
+                } while (true);
+            }
 
             foreach (CompletionItem comp in completions)
                 json_array.add_element (Json.gobject_serialize (comp));
