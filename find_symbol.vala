@@ -1,7 +1,7 @@
 using LanguageServer;
 
 class Vls.FindSymbol : Vala.CodeVisitor {
-    private LanguageServer.Position pos;
+    public LanguageServer.Position pos { get; private set; }
     private LanguageServer.Position? end_pos;
     private Vala.SourceFile file;
     public bool search_multiline { get; private set; }
@@ -73,6 +73,12 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         seen = new Gee.HashSet<Vala.CodeNode> ();
         Vala.CodeContext.push (file.context);
         this.visit_source_file (file);
+    }
+
+    /**
+     * Keep the code context around until we're done using FindSymbol
+     */
+    ~FindSymbol () {
         Vala.CodeContext.pop ();
     }
 
@@ -582,8 +588,7 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         seen.add (stmt);
         if (this.match (stmt))
             result.add (stmt);
-        if (stmt.return_expression != null)
-            stmt.return_expression.accept_children (this);
+	stmt.accept_children (this);
     }
 
     public override void visit_signal (Vala.Signal sig) {

@@ -20,6 +20,12 @@ class Vls.ListSymbols : Vala.CodeVisitor {
         this.ns_name_to_dsym = new Gee.HashMap<string, DocumentSymbol> ();
         Vala.CodeContext.push (file.context);
         this.visit_source_file (file);
+    }
+
+    /**
+     * Keep code context around until we're done using ListSymbols
+     */
+    ~ListSymbols () {
         Vala.CodeContext.pop ();
     }
 
