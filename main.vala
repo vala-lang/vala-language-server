@@ -891,8 +891,29 @@ class Vls.Server {
                 param_string += get_symbol_data_type (p, only_type_names);
                 at_least_one = true;
             }
+            string async_type = "";
+            string signal_type = "";
+            if (method_sym is Vala.Method) {
+                var mt = (Vala.Method) method_sym;
+                async_type = mt.coroutine && !mt.get_async_begin_parameters ().is_empty ? "async " : "";
+            }
+            signal_type = (method_sym is Vala.Signal) ? "signal " : "";
+            string err_string = "";
+            var error_types = new Vala.ArrayList<Vala.DataType> ();
+            method_sym.get_error_types (error_types);
+            if (!error_types.is_empty) {
+                err_string = " throws ";
+                at_least_one = false;
+                foreach (var dt in error_types) {
+                    if (at_least_one)
+                        err_string += ", ";
+                    err_string += get_symbol_data_type (dt.type_symbol, true);
+                    at_least_one = true;
+                }
+            }
             if (only_type_names) {
-                return @"$delg_type($param_string) -> " + (ret_type ?? (creation_method != null ? creation_method.class_name : "void"));
+                return @"$async_type$signal_type$delg_type($param_string)$err_string -> " + 
+                    (ret_type ?? (creation_method != null ? creation_method.class_name : "void"));
             } else {
                 string? parent_str = parent != null ? parent.to_string () : null;
                 if (creation_method == null) {
@@ -900,7 +921,8 @@ class Vls.Server {
                         parent_str = @"$parent_str::";
                     else
                         parent_str = "";
-                    return delg_type + (ret_type ?? "void") + @" $parent_str$(sym.name) ($param_string)";
+                    return async_type + signal_type + delg_type + 
+                        (ret_type ?? "void") + @" $parent_str$(sym.name) ($param_string)$err_string";
                 } else {
                     string sym_name = sym.name == ".new" ? (parent_str ?? creation_method.class_name) : sym.name;
                     string prefix_str = "";
@@ -908,7 +930,7 @@ class Vls.Server {
                         prefix_str = @"$parent_str::";
                     else
                         prefix_str = @"$(creation_method.class_name)::";
-                    return @"$delg_type$prefix_str$sym_name ($param_string)";
+                    return @"$async_type$signal_type$delg_type$prefix_str$sym_name ($param_string)$err_string";
                 }
             }
         } else if (sym is Vala.Parameter) {
@@ -1002,9 +1024,10 @@ class Vls.Server {
                     at_least_one = true;
                 }
             }
-            if (object_sym is Vala.Class)
-                return (only_type_names ? "" : "class ") + @"$type_string";
-            else
+            if (object_sym is Vala.Class) {
+                string abstract_kw = ((Vala.Class) object_sym).is_abstract ? "abstract " : "";
+                return (only_type_names ? "" : @"$(abstract_kw)class ") + @"$type_string";
+            } else
                 return (only_type_names ? "" : "interface ") + @"$type_string";
         } else if (sym is Vala.ErrorCode) {
             var err_sym = sym as Vala.ErrorCode;
@@ -1126,7 +1149,7 @@ class Vls.Server {
              */
             var object_type = type as Vala.ObjectTypeSymbol;
 
-            debug (@"completion: type is object $(object_type.name) (is_instance = $is_instance, in_oce = $in_oce)\n");
+            debug (@"completion: type is object $(object_type.name) (is_instance = $is_instance, in_oce = $in_oce)");
 
             foreach (var method_sym in object_type.get_methods ()) {
                 if (method_sym.name == ".new") {
@@ -1145,10 +1168,20 @@ class Vls.Server {
                     if (method_sym.is_instance_member ())
                         continue;
                 }
-                // finally, check whether the symbol is accessible
+                // check whether the symbol is accessible
                 if (!is_symbol_accessible (method_sym, current_scope))
                     continue;
                 completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
+            }
+
+            if (!in_oce) {
+                foreach (var field_sym in object_type.get_fields ()) {
+                    if (field_sym.name[0] == '_' && seen_props.contains (field_sym.name[1:field_sym.name.length])
+                        || field_sym.is_instance_member () != is_instance
+                        || !is_symbol_accessible (field_sym, current_scope))
+                        continue;
+                    completions.add (new CompletionItem.from_symbol (field_sym, CompletionItemKind.Field));
+                }
             }
 
             if (!in_oce && is_instance) {
@@ -1165,14 +1198,6 @@ class Vls.Server {
                         continue;
                     completions.add (new CompletionItem.from_symbol (prop_sym, CompletionItemKind.Property));
                     seen_props.add (prop_sym.name);
-                }
-
-                foreach (var field_sym in object_type.get_fields ()) {
-                    if (field_sym.name[0] == '_' && seen_props.contains (field_sym.name[1:field_sym.name.length])
-                        || field_sym.is_instance_member () != is_instance
-                        || !is_symbol_accessible (field_sym, current_scope))
-                        continue;
-                    completions.add (new CompletionItem.from_symbol (field_sym, CompletionItemKind.Field));
                 }
             }
 
@@ -1195,6 +1220,9 @@ class Vls.Server {
             if (!is_instance || in_oce) {
                 foreach (var class_sym in object_type.get_classes ())
                     completions.add (new CompletionItem.from_symbol (class_sym, CompletionItemKind.Class));
+
+                foreach (var iface_sym in object_type.get_interfaces ())
+                    completions.add (new CompletionItem.from_symbol (iface_sym, CompletionItemKind.Interface));
 
                 foreach (var struct_sym in object_type.get_structs ())
                     completions.add (new CompletionItem.from_symbol (struct_sym, CompletionItemKind.Struct));
@@ -1477,6 +1505,8 @@ class Vls.Server {
                     reply_null (id, client, method);
                     return;
                 }
+
+                debug (@"[$method] best scope SR is $(best_scope.owner.source_reference)");
                 for (Vala.Scope? current_scope = best_scope;
                      current_scope != null;
                      current_scope = current_scope.parent_scope) {
@@ -1490,10 +1520,20 @@ class Vls.Server {
                         foreach (Vala.Symbol sym in symtab.get_values ()) {
                             if (sym.name == null || sym.name[0] == '.')
                                 continue;
+                            var sr = sym.source_reference;
+                            if (sr == null)
+                                continue;
+                            var sr_begin = new Position () { line = sr.begin.line, character = sr.begin.column - 1 };
+
+                            // don't show local variables that are declared ahead of the cursor
+                            if (sr_begin.compare (fs.pos) > 0)
+                                continue;
                             completions.add (new CompletionItem.from_symbol (sym, CompletionItemKind.Variable));
                         }
                     } else if (owner is Vala.TypeSymbol) {
                         add_completions_for_type ((Vala.TypeSymbol) owner, completions, best_scope, in_instance, in_oce, seen_props);
+                        // once we leave a type symbol, we're no longer in an instance
+                        in_instance = false;
                     } else if (owner is Vala.Namespace) {
                         add_completions_for_ns ((Vala.Namespace) owner, completions);
                     } else {
