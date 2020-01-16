@@ -707,12 +707,17 @@ class Vls.Server {
                 var node_end = new Position.from_libvala (node.source_reference.end);
 
                 if (best_begin.compare (node_begin) <= 0 && node_end.compare (best_end) <= 0 &&
-                    // don't get implicit `this` accesses
                     !(best.source_reference.begin.column == node.source_reference.begin.column &&
                         node.source_reference.end.column == best.source_reference.end.column &&
-                        node is Vala.MemberAccess && 
-                        ((Vala.MemberAccess)node).member_name == "this" &&
-                        ((Vala.MemberAccess)node).inner == null))
+                        // don't get implicit `this` accesses
+                        ((node is Vala.MemberAccess && 
+                         ((Vala.MemberAccess)node).member_name == "this" &&
+                         ((Vala.MemberAccess)node).inner == null) ||
+                        // fix for creation method quirks
+                         (best is Vala.CreationMethod && (node is Vala.MethodCall || node is Vala.BaseAccess)) ||
+                        // fix for class/interface declaration quirks
+                         (best is Vala.TypeSymbol && (node is Vala.Namespace || node is Vala.CreationMethod || 
+                            node is Vala.MethodCall || node is Vala.BaseAccess)))))
                     best = node;
             }
         }
@@ -927,27 +932,22 @@ class Vls.Server {
                     at_least_one = true;
                 }
             }
-            if (only_type_names) {
-                return @"$async_type$signal_type$delg_type($param_string)$err_string -> " + 
-                    (ret_type ?? (creation_method != null ? creation_method.class_name : "void"));
+            string? parent_str = parent != null ? parent.to_string () : null;
+            if (creation_method == null) {
+                if (parent_str != null)
+                    parent_str = @"$parent_str::";
+                else
+                    parent_str = "";
+                return async_type + signal_type + delg_type + 
+                    (ret_type ?? "void") + @" $parent_str$(sym.name) ($param_string)$err_string";
             } else {
-                string? parent_str = parent != null ? parent.to_string () : null;
-                if (creation_method == null) {
-                    if (parent_str != null)
-                        parent_str = @"$parent_str::";
-                    else
-                        parent_str = "";
-                    return async_type + signal_type + delg_type + 
-                        (ret_type ?? "void") + @" $parent_str$(sym.name) ($param_string)$err_string";
-                } else {
-                    string sym_name = sym.name == ".new" ? (parent_str ?? creation_method.class_name) : sym.name;
-                    string prefix_str = "";
-                    if (parent_str != null)
-                        prefix_str = @"$parent_str::";
-                    else
-                        prefix_str = @"$(creation_method.class_name)::";
-                    return @"$async_type$signal_type$delg_type$prefix_str$sym_name ($param_string)$err_string";
-                }
+                string sym_name = sym.name == ".new" ? (parent_str ?? creation_method.class_name) : sym.name;
+                string prefix_str = "";
+                if (parent_str != null)
+                    prefix_str = @"$parent_str::";
+                else
+                    prefix_str = @"$(creation_method.class_name)::";
+                return @"$async_type$signal_type$delg_type$prefix_str$sym_name ($param_string)$err_string";
             }
         } else if (sym is Vala.Parameter) {
             var p = sym as Vala.Parameter;
@@ -1088,6 +1088,12 @@ class Vls.Server {
         } else if (sym is Vala.Enum) {
             var enum_sym = sym as Vala.Enum;
             return (only_type_names ? "" : "enum ") + @"$(enum_sym.name)";
+        } else if (sym is Vala.Destructor) {
+            var dtor = sym as Vala.Destructor;
+            string parent_str = parent != null ? parent.to_string () : 
+                (dtor.this_parameter.variable_type.type_symbol.to_string ());
+            string dtor_name = dtor.name ?? dtor.this_parameter.variable_type.type_symbol.name;
+            return @"$parent_str::~$dtor_name ()";
         } else {
             debug (@"get_symbol_data_type: unsupported symbol $(sym.type_name)");
         }
@@ -1899,9 +1905,10 @@ class Vls.Server {
             } else if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null) {
                 var expr = result as Vala.Expression;
                 var sym = expr.symbol_reference;
+                bool is_temp_expr = sym.name.length > 0 && sym.name[0] == '.';
                 hoverInfo.contents.add (new MarkedString () {
                     language = "vala",
-                    value = get_symbol_data_type (sym, result is Vala.Literal, null, true)
+                    value = get_symbol_data_type (sym, result is Vala.Literal || is_temp_expr, null, true)
                 });
                 var comment = get_symbol_comment (sym);
                 if (comment != null) {
