@@ -7,7 +7,7 @@
     - [ ] advanced (context-sensitive suggestions)
 - [x] document symbol outline
 - [x] goto definition
-- [ ] symbol references
+- [x] symbol references
 - [ ] goto implementation
 - [x] signature help
 - [x] hover
