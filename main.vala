@@ -158,6 +158,7 @@ class Vls.Server {
         call_handlers["textDocument/signatureHelp"] = this.textDocumentSignatureHelp;
         call_handlers["textDocument/hover"] = this.textDocumentHover;
         call_handlers["textDocument/references"] = this.textDocumentReferences;
+        call_handlers["textDocument/implementation"] = this.textDocumentImplementation;
         notif_handlers["$/cancelRequest"] = this.cancelRequest;
 
         debug ("Finished constructing");
@@ -348,7 +349,8 @@ class Vls.Server {
                         triggerCharacters: new Variant.strv (new string[] {"(", ","})
                     ),
                     hoverProvider: new Variant.boolean (true),
-                    referencesProvider: new Variant.boolean (true)
+                    referencesProvider: new Variant.boolean (true),
+                    implementationProvider: new Variant.boolean (true)
                 )
             ));
         } catch (Error e) {
@@ -1983,6 +1985,90 @@ class Vls.Server {
                 }
             }
             
+            debug (@"[$method] found $(references.size) reference(s)");
+            foreach (var node in references)
+                json_array.add_element (Json.gobject_serialize (new Location () {
+                    uri = "file://" + node.source_reference.file.filename,
+                    range = new Range.from_sourceref (node.source_reference)
+                }));
+
+            try {
+                Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
+                client.reply (id, variant_array);
+            } catch (Error e) {
+                debug (@"[$method] failed to reply to client: $(e.message)");
+            }
+        });
+    }
+
+    void textDocumentImplementation (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        var p = parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
+        TextDocument? doc = lookup_source_file (p.textDocument.uri);
+        if (doc == null) {
+            debug (@"file `$(p.textDocument.uri)' not found");
+            reply_null (id, client, method);
+            return;
+        }
+
+        Position pos = p.position;
+        wait_for_context_update (id, request_cancelled => {
+            if (request_cancelled) {
+                reply_null (id, client, method);
+                return;
+            }
+
+            var fs = new FindSymbol (doc.file, pos.to_libvala (), true);
+
+            if (fs.result.size == 0) {
+                debug (@"[$method] no results found");
+                reply_null (id, client, method);
+                return;
+            }
+
+            Vala.CodeNode result = get_best (fs, doc);
+            var json_array = new Json.Array ();
+            var references = new Gee.ArrayList<Vala.CodeNode> ();
+
+            if (result is Vala.DataType && ((Vala.DataType)result).type_symbol != null)
+                result = ((Vala.DataType) result).type_symbol;
+
+            debug (@"[$method] got best: $result ($(result.type_name))");
+            bool is_abstract_type = (result is Vala.Interface) || ((result is Vala.Class) && ((Vala.Class)result).is_abstract);
+            bool is_abstract_or_virtual_method = (result is Vala.Method) && 
+                (((Vala.Method)result).is_abstract || ((Vala.Method)result).is_virtual);
+
+            if (!is_abstract_type && !is_abstract_or_virtual_method) {
+                debug (@"[$method] best is neither an abstract type/interface nor abstract/virtual method");
+                reply_null (id, client, method);
+                return;
+            }
+
+            // show references in all files
+            foreach (var td in doc.compilation) {
+                FindSymbol fs2;
+                if (is_abstract_type) {
+                    fs2 = new FindSymbol.with_filter (td.file, result,
+                    (needle, node) => {
+                        if (node is Vala.Class) {
+                            foreach (Vala.DataType dt in ((Vala.Class) node).get_base_types ())
+                                if (dt.type_symbol == needle)
+                                    return true;
+                        } else if (node is Vala.Interface) {
+                            foreach (Vala.DataType dt in ((Vala.Interface) node).get_prerequisites ())
+                                if (dt.type_symbol == needle)
+                                    return true;
+                        }
+                        return false;
+                    });
+                } else {
+                    fs2 = new FindSymbol.with_filter (td.file, result,
+                    (needle, node) => needle != node && (node is Vala.Method) && 
+                        (((Vala.Method)node).base_method == needle ||
+                         ((Vala.Method)node).base_interface_method == needle));
+                }
+                references.add_all (fs2.result);
+            }
+
             debug (@"[$method] found $(references.size) reference(s)");
             foreach (var node in references)
                 json_array.add_element (Json.gobject_serialize (new Location () {
