@@ -857,11 +857,21 @@ class Vls.Server {
         });
     }
 
+    public static string get_expr_repr (Vala.Expression expr) {
+        var sr = expr.source_reference;
+        var file = sr.file;
+        var from = (long)Server.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
+        var to = (long)Server.get_string_pos (file.content, sr.end.line-1, sr.end.column);
+        return file.content [from:to];
+    }
+
     /**
      * Return the string representation of a symbol's type. This is used as the detailed
      * information for a completion item.
      */
-    public static string? get_symbol_data_type (Vala.Symbol? sym, bool only_type_names = false, Vala.Symbol? parent = null) {
+    public static string? get_symbol_data_type (Vala.Symbol? sym, bool only_type_names = false, 
+        Vala.Symbol? parent = null, 
+        bool show_inits = false) {
         if (sym == null) {
             return null;
         } else if (sym is Vala.Property) {
@@ -892,7 +902,7 @@ class Vls.Server {
             foreach (var p in method_sym.get_parameters ()) {
                 if (at_least_one)
                     param_string += ", ";
-                param_string += get_symbol_data_type (p, only_type_names);
+                param_string += get_symbol_data_type (p, only_type_names, null, show_inits);
                 at_least_one = true;
             }
             string async_type = "";
@@ -953,8 +963,8 @@ class Vls.Server {
                 } else {
                     param_string += p.variable_type.to_string ();
                     param_string += " " + p.name;
-                    if (p.initializer != null)
-                        param_string += @" = $(p.initializer)";
+                    if (show_inits && p.initializer != null && p.initializer.source_reference != null)
+                        param_string += @" = $(get_expr_repr (p.initializer))";
                 }
             }
             return param_string;
@@ -974,7 +984,10 @@ class Vls.Server {
                     parent_str = @"$(parent_str)::";
                 else
                     parent_str = "";
-                return @"$weak_kw$(var_sym.variable_type) $parent_str$(var_sym.name)";
+                string init_str = "";
+                if (show_inits && var_sym.initializer != null && var_sym.initializer.source_reference != null) 
+                    init_str = @" = $(get_expr_repr (var_sym.initializer))";
+                return @"$weak_kw$(var_sym.variable_type) $parent_str$(var_sym.name)$init_str";
             }
         } else if (sym is Vala.EnumValue) {
             var ev_sym = sym as Vala.EnumValue;
@@ -1360,7 +1373,7 @@ class Vls.Server {
         foreach (var p in sig.get_parameters ()) {
             if (arg_list != "")
                 arg_list += ", ";
-            arg_list += get_symbol_data_type (p);
+            arg_list += get_symbol_data_type (p, false, null, true);
         }
         completions.add_all_array (new CompletionItem []{
             new CompletionItem.for_signal ("connect", @"uint connect ($arg_list)", "Connect signal"),
@@ -1491,9 +1504,10 @@ class Vls.Server {
                 fs.result = new Gee.ArrayList<Vala.CodeNode> ();
 
                 // attempt to filter results
-                foreach (var sym in fs_results_saved)
+                foreach (var sym in fs_results_saved) 
                     if (sym is Vala.Block || sym is Vala.Symbol)
                         fs.result.add (sym);
+
                 if (fs.result.is_empty)
                     fs.result = fs_results_saved;
                 Vala.CodeNode best = get_best (fs, doc);
@@ -1789,15 +1803,15 @@ class Vls.Server {
             }
 
             if (explicit_sym == null) {
-                si.label = get_symbol_data_type (type_sym);
+                si.label = get_symbol_data_type (type_sym, false, null, true);
                 si.documentation = get_symbol_comment (type_sym);
             } else {
                 // TODO: need a function to display symbol names correctly given context
                 if (type_sym != null) {
-                    si.label = get_symbol_data_type (type_sym);
+                    si.label = get_symbol_data_type (type_sym, false, null, true);
                     si.documentation = get_symbol_comment (type_sym);
                 } else {
-                    si.label = get_symbol_data_type (explicit_sym, false, parent_sym);
+                    si.label = get_symbol_data_type (explicit_sym, false, parent_sym, true);
                 }
                 // try getting the documentation for the explicit symbol
                 // if the type does not have any documentation
@@ -1808,7 +1822,7 @@ class Vls.Server {
             if (param_list != null) {
                 foreach (var parameter in param_list) {
                     si.parameters.add (new ParameterInformation () {
-                        label = get_symbol_data_type (parameter),
+                        label = get_symbol_data_type (parameter, false, null, true),
                         documentation = get_symbol_comment (parameter)
                     });
                     debug (@"found parameter $parameter (name = $(parameter.name))");
@@ -1872,7 +1886,7 @@ class Vls.Server {
             if (result is Vala.Symbol) {
                 hoverInfo.contents.add (new MarkedString () {
                     language = "vala",
-                    value = get_symbol_data_type (result as Vala.Symbol)
+                    value = get_symbol_data_type (result as Vala.Symbol, false, null, true)
                 });
                 var comment = get_symbol_comment (result as Vala.Symbol);
                 if (comment != null) {
@@ -1885,7 +1899,7 @@ class Vls.Server {
                 var sym = expr.symbol_reference;
                 hoverInfo.contents.add (new MarkedString () {
                     language = "vala",
-                    value = get_symbol_data_type (sym, result is Vala.Literal)
+                    value = get_symbol_data_type (sym, result is Vala.Literal, null, true)
                 });
                 var comment = get_symbol_comment (sym);
                 if (comment != null) {
@@ -1896,7 +1910,7 @@ class Vls.Server {
             } else if (result is Vala.CastExpression) {
                 hoverInfo.contents.add (new MarkedString () {
                     language = "vala",
-                    value = @"$result"
+                    value = get_expr_repr ((Vala.CastExpression) result)
                 });
             } else {
                 bool is_instance = true;
@@ -1904,7 +1918,8 @@ class Vls.Server {
                                                              result, false, ref is_instance);
                 hoverInfo.contents.add (new MarkedString () {
                     language = "vala",
-                    value = type_sym != null ? get_symbol_data_type (type_sym, true) : result.to_string ()
+                    value = type_sym != null ? get_symbol_data_type (type_sym, true, null, true) : 
+                        ((result is Vala.Expression) ? get_expr_repr ((Vala.Expression) result) : result.to_string ())
                 });
             }
 
