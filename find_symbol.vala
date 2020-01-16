@@ -1,7 +1,7 @@
 using LanguageServer;
 
 class Vls.FindSymbol : Vala.CodeVisitor {
-    public LanguageServer.Position pos { get; private set; }
+    public LanguageServer.Position? pos { get; private set; }
     private LanguageServer.Position? end_pos;
     private Vala.SourceFile file;
     public bool search_multiline { get; private set; }
@@ -9,7 +9,13 @@ class Vls.FindSymbol : Vala.CodeVisitor {
     public Gee.List<Vala.CodeNode> result;
     private Gee.HashSet<Vala.CodeNode> seen;
 
-    bool match (Vala.CodeNode node) {
+    [CCode (has_target = false)]
+    public delegate bool Filter (Vala.CodeNode needle, Vala.CodeNode hay_node);
+
+    private Vala.CodeNode? needle;
+    private Filter? filter;
+
+    private bool match (Vala.CodeNode node) {
         var sr = node.source_reference;
         if (sr == null) {
             // debug ("node %s has no source reference", node.type_name);
@@ -24,6 +30,9 @@ class Vls.FindSymbol : Vala.CodeVisitor {
             warning (@"wtf vala: $(node.type_name): $sr");
             return false;
         }
+
+        if (filter != null)
+            return filter (needle, node);
 
         var begin = new Position () { line = sr.begin.line, character = sr.begin.column - 1 };
         var end = new Position () { line = sr.end.line, character = sr.end.column };
@@ -69,6 +78,16 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         this.file = file;
         this.search_multiline = search_multiline;
         this.include_blocks = include_blocks;
+        result = new Gee.ArrayList<Vala.CodeNode> ();
+        seen = new Gee.HashSet<Vala.CodeNode> ();
+        Vala.CodeContext.push (file.context);
+        this.visit_source_file (file);
+    }
+
+    public FindSymbol.with_filter (Vala.SourceFile file, Vala.CodeNode needle, Filter filter_func) {
+        this.file = file;
+        this.needle = needle;
+        this.filter = filter_func;
         result = new Gee.ArrayList<Vala.CodeNode> ();
         seen = new Gee.HashSet<Vala.CodeNode> ();
         Vala.CodeContext.push (file.context);

@@ -157,6 +157,7 @@ class Vls.Server {
         call_handlers["textDocument/completion"] = this.textDocumentCompletion;
         call_handlers["textDocument/signatureHelp"] = this.textDocumentSignatureHelp;
         call_handlers["textDocument/hover"] = this.textDocumentHover;
+        call_handlers["textDocument/references"] = this.textDocumentReferences;
         notif_handlers["$/cancelRequest"] = this.cancelRequest;
 
         debug ("Finished constructing");
@@ -346,7 +347,8 @@ class Vls.Server {
                     signatureHelpProvider: buildDict(
                         triggerCharacters: new Variant.strv (new string[] {"(", ","})
                     ),
-                    hoverProvider: new Variant.boolean (true)
+                    hoverProvider: new Variant.boolean (true),
+                    referencesProvider: new Variant.boolean (true)
                 )
             ));
         } catch (Error e) {
@@ -866,15 +868,17 @@ class Vls.Server {
             var prop_sym = sym as Vala.Property;
             if (prop_sym.property_type == null)
                 return null; 
+            string weak_kw = (prop_sym.property_type.value_owned ||
+                !(prop_sym.property_type is Vala.ReferenceType)) ? "" : "weak ";
             if (only_type_names)
-                return prop_sym.property_type.to_string ();
+                return @"$weak_kw$(prop_sym.property_type)";
             else {
                 string? parent_str = get_symbol_data_type (parent, only_type_names);
                 if (parent_str != null)
                     parent_str = @"$(parent_str)::";
                 else
                     parent_str = "";
-                return @"$(prop_sym.property_type) $parent_str$(prop_sym.name)";
+                return @"$weak_kw$(prop_sym.property_type) $parent_str$(prop_sym.name)";
             }
         } else if (sym is Vala.Callable) {
             var method_sym = sym as Vala.Callable;
@@ -960,15 +964,17 @@ class Vls.Server {
             var var_sym = sym as Vala.Variable;
             if (var_sym.variable_type == null)
                 return null;
+            string weak_kw = (var_sym.variable_type.value_owned ||
+                !(var_sym.variable_type is Vala.ReferenceType)) ? "" : "weak ";
             if (only_type_names)
-                return var_sym.variable_type.to_string ();
+                return @"$weak_kw$(var_sym.variable_type)";
             else {
                 string? parent_str = get_symbol_data_type (parent, only_type_names);
                 if (parent_str != null)
                     parent_str = @"$(parent_str)::";
                 else
                     parent_str = "";
-                return @"$(var_sym.variable_type) $parent_str$(var_sym.name)";
+                return @"$weak_kw$(var_sym.variable_type) $parent_str$(var_sym.name)";
             }
         } else if (sym is Vala.EnumValue) {
             var ev_sym = sym as Vala.EnumValue;
@@ -1908,6 +1914,72 @@ class Vls.Server {
                 client.reply (id, object_to_variant (hoverInfo));
             } catch (Error e) {
                 debug ("[textDocument/hover] failed to reply to client: %s", e.message);
+            }
+        });
+    }
+
+    void textDocumentReferences (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        var p = parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
+        TextDocument? doc = lookup_source_file (p.textDocument.uri);
+        if (doc == null) {
+            debug (@"file `$(p.textDocument.uri)' not found");
+            reply_null (id, client, method);
+            return;
+        }
+
+        Position pos = p.position;
+        wait_for_context_update (id, request_cancelled => {
+            if (request_cancelled) {
+                reply_null (id, client, method);
+                return;
+            }
+
+            var fs = new FindSymbol (doc.file, pos.to_libvala (), true);
+
+            if (fs.result.size == 0) {
+                debug (@"[$method] no results found");
+                reply_null (id, client, method);
+                return;
+            }
+
+            Vala.CodeNode result = get_best (fs, doc);
+            var json_array = new Json.Array ();
+            var references = new Gee.ArrayList<Vala.CodeNode> ();
+
+            if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null)
+                result = ((Vala.Expression) result).symbol_reference;
+            else if (result is Vala.DataType && ((Vala.DataType)result).type_symbol != null)
+                result = ((Vala.DataType) result).type_symbol;
+
+            debug (@"[$method] got best: $result ($(result.type_name))");
+            // show references in all files
+            foreach (var td in doc.compilation) {
+                if (result is Vala.TypeSymbol) {
+                    var fs2 = new FindSymbol.with_filter (td.file, result,
+                        (needle, node) => node == needle ||
+                            (node is Vala.DataType && ((Vala.DataType) node).type_symbol == needle));
+                    references.add_all (fs2.result);
+                }
+                if (result is Vala.Symbol) {
+                    var fs2 = new FindSymbol.with_filter (td.file, result, 
+                        (needle, node) => node == needle || 
+                            (node is Vala.Expression && ((Vala.Expression)node).symbol_reference == needle));
+                    references.add_all (fs2.result);
+                }
+            }
+            
+            debug (@"[$method] found $(references.size) reference(s)");
+            foreach (var node in references)
+                json_array.add_element (Json.gobject_serialize (new Location () {
+                    uri = "file://" + node.source_reference.file.filename,
+                    range = new Range.from_sourceref (node.source_reference)
+                }));
+
+            try {
+                Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
+                client.reply (id, variant_array);
+            } catch (Error e) {
+                debug (@"[$method] failed to reply to client: $(e.message)");
             }
         });
     }
