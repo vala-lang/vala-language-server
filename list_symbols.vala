@@ -10,6 +10,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
     private Gee.TreeMap<Range, DocumentSymbol> syms_flat;
     private Gee.List<DocumentSymbol> all_syms;
     private Gee.HashMap<string, DocumentSymbol> ns_name_to_dsym;
+    Vala.TypeSymbol? str_sym; 
 
     public ListSymbols (Vala.SourceFile file) {
         this.file = file;
@@ -18,6 +19,9 @@ class Vls.ListSymbols : Vala.CodeVisitor {
         this.syms_flat = new Gee.TreeMap<Range, DocumentSymbol> ((r1, r2) => r1.start.compare (r2.start));
         this.all_syms = new Gee.LinkedList<DocumentSymbol> ();
         this.ns_name_to_dsym = new Gee.HashMap<string, DocumentSymbol> ();
+
+        str_sym = file.context.root.scope.lookup ("string") as Vala.TypeSymbol;
+
         Vala.CodeContext.push (file.context);
         this.visit_source_file (file);
     }
@@ -197,7 +201,16 @@ class Vls.ListSymbols : Vala.CodeVisitor {
             var kind = containers.peek_head ().kind;
             if (kind == Method || kind == Function || kind == Constructor) return;
         }
-        add_symbol (c, Constant);
+        var skind = SymbolKind.Constant;
+
+        if (str_sym != null && c.type_reference.type_symbol.is_subtype_of (str_sym))
+            skind = SymbolKind.String;
+        else if (c.type_reference.type_symbol.get_attribute ("IntegerType") != null ||
+            c.type_reference.type_symbol.get_attribute ("FloatingType") != null)
+            skind = SymbolKind.Number;
+        else if (c.type_reference.type_symbol.get_attribute ("BooleanType") != null)
+            skind = SymbolKind.Boolean;
+        add_symbol (c, skind);
         c.accept_children (this);
     }
 
