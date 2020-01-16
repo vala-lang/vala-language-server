@@ -53,7 +53,7 @@ class Vls.FindSymbol : Vala.CodeVisitor {
                 return false;
             }
         } else if ((node is Vala.Statement && !(include_blocks && node is Vala.Block)) || 
-            node is Vala.LambdaExpression) {
+            node is Vala.LambdaExpression || node is Vala.CatchClause) {
             return false;       // we only want to find symbols, right?
         }
 
