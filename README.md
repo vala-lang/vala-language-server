@@ -8,7 +8,7 @@
 - [x] document symbol outline
 - [x] goto definition
 - [x] symbol references
-- [ ] goto implementation
+- [x] goto implementation
 - [x] signature help
 - [x] hover
 - [x] symbol documentation
