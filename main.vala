@@ -867,6 +867,8 @@ class Vls.Server {
     public static string get_expr_repr (Vala.Expression expr) {
         var sr = expr.source_reference;
         var file = sr.file;
+        if (file.content == null)
+            file.content = (string) file.get_mapped_contents ();
         var from = (long)Server.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
         var to = (long)Server.get_string_pos (file.content, sr.end.line-1, sr.end.column);
         return file.content [from:to];

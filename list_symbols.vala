@@ -203,13 +203,15 @@ class Vls.ListSymbols : Vala.CodeVisitor {
         }
         var skind = SymbolKind.Constant;
 
-        if (str_sym != null && c.type_reference.type_symbol.is_subtype_of (str_sym))
-            skind = SymbolKind.String;
-        else if (c.type_reference.type_symbol.get_attribute ("IntegerType") != null ||
-            c.type_reference.type_symbol.get_attribute ("FloatingType") != null)
-            skind = SymbolKind.Number;
-        else if (c.type_reference.type_symbol.get_attribute ("BooleanType") != null)
-            skind = SymbolKind.Boolean;
+        if (c.type_reference.type_symbol != null) {
+            if (str_sym != null && c.type_reference.type_symbol.is_subtype_of (str_sym))
+                skind = SymbolKind.String;
+            else if (c.type_reference.type_symbol.get_attribute ("IntegerType") != null ||
+                    c.type_reference.type_symbol.get_attribute ("FloatingType") != null)
+                skind = SymbolKind.Number;
+            else if (c.type_reference.type_symbol.get_attribute ("BooleanType") != null)
+                skind = SymbolKind.Boolean;
+        }
         add_symbol (c, skind);
         c.accept_children (this);
     }
