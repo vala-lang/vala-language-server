@@ -714,10 +714,9 @@ class Vls.Server {
                          ((Vala.MemberAccess)node).member_name == "this" &&
                          ((Vala.MemberAccess)node).inner == null) ||
                         // fix for creation method quirks
-                         (best is Vala.CreationMethod && (node is Vala.MethodCall || node is Vala.BaseAccess)) ||
+                         (best is Vala.CreationMethod) ||
                         // fix for class/interface declaration quirks
-                         (best is Vala.TypeSymbol && (node is Vala.Namespace || node is Vala.CreationMethod || 
-                            node is Vala.MethodCall || node is Vala.BaseAccess)))))
+                         (best is Vala.TypeSymbol))))
                     best = node;
             }
         }
