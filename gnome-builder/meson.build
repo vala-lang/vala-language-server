@@ -3,4 +3,5 @@ plugin_files = files([
   'vala_langserv.py',
 ])
 
-install_data(plugin_files, install_dir: '/usr/lib/gnome-builder/plugins')
+prefix = get_option('prefix')
+install_data(plugin_files, install_dir: prefix + '/lib/gnome-builder/plugins')

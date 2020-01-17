@@ -13,4 +13,4 @@ X-Highlighter-Languages=vala
 X-Hover-Provider-Languages=vala
 X-Rename-Provider-Languages=vala
 X-Symbol-Resolver-Languages=vala
-X-Builder-ABI=3.32
+X-Builder-ABI=3.35
