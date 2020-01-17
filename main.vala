@@ -159,6 +159,7 @@ class Vls.Server {
         call_handlers["textDocument/hover"] = this.textDocumentHover;
         call_handlers["textDocument/references"] = this.textDocumentReferences;
         call_handlers["textDocument/implementation"] = this.textDocumentImplementation;
+        call_handlers["workspace/symbol"] = this.workspaceSymbol;
         notif_handlers["$/cancelRequest"] = this.cancelRequest;
 
         debug ("Finished constructing");
@@ -350,7 +351,8 @@ class Vls.Server {
                     ),
                     hoverProvider: new Variant.boolean (true),
                     referencesProvider: new Variant.boolean (true),
-                    implementationProvider: new Variant.boolean (true)
+                    implementationProvider: new Variant.boolean (true),
+                    workspaceSymbolProvider: new Variant.boolean (true)
                 )
             ));
         } catch (Error e) {
@@ -830,13 +832,7 @@ class Vls.Server {
 
         wait_for_context_update (id, request_cancelled => {
             if (request_cancelled) {
-                debug (@"[$method] file `$(p.textDocument.uri)' not found");
                 reply_null (id, client, method);
-                try {
-                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
-                } catch (Error e) {
-                    debug ("[textDocument/completion] failed to reply to client: %s", e.message);
-                }
                 return;
             }
 
@@ -2084,6 +2080,44 @@ class Vls.Server {
                     range = new Range.from_sourceref (node.source_reference)
                 }));
 
+            try {
+                Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
+                client.reply (id, variant_array);
+            } catch (Error e) {
+                debug (@"[$method] failed to reply to client: $(e.message)");
+            }
+        });
+    }
+
+    // TODO: avoid recreating SymbolInformation unless the compilation has changed?
+    void workspaceSymbol (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        var query = (string) @params.lookup_value ("query", VariantType.STRING);
+
+        wait_for_context_update (id, request_cancelled => {
+            if (request_cancelled) {
+                reply_null (id, client, method);
+                return;
+            }
+
+            var json_array = new Json.Array ();
+            foreach (var build_target in builds) {
+                foreach (var compilation in build_target) {
+                    foreach (var text_document in compilation) {
+                        new ListSymbols (text_document.file)
+                            .flattened ()
+                            // NOTE: if introspection for g_str_match_string () / string.match_string ()
+                            // is fixed, this will have to be changed to `dsym.name.match_sting (query, true)`
+                            .filter (dsym => query.match_string (dsym.name, true))
+                            .foreach (dsym => {
+                                var si = new SymbolInformation.from_document_symbol (dsym, text_document.uri);
+                                json_array.add_element (Json.gobject_serialize (si));
+                                return true;
+                            });
+                    }
+                }
+            }
+
+            debug (@"[$method] found $(json_array.get_length ()) element(s) matching `$query'");
             try {
                 Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
                 client.reply (id, variant_array);
