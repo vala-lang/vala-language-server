@@ -375,6 +375,7 @@ namespace LanguageServer {
         public CompletionItemKind kind { get; set; }
         public string detail { get; set; }
         public MarkupContent documentation { get; set; }
+        public bool deprecated { get; set; }
         private uint _hash;
         protected string _hash_string;
 
@@ -385,6 +386,7 @@ namespace LanguageServer {
             this.kind = kind;
             this.detail = Vls.Server.get_symbol_data_type (sym);
             this.documentation = Vls.Server.get_symbol_comment (sym);
+            this.deprecated = sym.get_attribute_bool ("Version", "deprecated");
             this._hash_string = @"$label $(Vls.Server.get_symbol_data_type (sym, true)) $kind";
             this._hash = _hash_string.hash ();
         }
