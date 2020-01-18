@@ -1550,9 +1550,22 @@ class Vls.Server {
                      current_scope != null;
                      current_scope = current_scope.parent_scope) {
                     Vala.Symbol owner = current_scope.owner;
-                    if (owner is Vala.Callable || owner is Vala.Statement || owner is Vala.Block) {
+                    if (owner is Vala.Callable || owner is Vala.Statement || owner is Vala.Block || 
+                        owner is Vala.Subroutine) {
+                        Vala.Symbol? this_param = null;
                         if (owner is Vala.Method)
-                            in_instance = ((Vala.Method)owner).this_parameter != null;
+                            this_param = ((Vala.Method)owner).this_parameter;
+                        else if (owner is Vala.PropertyAccessor)
+                            this_param = ((Vala.PropertyAccessor)owner).prop.this_parameter;
+                        else if (owner is Vala.Constructor)
+                            this_param = ((Vala.Constructor)owner).this_parameter;
+                        else if (owner is Vala.Destructor)
+                            this_param = ((Vala.Destructor)owner).this_parameter;
+                        in_instance = this_param != null;
+                        if (in_instance) {
+                            // add `this' parameter
+                            completions.add (new CompletionItem.from_symbol (this_param, CompletionItemKind.Constant));
+                        }
                         var symtab = current_scope.get_symbol_table ();
                         if (symtab == null)
                             continue;
