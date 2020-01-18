@@ -859,6 +859,18 @@ class Vls.Server {
         });
     }
 
+    public static Range get_best_range (Vala.Symbol sym) {
+        var range = new Range.from_sourceref (sym.source_reference);
+
+        if (sym is Vala.Method) {
+            var m = (Vala.Method) sym;
+            if (m.body.source_reference != null)
+                range = range.union (get_best_range (m.body));
+        }
+        
+        return range;
+    }
+
     public static string get_expr_repr (Vala.Expression expr) {
         var sr = expr.source_reference;
         var file = sr.file;

@@ -55,8 +55,8 @@ class Vls.ListSymbols : Vala.CodeVisitor {
         }
 
         // handle conflicts
-        if (syms_flat.has_key (dsym.range)) {
-            var existing_sym = syms_flat [dsym.range];
+        if (syms_flat.has_key (dsym.selectionRange)) {
+            var existing_sym = syms_flat [dsym.selectionRange];
             // var dsym_name = dsym.kind == Constructor && dsym.name == null ? "(contruct block)" : (dsym.name ?? "(unknown)");
             // debug (@"found dup! $(existing_sym.name) ($(existing_sym.kind)) and $(dsym_name) ($(dsym.kind))");
             if (existing_sym.kind == dsym.kind)
@@ -66,6 +66,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
             else if (existing_sym.kind == Field && dsym.kind == Property) {
                 existing_sym.name = dsym.name;
                 existing_sym.kind = dsym.kind;
+                existing_sym.range = dsym.range;
                 return existing_sym;
             } else if (existing_sym.kind == Property && dsym.kind == Field)
                 return existing_sym;
@@ -95,6 +96,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
             if (current_sym != null) {
                 // debug (@"adding $(dsym.name) to current_sym $(current_sym.name)");
                 current_sym.children.add (dsym);
+                current_sym.range = current_sym.range.union (dsym.range);
             } else {
                 if (sym.parent_symbol is Vala.Namespace 
                     && sym.parent_symbol.to_string () != "(root namespace)") {
@@ -105,6 +107,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
                         parent_dsym = ns_name_to_dsym [sym.parent_symbol.get_full_name ()];
                     // debug (@"adding $(dsym.name) to $(parent_dsym.name)");
                     parent_dsym.children.add (dsym);
+                    parent_dsym.range = parent_dsym.range.union (dsym.range);
                 } else {
                     // debug (@"adding $(dsym.name) to top_level_syms");
                     top_level_syms.add (dsym);
@@ -116,7 +119,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
                 // debug (@"\tadding $(dsym.name) to ns_name_to_dsym");
                 ns_name_to_dsym [sym_full_name] = dsym;
             }
-            syms_flat [dsym.range] = dsym;
+            syms_flat [dsym.selectionRange] = dsym;
             all_syms.add (dsym);
         }
 
@@ -290,10 +293,18 @@ class Vls.ListSymbols : Vala.CodeVisitor {
         ev.accept_children (this);
     }
 
+    public override void visit_error_code (Vala.ErrorCode ecode) {
+        if (ecode.source_reference != null && ecode.source_reference.file != file) return;
+        add_symbol (ecode, EnumMember);
+        ecode.accept_children (this);
+    }
+
     public override void visit_error_domain (Vala.ErrorDomain edomain) {
         if (edomain.source_reference != null && edomain.source_reference.file != file) return;
-        add_symbol (edomain, Enum);
+        var dsym = add_symbol (edomain, Enum);
+        containers.offer_head (dsym);
         edomain.accept_children (this);
+        containers.poll_head ();
     }
 
     public override void visit_expression_statement (Vala.ExpressionStatement stmt) {
