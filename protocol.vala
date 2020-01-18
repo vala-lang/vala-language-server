@@ -109,6 +109,16 @@ namespace LanguageServer {
         }
 
         public bool equal_to (Range other) { return this.to_string () == other.to_string (); }
+
+        /**
+         * Return a new range that includes `this` and `other`.
+         */
+        public Range union (Range other) {
+            return new Range () {
+                start = start.compare (other.start) < 0 ? start : other.start,
+                end = end.compare (other.end) < 0 ? other.end : end
+            };
+        }
     }
 
     class Diagnostic : Object {
@@ -199,8 +209,8 @@ namespace LanguageServer {
         public DocumentSymbol.from_vala_symbol (Vala.Symbol sym, SymbolKind kind) {
             this.name = sym.name;
             this.kind = kind;
-            this.range = new Range.from_sourceref (sym.source_reference);
-            this.selectionRange = this.range;
+            this.range = Vls.Server.get_best_range (sym);
+            this.selectionRange = new Range.from_sourceref (sym.source_reference);
             this.deprecated = sym.version.deprecated;
         }
 
