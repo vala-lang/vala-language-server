@@ -1580,7 +1580,8 @@ class Vls.Server {
                             // don't show local variables that are declared ahead of the cursor
                             if (sr_begin.compare (fs.pos) > 0)
                                 continue;
-                            completions.add (new CompletionItem.from_symbol (sym, CompletionItemKind.Variable));
+                            completions.add (new CompletionItem.from_symbol (sym, 
+                                (sym is Vala.Constant) ? CompletionItemKind.Constant : CompletionItemKind.Variable));
                         }
                     } else if (owner is Vala.TypeSymbol) {
                         add_completions_for_type ((Vala.TypeSymbol) owner, completions, best_scope, in_instance, in_oce, seen_props);
