@@ -57,6 +57,16 @@ class Vls.Server {
     const uint wait_for_context_update_delay_ms = 500;
 
     HashSet<BuildTarget> builds;
+    /**
+     * Contains all of the VAPIs that are shared by two or more compilations.
+     * The purpose of this is to allow for normal interaction with VAPIs that
+     * belong to multiple compilations.
+     */
+    Compilation shared_vapis;
+    /**
+     * Same idea as shared_vapis
+     */
+    Compilation shared_girs;
     HashSet<Request> pending_requests;
 
     [CCode (has_target = false)]
@@ -125,6 +135,8 @@ class Vls.Server {
         call_handlers = new HashTable<string, CallHandler> (str_hash, str_equal);
 
         builds = new HashSet<BuildTarget> (BuildTarget.hash, BuildTarget.equal);
+        shared_vapis = new Compilation.without_parent ();
+        shared_girs = new Compilation.without_parent ();
         pending_requests = new HashSet<Request> (Request.hash, Request.equal);
 
         server.notification.connect ((client, method, @params) => {
@@ -338,6 +350,40 @@ class Vls.Server {
             warning (@"[$method] removed build target $(build_target)!");
         }
 
+        // compile everything, which may cause new packages to be added
+        foreach (var build_target in builds)
+            build_target.compile ();
+
+        // shared_vapis/shared_girs setup
+        var package_files = new HashMap<string, Vala.SourceFile> ();
+        foreach (var build_target in builds) {
+            foreach (var compilation in build_target) {
+                foreach (var package_file in compilation.get_internal_files ()) {
+                    if (package_file.file_type != Vala.SourceFileType.PACKAGE)
+                        continue;
+                    bool is_vapi = package_file.filename.has_suffix (".vapi");
+                    bool is_gir = package_file.filename.has_suffix (".gir");
+                    if (package_files.has_key (package_file.filename)) {
+                        if (is_vapi && shared_vapis.lookup_source_file (package_file.filename) == null) {
+                            try {
+                                shared_vapis.add_source_file (package_file.filename);
+                            } catch (Error e) {
+                                debug (@"[$method] failed to add `$(package_file.filename)' to shared_vapis: $(e.message)");
+                            }
+                        } else if (is_gir && shared_girs.lookup_source_file (package_file.filename) == null) {
+                            try {
+                                shared_girs.add_source_file (package_file.filename);
+                            } catch (Error e) {
+                                debug (@"[$method] failed to add `$(package_file.filename)' to shared_girs: $(e.message)");
+                            }
+                        }
+                    } else {
+                        package_files[package_file.filename] = package_file;
+                    }
+                }
+            }
+        }
+
         try {
             client.reply (id, buildDict (
                 capabilities: buildDict (
@@ -361,11 +407,13 @@ class Vls.Server {
             debug (@"[initialize] failed to reply to client: $(e.message)");
         }
 
-        // compile everything
-        foreach (var build_target in builds) {
-            build_target.compile ();
+        // publish diagnostics
+        foreach (var build_target in builds)
             publishDiagnostics (build_target, client);
-        }
+
+        // we don't need diagnostics for VAPIs/GIRs; just compile them
+        shared_vapis.compile ();
+        shared_girs.compile ();
 
         // listen for context update requests
         Timeout.add (check_update_context_period_ms, () => {
@@ -451,13 +499,38 @@ class Vls.Server {
     TextDocument? lookup_source_file (string uri) {
         string? filename = File.new_for_uri (uri).get_path ();
         assert (filename != null);
+        var document = shared_vapis.lookup_source_file (filename);
+        if (document != null)
+            return document;
+        document = shared_girs.lookup_source_file (filename);
+        if (document != null)
+            return document;
+
         foreach (var build_target in builds) {
-            var document = build_target.lookup_source_file (filename);
-            if (document != null)
-                return document;
+            var bt_document = build_target.lookup_source_file (filename);
+            if (bt_document != null)
+                return bt_document;
         }
-        debug (@"could not find source file for `$filename'");
+
+        debug (@"failed to find text document for `$filename'");
         return null;
+    }
+
+    Collection<TextDocument> get_source_files () {
+        var source_files = new HashMap<string, TextDocument> ();
+
+        foreach (var text_document in shared_vapis)
+            source_files[text_document.filename] = text_document;
+        foreach (var text_document in shared_girs)
+            source_files[text_document.filename] = text_document;
+
+        foreach (var build_target in builds)
+            foreach (var compilation in build_target)
+                foreach (var text_document in compilation) {
+                    if (!source_files.has_key (text_document.filename))
+                        source_files[text_document.filename] = text_document;
+                }
+        return source_files.values;
     }
 
     void reply_null (Variant id, Jsonrpc.Client client, string method) {
@@ -614,6 +687,7 @@ class Vls.Server {
 
     void publishDiagnostics (BuildTarget target, Jsonrpc.Client client) {
         var docs_not_published = new HashMap<string,TextDocument> ();
+        var diags_without_source = new Json.Array ();
 
         foreach (var compilation in target)
             foreach (var doc in compilation)
@@ -628,7 +702,10 @@ class Vls.Server {
             
             compilation.reporter.messages.foreach (err => {
                 if (err.loc == null) {
-                    warning (@"got diagnostic without source");
+                    diags_without_source.add_element (Json.gobject_serialize (new Diagnostic () {
+                        severity = err.severity,
+                        message = err.message
+                    }));
                     return;
                 }
                 assert (err.loc.file != null);
@@ -695,6 +772,19 @@ class Vls.Server {
             } catch (Error e) {
                 debug (@"[publishDiagnostics] failed to publish empty diags for $(entry.key): $(e.message)");
             }
+        }
+
+        try {
+            Variant diags_wo_src_variant_array = Json.gvariant_deserialize (
+                new Json.Node.alloc ().init_array (diags_without_source),
+                null);
+            client.send_notification (
+                "textDocument/publishDiagnostics",
+                buildDict (
+                    diagnostics: diags_wo_src_variant_array
+                ));
+        } catch (Error e) {
+            debug (@"[publishDiagnostics] failed to publish diags without source: $(e.message)");
         }
     }
 
@@ -866,7 +956,7 @@ class Vls.Server {
 
         if (sym is Vala.Method) {
             var m = (Vala.Method) sym;
-            if (m.body.source_reference != null)
+            if (m.body != null && m.body.source_reference != null)
                 range = range.union (get_best_range (m.body));
         }
         
@@ -2161,21 +2251,17 @@ class Vls.Server {
             }
 
             var json_array = new Json.Array ();
-            foreach (var build_target in builds) {
-                foreach (var compilation in build_target) {
-                    foreach (var text_document in compilation) {
-                        new ListSymbols (text_document.file)
-                            .flattened ()
-                            // NOTE: if introspection for g_str_match_string () / string.match_string ()
-                            // is fixed, this will have to be changed to `dsym.name.match_sting (query, true)`
-                            .filter (dsym => query.match_string (dsym.name, true))
-                            .foreach (dsym => {
-                                var si = new SymbolInformation.from_document_symbol (dsym, text_document.uri);
-                                json_array.add_element (Json.gobject_serialize (si));
-                                return true;
-                            });
-                    }
-                }
+            foreach (var text_document in get_source_files ()) {
+                new ListSymbols (text_document.file)
+                    .flattened ()
+                    // NOTE: if introspection for g_str_match_string () / string.match_string ()
+                    // is fixed, this will have to be changed to `dsym.name.match_sting (query, true)`
+                    .filter (dsym => query.match_string (dsym.name, true))
+                    .foreach (dsym => {
+                        var si = new SymbolInformation.from_document_symbol (dsym, text_document.uri);
+                        json_array.add_element (Json.gobject_serialize (si));
+                        return true;
+                    });
             }
 
             debug (@"[$method] found $(json_array.get_length ()) element(s) matching `$query'");

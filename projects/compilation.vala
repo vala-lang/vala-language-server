@@ -5,15 +5,22 @@ using Gee;
  * TODO: could we implement a GIR documentation symbol resolver by extending this class?
  */
 class Vls.Compilation : Object {
-    public weak BuildTarget parent_target { get; private set; }
-    private HashSet<string> _packages;
+    private weak BuildTarget? _parent_target;
+    public weak BuildTarget parent_target {
+        get {
+            return (!) _parent_target;
+        }
+    }
+
+    private HashSet<string> _packages = new HashSet<string> ();
     // maps URI -> TextDocument
-    private HashMap<string, TextDocument> _sources;
-    private HashSet<string> _vapi_dirs;
-    private HashSet<string> _gir_dirs;
-    private HashSet<string> _metadata_dirs;
-    private HashSet<string> _gresources_dirs;
-    private HashSet<string> _defines;
+    private HashMap<string, TextDocument> _sources = new HashMap<string, TextDocument> ();
+    private HashMap<string, TextDocument> _autosources = new HashMap<string, TextDocument> ();
+    private HashSet<string> _vapi_dirs = new HashSet<string> ();
+    private HashSet<string> _gir_dirs = new HashSet<string> ();
+    private HashSet<string> _metadata_dirs = new HashSet<string> ();
+    private HashSet<string> _gresources_dirs = new HashSet<string> ();
+    private HashSet<string> _defines = new HashSet<string> ();
 
     // compiler flags
 
@@ -45,9 +52,11 @@ class Vls.Compilation : Object {
                 if (_ctx != null) {
                     // stupid workaround for memory leaks in Vala 0.38
                     workaround_038 (_ctx, _sources.values);
+                    workaround_038 (_ctx, _autosources.values);
                 }
                 // generate a new code context 
                 _ctx = new Vala.CodeContext () { keep_going = true };
+                _autosources.clear ();
                 Vala.CodeContext.push (_ctx);
                 dirty = false;
 
@@ -74,12 +83,6 @@ class Vls.Compilation : Object {
                 _ctx.metadata_directories = _metadata_dirs.to_array ();
                 _ctx.gresources_directories = _gresources_dirs.to_array ();
 
-                // packages
-                _ctx.add_external_package ("glib-2.0");
-                _ctx.add_external_package ("gobject-2.0");
-                foreach (var package in _packages)
-                    _ctx.add_external_package (package);
-
                 foreach (TextDocument doc in _sources.values) {
                     doc.file.context = _ctx;
                     _ctx.add_source_file (doc.file);
@@ -100,12 +103,14 @@ class Vls.Compilation : Object {
 
                     // clear all comments from file
                     doc.file.get_comments ().clear ();
-                    assert (doc.file.get_comments ().size == 0);
 
                     // clear all code nodes from file
                     doc.file.get_nodes ().clear ();
-                    assert (doc.file.get_nodes ().size == 0);
                 }
+
+                // packages (should come after in case we've wrapped any package files in TextDocuments)
+                foreach (var package in _packages)
+                    _ctx.add_external_package (package);
 
                 Vala.CodeContext.pop ();
                 needs_compile = true;
@@ -122,6 +127,11 @@ class Vls.Compilation : Object {
         get { return (Reporter) code_context.report; }
     }
 
+    construct {
+        _packages.add ("glib-2.0");
+        _packages.add ("gobject-2.0");
+    }
+
     public Compilation (BuildTarget parent, 
                         bool experimental,
                         bool experimental_non_null,
@@ -133,25 +143,18 @@ class Vls.Compilation : Object {
                         Collection<string>? metadata_dirs = null,
                         Collection<string>? gresources_dirs = null,
                         Collection<string>? defines = null) {
-        this.parent_target = parent;
+        this._parent_target = parent;
 
-        _packages = new HashSet<string> ();
         if (packages != null)
             _packages.add_all (packages);
-        _sources = new HashMap<string, TextDocument> ();
-        _vapi_dirs = new HashSet<string> ();
         if (vapi_dirs != null)
             _vapi_dirs.add_all (vapi_dirs);
-        _gir_dirs = new HashSet<string> ();
         if (gir_dirs != null)
             _gir_dirs.add_all (gir_dirs);
-        _metadata_dirs = new HashSet<string> ();
         if (metadata_dirs != null)
             _metadata_dirs.add_all (metadata_dirs);
-        _gresources_dirs = new HashSet<string> ();
         if (gresources_dirs != null)
             _gresources_dirs.add_all (gresources_dirs);
-        _defines = new HashSet<string> ();
         if (defines != null)
             _defines.add_all (defines);
 
@@ -161,11 +164,17 @@ class Vls.Compilation : Object {
         this.abi_stability = abi_stability;
     }
 
+    public Compilation.without_parent () {
+        this.profile = Vala.Profile.GOBJECT;
+    }
+
     public TextDocument add_source_file (string filename) throws ConvertError, FileError {
         if (_sources.has_key (filename))
             throw new FileError.FAILED (@"file `$filename' is already in the compilation");
         var source = new TextDocument (this, filename);
         _sources[filename] = source;
+        if (source.package_name != null)
+            _packages.remove (source.package_name);
         dirty = true;
         return source;
     }
@@ -184,6 +193,14 @@ class Vls.Compilation : Object {
         gir_parser.parse (code_context);
 
         code_context.check ();
+        // wrap autosources
+        foreach (var auto_source in get_internal_files ()) {
+            try {
+                _autosources[auto_source.filename] = new TextDocument.from_sourcefile (this, auto_source);
+            } catch (Error e) {
+                debug (@"compilation: failed to wrap autosource `$(auto_source.filename)': $(e.message)");
+            }
+        }
         Vala.CodeContext.pop ();
         needs_compile = false;
         return true;
@@ -200,10 +217,28 @@ class Vls.Compilation : Object {
      * Lookup a source file by filename.
      */
     public TextDocument? lookup_source_file (string filename) {
-        return _sources[filename];
+        var result = _sources[filename];
+        if (result == null)
+            return _autosources[filename];
+        return result;
     }
 
     public Iterator<TextDocument> iterator () {
         return _sources.values.iterator ();
+    }
+
+    /**
+     * Get source files automatically added during the last compilation.
+     */
+    public Gee.List<Vala.SourceFile> get_internal_files () {
+        var internal_files = new ArrayList<Vala.SourceFile> ();
+
+        if (_ctx != null)
+            foreach (var source_file in _ctx.get_source_files ()) {
+                if (!_sources.has_key (source_file.filename))
+                    internal_files.add (source_file);
+            }
+
+        return internal_files;
     }
 }
