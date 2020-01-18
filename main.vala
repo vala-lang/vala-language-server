@@ -158,6 +158,7 @@ class Vls.Server {
         call_handlers["textDocument/signatureHelp"] = this.textDocumentSignatureHelp;
         call_handlers["textDocument/hover"] = this.textDocumentHover;
         call_handlers["textDocument/references"] = this.textDocumentReferences;
+        call_handlers["textDocument/documentHighlight"] = this.textDocumentReferences;
         call_handlers["textDocument/implementation"] = this.textDocumentImplementation;
         call_handlers["workspace/symbol"] = this.workspaceSymbol;
         notif_handlers["$/cancelRequest"] = this.cancelRequest;
@@ -351,6 +352,7 @@ class Vls.Server {
                     ),
                     hoverProvider: new Variant.boolean (true),
                     referencesProvider: new Variant.boolean (true),
+                    documentHighlightProvider: new Variant.boolean (true),
                     implementationProvider: new Variant.boolean (true),
                     workspaceSymbolProvider: new Variant.boolean (true)
                 )
@@ -1951,6 +1953,30 @@ class Vls.Server {
         });
     }
 
+    DocumentHighlightKind determine_node_highlight_kind (Vala.CodeNode node) {
+        Vala.CodeNode? previous_node = node;
+
+        for (Vala.CodeNode? current_node = node.parent_node;
+             current_node != null;
+             current_node = current_node.parent_node,
+             previous_node = current_node) {
+            if (current_node is Vala.MethodCall)
+                return DocumentHighlightKind.Read;
+            else if (current_node is Vala.Assignment) {
+                if (previous_node == ((Vala.Assignment)current_node).left)
+                    return DocumentHighlightKind.Write;
+                else if (previous_node == ((Vala.Assignment)current_node).right)
+                    return DocumentHighlightKind.Read;
+            } else if (current_node is Vala.DeclarationStatement &&
+                node == ((Vala.DeclarationStatement)current_node).declaration)
+                return DocumentHighlightKind.Write;
+            else if (current_node is Vala.Statement)
+                return DocumentHighlightKind.Read;
+        }
+
+        return DocumentHighlightKind.Text;
+    }
+
     void textDocumentReferences (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
         TextDocument? doc = lookup_source_file (p.textDocument.uri);
@@ -1961,6 +1987,7 @@ class Vls.Server {
         }
 
         Position pos = p.position;
+        bool is_highlight = method == "textDocument/documentHighlight";
         wait_for_context_update (id, request_cancelled => {
             if (request_cancelled) {
                 reply_null (id, client, method);
@@ -2002,11 +2029,19 @@ class Vls.Server {
             }
             
             debug (@"[$method] found $(references.size) reference(s)");
-            foreach (var node in references)
-                json_array.add_element (Json.gobject_serialize (new Location () {
-                    uri = "file://" + node.source_reference.file.filename,
-                    range = new Range.from_sourceref (node.source_reference)
-                }));
+            foreach (var node in references) {
+                if (is_highlight) {
+                    json_array.add_element (Json.gobject_serialize (new DocumentHighlight () {
+                        range = new Range.from_sourceref (node.source_reference),
+                        kind = determine_node_highlight_kind (node)
+                    }));
+                } else {
+                    json_array.add_element (Json.gobject_serialize (new Location () {
+                        uri = "file://" + node.source_reference.file.filename,
+                        range = new Range.from_sourceref (node.source_reference)
+                    }));
+                }
+            }
 
             try {
                 Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);

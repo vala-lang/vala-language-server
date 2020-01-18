@@ -193,6 +193,18 @@ namespace LanguageServer {
         public Range range { get; set; }
     }
 
+    [CCode (default_value = "LANGUAGE_SERVER_DOCUMENT_HIGHLIGHT_KIND_Text")]
+    enum DocumentHighlightKind {
+        Text = 1,
+        Read = 2,
+        Write = 3
+    }
+
+    class DocumentHighlight : Object {
+        public Range range { get; set; }
+        public DocumentHighlightKind kind { get; set; }
+    }
+
     class DocumentSymbolParams: Object {
         public TextDocumentIdentifier textDocument { get; set; }
     }
