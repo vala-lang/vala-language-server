@@ -261,11 +261,13 @@ class Vls.Server {
 
                 if (proc_status == 0)
                     ninja_files.add (Path.build_filename (build_dir, "build.ninja"));
-                else
+                else {
                     showMessage (
                         client, 
                         @"Failed to configure Meson in `$build_dir': process exited with error code $proc_status", 
                         MessageType.Error);
+                    return;
+                }
             }
 
             // For each Ninja build script found, attempt to Meson introspect its
