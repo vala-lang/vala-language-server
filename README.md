@@ -15,8 +15,9 @@
     - [x] basic (from comments)
     - [ ] advanced (from GIR and VAPI files)
 - [x] search for symbols in workspace
-- [ ] highlight active symbol in document
+- [x] highlight active symbol in document
 - [ ] snippets
+- [ ] code actions
 
 #### build systems / environments:
 - [x] meson
