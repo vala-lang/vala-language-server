@@ -339,6 +339,15 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         en.accept_children (this);
     }
 
+    public override void visit_enum_value (Vala.EnumValue ev) {
+        if (seen.contains (ev))
+            return;
+        seen.add (ev);
+        if (this.match (ev))
+            result.add (ev);
+        ev.accept_children (this);
+    }
+
     public override void visit_error_code (Vala.ErrorCode ecode) {
         if (seen.contains (ecode))
             return;
@@ -607,7 +616,7 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         seen.add (stmt);
         if (this.match (stmt))
             result.add (stmt);
-	stmt.accept_children (this);
+        stmt.accept_children (this);
     }
 
     public override void visit_signal (Vala.Signal sig) {
@@ -756,8 +765,9 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         if (seen.contains (ud))
             return;
         seen.add (ud);
-        if (this.match (ud.namespace_symbol))
-            result.add (ud.namespace_symbol);
+        if (this.match (ud))
+            result.add (ud);
+        ud.accept_children (this);
     }
 
     public override void visit_yield_statement (Vala.YieldStatement stmt) {
