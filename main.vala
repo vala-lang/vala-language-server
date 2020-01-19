@@ -2041,46 +2041,58 @@ class Vls.Server {
                     result = dt.symbol;
             }
 
-            if (result is Vala.Symbol) {
-                hoverInfo.contents.add (new MarkedString () {
-                    language = "vala",
-                    value = get_symbol_data_type (result as Vala.Symbol, false, null, true)
-                });
-                var comment = get_symbol_comment (result as Vala.Symbol);
-                if (comment != null) {
+            do {
+                if (result is Vala.Symbol) {
+                    var sym = (Vala.Symbol) result;
+                    if (sym.name.length > 0 && sym.name[0] == '.') {
+                        if (sym is Vala.Variable && ((Vala.Variable)sym).initializer != null) {
+                            result = ((Vala.Variable)sym).initializer;
+                            continue;   // try again
+                        }
+                        debug (@"[$method] could not handle temp variable");
+                    }
                     hoverInfo.contents.add (new MarkedString () {
-                        value = comment.value
+                        language = "vala",
+                        value = get_symbol_data_type (result as Vala.Symbol, false, null, true)
+                    });
+                    var comment = get_symbol_comment (result as Vala.Symbol);
+                    if (comment != null) {
+                        hoverInfo.contents.add (new MarkedString () {
+                            value = comment.value
+                        });
+                    }
+                } else if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null) {
+                    var expr = result as Vala.Expression;
+                    var sym = expr.symbol_reference;
+                    bool is_temp_expr = sym.name.length > 0 && sym.name[0] == '.';
+                    hoverInfo.contents.add (new MarkedString () {
+                        language = "vala",
+                        value = get_symbol_data_type (sym, 
+                            result is Vala.Literal || (is_temp_expr && !(sym is Vala.Callable)), null, true)
+                    });
+                    var comment = get_symbol_comment (sym);
+                    if (comment != null) {
+                        hoverInfo.contents.add (new MarkedString () {
+                            value = comment.value
+                        });
+                    }
+                } else if (result is Vala.CastExpression) {
+                    hoverInfo.contents.add (new MarkedString () {
+                        language = "vala",
+                        value = get_expr_repr ((Vala.CastExpression) result)
+                    });
+                } else {
+                    bool is_instance = true;
+                    Vala.TypeSymbol? type_sym = get_type_symbol (doc.compilation.code_context,
+                                                                result, false, ref is_instance);
+                    hoverInfo.contents.add (new MarkedString () {
+                        language = "vala",
+                        value = type_sym != null ? get_symbol_data_type (type_sym, true, null, true) : 
+                            ((result is Vala.Expression) ? get_expr_repr ((Vala.Expression) result) : result.to_string ())
                     });
                 }
-            } else if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null) {
-                var expr = result as Vala.Expression;
-                var sym = expr.symbol_reference;
-                bool is_temp_expr = sym.name.length > 0 && sym.name[0] == '.';
-                hoverInfo.contents.add (new MarkedString () {
-                    language = "vala",
-                    value = get_symbol_data_type (sym, result is Vala.Literal || is_temp_expr, null, true)
-                });
-                var comment = get_symbol_comment (sym);
-                if (comment != null) {
-                    hoverInfo.contents.add (new MarkedString () {
-                        value = comment.value
-                    });
-                }
-            } else if (result is Vala.CastExpression) {
-                hoverInfo.contents.add (new MarkedString () {
-                    language = "vala",
-                    value = get_expr_repr ((Vala.CastExpression) result)
-                });
-            } else {
-                bool is_instance = true;
-                Vala.TypeSymbol? type_sym = get_type_symbol (doc.compilation.code_context,
-                                                             result, false, ref is_instance);
-                hoverInfo.contents.add (new MarkedString () {
-                    language = "vala",
-                    value = type_sym != null ? get_symbol_data_type (type_sym, true, null, true) : 
-                        ((result is Vala.Expression) ? get_expr_repr ((Vala.Expression) result) : result.to_string ())
-                });
-            }
+                break;
+            } while (true);
 
             debug (@"[textDocument/hover] got $result $(result.type_name)");
 
