@@ -54,7 +54,7 @@ class Vls.Compilation : Object {
                     workaround_038 (_ctx, _sources.values);
                     workaround_038 (_ctx, _autosources.values);
                 }
-                // generate a new code context 
+                // generate a new code context
                 _ctx = new Vala.CodeContext () { keep_going = true };
                 _autosources.clear ();
                 Vala.CodeContext.push (_ctx);
@@ -69,9 +69,11 @@ class Vls.Compilation : Object {
                     case Vala.Profile.POSIX:
                         _ctx.add_define ("POSIX");
                         break;
-                    default: // case Vala.Profile.GOBJECT:
+                    case Vala.Profile.GOBJECT:
                         _ctx.add_define ("GOBJECT");
                         break;
+                    default:
+                        error ("unsupported Vala profile %s", profile.to_string ());
                 }
 
                 _ctx.experimental = experimental;
