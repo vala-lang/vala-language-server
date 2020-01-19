@@ -1510,21 +1510,19 @@ class Vls.Server {
         foreach (var ns_sym in ns.get_namespaces ())
             completions.add (new CompletionItem.from_symbol (ns_sym, CompletionItemKind.Module));
     }
-
+    
     /**
      * Use this to complete members of a signal.
      */
     void add_completions_for_signal (Vala.Signal sig, Gee.Set<CompletionItem> completions) {
-        string arg_list = "";
-        foreach (var p in sig.get_parameters ()) {
-            if (arg_list != "")
-                arg_list += ", ";
-            arg_list += get_symbol_data_type (p, false, null, true);
-        }
+        var sig_type = new Vala.SignalType (sig);
         completions.add_all_array (new CompletionItem []{
-            new CompletionItem.for_signal ("connect", @"uint connect ($arg_list)", "Connect signal"),
-            new CompletionItem.for_signal ("connect_after", @"uint connect_after ($arg_list)", "Connect signal after default handler"),
-            new CompletionItem.for_signal ("disconnect", "void disconnect (uint id)", "Disconnect signal")
+            new CompletionItem.from_symbol (sig_type.get_member ("connect"), CompletionItemKind.Method, 
+                new MarkupContent.plaintext ("Connect to signal")),
+            new CompletionItem.from_symbol (sig_type.get_member ("connect_after"), CompletionItemKind.Method,
+                new MarkupContent.plaintext ("Connect to signal after default handler")),
+            new CompletionItem.from_symbol (sig_type.get_member ("disconnect"), CompletionItemKind.Method,
+                new MarkupContent.plaintext ("Disconnect signal"))
         });
     }
 

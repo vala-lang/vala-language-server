@@ -381,22 +381,14 @@ namespace LanguageServer {
 
         private CompletionItem () {}
 
-        public CompletionItem.from_symbol (Vala.Symbol sym, CompletionItemKind kind) {
+        public CompletionItem.from_symbol (Vala.Symbol sym, CompletionItemKind kind, 
+            MarkupContent? default_doc = null) {
             this.label = sym.name;
             this.kind = kind;
             this.detail = Vls.Server.get_symbol_data_type (sym);
-            this.documentation = Vls.Server.get_symbol_comment (sym);
+            this.documentation = default_doc ?? Vls.Server.get_symbol_comment (sym);
             this.deprecated = sym.get_attribute_bool ("Version", "deprecated");
             this._hash_string = @"$label $(Vls.Server.get_symbol_data_type (sym, true)) $kind";
-            this._hash = _hash_string.hash ();
-        }
-
-        public CompletionItem.for_signal (string label, string detail, string documentation) {
-            this.label = label;
-            this.kind = CompletionItemKind.Method;
-            this.detail = detail;
-            this.documentation = new MarkupContent () { value = documentation };
-            this._hash_string = @"$label $kind";
             this._hash = _hash_string.hash ();
         }
 
@@ -412,6 +404,10 @@ namespace LanguageServer {
     class MarkupContent : Object {
         public string kind { get; set; default = "plaintext"; }
         public string value { get; set; }
+
+        public MarkupContent.plaintext (string doc) {
+            this.value = doc;
+        }
     }
     
     [CCode (default_value = "LANGUAGE_SERVER_COMPLETION_ITEM_KIND_Text")]
