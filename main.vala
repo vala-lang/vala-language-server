@@ -812,7 +812,9 @@ class Vls.Server {
                         // fix for creation method quirks
                          (best is Vala.CreationMethod) ||
                         // fix for class/interface declaration quirks
-                         (best is Vala.TypeSymbol))))
+                         (best is Vala.TypeSymbol) ||
+                        // fix for variable declared in foreach
+                         ((best is Vala.LocalVariable) && !(node is Vala.LocalVariable)))))
                     best = node;
             }
         }
@@ -975,6 +977,16 @@ class Vls.Server {
         return file.content [from:to];
     }
 
+    public delegate bool FindFunc (Vala.CodeNode node);
+    public static Vala.CodeNode? find_ancestor (Vala.CodeNode start_node, FindFunc filter) {
+        for (Vala.CodeNode? current_node = start_node;
+             current_node != null;
+             current_node = current_node.parent_node)
+            if (filter (current_node))
+                return current_node;
+        return null;
+    }
+
     /**
      * Return the string representation of a symbol's type. This is used as the detailed
      * information for a completion item.
@@ -1015,6 +1027,23 @@ class Vls.Server {
                 param_string += get_symbol_data_type (p, only_type_names, null, show_inits);
                 at_least_one = true;
             }
+            string type_params = "";
+            if (method_sym is Vala.Method) {
+                var m = (Vala.Method) method_sym;
+                at_least_one = false;
+                foreach (var type_param in m.get_type_parameters ()) {
+                    if (!at_least_one)
+                        type_params += "<";
+                    else
+                        type_params += ",";
+                    type_params += type_param.name;
+                    at_least_one = true;
+                }
+
+                if (at_least_one)
+                    type_params += ">";
+            }
+            string extern_kw = method_sym.is_extern ? "extern " : "";
             string async_type = "";
             string signal_type = "";
             if (method_sym is Vala.Method) {
@@ -1041,8 +1070,8 @@ class Vls.Server {
                     parent_str = @"$parent_str::";
                 else
                     parent_str = "";
-                return async_type + signal_type + delg_type + 
-                    (ret_type ?? "void") + @" $parent_str$(sym.name) ($param_string)$err_string";
+                return extern_kw + async_type + signal_type + delg_type + 
+                    (ret_type ?? "void") + @" $parent_str$(sym.name)$type_params ($param_string)$err_string";
             } else {
                 string sym_name = sym.name == ".new" ? (parent_str ?? creation_method.class_name) : sym.name;
                 string prefix_str = "";
@@ -1050,7 +1079,7 @@ class Vls.Server {
                     prefix_str = @"$parent_str::";
                 else
                     prefix_str = @"$(creation_method.class_name)::";
-                return @"$async_type$signal_type$delg_type$prefix_str$sym_name ($param_string)$err_string";
+                return @"$extern_kw$async_type$signal_type$delg_type$prefix_str$sym_name$type_params ($param_string)$err_string";
             }
         } else if (sym is Vala.Parameter) {
             var p = sym as Vala.Parameter;
@@ -1090,8 +1119,13 @@ class Vls.Server {
                 else
                     parent_str = "";
                 string init_str = "";
-                if (show_inits && var_sym.initializer != null && var_sym.initializer.source_reference != null) 
-                    init_str = @" = $(get_expr_repr (var_sym.initializer))";
+                if (show_inits) {
+                    var foreach_stmt = find_ancestor (var_sym, node => node is Vala.ForeachStatement) as Vala.ForeachStatement;
+                    if (foreach_stmt != null && var_sym.name == foreach_stmt.variable_name) {
+                        init_str = @" in $(foreach_stmt.collection)";
+                    } else if (var_sym.initializer != null && var_sym.initializer.source_reference != null)
+                        init_str = @" = $(get_expr_repr (var_sym.initializer))";
+                }
                 return @"$weak_kw$(var_sym.variable_type) $parent_str$(var_sym.name)$init_str";
             }
         } else if (sym is Vala.EnumValue) {
@@ -1160,6 +1194,7 @@ class Vls.Server {
             return get_symbol_data_type (err_sym.parent_symbol, true);
         } else if (sym is Vala.Struct) {
             var struct_sym = sym as Vala.Struct;
+            string extern_kw = struct_sym.is_extern ? "extern " : "";
             string type_string = struct_sym.to_string ();
             bool at_least_one = false;
 
@@ -1178,7 +1213,7 @@ class Vls.Server {
             if (struct_sym.base_type != null)
                 type_string += ": " + struct_sym.base_type.to_string ();
 
-            return (only_type_names ? "" : "struct ") + @"$type_string";
+            return (only_type_names ? "" : @"$(extern_kw)struct ") + @"$type_string";
         } else if (sym is Vala.ErrorDomain) {
             // don't do this if LSP ever gets CompletionItemKind.Error
             var err_sym = sym as Vala.ErrorDomain;
@@ -2075,6 +2110,9 @@ class Vls.Server {
                     return DocumentHighlightKind.Read;
             } else if (current_node is Vala.DeclarationStatement &&
                 node == ((Vala.DeclarationStatement)current_node).declaration)
+                return DocumentHighlightKind.Write;
+            else if (current_node is Vala.ForeachStatement &&
+                node == ((Vala.ForeachStatement)current_node).element_variable)
                 return DocumentHighlightKind.Write;
             else if (current_node is Vala.Statement)
                 return DocumentHighlightKind.Read;
