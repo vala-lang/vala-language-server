@@ -368,13 +368,15 @@ class Vls.Server {
                     if (package_files.has_key (package_file.filename)) {
                         if (is_vapi && shared_vapis.lookup_source_file (package_file.filename) == null) {
                             try {
-                                shared_vapis.add_source_file (package_file.filename);
+                                shared_vapis.add_source_file (package_file.filename, false);
+                                debug (@"[$method] adding shared VAPI `$(package_file.filename)'");
                             } catch (Error e) {
                                 debug (@"[$method] failed to add `$(package_file.filename)' to shared_vapis: $(e.message)");
                             }
                         } else if (is_gir && shared_girs.lookup_source_file (package_file.filename) == null) {
                             try {
-                                shared_girs.add_source_file (package_file.filename);
+                                shared_girs.add_source_file (package_file.filename, false);
+                                debug (@"[$method] adding shared GIR `$(package_file.filename)'");
                             } catch (Error e) {
                                 debug (@"[$method] failed to add `$(package_file.filename)' to shared_girs: $(e.message)");
                             }
@@ -561,10 +563,14 @@ class Vls.Server {
         if (doc == null)
             return;
 
-        debug (@"opened a file; requesting context update");
-        doc.content = fileContents;
-        doc.compilation.invalidate ();
-        request_context_update (client);
+        if (doc.is_writable) {
+            debug (@"[textDocument/didOpen] opened file `$(doc.filename)'; requesting context update");
+            doc.content = fileContents;
+            doc.compilation.invalidate ();
+            request_context_update (client);
+        } else {
+            debug (@"[textDocument/didOpen] opened read-only file `$(doc.filename)'");
+        }
     }
 
     Jsonrpc.Client? update_context_client = null;
@@ -593,27 +599,31 @@ class Vls.Server {
             return;
         }
 
-        source.version = (int) version;
+        if (source.is_writable) {
+            source.version = (int) version;
 
-        var iter = changes.iterator ();
-        Variant? elem = null;
-        var sb = new StringBuilder (source.content);
-        while ((elem = iter.next_value ()) != null) {
-            var changeEvent = parse_variant<TextDocumentContentChangeEvent> (elem);
+            var iter = changes.iterator ();
+            Variant? elem = null;
+            var sb = new StringBuilder (source.content);
+            while ((elem = iter.next_value ()) != null) {
+                var changeEvent = parse_variant<TextDocumentContentChangeEvent> (elem);
 
-            if (changeEvent.range == null /* && changeEvent.rangeLength == 0*/) {
-                sb.assign (changeEvent.text);
-            } else {
-                var start = changeEvent.range.start;
-                size_t pos = get_string_pos (sb.str, start.line, start.character);
-                sb.erase ((ssize_t) pos, changeEvent.rangeLength);
-                sb.insert ((ssize_t) pos, changeEvent.text);
+                if (changeEvent.range == null /* && changeEvent.rangeLength == 0*/) {
+                    sb.assign (changeEvent.text);
+                } else {
+                    var start = changeEvent.range.start;
+                    size_t pos = get_string_pos (sb.str, start.line, start.character);
+                    sb.erase ((ssize_t) pos, changeEvent.rangeLength);
+                    sb.insert ((ssize_t) pos, changeEvent.text);
+                }
             }
-        }
-        source.content = sb.str;
+            source.content = sb.str;
 
-        source.compilation.invalidate ();
-        request_context_update (client);
+            source.compilation.invalidate ();
+            request_context_update (client);
+        } else {
+            debug (@"[textDocument/didChange] ignoring requested changes to read-only `$(source.filename)'");
+        }
     }
 
     void request_context_update (Jsonrpc.Client client) {

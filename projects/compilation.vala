@@ -170,10 +170,11 @@ class Vls.Compilation : Object {
         this.profile = Vala.Profile.GOBJECT;
     }
 
-    public TextDocument add_source_file (string filename) throws ConvertError, FileError {
+    public TextDocument add_source_file (string filename, 
+        bool is_writable = true) throws ConvertError, FileError {
         if (_sources.has_key (filename))
             throw new FileError.FAILED (@"file `$filename' is already in the compilation");
-        var source = new TextDocument (this, filename);
+        var source = new TextDocument (this, filename, is_writable);
         _sources[filename] = source;
         if (source.package_name != null)
             _packages.remove (source.package_name);
@@ -198,7 +199,8 @@ class Vls.Compilation : Object {
         // wrap autosources
         foreach (var auto_source in get_internal_files ()) {
             try {
-                _autosources[auto_source.filename] = new TextDocument.from_sourcefile (this, auto_source);
+                _autosources[auto_source.filename] = new TextDocument.from_sourcefile (this, auto_source, false);
+                debug (@"compilation: wrapped autosource `$(auto_source.filename)'");
             } catch (Error e) {
                 debug (@"compilation: failed to wrap autosource `$(auto_source.filename)': $(e.message)");
             }

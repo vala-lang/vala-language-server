@@ -1,6 +1,6 @@
 class Vls.TextDocument : Object {
     public weak Compilation compilation { get; private set; }
-    public string filename;
+    public string filename { get; private set; }
 
     public Vala.SourceFile file { get; private set; }
     public string uri { get; private set; }
@@ -8,6 +8,8 @@ class Vls.TextDocument : Object {
 
     public string? content {
         get {
+            // Vala.SourceFile.get_mapped_contents () returns
+            // file.content if it's non-null
             return (string) file.get_mapped_contents ();
         }
         set {
@@ -17,8 +19,11 @@ class Vls.TextDocument : Object {
 
     public string? package_name { get; private set; }
 
+    public bool is_writable { get; private set; }
+
     public TextDocument (Compilation compilation,
                          string filename,
+                         bool is_writable = true,
                          string? content = null,
                          int version = 0) throws ConvertError, FileError {
 
@@ -30,6 +35,7 @@ class Vls.TextDocument : Object {
         this.filename = filename;
         this.uri = Filename.to_uri (filename);
         this.version = version;
+        this.is_writable = is_writable;
 
         var type = Vala.SourceFileType.NONE;
         if (uri.has_suffix (".vala") || uri.has_suffix (".gs"))
@@ -45,12 +51,14 @@ class Vls.TextDocument : Object {
      * Create a TextDocument that wraps a Vala.SourceFile
      */
     public TextDocument.from_sourcefile (Compilation compilation,
-                                         Vala.SourceFile file) throws ConvertError {
+                                         Vala.SourceFile file,
+                                         bool is_writable = true) throws ConvertError {
         this.compilation = compilation;
         this.filename = file.filename;
         this.uri = Filename.to_uri (file.filename);
         this.version = 0;
         this.file = file;
+        this.is_writable = is_writable;
         determine_package_name ();
     }
 
