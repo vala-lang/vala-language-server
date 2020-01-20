@@ -845,6 +845,15 @@ class Vls.Server {
         return (!) best;
     }
 
+    Vala.Scope get_topmost_scope (Vala.Scope topmost) {
+        for (Vala.Scope? current_scope = topmost;
+             current_scope != null;
+             current_scope = current_scope.parent_scope)
+            topmost = current_scope;
+
+        return topmost;
+    }
+
     void textDocumentDefinition (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = parse_variant <LanguageServer.TextDocumentPositionParams> (@params);
         TextDocument? sourcefile = lookup_source_file (p.textDocument.uri);
@@ -1447,11 +1456,28 @@ class Vls.Server {
                 completions.add (new CompletionItem.from_symbol (code_sym, CompletionItemKind.Value));
             }
 
-            foreach (var method_sym in errdomain_type.get_methods ()) {
-                if (method_sym.is_instance_member () != is_instance
-                    || !is_symbol_accessible (method_sym, current_scope))
-                    continue;
-                completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
+            if (!in_oce) {
+                foreach (var method_sym in errdomain_type.get_methods ()) {
+                    if (method_sym.is_instance_member () != is_instance
+                        || !is_symbol_accessible (method_sym, current_scope))
+                        continue;
+                    completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
+                }
+            }
+
+            if (is_instance && !in_oce) {
+                Vala.Scope topmost = get_topmost_scope (current_scope);
+
+                Vala.Symbol? gerror_sym = topmost.lookup ("GLib");
+                if (gerror_sym != null) {
+                    gerror_sym = gerror_sym.scope.lookup ("Error");
+                    if (gerror_sym == null)
+                        debug ("GLib.Error not found");
+                    else
+                        add_completions_for_type ((Vala.TypeSymbol) gerror_sym, completions, 
+                            current_scope, is_instance, in_oce, seen_props);
+                } else
+                    debug ("GLib not found");
             }
         } else if (type is Vala.Struct) {
             /**
