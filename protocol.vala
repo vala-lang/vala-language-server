@@ -382,10 +382,10 @@ namespace LanguageServer {
         private CompletionItem () {}
 
         public CompletionItem.from_symbol (Vala.Symbol sym, CompletionItemKind kind, 
-            MarkupContent? default_doc = null) {
-            this.label = sym.name;
+            string? label_override = null, MarkupContent? default_doc = null) {
+            this.label = label_override ?? sym.name;
             this.kind = kind;
-            this.detail = Vls.Server.get_symbol_data_type (sym);
+            this.detail = Vls.Server.get_symbol_data_type (sym, false, null, false, label_override);
             this.documentation = default_doc ?? Vls.Server.get_symbol_comment (sym);
             this.deprecated = sym.get_attribute_bool ("Version", "deprecated");
             this._hash_string = @"$label $(Vls.Server.get_symbol_data_type (sym, true)) $kind";

@@ -968,6 +968,8 @@ class Vls.Server {
     }
 
     public static string get_expr_repr (Vala.Expression expr) {
+        if (expr is Vala.Literal)
+            return expr.to_string ();
         var sr = expr.source_reference;
         var file = sr.file;
         if (file.content == null)
@@ -992,8 +994,7 @@ class Vls.Server {
      * information for a completion item.
      */
     public static string? get_symbol_data_type (Vala.Symbol? sym, bool only_type_names = false, 
-        Vala.Symbol? parent = null, 
-        bool show_inits = false) {
+        Vala.Symbol? parent = null, bool show_inits = false, string? name_override = null) {
         if (sym == null) {
             return null;
         } else if (sym is Vala.Property) {
@@ -1019,9 +1020,14 @@ class Vls.Server {
             var creation_method = sym as Vala.CreationMethod;
             string? ret_type = method_sym.return_type.to_string ();
             string delg_type = (method_sym is Vala.Delegate) ? "delegate " : "";
+            bool is_async = method_sym is Vala.Method && 
+                ((Vala.Method)method_sym).coroutine && 
+                !((Vala.Method)method_sym).get_async_begin_parameters ().is_empty;
             string param_string = "";
             bool at_least_one = false;
-            foreach (var p in method_sym.get_parameters ()) {
+            var parameters = (is_async && name_override == "begin") ? 
+                ((Vala.Method)method_sym).get_async_begin_parameters () : method_sym.get_parameters ();
+            foreach (var p in parameters) {
                 if (at_least_one)
                     param_string += ", ";
                 param_string += get_symbol_data_type (p, only_type_names, null, show_inits);
@@ -1044,13 +1050,8 @@ class Vls.Server {
                     type_params += ">";
             }
             string extern_kw = method_sym.is_extern ? "extern " : "";
-            string async_type = "";
-            string signal_type = "";
-            if (method_sym is Vala.Method) {
-                var mt = (Vala.Method) method_sym;
-                async_type = mt.coroutine && !mt.get_async_begin_parameters ().is_empty ? "async " : "";
-            }
-            signal_type = (method_sym is Vala.Signal) ? "signal " : "";
+            string async_type = is_async ? "async ": "";
+            string signal_type = (method_sym is Vala.Signal) ? "signal " : "";
             string err_string = "";
             var error_types = new Vala.ArrayList<Vala.DataType> ();
             method_sym.get_error_types (error_types);
@@ -1071,9 +1072,9 @@ class Vls.Server {
                 else
                     parent_str = "";
                 return extern_kw + async_type + signal_type + delg_type + 
-                    (ret_type ?? "void") + @" $parent_str$(sym.name)$type_params ($param_string)$err_string";
+                    (ret_type ?? "void") + @" $parent_str$(name_override ?? sym.name)$type_params ($param_string)$err_string";
             } else {
-                string sym_name = sym.name == ".new" ? (parent_str ?? creation_method.class_name) : sym.name;
+                string sym_name = name_override ?? (sym.name == ".new" ? (parent_str ?? creation_method.class_name) : sym.name);
                 string prefix_str = "";
                 if (parent_str != null)
                     prefix_str = @"$parent_str::";
@@ -1109,7 +1110,7 @@ class Vls.Server {
             if (var_sym.variable_type == null)
                 return null;
             string weak_kw = (var_sym.variable_type.value_owned ||
-                !(var_sym.variable_type is Vala.ReferenceType)) ? "" : "weak ";
+                    !(var_sym.variable_type is Vala.ReferenceType)) ? "" : "weak ";
             if (only_type_names)
                 return @"$weak_kw$(var_sym.variable_type)";
             else {
@@ -1123,8 +1124,9 @@ class Vls.Server {
                     var foreach_stmt = find_ancestor (var_sym, node => node is Vala.ForeachStatement) as Vala.ForeachStatement;
                     if (foreach_stmt != null && var_sym.name == foreach_stmt.variable_name) {
                         init_str = @" in $(foreach_stmt.collection)";
-                    } else if (var_sym.initializer != null && var_sym.initializer.source_reference != null)
+                    } else if (var_sym.initializer != null && var_sym.initializer.source_reference != null) {
                         init_str = @" = $(get_expr_repr (var_sym.initializer))";
+                    }
                 }
                 return @"$weak_kw$(var_sym.variable_type) $parent_str$(var_sym.name)$init_str";
             }
@@ -1336,7 +1338,8 @@ class Vls.Server {
                 // check whether the symbol is accessible
                 if (!is_symbol_accessible (method_sym, current_scope))
                     continue;
-                completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
+                completions.add (new CompletionItem.from_symbol (method_sym, (method_sym is Vala.CreationMethod) ? 
+                    CompletionItemKind.Constructor : CompletionItemKind.Method));
             }
 
             if (!in_oce) {
@@ -1378,7 +1381,7 @@ class Vls.Server {
                     completions.add (new CompletionItem.from_symbol (enum_sym, CompletionItemKind.Enum));
 
                 foreach (var delegate_sym in object_type.get_delegates ())
-                    completions.add (new CompletionItem.from_symbol (delegate_sym, CompletionItemKind.Event));
+                    completions.add (new CompletionItem.from_symbol (delegate_sym, CompletionItemKind.Interface));
             }
 
             // if we're inside an OCE (which are treated as instances), get only inner types
@@ -1503,6 +1506,8 @@ class Vls.Server {
             completions.add (new CompletionItem.from_symbol (struct_sym, CompletionItemKind.Struct));
         foreach (var method_sym in ns.get_methods ())
             completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
+        foreach (var delg_sym in ns.get_delegates ())
+            completions.add (new CompletionItem.from_symbol (delg_sym, CompletionItemKind.Interface));
         foreach (var enum_sym in ns.get_enums ())
             completions.add (new CompletionItem.from_symbol (enum_sym, CompletionItemKind.Enum));
         foreach (var err_sym in ns.get_error_domains ())
@@ -1518,11 +1523,31 @@ class Vls.Server {
         var sig_type = new Vala.SignalType (sig);
         completions.add_all_array (new CompletionItem []{
             new CompletionItem.from_symbol (sig_type.get_member ("connect"), CompletionItemKind.Method, 
-                new MarkupContent.plaintext ("Connect to signal")),
+                null, new MarkupContent.plaintext ("Connect to signal")),
             new CompletionItem.from_symbol (sig_type.get_member ("connect_after"), CompletionItemKind.Method,
-                new MarkupContent.plaintext ("Connect to signal after default handler")),
+                null, new MarkupContent.plaintext ("Connect to signal after default handler")),
             new CompletionItem.from_symbol (sig_type.get_member ("disconnect"), CompletionItemKind.Method,
-                new MarkupContent.plaintext ("Disconnect signal"))
+                null, new MarkupContent.plaintext ("Disconnect signal"))
+        });
+    }
+
+    /**
+     * Use this to complete members of an async method.
+     */
+    void add_completions_for_async_method (Vala.Method m, Gee.Set<CompletionItem> completions) {
+        string param_string = "";
+        bool at_least_one = false;
+        foreach (var p in m.get_async_begin_parameters ()) {
+            if (at_least_one)
+                param_string += ", ";
+            param_string += get_symbol_data_type (p, false, null, true);
+            at_least_one = true;
+        }
+        completions.add_all_array(new CompletionItem []{
+            new CompletionItem.from_symbol (m, CompletionItemKind.Method, "begin",
+                new MarkupContent.plaintext ("Begin asynchronous operation")),
+            new CompletionItem.from_symbol (m.get_end_method (), CompletionItemKind.Method, null,
+	    	new MarkupContent.plaintext ("Get results of asynchronous operation"))
         });
     }
 
@@ -1767,9 +1792,11 @@ class Vls.Server {
                         add_completions_for_type (type_sym, completions, current_scope, is_instance, in_oce);
                     // and try some more
                     else if (peeled is Vala.Signal)
-                        add_completions_for_signal (peeled as Vala.Signal, completions);
+                        add_completions_for_signal ((Vala.Signal) peeled, completions);
                     else if (peeled is Vala.Namespace)
-                        add_completions_for_ns (peeled as Vala.Namespace, completions);
+                        add_completions_for_ns ((Vala.Namespace) peeled, completions);
+                    else if (peeled is Vala.Method && ((Vala.Method) peeled).coroutine)
+                        add_completions_for_async_method ((Vala.Method) peeled, completions);
                     else {
                         if (result is Vala.MemberAccess &&
                             ((Vala.MemberAccess)result).inner != null &&
@@ -1869,17 +1896,18 @@ class Vls.Server {
             }
 
             if (fs.result.size == 0) {
-                debug ("[textDocument/signatureHelp] no results found");
-                reply_null (id, client, "textDocument/signatureHelp");
+                debug ("[$method] no results found");
+                reply_null (id, client, method);
                 return;
             }
 
             Vala.CodeNode result = get_best (fs, doc);
+            debug (@"[$method] got best: $(result.type_name) @ $(result.source_reference)");
 
             if (result is Vala.ExpressionStatement) {
                 var estmt = result as Vala.ExpressionStatement;
                 result = estmt.expression;
-                debug (@"[textDocument/signatureHelp] peeling away expression statement: $(result)");
+                debug (@"[$method] peeling away expression statement: $(result)");
             }
 
             var si = new SignatureInformation ();
@@ -1892,6 +1920,8 @@ class Vls.Server {
             Vala.Symbol? type_sym = null;
             // The parent symbol (useful for creation methods)
             Vala.Symbol? parent_sym = null;
+            // either "begin" or "end" or null
+            string? coroutine_name = null;
 
             if (result is Vala.MethodCall) {
                 var mc = result as Vala.MethodCall;
@@ -1901,7 +1931,7 @@ class Vls.Server {
                 if (active_param < 0)
                     active_param = 0;
                 foreach (var arg in arg_list) {
-                    debug (@"$mc: found argument ($arg)");
+                    debug (@"[$method] $mc: found argument ($arg)");
                 }
 
                 // get the method type from the expression
@@ -1918,6 +1948,23 @@ class Vls.Server {
                     } else if (ct is Vala.MethodType) {
                         var mt = ct as Vala.MethodType;
                         type_sym = mt.method_symbol;
+
+                        // handle special cases for .begin() and .end() in coroutines (async methods)
+                        if (mc.call is Vala.MemberAccess && mt.method_symbol.coroutine &&
+                            (explicit_sym == null || (((Vala.MemberAccess)mc.call).inner).symbol_reference == explicit_sym)) {
+                            coroutine_name = ((Vala.MemberAccess)mc.call).member_name;
+                            if (coroutine_name == "")   // is possible because of incomplete member access
+                                coroutine_name = null;
+                            if (coroutine_name == "begin")
+                                param_list = mt.method_symbol.get_async_begin_parameters ();
+                            else if (coroutine_name == "end") {
+                                param_list = mt.method_symbol.get_async_end_parameters ();
+                                type_sym = mt.method_symbol.get_end_method ();
+                                coroutine_name = null;  // .end() is its own method
+                            } else if (coroutine_name != null) {
+                                debug (@"[$method] coroutine name `$coroutine_name' not handled");
+                            }
+                        }
                     } else if (ct is Vala.SignalType) {
                         var st = ct as Vala.SignalType;
                         type_sym = st.signal_symbol;
@@ -1949,13 +1996,13 @@ class Vls.Server {
 
                 parent_sym = explicit_sym.parent_symbol;
             } else {
-                debug ("[textDocument/signatureHelp] neither a method call nor (complete) object creation expr");
-                reply_null (id, client, "textDocument/signatureHelp");
+                debug (@"[$method] neither a method call nor (complete) object creation expr");
+                reply_null (id, client, method);
                 return;     // early exit
             } 
 
             if (explicit_sym == null && type_sym == null) {
-                debug ("[$method] could not get explicit_sym and type_sym from $(result.type_name)");
+                debug (@"[$method] could not get explicit_sym and type_sym from $(result.type_name)");
                 reply_null (id, client, method);
                 return;
             }
@@ -1966,10 +2013,10 @@ class Vls.Server {
             } else {
                 // TODO: need a function to display symbol names correctly given context
                 if (type_sym != null) {
-                    si.label = get_symbol_data_type (type_sym, false, null, true);
+                    si.label = get_symbol_data_type (type_sym, false, null, true, coroutine_name);
                     si.documentation = get_symbol_comment (type_sym);
                 } else {
-                    si.label = get_symbol_data_type (explicit_sym, false, parent_sym, true);
+                    si.label = get_symbol_data_type (explicit_sym, false, parent_sym, true, coroutine_name);
                 }
                 // try getting the documentation for the explicit symbol
                 // if the type does not have any documentation
