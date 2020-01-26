@@ -1656,6 +1656,7 @@ class Vls.Server {
         bool is_pointer_access = false;
         long idx = (long) get_string_pos (doc.content, p.position.line, p.position.character);
         Position pos = p.position;
+        Position end_pos = p.position.to_libvala ();
         bool is_member_access = false;
         
         if (idx >= 2 && doc.content[idx-2:idx] == "->") {
@@ -1664,9 +1665,10 @@ class Vls.Server {
             debug (@"[$method] found pointer access");
             pos = p.position.translate (0, -2);
         } else if (p.context != null) {
-            if (p.context.triggerKind == CompletionTriggerKind.TriggerCharacter)
+            if (p.context.triggerKind == CompletionTriggerKind.TriggerCharacter) {
+                pos = p.position.translate (0, -1);
                 is_member_access = true;
-            else if (p.context.triggerKind == CompletionTriggerKind.Invoked)
+            } else if (p.context.triggerKind == CompletionTriggerKind.Invoked)
                 debug (@"[$method] invoked");
             // TODO: incomplete completions 
         } else {
@@ -1685,7 +1687,8 @@ class Vls.Server {
 
             debug (@"[$method] FindSymbol @ $(pos.to_libvala ())");
 
-            var fs = new FindSymbol (doc.file, pos.to_libvala (), true, !is_member_access);
+            var fs = new FindSymbol (doc.file, pos.to_libvala (), true, !is_member_access,
+                 is_member_access ? end_pos.to_libvala () : null);
 
             if (fs.result.size == 0) {
                 debug (@"[$method] no results found" + (is_member_access ? " for member access" : ""));
