@@ -176,8 +176,8 @@ class Vls.Compilation : Object {
             throw new FileError.FAILED (@"file `$filename' is already in the compilation");
         var source = new TextDocument (this, filename, is_writable);
         _sources[filename] = source;
-        if (source.package_name != null)
-            _packages.remove (source.package_name);
+        if (source.file.package_name != null)
+            _packages.remove (source.file.package_name);
         dirty = true;
         return source;
     }
