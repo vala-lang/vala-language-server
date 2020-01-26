@@ -1991,8 +1991,8 @@ class Vls.Server {
                         // handle special cases for .begin() and .end() in coroutines (async methods)
                         if (mc.call is Vala.MemberAccess && mt.method_symbol.coroutine &&
                             (explicit_sym == null || (((Vala.MemberAccess)mc.call).inner).symbol_reference == explicit_sym)) {
-                            coroutine_name = ((Vala.MemberAccess)mc.call).member_name;
-                            if (coroutine_name == "")   // is possible because of incomplete member access
+                            coroutine_name = ((Vala.MemberAccess)mc.call).member_name ?? "";
+                            if (coroutine_name[0] == 'S')   // is possible because of incomplete member access
                                 coroutine_name = null;
                             if (coroutine_name == "begin")
                                 param_list = mt.method_symbol.get_async_begin_parameters ();
@@ -2010,7 +2010,7 @@ class Vls.Server {
                     }
                 }
             } else if (result is Vala.ObjectCreationExpression
-                    && !((Vala.ObjectCreationExpression)result).is_incomplete) {
+                        && ((Vala.ObjectCreationExpression)result).initial_argument_count != -1) {
                 var oce = result as Vala.ObjectCreationExpression;
                 var arg_list = oce.get_argument_list ();
                 // TODO: NamedArgument's, whenever they become supported in upstream
