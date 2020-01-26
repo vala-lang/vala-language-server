@@ -1531,25 +1531,30 @@ class Vls.Server {
     /**
      * Use this when we're completing members of a namespace.
      */
-    void add_completions_for_ns (Vala.Namespace ns, Gee.Set<CompletionItem> completions) {
+    void add_completions_for_ns (Vala.Namespace ns, Gee.Set<CompletionItem> completions, bool in_oce) {
         foreach (var class_sym in ns.get_classes ())
             completions.add (new CompletionItem.from_symbol (class_sym, CompletionItemKind.Class));
-        foreach (var const_sym in ns.get_constants ())
-            completions.add (new CompletionItem.from_symbol (const_sym, CompletionItemKind.Constant));
+        // this is outside of the OCE check because while we cannot create new instances of 
+        // raw interfaces, it's possible for interfaces to contain instantiable types declared inside,
+        // so that we would call `new Iface.Thing ()'
         foreach (var iface_sym in ns.get_interfaces ())
             completions.add (new CompletionItem.from_symbol (iface_sym, CompletionItemKind.Interface));
         foreach (var struct_sym in ns.get_structs ())
             completions.add (new CompletionItem.from_symbol (struct_sym, CompletionItemKind.Struct));
-        foreach (var method_sym in ns.get_methods ())
-            completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
-        foreach (var delg_sym in ns.get_delegates ())
-            completions.add (new CompletionItem.from_symbol (delg_sym, CompletionItemKind.Interface));
-        foreach (var enum_sym in ns.get_enums ())
-            completions.add (new CompletionItem.from_symbol (enum_sym, CompletionItemKind.Enum));
         foreach (var err_sym in ns.get_error_domains ())
             completions.add (new CompletionItem.from_symbol (err_sym, CompletionItemKind.Enum));
         foreach (var ns_sym in ns.get_namespaces ())
             completions.add (new CompletionItem.from_symbol (ns_sym, CompletionItemKind.Module));
+        if (!in_oce) {
+            foreach (var const_sym in ns.get_constants ())
+                completions.add (new CompletionItem.from_symbol (const_sym, CompletionItemKind.Constant));
+            foreach (var method_sym in ns.get_methods ())
+                completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
+            foreach (var delg_sym in ns.get_delegates ())
+                completions.add (new CompletionItem.from_symbol (delg_sym, CompletionItemKind.Interface));
+            foreach (var enum_sym in ns.get_enums ())
+                completions.add (new CompletionItem.from_symbol (enum_sym, CompletionItemKind.Enum));
+        }
     }
     
     /**
@@ -1777,14 +1782,14 @@ class Vls.Server {
                         // once we leave a type symbol, we're no longer in an instance
                         in_instance = false;
                     } else if (owner is Vala.Namespace) {
-                        add_completions_for_ns ((Vala.Namespace) owner, completions);
+                        add_completions_for_ns ((Vala.Namespace) owner, completions, false);
                     } else {
                         debug (@"[$method] ignoring owner ($owner) ($(owner.type_name)) of scope");
                     }
                 }
                 // show members of all imported namespaces
                 foreach (var ud in doc.file.current_using_directives)
-                    add_completions_for_ns ((Vala.Namespace) ud.namespace_symbol, completions);
+                    add_completions_for_ns ((Vala.Namespace) ud.namespace_symbol, completions, in_oce);
             } else {
                 Vala.CodeNode result = get_best (fs, doc);
                 Vala.CodeNode? peeled = null;
@@ -1833,7 +1838,7 @@ class Vls.Server {
                     else if (peeled is Vala.Signal)
                         add_completions_for_signal ((Vala.Signal) peeled, completions);
                     else if (peeled is Vala.Namespace)
-                        add_completions_for_ns ((Vala.Namespace) peeled, completions);
+                        add_completions_for_ns ((Vala.Namespace) peeled, completions, in_oce);
                     else if (peeled is Vala.Method && ((Vala.Method) peeled).coroutine)
                         add_completions_for_async_method ((Vala.Method) peeled, completions);
                     else {
