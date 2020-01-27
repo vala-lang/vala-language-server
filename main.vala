@@ -2135,7 +2135,7 @@ class Vls.Server {
             do {
                 if (result is Vala.Symbol) {
                     var sym = (Vala.Symbol) result;
-                    if (sym.name.length > 0 && sym.name[0] == '.') {
+                    if (sym.name != null && sym.name.length > 0 && sym.name[0] == '.') {
                         if (sym is Vala.Variable && ((Vala.Variable)sym).initializer != null) {
                             result = ((Vala.Variable)sym).initializer;
                             continue;   // try again
