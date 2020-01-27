@@ -1151,8 +1151,11 @@ class Vls.Server {
             }
         } else if (sym is Vala.EnumValue) {
             var ev_sym = sym as Vala.EnumValue;
-            if (ev_sym.value != null)
+            if (ev_sym.value != null) {
+                if (only_type_names)
+                    return ev_sym.value.to_string ();
                 return @"$ev_sym = $(ev_sym.value)";
+            }
             return get_symbol_data_type (ev_sym.parent_symbol, true);
         } else if (sym is Vala.Constant) {
             var const_sym = sym as Vala.Constant;
@@ -1210,8 +1213,11 @@ class Vls.Server {
                 return (only_type_names ? "" : "interface ") + @"$type_string";
         } else if (sym is Vala.ErrorCode) {
             var err_sym = sym as Vala.ErrorCode;
-            if (err_sym.value != null)
+            if (err_sym.value != null) {
+                if (only_type_names)
+                    return err_sym.value.to_string ();
                 return @"$err_sym = $(err_sym.value)";
+            }
             return get_symbol_data_type (err_sym.parent_symbol, true);
         } else if (sym is Vala.Struct) {
             var struct_sym = sym as Vala.Struct;

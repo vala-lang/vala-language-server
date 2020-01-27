@@ -65,6 +65,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
                 return existing_sym;
             else if (existing_sym.kind == Field && dsym.kind == Property) {
                 existing_sym.name = dsym.name;
+                existing_sym.detail = dsym.detail;
                 existing_sym.kind = dsym.kind;
                 existing_sym.range = dsym.range;
                 return existing_sym;
