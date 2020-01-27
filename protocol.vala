@@ -220,6 +220,7 @@ namespace LanguageServer {
 
         public DocumentSymbol.from_vala_symbol (Vala.Symbol sym, SymbolKind kind) {
             this.name = sym.name;
+            this.detail = Vls.Server.get_symbol_data_type (sym, true, null, true);
             this.kind = kind;
             this.range = Vls.Server.get_best_range (sym);
             this.selectionRange = new Range.from_sourceref (sym.source_reference);
