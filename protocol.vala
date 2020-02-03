@@ -375,19 +375,19 @@ namespace LanguageServer {
         public string label { get; set; }
         public CompletionItemKind kind { get; set; }
         public string detail { get; set; }
-        public MarkupContent documentation { get; set; }
+        public MarkupContent? documentation { get; set; }
         public bool deprecated { get; set; }
         private uint _hash;
         protected string _hash_string;
 
         private CompletionItem () {}
 
-        public CompletionItem.from_symbol (Vala.Symbol sym, CompletionItemKind kind, 
-            string? label_override = null, MarkupContent? default_doc = null) {
+        public CompletionItem.from_symbol (Vala.Symbol sym, CompletionItemKind kind,
+            MarkupContent? documentation, string? label_override = null) {
             this.label = label_override ?? sym.name;
             this.kind = kind;
             this.detail = Vls.Server.get_symbol_data_type (sym, false, null, false, label_override);
-            this.documentation = default_doc ?? Vls.Server.get_symbol_comment (sym);
+            this.documentation = documentation;
             this.deprecated = sym.get_attribute_bool ("Version", "deprecated");
             this._hash_string = @"$label $(Vls.Server.get_symbol_data_type (sym, true)) $kind";
             this._hash = _hash_string.hash ();

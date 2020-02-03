@@ -28,6 +28,7 @@ subdir('gnome-builder')
 src = files([
     'main.vala',
     'find_symbol.vala',
+    'girdocumentation.vala',
     'list_symbols.vala',
     'projects/buildtarget.vala',
     'projects/compilation.vala',
