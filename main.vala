@@ -67,6 +67,10 @@ class Vls.Server {
      * Same idea as shared_vapis
      */
     Compilation shared_girs;
+    /**
+     * Contains documentation from found GIR files.
+     */
+    GirDocumentation documentation;
     HashSet<Request> pending_requests;
 
     [CCode (has_target = false)]
@@ -387,6 +391,9 @@ class Vls.Server {
                 }
             }
         }
+
+        // create documentation (compiles GIR files too)
+        documentation = new GirDocumentation (package_files.values);
 
         try {
             client.reply (id, buildDict (
@@ -1265,15 +1272,22 @@ class Vls.Server {
         return null;
     }
 
-    public static LanguageServer.MarkupContent? get_symbol_comment (Vala.Symbol sym) {
-        if (sym.comment == null)
+    public LanguageServer.MarkupContent? get_symbol_documentation (Vala.Symbol sym) {
+        var gir_sym = documentation.find_gir_symbol (sym);
+        string? comment = null;
+
+        if (sym.comment != null) {
+            comment = sym.comment.content;
+            try {
+                comment = /^\s*\*(.*)/m.replace (comment, comment.length, 0, "\\1");
+            } catch (RegexError e) {
+                warning (@"failed to parse comment...\n$comment\n...");
+                comment = "(failed to parse comment)";
+            }
+        } else if (gir_sym != null && gir_sym.comment != null) {
+            comment = GirDocumentation.render_comment (gir_sym.comment);
+        } else {
             return null;
-        string comment = sym.comment.content;
-        try {
-            comment = /^\s*\*(.*)/m.replace (comment, comment.length, 0, "\\1");
-        } catch (RegexError e) {
-            warning (@"failed to parse comment...\n$comment\n...");
-            comment = "(failed to parse comment)";
         }
 
         return new MarkupContent () {
@@ -1364,7 +1378,7 @@ class Vls.Server {
                 if (!is_symbol_accessible (method_sym, current_scope))
                     continue;
                 completions.add (new CompletionItem.from_symbol (method_sym, (method_sym is Vala.CreationMethod) ? 
-                    CompletionItemKind.Constructor : CompletionItemKind.Method));
+                    CompletionItemKind.Constructor : CompletionItemKind.Method, get_symbol_documentation (method_sym)));
             }
 
             if (!in_oce) {
@@ -1373,7 +1387,7 @@ class Vls.Server {
                         || field_sym.is_instance_member () != is_instance
                         || !is_symbol_accessible (field_sym, current_scope))
                         continue;
-                    completions.add (new CompletionItem.from_symbol (field_sym, CompletionItemKind.Field));
+                    completions.add (new CompletionItem.from_symbol (field_sym, CompletionItemKind.Field, get_symbol_documentation (field_sym)));
                 }
             }
 
@@ -1382,14 +1396,14 @@ class Vls.Server {
                     if (signal_sym.is_instance_member () != is_instance 
                         || !is_symbol_accessible (signal_sym, current_scope))
                         continue;
-                    completions.add (new CompletionItem.from_symbol (signal_sym, CompletionItemKind.Event));
+                    completions.add (new CompletionItem.from_symbol (signal_sym, CompletionItemKind.Event, get_symbol_documentation (signal_sym)));
                 }
 
                 foreach (var prop_sym in object_type.get_properties ()) {
                     if (prop_sym.is_instance_member () != is_instance
                         || !is_symbol_accessible (prop_sym, current_scope))
                         continue;
-                    completions.add (new CompletionItem.from_symbol (prop_sym, CompletionItemKind.Property));
+                    completions.add (new CompletionItem.from_symbol (prop_sym, CompletionItemKind.Property, get_symbol_documentation (prop_sym)));
                     seen_props.add (prop_sym.name);
                 }
             }
@@ -1399,26 +1413,26 @@ class Vls.Server {
                 foreach (var constant_sym in object_type.get_constants ()) {
                     if (!is_symbol_accessible (constant_sym, current_scope))
                         continue;
-                    completions.add (new CompletionItem.from_symbol (constant_sym, CompletionItemKind.Constant));
+                    completions.add (new CompletionItem.from_symbol (constant_sym, CompletionItemKind.Constant, get_symbol_documentation (constant_sym)));
                 }
 
                 foreach (var enum_sym in object_type.get_enums ())
-                    completions.add (new CompletionItem.from_symbol (enum_sym, CompletionItemKind.Enum));
+                    completions.add (new CompletionItem.from_symbol (enum_sym, CompletionItemKind.Enum, get_symbol_documentation (enum_sym)));
 
                 foreach (var delegate_sym in object_type.get_delegates ())
-                    completions.add (new CompletionItem.from_symbol (delegate_sym, CompletionItemKind.Interface));
+                    completions.add (new CompletionItem.from_symbol (delegate_sym, CompletionItemKind.Interface, get_symbol_documentation (delegate_sym)));
             }
 
             // if we're inside an OCE (which are treated as instances), get only inner types
             if (!is_instance || in_oce) {
                 foreach (var class_sym in object_type.get_classes ())
-                    completions.add (new CompletionItem.from_symbol (class_sym, CompletionItemKind.Class));
+                    completions.add (new CompletionItem.from_symbol (class_sym, CompletionItemKind.Class, get_symbol_documentation (class_sym)));
 
                 foreach (var iface_sym in object_type.get_interfaces ())
-                    completions.add (new CompletionItem.from_symbol (iface_sym, CompletionItemKind.Interface));
+                    completions.add (new CompletionItem.from_symbol (iface_sym, CompletionItemKind.Interface, get_symbol_documentation (iface_sym)));
 
                 foreach (var struct_sym in object_type.get_structs ())
-                    completions.add (new CompletionItem.from_symbol (struct_sym, CompletionItemKind.Struct));
+                    completions.add (new CompletionItem.from_symbol (struct_sym, CompletionItemKind.Struct, get_symbol_documentation (struct_sym)));
             }
 
             // get instance members of supertypes
@@ -1447,17 +1461,17 @@ class Vls.Server {
                 if (method_sym.is_instance_member () != is_instance
                     || !is_symbol_accessible (method_sym, current_scope))
                     continue;
-                completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
+                completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method, get_symbol_documentation (method_sym)));
             }
 
             if (!is_instance) {
                 foreach (var constant_sym in enum_type.get_constants ()) {
                     if (!is_symbol_accessible (constant_sym, current_scope))
                         continue;
-                    completions.add (new CompletionItem.from_symbol (constant_sym, CompletionItemKind.Constant));
+                    completions.add (new CompletionItem.from_symbol (constant_sym, CompletionItemKind.Constant, get_symbol_documentation (constant_sym)));
                 }
                 foreach (var value_sym in enum_type.get_values ())
-                    completions.add (new CompletionItem.from_symbol (value_sym, CompletionItemKind.EnumMember));
+                    completions.add (new CompletionItem.from_symbol (value_sym, CompletionItemKind.EnumMember, get_symbol_documentation (value_sym)));
             }
         } else if (type is Vala.ErrorDomain) {
             /**
@@ -1469,7 +1483,7 @@ class Vls.Server {
             foreach (var code_sym in errdomain_type.get_codes ()) {
                 if (code_sym.is_instance_member () != is_instance)
                     continue;
-                completions.add (new CompletionItem.from_symbol (code_sym, CompletionItemKind.Value));
+                completions.add (new CompletionItem.from_symbol (code_sym, CompletionItemKind.Value, get_symbol_documentation (code_sym)));
             }
 
             if (!in_oce) {
@@ -1477,7 +1491,7 @@ class Vls.Server {
                     if (method_sym.is_instance_member () != is_instance
                         || !is_symbol_accessible (method_sym, current_scope))
                         continue;
-                    completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
+                    completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method, get_symbol_documentation (method_sym)));
                 }
             }
 
@@ -1505,28 +1519,28 @@ class Vls.Server {
                 // struct fields are always public
                 if (field_sym.is_instance_member () != is_instance)
                     continue;
-                completions.add (new CompletionItem.from_symbol (field_sym, CompletionItemKind.Field));
+                completions.add (new CompletionItem.from_symbol (field_sym, CompletionItemKind.Field, get_symbol_documentation (field_sym)));
             }
 
             foreach (var method_sym in struct_type.get_methods ()) {
                 if (method_sym.is_instance_member () != is_instance
                     || !is_symbol_accessible (method_sym, current_scope))
                     continue;
-                completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
+                completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method, get_symbol_documentation (method_sym)));
             }
 
             foreach (var prop_sym in struct_type.get_properties ()) {
                 if (prop_sym.is_instance_member () != is_instance
                     || !is_symbol_accessible (prop_sym, current_scope))
                     continue;
-                completions.add (new CompletionItem.from_symbol (prop_sym, CompletionItemKind.Property));
+                completions.add (new CompletionItem.from_symbol (prop_sym, CompletionItemKind.Property, get_symbol_documentation (prop_sym)));
             }
 
             if (!is_instance) {
                 foreach (var constant_sym in struct_type.get_constants ()) {
                     if (!is_symbol_accessible (constant_sym, current_scope))
                         continue;
-                    completions.add (new CompletionItem.from_symbol (constant_sym, CompletionItemKind.Constant));
+                    completions.add (new CompletionItem.from_symbol (constant_sym, CompletionItemKind.Constant, get_symbol_documentation (constant_sym)));
                 }
             }
         } else {
@@ -1539,27 +1553,27 @@ class Vls.Server {
      */
     void add_completions_for_ns (Vala.Namespace ns, Gee.Set<CompletionItem> completions, bool in_oce) {
         foreach (var class_sym in ns.get_classes ())
-            completions.add (new CompletionItem.from_symbol (class_sym, CompletionItemKind.Class));
+            completions.add (new CompletionItem.from_symbol (class_sym, CompletionItemKind.Class, get_symbol_documentation (class_sym)));
         // this is outside of the OCE check because while we cannot create new instances of 
         // raw interfaces, it's possible for interfaces to contain instantiable types declared inside,
         // so that we would call `new Iface.Thing ()'
         foreach (var iface_sym in ns.get_interfaces ())
-            completions.add (new CompletionItem.from_symbol (iface_sym, CompletionItemKind.Interface));
+            completions.add (new CompletionItem.from_symbol (iface_sym, CompletionItemKind.Interface, get_symbol_documentation (iface_sym)));
         foreach (var struct_sym in ns.get_structs ())
-            completions.add (new CompletionItem.from_symbol (struct_sym, CompletionItemKind.Struct));
+            completions.add (new CompletionItem.from_symbol (struct_sym, CompletionItemKind.Struct, get_symbol_documentation (struct_sym)));
         foreach (var err_sym in ns.get_error_domains ())
-            completions.add (new CompletionItem.from_symbol (err_sym, CompletionItemKind.Enum));
+            completions.add (new CompletionItem.from_symbol (err_sym, CompletionItemKind.Enum, get_symbol_documentation (err_sym)));
         foreach (var ns_sym in ns.get_namespaces ())
-            completions.add (new CompletionItem.from_symbol (ns_sym, CompletionItemKind.Module));
+            completions.add (new CompletionItem.from_symbol (ns_sym, CompletionItemKind.Module, get_symbol_documentation (ns_sym)));
         if (!in_oce) {
             foreach (var const_sym in ns.get_constants ())
-                completions.add (new CompletionItem.from_symbol (const_sym, CompletionItemKind.Constant));
+                completions.add (new CompletionItem.from_symbol (const_sym, CompletionItemKind.Constant, get_symbol_documentation (const_sym)));
             foreach (var method_sym in ns.get_methods ())
-                completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method));
+                completions.add (new CompletionItem.from_symbol (method_sym, CompletionItemKind.Method, get_symbol_documentation (method_sym)));
             foreach (var delg_sym in ns.get_delegates ())
-                completions.add (new CompletionItem.from_symbol (delg_sym, CompletionItemKind.Interface));
+                completions.add (new CompletionItem.from_symbol (delg_sym, CompletionItemKind.Interface, get_symbol_documentation (delg_sym)));
             foreach (var enum_sym in ns.get_enums ())
-                completions.add (new CompletionItem.from_symbol (enum_sym, CompletionItemKind.Enum));
+                completions.add (new CompletionItem.from_symbol (enum_sym, CompletionItemKind.Enum, get_symbol_documentation (enum_sym)));
         }
     }
     
@@ -1570,11 +1584,11 @@ class Vls.Server {
         var sig_type = new Vala.SignalType (sig);
         completions.add_all_array (new CompletionItem []{
             new CompletionItem.from_symbol (sig_type.get_member ("connect"), CompletionItemKind.Method, 
-                null, new MarkupContent.plaintext ("Connect to signal")),
+                new MarkupContent.plaintext ("Connect to signal")),
             new CompletionItem.from_symbol (sig_type.get_member ("connect_after"), CompletionItemKind.Method,
-                null, new MarkupContent.plaintext ("Connect to signal after default handler")),
+                new MarkupContent.plaintext ("Connect to signal after default handler")),
             new CompletionItem.from_symbol (sig_type.get_member ("disconnect"), CompletionItemKind.Method,
-                null, new MarkupContent.plaintext ("Disconnect signal"))
+                new MarkupContent.plaintext ("Disconnect signal"))
         });
     }
 
@@ -1591,9 +1605,9 @@ class Vls.Server {
             at_least_one = true;
         }
         completions.add_all_array(new CompletionItem []{
-            new CompletionItem.from_symbol (m, CompletionItemKind.Method, "begin",
-                new MarkupContent.plaintext ("Begin asynchronous operation")),
-            new CompletionItem.from_symbol (m.get_end_method (), CompletionItemKind.Method, null,
+            new CompletionItem.from_symbol (m, CompletionItemKind.Method,
+                new MarkupContent.plaintext ("Begin asynchronous operation"), "begin"),
+            new CompletionItem.from_symbol (m.get_end_method (), CompletionItemKind.Method,
 	    	new MarkupContent.plaintext ("Get results of asynchronous operation"))
         });
     }
@@ -1764,7 +1778,7 @@ class Vls.Server {
                         in_instance = this_param != null;
                         if (in_instance) {
                             // add `this' parameter
-                            completions.add (new CompletionItem.from_symbol (this_param, CompletionItemKind.Constant));
+                            completions.add (new CompletionItem.from_symbol (this_param, CompletionItemKind.Constant, get_symbol_documentation (this_param)));
                         }
                         var symtab = current_scope.get_symbol_table ();
                         if (symtab == null)
@@ -1781,7 +1795,8 @@ class Vls.Server {
                             if (sr_begin.compare (fs.pos) > 0)
                                 continue;
                             completions.add (new CompletionItem.from_symbol (sym, 
-                                (sym is Vala.Constant) ? CompletionItemKind.Constant : CompletionItemKind.Variable));
+                                (sym is Vala.Constant) ? CompletionItemKind.Constant : CompletionItemKind.Variable,
+                                get_symbol_documentation (sym)));
                         }
                     } else if (owner is Vala.TypeSymbol) {
                         add_completions_for_type ((Vala.TypeSymbol) owner, completions, best_scope, in_instance, in_oce, seen_props);
@@ -2059,26 +2074,26 @@ class Vls.Server {
 
             if (explicit_sym == null) {
                 si.label = get_symbol_data_type (type_sym, false, null, true);
-                si.documentation = get_symbol_comment (type_sym);
+                si.documentation = get_symbol_documentation (type_sym);
             } else {
                 // TODO: need a function to display symbol names correctly given context
                 if (type_sym != null) {
                     si.label = get_symbol_data_type (type_sym, false, null, true, coroutine_name);
-                    si.documentation = get_symbol_comment (type_sym);
+                    si.documentation = get_symbol_documentation (type_sym);
                 } else {
                     si.label = get_symbol_data_type (explicit_sym, false, parent_sym, true, coroutine_name);
                 }
                 // try getting the documentation for the explicit symbol
                 // if the type does not have any documentation
                 if (si.documentation == null)
-                    si.documentation = get_symbol_comment (explicit_sym);
+                    si.documentation = get_symbol_documentation (explicit_sym);
             }
 
             if (param_list != null) {
                 foreach (var parameter in param_list) {
                     si.parameters.add (new ParameterInformation () {
                         label = get_symbol_data_type (parameter, false, null, true),
-                        documentation = get_symbol_comment (parameter)
+                        documentation = get_symbol_documentation (parameter)
                     });
                     debug (@"found parameter $parameter (name = $(parameter.name))");
                 }
@@ -2152,7 +2167,7 @@ class Vls.Server {
                         language = "vala",
                         value = get_symbol_data_type (result as Vala.Symbol, false, null, true)
                     });
-                    var comment = get_symbol_comment (result as Vala.Symbol);
+                    var comment = get_symbol_documentation (result as Vala.Symbol);
                     if (comment != null) {
                         hoverInfo.contents.add (new MarkedString () {
                             value = comment.value
@@ -2167,7 +2182,7 @@ class Vls.Server {
                         value = get_symbol_data_type (sym, 
                             result is Vala.Literal || (is_temp_expr && !(sym is Vala.Callable)), null, true)
                     });
-                    var comment = get_symbol_comment (sym);
+                    var comment = get_symbol_documentation (sym);
                     if (comment != null) {
                         hoverInfo.contents.add (new MarkedString () {
                             value = comment.value

@@ -2,7 +2,6 @@ using Gee;
 
 /**
  * Wraps a Vala.CodeContext and refreshes it as necessary.
- * TODO: could we implement a GIR documentation symbol resolver by extending this class?
  */
 class Vls.Compilation : Object {
     private weak BuildTarget? _parent_target;
