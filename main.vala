@@ -51,10 +51,10 @@ class Vls.Server {
     HashTable<string, CallHandler> call_handlers;
     InitializeParams init_params;
 
-    const uint check_update_context_period_ms = 200;
-    const int64 update_context_delay_inc_us = check_update_context_period_ms * 50;
+    const uint check_update_context_period_ms = 100;
+    const int64 update_context_delay_inc_us = 1000;
     const int64 update_context_delay_max_us = 1000 * 1000;
-    const uint wait_for_context_update_delay_ms = 500;
+    const uint wait_for_context_update_delay_ms = 200;
 
     HashSet<BuildTarget> builds;
     /**
