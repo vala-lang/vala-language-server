@@ -1163,7 +1163,7 @@ class Vls.Server {
                     return ev_sym.value.to_string ();
                 return @"$ev_sym = $(ev_sym.value)";
             }
-            return get_symbol_data_type (ev_sym.parent_symbol, true);
+            return ev_sym.to_string ();
         } else if (sym is Vala.Constant) {
             var const_sym = sym as Vala.Constant;
             string type_string = "";
@@ -1225,7 +1225,7 @@ class Vls.Server {
                     return err_sym.value.to_string ();
                 return @"$err_sym = $(err_sym.value)";
             }
-            return get_symbol_data_type (err_sym.parent_symbol, true);
+            return err_sym.to_string ();
         } else if (sym is Vala.Struct) {
             var struct_sym = sym as Vala.Struct;
             string extern_kw = struct_sym.is_extern ? "extern " : "";
