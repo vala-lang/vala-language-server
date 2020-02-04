@@ -2353,9 +2353,11 @@ class Vls.Server {
             bool is_abstract_type = (result is Vala.Interface) || ((result is Vala.Class) && ((Vala.Class)result).is_abstract);
             bool is_abstract_or_virtual_method = (result is Vala.Method) && 
                 (((Vala.Method)result).is_abstract || ((Vala.Method)result).is_virtual);
+            bool is_abstract_or_virtual_property = (result is Vala.Property) &&
+                (((Vala.Property)result).is_abstract || ((Vala.Property)result).is_virtual);
 
-            if (!is_abstract_type && !is_abstract_or_virtual_method) {
-                debug (@"[$method] best is neither an abstract type/interface nor abstract/virtual method");
+            if (!is_abstract_type && !is_abstract_or_virtual_method && !is_abstract_or_virtual_property) {
+                debug (@"[$method] best is neither an abstract type/interface nor abstract/virtual method/property");
                 reply_null (id, client, method);
                 return;
             }
@@ -2377,11 +2379,16 @@ class Vls.Server {
                         }
                         return false;
                     });
-                } else {
+                } else if (is_abstract_or_virtual_method) {
                     fs2 = new FindSymbol.with_filter (td.file, result,
                     (needle, node) => needle != node && (node is Vala.Method) && 
                         (((Vala.Method)node).base_method == needle ||
                          ((Vala.Method)node).base_interface_method == needle));
+                } else {
+                    fs2 = new FindSymbol.with_filter (td.file, result,
+                    (needle, node) => needle != node && (node is Vala.Property) &&
+                        (((Vala.Property)node).base_property == needle ||
+                         ((Vala.Property)node).base_interface_property == needle));
                 }
                 references.add_all (fs2.result);
             }
