@@ -48,11 +48,6 @@ class Vls.Compilation : Object {
             if (dirty) {
                 debug ("dirty context, rebuilding");
 
-                if (_ctx != null) {
-                    // stupid workaround for memory leaks in Vala 0.38
-                    workaround_038 (_ctx, _sources.values);
-                    workaround_038 (_ctx, _autosources.values);
-                }
                 // generate a new code context
                 _ctx = new Vala.CodeContext () { keep_going = true };
                 _autosources.clear ();

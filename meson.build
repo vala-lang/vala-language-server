@@ -36,8 +36,7 @@ src = files([
     'projects/simpletarget.vala',
     'protocol.vala',
     'reporter.vala',
-    'textdocument.vala',
-    'vala038_workarounds.vala',
+    'textdocument.vala'
 ])
 
 if host_machine.system() == 'windows'
