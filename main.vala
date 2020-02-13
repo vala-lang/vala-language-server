@@ -1266,6 +1266,8 @@ class Vls.Server {
                 (dtor.this_parameter.variable_type.type_symbol.to_string ());
             string dtor_name = dtor.name ?? dtor.this_parameter.variable_type.type_symbol.name;
             return @"$parent_str::~$dtor_name ()";
+        } else if (sym is Vala.TypeParameter) {
+            return sym.name;
         } else {
             debug (@"get_symbol_data_type: unsupported symbol $(sym.type_name)");
         }
