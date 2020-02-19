@@ -45,4 +45,8 @@ class Vls.SimpleTarget : BuildTarget {
             compilations.add (compilation);
         }
     }
+
+    public override string to_string () {
+        return @"SimpleTarget($id)";
+    }
 }

@@ -25,10 +25,9 @@ conf_file = configure_file(input: 'config.vala.in',
 
 subdir('gnome-builder')
 
-src = files([
+vls_src = files([
     'main.vala',
     'find_symbol.vala',
-    'girdocumentation.vala',
     'list_symbols.vala',
     'projects/buildtarget.vala',
     'projects/compilation.vala',
@@ -36,19 +35,31 @@ src = files([
     'projects/simpletarget.vala',
     'protocol.vala',
     'reporter.vala',
-    'textdocument.vala'
+    'textdocument.vala',
+    'util.vala'
 ])
 
 if host_machine.system() == 'windows'
     deps += dependency('gio-windows-2.0')
-    src += 'windows.vapi'
+    vls_src += 'windows.vapi'
     add_project_arguments(['--define=WINDOWS'], language: 'vala')
 else
     deps += dependency('gio-unix-2.0')
 endif
 
+if get_option('parse_system_girs')
+  vls_src += 'girdocumentation.vala'
+  add_project_arguments(['--define=PARSE_SYSTEM_GIRS'], language: 'vala')
+endif
+
+add_project_arguments(['--pkg=posix', '--enable-gobject-tracing', '--fatal-warnings'], language: 'vala')
+
 executable('vala-language-server',
-           dependencies: deps,
-           sources: [src, conf_file],
-           vala_args: ['--pkg=posix', '--enable-gobject-tracing', '--fatal-warnings'],
-           install: true)
+  dependencies: deps,
+  sources: [vls_src, conf_file],
+  install: true)
+
+executable('vls-testclient',
+  dependencies: deps,
+  sources: files(['tests/testclient.vala', 'util.vala']),
+  install: false)

@@ -1,7 +1,7 @@
 using LanguageServer;
 using Gee;
 
-class Vls.Request {
+class Vls.Request : Object {
     private int64? int_value;
     private string? string_value;
     private string? method;
@@ -43,7 +43,8 @@ errordomain Vls.ProjectError {
     JSON
 }
 
-class Vls.Server {
+class Vls.Server : Object {
+    private static bool received_signal = false;
     Jsonrpc.Server server;
     MainLoop loop;
 
@@ -67,11 +68,16 @@ class Vls.Server {
      * Same idea as shared_vapis
      */
     Compilation shared_girs;
+
+#if PARSE_SYSTEM_GIRS
     /**
      * Contains documentation from found GIR files.
      */
     GirDocumentation documentation;
+#endif
     HashSet<Request> pending_requests;
+
+    bool shutting_down = false;
 
     [CCode (has_target = false)]
     delegate void NotificationHandler (Vls.Server self, Jsonrpc.Client client, Variant @params);
@@ -80,7 +86,19 @@ class Vls.Server {
     delegate void CallHandler (Vls.Server self, Jsonrpc.Server server, Jsonrpc.Client client, string method, Variant id, Variant @params);
 
     private void log_handler (string? log_domain, LogLevelFlags log_levels, string message) {
-        stderr.printf ("%s: %s\n", log_domain == null ? "vls" : log_domain, message);
+        printerr ("%s: %s\n", log_domain == null ? "vls" : log_domain, message);
+    }
+
+    uint[] g_sources = {};
+    ulong event;
+
+    static construct {
+        Process.@signal (ProcessSignal.INT, () => {
+            Server.received_signal = true;
+        });
+        Process.@signal (ProcessSignal.TERM, () => {
+            Server.received_signal = true;
+        });
     }
 
     public Server (MainLoop loop) {
@@ -89,12 +107,6 @@ class Vls.Server {
         Log.set_handler ("jsonrpc-server", LogLevelFlags.LEVEL_MASK, log_handler);
 
         this.loop = loop;
-
-        Timeout.add (60 * 1000, () => {
-            debug (@"listening...");
-            return true;
-        });
-
         this.server = new Jsonrpc.Server ();
 
         // hack to prevent other things from corrupting JSON-RPC pipe:
@@ -130,10 +142,20 @@ class Vls.Server {
         }
 #endif
 
-        // disable SIGPIPE?
-        // Process.@signal (ProcessSignal.PIPE, signum => {} );
+        // shutdown if/when we get a signal
+        g_sources += Timeout.add (1 * 1000, () => {
+            if (Server.received_signal) {
+                shutdown_real ();
+                return Source.REMOVE;
+            }
+            return !this.shutting_down;
+        });
 
         server.accept_io_stream (new SimpleIOStream (input_stream, output_stream));
+
+        event = server.client_closed.connect (client => {
+            shutdown_real ();
+        });
 
         notif_handlers = new HashTable<string, NotificationHandler> (str_hash, str_equal);
         call_handlers = new HashTable<string, CallHandler> (str_hash, str_equal);
@@ -183,7 +205,7 @@ class Vls.Server {
     }
 
     // a{sv} only
-    Variant buildDict (...) {
+    public Variant buildDict (...) {
         var builder = new VariantBuilder (new VariantType ("a{sv}"));
         var l = va_list ();
         while (true) {
@@ -392,8 +414,10 @@ class Vls.Server {
             }
         }
 
+#if PARSE_SYSTEM_GIRS
         // create documentation (compiles GIR files too)
         documentation = new GirDocumentation (package_files.values);
+#endif
 
         try {
             client.reply (id, buildDict (
@@ -427,9 +451,9 @@ class Vls.Server {
         shared_girs.compile ();
 
         // listen for context update requests
-        Timeout.add (check_update_context_period_ms, () => {
+        g_sources += Timeout.add (check_update_context_period_ms, () => {
             check_update_context ();
-            return true;
+            return !this.shutting_down;
         });
     }
 
@@ -470,29 +494,6 @@ class Vls.Server {
             throw new IOError.CANCELLED ("Operation was cancelled");
 
         return results;
-    }
-
-    T? parse_variant<T> (Variant variant) {
-        var json = Json.gvariant_serialize (variant);
-        return Json.gobject_deserialize (typeof (T), json);
-    }
-
-    Variant object_to_variant (Object object) throws Error {
-        var json = Json.gobject_serialize (object);
-        return Json.gvariant_deserialize (json, null);
-    }
-
-    public static size_t get_string_pos (string str, uint lineno, uint charno) {
-        int linepos = -1;
-
-        for (uint lno = 0; lno < lineno; ++lno) {
-            int pos = str.index_of_char ('\n', linepos + 1);
-            if (pos == -1)
-                break;
-            linepos = pos;
-        }
-
-        return linepos + 1 + charno;
     }
 
     void cancelRequest (Jsonrpc.Client client, Variant @params) {
@@ -572,9 +573,11 @@ class Vls.Server {
 
         if (doc.is_writable) {
             debug (@"[textDocument/didOpen] opened file `$(doc.filename)'; requesting context update");
-            doc.content = fileContents;
-            doc.compilation.invalidate ();
-            request_context_update (client);
+            if (doc.content == null || doc.content != fileContents) {
+                doc.content = fileContents;
+                doc.compilation.invalidate ();
+                request_context_update (client);
+            }
         } else {
             debug (@"[textDocument/didOpen] opened read-only file `$(doc.filename)'");
         }
@@ -643,6 +646,7 @@ class Vls.Server {
 
     void check_update_context () {
         if (update_context_requests > 0 && get_monotonic_time () >= update_context_time_us) {
+            debug ("updating contexts and publishing diagnostics...");
             update_context_requests = 0;
             update_context_time_us = 0;
             /* This must come after the resetting of the two variables above,
@@ -699,7 +703,7 @@ class Vls.Server {
                     debug (@"Request ($req): cancelled before context update");
                     on_context_updated_func (true);
                 }
-                return false;
+                return Source.REMOVE;
             });
         }
     }
@@ -707,6 +711,8 @@ class Vls.Server {
     void publishDiagnostics (BuildTarget target, Jsonrpc.Client client) {
         var docs_not_published = new HashMap<string,TextDocument> ();
         var diags_without_source = new Json.Array ();
+
+        debug ("publishing diagnostics for target %s", target.to_string ());
 
         foreach (var compilation in target)
             foreach (var doc in compilation)
@@ -1000,8 +1006,8 @@ class Vls.Server {
         var file = sr.file;
         if (file.content == null)
             file.content = (string) file.get_mapped_contents ();
-        var from = (long)Server.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
-        var to = (long)Server.get_string_pos (file.content, sr.end.line-1, sr.end.column);
+        var from = (long)get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
+        var to = (long)get_string_pos (file.content, sr.end.line-1, sr.end.column);
         return file.content [from:to];
     }
 
@@ -1275,7 +1281,9 @@ class Vls.Server {
     }
 
     public LanguageServer.MarkupContent? get_symbol_documentation (Vala.Symbol sym) {
+#if PARSE_SYSTEM_GIRS
         var gir_sym = documentation.find_gir_symbol (sym);
+#endif
         string? comment = null;
 
         if (sym.comment != null) {
@@ -1286,8 +1294,10 @@ class Vls.Server {
                 warning (@"failed to parse comment...\n$comment\n...");
                 comment = "(failed to parse comment)";
             }
+#if PARSE_SYSTEM_GIRS
         } else if (gir_sym != null && gir_sym.comment != null) {
             comment = GirDocumentation.render_comment (gir_sym.comment);
+#endif
         } else {
             return null;
         }
@@ -2447,11 +2457,20 @@ class Vls.Server {
 
     void shutdown (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         reply_null (id, client, "shutdown");
-        debug ("shutting down...");
+        shutdown_real ();
     }
 
     void exit (Jsonrpc.Client client, Variant @params) {
+        shutdown_real ();
+    }
+
+    void shutdown_real () {
+        debug ("shutting down...");
+        this.shutting_down = true;
+        server.disconnect (event);
         loop.quit ();
+        foreach (uint id in g_sources)
+            Source.remove (id);
     }
 }
 

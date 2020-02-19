@@ -1,0 +1,1 @@
+option('parse_system_girs', type: 'boolean', value: true, description: 'Parse system GIRs for symbol documentation')

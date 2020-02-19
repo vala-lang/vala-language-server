@@ -177,7 +177,7 @@ class Vls.Compilation : Object {
     }
 
     public bool compile () {
-        if (!(needs_compile || dirty))
+        if (!(needs_compile || dirty) || _sources.is_empty)
             return false;
         Vala.CodeContext.push (this.code_context);
         var parser = new Vala.Parser ();
@@ -194,7 +194,6 @@ class Vls.Compilation : Object {
         foreach (var auto_source in get_internal_files ()) {
             try {
                 _autosources[auto_source.filename] = new TextDocument.from_sourcefile (this, auto_source, false);
-                debug (@"compilation: wrapped autosource `$(auto_source.filename)'");
             } catch (Error e) {
                 debug (@"compilation: failed to wrap autosource `$(auto_source.filename)': $(e.message)");
             }
