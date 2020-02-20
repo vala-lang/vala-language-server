@@ -69,6 +69,8 @@ class Vls.Server : Object {
      */
     Compilation shared_girs;
 
+    HashTable<string, LinkedList<TextDocument>> shared_docs;
+
 #if PARSE_SYSTEM_GIRS
     /**
      * Contains documentation from found GIR files.
@@ -163,6 +165,7 @@ class Vls.Server : Object {
         builds = new HashSet<BuildTarget> (BuildTarget.hash, BuildTarget.equal);
         shared_vapis = new Compilation.without_parent ();
         shared_girs = new Compilation.without_parent ();
+        shared_docs = new HashTable<string, LinkedList<TextDocument>> (str_hash, str_equal);
         pending_requests = new HashSet<Request> (Request.hash, Request.equal);
 
         server.notification.connect ((client, method, @params) => {
@@ -355,27 +358,28 @@ class Vls.Server : Object {
 
         // sanity checking
         var text_documents = new HashMap<string, TextDocument> ();
-        var build_targets_to_remove = new ArrayList<BuildTarget> ();
         foreach (var build_target in builds) {
             foreach (var compilation in build_target) {
                 foreach (var document in compilation) {
                     if (text_documents.has_key (document.uri)) {
                         var other_document = text_documents[document.uri];
-                        var target1 = other_document.compilation.parent_target;
-                        var target2 = document.compilation.parent_target;
-                        debug (@"[$method] the same text document $(document.uri) appears twice in $(target1) and $(target2)!");
-                        debug (@"[$method] will remove $(target2)");
-                        build_targets_to_remove.add (target2);
+                        LinkedList<TextDocument> dups_list;
+                        if (!shared_docs.contains (document.uri)) {
+                            dups_list = new LinkedList<TextDocument> ();
+                            shared_docs[document.uri] = dups_list;
+                        } else {
+                            dups_list = shared_docs[document.uri];
+                        }
+                        dups_list.add (other_document);
+                        dups_list.add (document);
+
+                        document.clones = dups_list;
+                        other_document.clones = dups_list;
                     } else {
                         text_documents[document.uri] = document;
                     }
                 }
             }
-        }
-
-        foreach (var build_target in build_targets_to_remove) {
-            builds.remove (build_target);
-            warning (@"[$method] removed build target $(build_target)!");
         }
 
         // compile everything, which may cause new packages to be added
@@ -575,7 +579,7 @@ class Vls.Server : Object {
             debug (@"[textDocument/didOpen] opened file `$(doc.filename)'; requesting context update");
             if (doc.content == null || doc.content != fileContents) {
                 doc.content = fileContents;
-                doc.compilation.invalidate ();
+                doc.synchronize_clones ();
                 request_context_update (client);
             }
         } else {
@@ -628,8 +632,8 @@ class Vls.Server : Object {
                 }
             }
             source.content = sb.str;
+            source.synchronize_clones ();
 
-            source.compilation.invalidate ();
             request_context_update (client);
         } else {
             debug (@"[textDocument/didChange] ignoring requested changes to read-only `$(source.filename)'");
