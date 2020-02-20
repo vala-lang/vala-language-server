@@ -1,3 +1,5 @@
+using Gee;
+
 class Vls.TextDocument : Object {
     public weak Compilation compilation { get; private set; }
     public string filename { get; private set; }
@@ -14,16 +16,20 @@ class Vls.TextDocument : Object {
         }
         set {
             file.content = value;
+            compilation.invalidate ();
         }
     }
 
     public bool is_writable { get; private set; }
 
+    /**
+     * The list of all TextDocumnts that refer to the same file.
+     */
+    public weak LinkedList<TextDocument>? clones { get; set; }
+
     public TextDocument (Compilation compilation,
                          string filename,
-                         bool is_writable = true,
-                         string? content = null,
-                         int version = 0) throws ConvertError, FileError {
+                         bool is_writable = true) throws ConvertError, FileError {
 
         if (!FileUtils.test (filename, FileTest.EXISTS)) {
             throw new FileError.NOENT ("file %s does not exist".printf (filename));
@@ -32,7 +38,6 @@ class Vls.TextDocument : Object {
         this.compilation = compilation;
         this.filename = filename;
         this.uri = Filename.to_uri (filename);
-        this.version = version;
         this.is_writable = is_writable;
 
         var type = Vala.SourceFileType.NONE;
@@ -41,7 +46,7 @@ class Vls.TextDocument : Object {
         else if (uri.has_suffix (".vapi") || uri.has_suffix (".gir"))
             type = Vala.SourceFileType.PACKAGE;
 
-        this.file = new Vala.SourceFile (compilation.code_context, type, filename, content);
+        this.file = new Vala.SourceFile (compilation.code_context, type, filename);
     }
 
     /**
@@ -56,5 +61,21 @@ class Vls.TextDocument : Object {
         this.version = 0;
         this.file = file;
         this.is_writable = is_writable;
+    }
+
+    public void synchronize_clones () {
+        if (clones != null) {
+            debug (@"$this: synchronizing clones");
+            foreach (var td in clones)
+                if (td != this) {
+                    td.version = this.version;
+                    td.content = this.content;
+                    debug (@"synchronized with $td");
+                }
+        }
+    }
+
+    public string to_string () {
+        return @"TextDocument($filename)";
     }
 }
