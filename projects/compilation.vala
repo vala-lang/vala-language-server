@@ -70,6 +70,9 @@ class Vls.Compilation : Object {
                         error ("unsupported Vala profile %s", profile.to_string ());
                 }
 
+                foreach (string define in _defines)
+                    _ctx.add_define (define);
+
                 _ctx.experimental = experimental;
                 _ctx.experimental_non_null = experimental_non_null;
                 _ctx.abi_stability = abi_stability;

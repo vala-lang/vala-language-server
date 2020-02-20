@@ -42,6 +42,20 @@ class Vls.MesonTarget : BuildTarget {
                                 profile = Vala.Profile.POSIX;
                             i++;
                         }
+                    } else if (param.has_prefix ("-D")) {
+                        if (param == "-D") {
+                            if (i+1 < target_source.parameters.length) {
+                                // the next argument is the value
+                                if (!args.has_key ("--define"))
+                                    args["--define"] = new ArrayList<string> ();
+                                args["--define"].add (target_source.parameters[i+1]);
+                                i++;
+                            }
+                        } else {
+                            if (!args.has_key ("--define"))
+                                args["--define"] = new ArrayList<string> ();
+                            args["--define"].add (param.substring (2));
+                        }
                     } else if (param == "--abi-stability") {
                         abi_stability = true;
                     } else {
