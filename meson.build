@@ -52,6 +52,10 @@ if get_option('parse_system_girs')
   add_project_arguments(['--define=PARSE_SYSTEM_GIRS'], language: 'vala')
 endif
 
+if get_option('active_parameter')
+  add_project_arguments(['--define=VALA_FEATURE_INITIAL_ARGUMENT_COUNT'], language: 'vala')
+endif
+
 add_project_arguments(['--pkg=posix', '--enable-gobject-tracing', '--fatal-warnings'], language: 'vala')
 
 executable('vala-language-server',
