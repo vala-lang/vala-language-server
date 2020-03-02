@@ -10,10 +10,12 @@
 - [x] symbol references
 - [x] goto implementation
 - [x] signature help
+    - active parameter support requires upstream changes in vala and is disabled by default. use `meson -Dactive_parameter=true` to enable. see [this MR](https://gitlab.gnome.org/GNOME/vala/-/merge_requests/95)
 - [x] hover
 - [x] symbol documentation
     - [x] basic (from comments)
     - [x] advanced (from GIR and VAPI files)
+        - this feature is unstable and depends on changes to GirParser in uptream vala, therefore it's currently disabled by default. use `meson -Dparse_system_girs=true` to enable
 - [x] search for symbols in workspace
 - [x] highlight active symbol in document
 - [ ] snippets
@@ -26,6 +28,7 @@
 ### Dependencies
 - `jsonrpc-glib-1.0`
 - `libvala-0.48` or later
+    - you MUST compile with vala master from commit `f8676a6584d5b67ac76e132061a9df5d92258b0f` or later
 
 ### Setup
 ```
