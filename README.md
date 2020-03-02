@@ -5,6 +5,7 @@
 - [x] code completion
     - [x] basic (member access and scope-visible completion)
     - [ ] advanced (context-sensitive suggestions)
+    - completion support relies heavily on changes made upstream to the Vala parser. See [this MR](https://gitlab.gnome.org/GNOME/vala/-/merge_requests/95) if you want to build VLS with improved completion ability
 - [x] document symbol outline
 - [x] goto definition
 - [x] symbol references
