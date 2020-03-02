@@ -2008,7 +2008,9 @@ class Vls.Server : Object {
                 var mc = result as Vala.MethodCall;
                 var arg_list = mc.get_argument_list ();
                 // TODO: NamedArgument's, whenever they become supported in upstream
+#if VALA_FEATURE_INITIAL_ARGUMENT_COUNT
                 active_param = mc.initial_argument_count - 1;
+#endif
                 if (active_param < 0)
                     active_param = 0;
                 foreach (var arg in arg_list) {
@@ -2052,11 +2054,16 @@ class Vls.Server : Object {
                     }
                 }
             } else if (result is Vala.ObjectCreationExpression
-                        && ((Vala.ObjectCreationExpression)result).initial_argument_count != -1) {
+#if VALA_FEATURE_INITIAL_ARGUMENT_COUNT
+                        && ((Vala.ObjectCreationExpression)result).initial_argument_count != -1
+#endif
+			) {
                 var oce = result as Vala.ObjectCreationExpression;
                 var arg_list = oce.get_argument_list ();
                 // TODO: NamedArgument's, whenever they become supported in upstream
+#if VALA_FEATURE_INITIAL_ARGUMENT_COUNT
                 active_param = oce.initial_argument_count - 1;
+#endif
                 if (active_param < 0)
                     active_param = 0;
                 foreach (var arg in arg_list) {
