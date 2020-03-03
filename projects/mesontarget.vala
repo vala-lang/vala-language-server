@@ -15,6 +15,8 @@ class Vls.MesonTarget : BuildTarget {
             Vala.Profile profile = Vala.Profile.GOBJECT;
             bool abi_stability = false;
             var args = new HashMap<string, ArrayList<string>> ();
+            var files_from_args = new HashSet<string> ();
+            bool ignore_next_arg = false;
 
             // get all flags
             for (int i=0; i<target_source.parameters.length; i++) {
@@ -59,9 +61,13 @@ class Vls.MesonTarget : BuildTarget {
                     } else if (param == "--abi-stability") {
                         abi_stability = true;
                     } else {
-                        debug (@"MesonTarget: ignoring argument `$param'");
+                        if (param == "--vapi" || param == "--internal-vapi"
+                         || param == "--gir") {
+                            ignore_next_arg = true;
+                        }
+                        debug (@"MesonTarget: ignoring flag `$param'");
                     }
-                } else {
+                } else if (!ignore_next_arg) {
                     int idx = param.index_of ("=");
                     if (idx != -1) {
                         // --[param_name]={value}
@@ -69,9 +75,15 @@ class Vls.MesonTarget : BuildTarget {
                         if (!args.has_key (param_name))
                             args[param_name] = new ArrayList<string> ();
                         args[param_name].add (param.substring (idx+1));
+                    } else if (param.has_suffix (".vapi") || param.has_suffix (".gir")) {
+                        // TODO: recognize basedir
+                        files_from_args.add (param);
                     } else {
                         debug (@"MesonTarget: ignoring argument `$param'");
                     }
+                } else {
+                    ignore_next_arg = false;
+                    debug (@"MesonTarget: ignoring argument `$param' because of previous argument");
                 }
             }
 
@@ -86,6 +98,11 @@ class Vls.MesonTarget : BuildTarget {
                     args["--define"]);
 
             // add source files to compilation
+            foreach (string source in files_from_args) {
+                debug (@"MesonTarget: adding source file `$source' from args");
+                compilation.add_source_file (source);
+            }
+
             foreach (string source in target_source.sources) {
                 if (!Path.is_absolute (source))
                     source = Path.build_filename (build_dir, source);
