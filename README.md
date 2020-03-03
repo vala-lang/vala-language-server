@@ -1,5 +1,15 @@
 # Vala Language Server [![Gitter](https://badges.gitter.im/vala-language-server/community.svg)](https://gitter.im/vala-language-server/community)
 
+## Contents
+1. Features
+2. Dependencies
+3. Setup
+    1. Building and Installing
+    2. With Vim
+    3. With Visual Studio Code
+    4. With GNOME Builder
+4. Contributing
+
 ### Features
 - [x] diagnostics
 - [x] code completion
@@ -21,21 +31,36 @@
 - [x] highlight active symbol in document
 - [ ] snippets
 - [ ] code actions
-
-#### build systems / environments:
-- [x] meson
-- [ ] cmake
+- [ ] workspaces
+- [ ] supported IDEs (see Setup below):
+    - [x] vim with `vim-lsp` plugin installed
+    - [x] Visual Studio Code
+    - [x] GNOME Builder >= 3.35
+    - [ ] IntelliJ
+- [ ] supported project build systems
+    - [x] meson
+    - [ ] autotoools
+    - [ ] cmake
 
 ### Dependencies
+- `glib-2.0`
+- `gobject-2.0`
+- `gio-2.0` and either `gio-unix-2.0` or `gio-windows-2.0`
+- `gee-0.8`
 - `jsonrpc-glib-1.0`
 - `libvala-0.48` or later
     - you MUST compile with vala master from commit `f8676a6584d5b67ac76e132061a9df5d92258b0f` or later
 
 ### Setup
+
+#### Building and Installing
 ```
-$ meson build
+$ meson -Dprefix=$PREFIX build
 $ ninja -C build
+$ sudo ninja -C build install
 ```
+
+This will install `vala-language-server` to `$PREFIX/bin`
 
 #### With Vim
 Once you have VLS installed, you can use it with `vim`.
@@ -53,9 +78,8 @@ if executable('vala-language-server')
 endif
 ```
 
-#### With VSCode
-- Clone this repo: https://github.com/benwaffle/vala-code
-- Check out the `language-server` branch
+#### With Visual Studio Code
+- Clone this repo: https://github.com/thiagoabreu/vala-code
 - Run `npm install`
 - open this folder in VS Code
 - `git submodule update --init`
@@ -63,15 +87,19 @@ endif
 - `git checkout master`
 - `meson build`
 - `ninja -C build`
-- Hit F5 in VS Code to run a new instance with the VLS
+- Hit F5 in VS Code to run a new instance with the VLS plugin
 
-#### With GNOME Builder (experimental)
-- In progress. See [this issue](https://github.com/benwaffle/vala-language-server/issues/12)
-- if you really want to try it out:
+#### With GNOME Builder
+- Support is currently available with Builder 3.35 and up
+- Running `ninja -C build install` should install the plugin to `$PREFIX/lib/gnome-builder/plugins`. Make sure you disable the GVLS plugin.
 
-1. open a Vala project in GNOME Builder
-2. make sure Vala plugin is installed and enabled, and Vala Pack is disabled
-3. open a file and run `kill <pidof vala-language-server>`. The server should restart and from then on you should be able to type and get diagnostics.
+### Contributing
+Want to help out? Here are some helpful resources:
 
-### libvala docs
-https://benwaffle.github.io/vala-language-server/index.html
+- If you're a newcomer, check out https://github.com/benwaffle/vala-language-server/issues?q=is%3Aissue+is%3Aopen+label%3Anewcomers
+- Gitter room is for project discussions: https://gitter.im/vala-language-server/community
+- `#vala` on gimpnet/IRC is for general discussions about Vala and collaboration with upstream
+- Vala wiki: https://wiki.gnome.org/Projects/Vala/
+- libvala documentation:
+    - https://benwaffle.github.io/vala-language-server/index.html
+    - https://gnome.pages.gitlab.gnome.org/vala/docs/index.html
