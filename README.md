@@ -1,5 +1,9 @@
 # Vala Language Server [![Gitter](https://badges.gitter.im/vala-language-server/community.svg)](https://gitter.im/vala-language-server/community)
 
+![vls-vscode](images/vls-vscode.png)
+![vls-vim](images/vls-vim.png)
+![vls-gb](images/vls-gb.png)
+
 ## Contents
 1. Features
 2. Dependencies
