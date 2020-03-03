@@ -79,15 +79,7 @@ endif
 ```
 
 #### With Visual Studio Code
-- Clone this repo: https://github.com/thiagoabreu/vala-code
-- Run `npm install`
-- open this folder in VS Code
-- `git submodule update --init`
-- `cd vala-lanugage-server`
-- `git checkout master`
-- `meson build`
-- `ninja -C build`
-- Hit F5 in VS Code to run a new instance with the VLS plugin
+- Install the Vala plugin (https://marketplace.visualstudio.com/items?itemName=prince781.vala)
 
 #### With GNOME Builder
 - Support is currently available with Builder 3.35 and up
