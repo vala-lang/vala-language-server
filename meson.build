@@ -1,4 +1,6 @@
-project('vala-language-server', 'vala', 'c')
+project('vala-language-server', 'vala', 'c',
+  version: '0.1-alpha',
+  license: 'LGPL2.1+')
 
 valac = meson.get_compiler('vala')
 # libvala_version = run_command(valac, '--api-version').stdout().strip()
