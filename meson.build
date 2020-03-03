@@ -23,7 +23,7 @@ conf_file = configure_file(input: 'config.vala.in',
                            output: 'config.vala',
                            configuration: conf)
 
-subdir('gnome-builder')
+subdir('plugins/gnome-builder')
 
 vls_src = files([
     'main.vala',

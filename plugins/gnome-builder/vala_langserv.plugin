@@ -2,7 +2,7 @@
 Name=Vala
 Description=Vala language server
 Authors=Princeton Ferro, Ben Iofel
-Copyright=Copyright © 2018
+Copyright=Copyright © 2020
 
 Loader=python3
 Module=vala_langserv
