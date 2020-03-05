@@ -3,15 +3,17 @@ project('vala-language-server', 'vala', 'c',
   license: 'LGPL2.1+')
 
 valac = meson.get_compiler('vala')
+cc = meson.get_compiler('c')
 # libvala_version = run_command(valac, '--api-version').stdout().strip()
 # 
 # libvala = dependency('libvala-@0@'.format(libvala_version))
 
 libvala = dependency('libvala-0.48')
+libgobject_dep = dependency('gobject-2.0')
 
 deps = [
     dependency('glib-2.0'),
-    dependency('gobject-2.0'),
+    libgobject_dep,
     dependency('gio-2.0'),
     dependency('gee-0.8'),
     dependency('jsonrpc-glib-1.0'),
@@ -59,6 +61,11 @@ if get_option('active_parameter')
 endif
 
 add_project_arguments(['--pkg=posix', '--enable-gobject-tracing', '--fatal-warnings'], language: 'vala')
+
+if get_option('debug_mem')
+  subdir('lib')
+  deps += libgobject_list_dep
+endif
 
 executable('vala-language-server',
   dependencies: deps,
