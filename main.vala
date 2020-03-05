@@ -897,6 +897,7 @@ class Vls.Server : Object {
                 return;
             }
 
+            Vala.CodeContext.push (file.context);
             var fs = new FindSymbol (file, p.position.to_libvala ());
 
             if (fs.result.size == 0) {
@@ -905,6 +906,7 @@ class Vls.Server : Object {
                 } catch (Error e) {
                     debug("[textDocument/definition] failed to reply to client: %s", e.message);
                 }
+                Vala.CodeContext.pop ();
                 return;
             }
 
@@ -929,6 +931,7 @@ class Vls.Server : Object {
                 } catch (Error e) {
                     debug("[textDocument/definition] failed to reply to client: %s", e.message);
                 }
+                Vala.CodeContext.pop ();
                 return;
             }
 
@@ -950,6 +953,8 @@ class Vls.Server : Object {
             } catch (Error e) {
                 debug("[textDocument/definition] failed to reply to client: %s", e.message);
             }
+
+            Vala.CodeContext.pop ();
         });
     }
 
@@ -969,6 +974,7 @@ class Vls.Server : Object {
             }
 
             var array = new Json.Array ();
+            Vala.CodeContext.push (doc.file.context);
             var syms = new ListSymbols (doc.file);
             if (init_params.capabilities.textDocument.documentSymbol.hierarchicalDocumentSymbolSupport)
                 foreach (var dsym in syms) {
@@ -981,6 +987,7 @@ class Vls.Server : Object {
                     array.add_element (Json.gobject_serialize (new SymbolInformation.from_document_symbol (dsym, p.textDocument.uri)));
                 }
             }
+            Vala.CodeContext.pop ();
 
             try {
                 Variant result = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (array), null);
@@ -1728,12 +1735,14 @@ class Vls.Server : Object {
 
             debug (@"[$method] FindSymbol @ $(pos.to_libvala ())");
 
+            Vala.CodeContext.push (doc.file.context);
             var fs = new FindSymbol (doc.file, pos.to_libvala (), true, !is_member_access,
                  is_member_access ? end_pos.to_libvala () : null);
 
             if (fs.result.size == 0) {
                 debug (@"[$method] no results found" + (is_member_access ? " for member access" : ""));
                 reply_null (id, client, method);
+                Vala.CodeContext.pop ();
                 return;
             }
 
@@ -1772,6 +1781,7 @@ class Vls.Server : Object {
                             best_scope = ((Vala.Symbol) node).scope;
                     warning (@"[$method] invoke: could not get block from $best ($(best.type_name))");
                     reply_null (id, client, method);
+                    Vala.CodeContext.pop ();
                     return;
                 }
 
@@ -1911,6 +1921,8 @@ class Vls.Server : Object {
             foreach (CompletionItem comp in completions)
                 json_array.add_element (Json.gobject_serialize (comp));
 
+            Vala.CodeContext.pop ();
+
             try {
                 Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
                 client.reply (id, variant_array);
@@ -1950,6 +1962,7 @@ class Vls.Server : Object {
                 pos = p.position.translate (0, -1);
             }
 
+            Vala.CodeContext.push (doc.file.context);
             var fs = new FindSymbol (doc.file, pos.to_libvala (), true);
 
             // filter the results for MethodCall's and ExpressionStatements
@@ -1979,6 +1992,7 @@ class Vls.Server : Object {
             if (fs.result.size == 0) {
                 debug ("[$method] no results found");
                 reply_null (id, client, method);
+                Vala.CodeContext.pop ();
                 return;
             }
 
@@ -2086,12 +2100,14 @@ class Vls.Server : Object {
             } else {
                 debug (@"[$method] neither a method call nor (complete) object creation expr");
                 reply_null (id, client, method);
+                Vala.CodeContext.pop ();
                 return;     // early exit
             } 
 
             if (explicit_sym == null && type_sym == null) {
                 debug (@"[$method] could not get explicit_sym and type_sym from $(result.type_name)");
                 reply_null (id, client, method);
+                Vala.CodeContext.pop ();
                 return;
             }
 
@@ -2136,6 +2152,8 @@ class Vls.Server : Object {
             } catch (Error e) {
                 debug (@"[textDocument/signatureHelp] failed to reply to client: $(e.message)");
             }
+
+            Vala.CodeContext.pop ();
         });
     }
 
@@ -2155,11 +2173,13 @@ class Vls.Server : Object {
                 return;
             }
 
+            Vala.CodeContext.push (doc.file.context);
             var fs = new FindSymbol (doc.file, pos.to_libvala (), true);
 
             if (fs.result.size == 0) {
                 debug ("[textDocument/hover] no results found");
                 reply_null (id, client, "textDocument/hover");
+                Vala.CodeContext.pop ();
                 return;
             }
 
@@ -2236,6 +2256,8 @@ class Vls.Server : Object {
             } catch (Error e) {
                 debug ("[textDocument/hover] failed to reply to client: %s", e.message);
             }
+
+            Vala.CodeContext.pop ();
         });
     }
 
@@ -2283,11 +2305,13 @@ class Vls.Server : Object {
                 return;
             }
 
+            Vala.CodeContext.push (doc.file.context);
             var fs = new FindSymbol (doc.file, pos.to_libvala (), true);
 
             if (fs.result.size == 0) {
                 debug (@"[$method] no results found");
                 reply_null (id, client, method);
+                Vala.CodeContext.pop ();
                 return;
             }
 
@@ -2338,6 +2362,8 @@ class Vls.Server : Object {
             } catch (Error e) {
                 debug (@"[$method] failed to reply to client: $(e.message)");
             }
+
+            Vala.CodeContext.pop ();
         });
     }
 
@@ -2357,11 +2383,13 @@ class Vls.Server : Object {
                 return;
             }
 
+            Vala.CodeContext.push (doc.file.context);
             var fs = new FindSymbol (doc.file, pos.to_libvala (), true);
 
             if (fs.result.size == 0) {
                 debug (@"[$method] no results found");
                 reply_null (id, client, method);
+                Vala.CodeContext.pop ();
                 return;
             }
 
@@ -2382,6 +2410,7 @@ class Vls.Server : Object {
             if (!is_abstract_type && !is_abstract_or_virtual_method && !is_abstract_or_virtual_property) {
                 debug (@"[$method] best is neither an abstract type/interface nor abstract/virtual method/property");
                 reply_null (id, client, method);
+                Vala.CodeContext.pop ();
                 return;
             }
 
@@ -2423,6 +2452,7 @@ class Vls.Server : Object {
                     range = new Range.from_sourceref (node.source_reference)
                 }));
 
+            Vala.CodeContext.pop ();
             try {
                 Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
                 client.reply (id, variant_array);
@@ -2444,6 +2474,7 @@ class Vls.Server : Object {
 
             var json_array = new Json.Array ();
             foreach (var text_document in get_source_files ()) {
+                Vala.CodeContext.push (text_document.file.context);
                 new ListSymbols (text_document.file)
                     .flattened ()
                     // NOTE: if introspection for g_str_match_string () / string.match_string ()
@@ -2454,6 +2485,7 @@ class Vls.Server : Object {
                         json_array.add_element (Json.gobject_serialize (si));
                         return true;
                     });
+                Vala.CodeContext.pop ();
             }
 
             debug (@"[$method] found $(json_array.get_length ()) element(s) matching `$query'");

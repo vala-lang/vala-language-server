@@ -22,15 +22,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
 
         str_sym = file.context.root.scope.lookup ("string") as Vala.TypeSymbol;
 
-        Vala.CodeContext.push (file.context);
         this.visit_source_file (file);
-    }
-
-    /**
-     * Keep code context around until we're done using ListSymbols
-     */
-    ~ListSymbols () {
-        Vala.CodeContext.pop ();
     }
 
     public Gee.Iterator<DocumentSymbol> iterator () {

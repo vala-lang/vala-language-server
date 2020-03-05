@@ -80,7 +80,6 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         this.include_blocks = include_blocks;
         result = new Gee.ArrayList<Vala.CodeNode> ();
         seen = new Gee.HashSet<Vala.CodeNode> ();
-        Vala.CodeContext.push (file.context);
         this.visit_source_file (file);
     }
 
@@ -90,15 +89,7 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         this.filter = filter_func;
         result = new Gee.ArrayList<Vala.CodeNode> ();
         seen = new Gee.HashSet<Vala.CodeNode> ();
-        Vala.CodeContext.push (file.context);
         this.visit_source_file (file);
-    }
-
-    /**
-     * Keep the code context around until we're done using FindSymbol
-     */
-    ~FindSymbol () {
-        Vala.CodeContext.pop ();
     }
 
     public override void visit_source_file (Vala.SourceFile file) {
