@@ -18,6 +18,7 @@ deps = [
     dependency('gee-0.8'),
     dependency('jsonrpc-glib-1.0'),
     libvala,
+    valac.find_library('posix'),
 ]
 
 conf = configuration_data()
@@ -60,7 +61,7 @@ if get_option('active_parameter')
   add_project_arguments(['--define=VALA_FEATURE_INITIAL_ARGUMENT_COUNT'], language: 'vala')
 endif
 
-add_project_arguments(['--pkg=posix', '--enable-gobject-tracing', '--fatal-warnings'], language: 'vala')
+add_project_arguments(['--enable-gobject-tracing', '--fatal-warnings'], language: 'vala')
 
 if get_option('debug_mem')
   subdir('lib')
