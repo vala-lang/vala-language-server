@@ -399,14 +399,14 @@ class Vls.Server : Object {
                         if (is_vapi && shared_vapis.lookup_source_file (package_file.filename) == null) {
                             try {
                                 shared_vapis.add_source_file (package_file.filename, false);
-                                debug (@"[$method] adding shared VAPI `$(package_file.filename)'");
+                                debug (@"[$method] added shared VAPI `$(package_file.filename)'");
                             } catch (Error e) {
                                 debug (@"[$method] failed to add `$(package_file.filename)' to shared_vapis: $(e.message)");
                             }
                         } else if (is_gir && shared_girs.lookup_source_file (package_file.filename) == null) {
                             try {
                                 shared_girs.add_source_file (package_file.filename, false);
-                                debug (@"[$method] adding shared GIR `$(package_file.filename)'");
+                                debug (@"[$method] added shared GIR `$(package_file.filename)'");
                             } catch (Error e) {
                                 debug (@"[$method] failed to add `$(package_file.filename)' to shared_girs: $(e.message)");
                             }
@@ -512,23 +512,22 @@ class Vls.Server : Object {
             debug (@"[cancelRequest] request $req not found");
     }
 
-    TextDocument? lookup_source_file (string uri) {
-        string? filename = File.new_for_uri (uri).get_path ();
-        assert (filename != null);
-        var document = shared_vapis.lookup_source_file (filename);
+    TextDocument? lookup_source_file (string escaped_uri) {
+        string uri = Uri.unescape_string (escaped_uri);
+        var document = shared_vapis.lookup_source_file (uri);
         if (document != null)
             return document;
-        document = shared_girs.lookup_source_file (filename);
+        document = shared_girs.lookup_source_file (uri);
         if (document != null)
             return document;
 
         foreach (var build_target in builds) {
-            var bt_document = build_target.lookup_source_file (filename);
+            var bt_document = build_target.lookup_source_file (uri);
             if (bt_document != null)
                 return bt_document;
         }
 
-        debug (@"failed to find text document for `$filename'");
+        debug (@"failed to find text document for `$uri'");
         return null;
     }
 
@@ -536,15 +535,15 @@ class Vls.Server : Object {
         var source_files = new HashMap<string, TextDocument> ();
 
         foreach (var text_document in shared_vapis)
-            source_files[text_document.filename] = text_document;
+            source_files[text_document.uri] = text_document;
         foreach (var text_document in shared_girs)
-            source_files[text_document.filename] = text_document;
+            source_files[text_document.uri] = text_document;
 
         foreach (var build_target in builds)
             foreach (var compilation in build_target)
                 foreach (var text_document in compilation) {
-                    if (!source_files.has_key (text_document.filename))
-                        source_files[text_document.filename] = text_document;
+                    if (!source_files.has_key (text_document.uri))
+                        source_files[text_document.uri] = text_document;
                 }
         return source_files.values;
     }
@@ -576,14 +575,14 @@ class Vls.Server : Object {
             return;
 
         if (doc.is_writable) {
-            debug (@"[textDocument/didOpen] opened file `$(doc.filename)'; requesting context update");
+            debug (@"[textDocument/didOpen] opened $(doc.uri); requesting context update");
             if (doc.content == null || doc.content != fileContents) {
                 doc.content = fileContents;
                 doc.synchronize_clones ();
                 request_context_update (client);
             }
         } else {
-            debug (@"[textDocument/didOpen] opened read-only file `$(doc.filename)'");
+            debug (@"[textDocument/didOpen] opened read-only $(doc.uri)");
         }
     }
 
@@ -636,7 +635,7 @@ class Vls.Server : Object {
 
             request_context_update (client);
         } else {
-            debug (@"[textDocument/didChange] ignoring requested changes to read-only `$(source.filename)'");
+            debug (@"[textDocument/didChange] ignoring requested changes to read-only $(source.uri)");
         }
     }
 
@@ -935,21 +934,10 @@ class Vls.Server : Object {
                 return;
             }
 
-            debug (@"replying... $(best.source_reference.file.filename)");
+            var location = new Location.from_sourceref (best.source_reference);
+            debug ("replying... %s", location.uri);
             try {
-                client.reply (id, object_to_variant (new LanguageServer.Location () {
-                    uri = "file://" + best.source_reference.file.filename,
-                    range = new Range () {
-                        start = new Position () {
-                            line = best.source_reference.begin.line - 1,
-                            character = best.source_reference.begin.column - 1
-                        },
-                        end = new Position () {
-                            line = best.source_reference.end.line - 1,
-                            character = best.source_reference.end.column
-                        }
-                    }
-                }));
+                client.reply (id, object_to_variant (location));
             } catch (Error e) {
                 debug("[textDocument/definition] failed to reply to client: %s", e.message);
             }
@@ -2349,10 +2337,7 @@ class Vls.Server : Object {
                         kind = determine_node_highlight_kind (node)
                     }));
                 } else {
-                    json_array.add_element (Json.gobject_serialize (new Location () {
-                        uri = "file://" + node.source_reference.file.filename,
-                        range = new Range.from_sourceref (node.source_reference)
-                    }));
+                    json_array.add_element (Json.gobject_serialize (new Location.from_sourceref (node.source_reference)));
                 }
             }
 
@@ -2447,10 +2432,7 @@ class Vls.Server : Object {
 
             debug (@"[$method] found $(references.size) reference(s)");
             foreach (var node in references)
-                json_array.add_element (Json.gobject_serialize (new Location () {
-                    uri = "file://" + node.source_reference.file.filename,
-                    range = new Range.from_sourceref (node.source_reference)
-                }));
+                json_array.add_element (Json.gobject_serialize (new Location.from_sourceref (node.source_reference)));
 
             Vala.CodeContext.pop ();
             try {

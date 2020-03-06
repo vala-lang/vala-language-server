@@ -106,7 +106,7 @@ class Vls.MesonTarget : BuildTarget {
             foreach (string source in target_source.sources) {
                 if (!Path.is_absolute (source))
                     source = Path.build_filename (build_dir, source);
-                debug (@"MesonTarget: adding source file `$source'");
+                debug (@"MesonTarget: adding source file $source");
                 compilation.add_source_file (source);
             }
 

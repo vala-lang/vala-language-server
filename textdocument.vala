@@ -2,10 +2,9 @@ using Gee;
 
 class Vls.TextDocument : Object {
     public weak Compilation compilation { get; private set; }
-    public string filename { get; private set; }
-
-    public Vala.SourceFile file { get; private set; }
+    public File gfile { get; private set; }
     public string uri { get; private set; }
+    public Vala.SourceFile file { get; private set; }
     public int version;
 
     public string? content {
@@ -23,21 +22,22 @@ class Vls.TextDocument : Object {
     public bool is_writable { get; private set; }
 
     /**
-     * The list of all TextDocumnts that refer to the same file.
+     * The list of all TextDocuments that refer to the same file.
      */
     public weak LinkedList<TextDocument>? clones { get; set; }
 
     public TextDocument (Compilation compilation,
-                         string filename,
-                         bool is_writable = true) throws ConvertError, FileError {
+                         File gfile,
+                         bool is_writable = true) throws FileError {
+        string filename = (!) gfile.get_path ();
 
         if (!FileUtils.test (filename, FileTest.EXISTS)) {
             throw new FileError.NOENT ("file %s does not exist".printf (filename));
         }
 
         this.compilation = compilation;
-        this.filename = filename;
-        this.uri = Filename.to_uri (filename);
+        this.gfile = gfile;
+        this.uri = gfile.get_uri ();
         this.is_writable = is_writable;
 
         var type = Vala.SourceFileType.NONE;
@@ -54,10 +54,10 @@ class Vls.TextDocument : Object {
      */
     public TextDocument.from_sourcefile (Compilation compilation,
                                          Vala.SourceFile file,
-                                         bool is_writable = true) throws ConvertError {
+                                         bool is_writable = true) {
         this.compilation = compilation;
-        this.filename = file.filename;
-        this.uri = Filename.to_uri (file.filename);
+        this.gfile = File.new_for_path (file.filename);
+        this.uri = gfile.get_uri ();
         this.version = 0;
         this.file = file;
         this.is_writable = is_writable;
@@ -76,6 +76,6 @@ class Vls.TextDocument : Object {
     }
 
     public string to_string () {
-        return @"TextDocument($filename)";
+        return @"TextDocument($(gfile.get_path ()))";
     }
 }

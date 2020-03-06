@@ -83,11 +83,11 @@ abstract class Vls.BuildTarget : Object {
         return updated;
     }
 
-    public TextDocument? lookup_source_file (string filename) {
+    public TextDocument? lookup_source_file (string uri) {
         int nth = 0;
         foreach (var compilation in compilations) {
-            var result = compilation.lookup_source_file (filename);
-            debug (@"looking inside compilation #$(nth) for $filename");
+            debug (@"looking inside compilation #$(nth) for $uri");
+            var result = compilation.lookup_source_file (uri);
             if (result != null)
                 return result;
             nth++;

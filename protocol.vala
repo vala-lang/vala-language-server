@@ -191,6 +191,12 @@ namespace LanguageServer {
     class Location : Object {
         public string uri { get; set; }
         public Range range { get; set; }
+
+        internal Location () {}
+        public Location.from_sourceref (Vala.SourceReference sref) {
+            this.uri = File.new_for_path (sref.file.filename).get_uri ();
+            this.range = new Range.from_sourceref (sref);
+        }
     }
 
     [CCode (default_value = "LANGUAGE_SERVER_DOCUMENT_HIGHLIGHT_KIND_Text")]
@@ -268,7 +274,7 @@ namespace LanguageServer {
             this.kind = dsym.kind;
             this.location = new Location () {
                 uri = uri,
-                    range = dsym.range
+                range = dsym.range
             };
         }
     }

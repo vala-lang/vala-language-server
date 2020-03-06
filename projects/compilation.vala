@@ -11,10 +11,24 @@ class Vls.Compilation : Object {
         }
     }
 
+    static uint file_hash (File file) {
+        string? file_id = get_file_id (file);
+        return file_id != null ? str_hash (file_id) : 0 /* fallback */;
+    }
+
+    static bool files_equal (File file1, File file2) {
+        if (file1.equal (file2))
+            return true;
+        debug ("equality test between %s and %s failed, trying FileInfo...", file1.get_uri (), file2.get_uri ());
+        string? file_id1 = get_file_id (file1);
+        string? file_id2 = get_file_id (file2);
+        return file_id1 != null && file_id2 != null && file_id1 == file_id2;
+    }
+
     private HashSet<string> _packages = new HashSet<string> ();
-    // maps URI -> TextDocument
-    private HashMap<string, TextDocument> _sources = new HashMap<string, TextDocument> ();
-    private HashMap<string, TextDocument> _autosources = new HashMap<string, TextDocument> ();
+    // maps File -> TextDocument
+    private HashMap<File, TextDocument> _sources = new HashMap<File, TextDocument> (file_hash, files_equal);
+    private HashMap<File, TextDocument> _autosources = new HashMap<File, TextDocument> (file_hash, files_equal);
     private HashSet<string> _vapi_dirs = new HashSet<string> ();
     private HashSet<string> _gir_dirs = new HashSet<string> ();
     private HashSet<string> _metadata_dirs = new HashSet<string> ();
@@ -169,10 +183,12 @@ class Vls.Compilation : Object {
 
     public TextDocument add_source_file (string filename, 
         bool is_writable = true) throws ConvertError, FileError {
-        if (_sources.has_key (filename))
+        var file = File.new_for_path (filename);
+        if (_sources.has_key (file))
             throw new FileError.FAILED (@"file `$filename' is already in the compilation");
-        var source = new TextDocument (this, filename, is_writable);
-        _sources[filename] = source;
+        var source = new TextDocument (this, file, is_writable);
+        _sources[file] = source;
+        debug (@"added source $(file.get_uri ())");
         if (source.file.package_name != null)
             _packages.remove (source.file.package_name);
         dirty = true;
@@ -195,11 +211,8 @@ class Vls.Compilation : Object {
         code_context.check ();
         // wrap autosources
         foreach (var auto_source in get_internal_files ()) {
-            try {
-                _autosources[auto_source.filename] = new TextDocument.from_sourcefile (this, auto_source, false);
-            } catch (Error e) {
-                debug (@"compilation: failed to wrap autosource `$(auto_source.filename)': $(e.message)");
-            }
+            var file = File.new_for_path (auto_source.filename);
+            _autosources[file] = new TextDocument.from_sourcefile (this, auto_source, false);
         }
         Vala.CodeContext.pop ();
         needs_compile = false;
@@ -214,12 +227,13 @@ class Vls.Compilation : Object {
     }
 
     /**
-     * Lookup a source file by filename.
+     * Lookup a source file by uri.
      */
-    public TextDocument? lookup_source_file (string filename) {
-        var result = _sources[filename];
+    public TextDocument? lookup_source_file (string uri) {
+        var file = File.new_for_uri (uri);
+        var result = _sources[file];
         if (result == null)
-            return _autosources[filename];
+            return _autosources[file];
         return result;
     }
 
@@ -235,7 +249,7 @@ class Vls.Compilation : Object {
 
         if (_ctx != null)
             foreach (var source_file in _ctx.get_source_files ()) {
-                if (!_sources.has_key (source_file.filename))
+                if (!_sources.has_key (File.new_for_path(source_file.filename)))
                     internal_files.add (source_file);
             }
 
