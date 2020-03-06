@@ -27,7 +27,7 @@ namespace Vls {
             var finfo = file.query_info (FileAttribute.ID_FILE, FileQueryInfoFlags.NONE);
             return finfo.get_attribute_string (FileAttribute.ID_FILE);
         } catch (Error e) {
-            warning ("could not get file ID of %s", file.get_uri ());
+            warning ("could not get file ID of %s: %s", file.get_uri (), e.message);
             return null;
         }
     }

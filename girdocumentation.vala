@@ -9,7 +9,6 @@ class Vls.GirDocumentation {
         context = new Vala.CodeContext ();
         context.profile = Vala.Profile.GOBJECT;
         context.add_define ("GOBJECT");
-        context.gir_directories = { "/usr/share", "/usr/local/share" };
 
         // add packages
         var added = new Gee.HashSet<string> ();
@@ -17,8 +16,8 @@ class Vls.GirDocumentation {
         added.add ("GObject-2.0");
         context.add_external_package ("GLib-2.0");
         added.add ("GLib-2.0");
-        foreach (string gir_directory in context.gir_directories) {
-            File dir = File.new_for_path (@"$gir_directory/gir-1.0");
+        foreach (string data_dir in Environment.get_system_data_dirs ()) {
+            File dir = File.new_for_path (Path.build_filename (data_dir, "gir-1.0"));
             try {
                 var enumerator = dir.enumerate_children (
                     "standard::*",
@@ -35,13 +34,13 @@ class Vls.GirDocumentation {
                     Vala.SourceFile? vapi_pkg_match = packages.first_match (
                         pkg => pkg.gir_version != null && @"$(pkg.gir_namespace)-$(pkg.gir_version)" == gir_pkg);
                     if (!added.contains (gir_pkg) && vapi_pkg_match != null) {
-                        debug (@"adding GIR `$gir_pkg' for package `$(vapi_pkg_match.package_name)'");
+                        debug (@"adding GIR $gir_pkg for package $(vapi_pkg_match.package_name)");
                         context.add_external_package (gir_pkg);
                         added.add (gir_pkg);
                     }
                 }
             } catch (Error e) {
-                debug (@"could not enumerate dir `$(dir.get_path ())': $(e.message)");
+                debug (@"could not enumerate $(dir.get_uri ()): $(e.message)");
             }
         }
 

@@ -185,7 +185,7 @@ class Vls.Compilation : Object {
         bool is_writable = true) throws ConvertError, FileError {
         var file = File.new_for_path (filename);
         if (_sources.has_key (file))
-            throw new FileError.FAILED (@"file `$filename' is already in the compilation");
+            throw new FileError.FAILED (@"$(file.get_uri ()) is already in the compilation");
         var source = new TextDocument (this, file, is_writable);
         _sources[file] = source;
         debug (@"added source $(file.get_uri ())");
