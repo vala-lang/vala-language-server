@@ -30,7 +30,7 @@
 - [x] symbol documentation
     - [x] basic (from comments)
     - [x] advanced (from GIR and VAPI files)
-        - this feature is unstable and depends on changes to GirParser in uptream vala, therefore it's currently disabled by default. use `meson -Dparse_system_girs=true` to enable
+        - this feature may be a bit unstable. If it breaks things, use `meson -Dparse_system_girs=false` to disable
 - [x] search for symbols in workspace
 - [x] highlight active symbol in document
 - [ ] snippets

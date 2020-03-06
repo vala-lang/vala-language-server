@@ -63,13 +63,29 @@ class Vls.GirDocumentation {
         var sr_begin = Vala.SourceLocation (null, 1, 1);
         var sr_end = sr_begin;
 
-        // ... add bool
-        var bool_struct = new Vala.Struct ("bool", new Vala.SourceReference (sr_file, sr_begin, sr_end));
-        bool_struct.add_method (new Vala.Method ("to_string", new Vala.UnresolvedType.from_symbol (new Vala.UnresolvedSymbol (null, "string"))));
-        context.root.add_struct (bool_struct);
+        // ... add fundamental numeric types
+        foreach (string type_sym in new string[]{
+            "bool", 
+            "ssize_t", "size_t", 
+            "uint8", "int8", "uint16", "int16", "uint32", "int32", "uint64", "int64",
+            "char", "unichar",
+            "short", "ushort",
+            "int", "uint",
+            "long", "ulong",
+            "float", "double"}) {
+            var numeric_type = new Vala.Struct (type_sym, new Vala.SourceReference (sr_file, sr_begin, sr_end));
+            numeric_type.add_method (new Vala.Method ("to_string", new Vala.UnresolvedType.from_symbol (new Vala.UnresolvedSymbol (null, "string"))));
+            context.root.add_struct (numeric_type);
+        }
+
+        // ... add string
+        var string_class = new Vala.Class ("string", new Vala.SourceReference (sr_file, sr_begin, sr_end));
+        context.root.add_class (string_class);
 
         // ... add GLib namespace
-        context.root.add_namespace (new Vala.Namespace ("GLib", new Vala.SourceReference (sr_file, sr_begin, sr_end)));
+        var glib_ns = new Vala.Namespace ("GLib", new Vala.SourceReference (sr_file, sr_begin, sr_end));
+        // ... TODO add GLib.Type
+        context.root.add_namespace (glib_ns);
 
         // compile once
         Vala.CodeContext.push (context);
@@ -102,8 +118,18 @@ class Vls.GirDocumentation {
         }
 
         gir_sym = context.root.scope.lookup (symbols.pop_head ().name);
-        while (!symbols.is_empty () && gir_sym != null)
-            gir_sym = gir_sym.scope.get_symbol_table ()[symbols.pop_head ().name];
+        while (!symbols.is_empty () && gir_sym != null) {
+            var symtab = gir_sym.scope.get_symbol_table ();
+            if (symtab != null) {
+                gir_sym = symtab[symbols.pop_head ().name];
+            } else {
+                // workaround:
+                if (gir_sym.name == "GLib") {
+                    gir_sym = context.root.scope.lookup ("G");
+                } else 
+                    gir_sym = null;
+            }
+        }
 
         if (!symbols.is_empty ())
             return null;
