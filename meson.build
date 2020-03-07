@@ -16,7 +16,7 @@ deps = [
     libgobject_dep,
     dependency('gio-2.0'),
     dependency('gee-0.8'),
-    dependency('jsonrpc-glib-1.0'),
+    dependency('jsonrpc-glib-1.0', version: '>= 3.30'),
     libvala,
     valac.find_library('posix'),
 ]
