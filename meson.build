@@ -16,7 +16,7 @@ deps = [
     libgobject_dep,
     dependency('gio-2.0'),
     dependency('gee-0.8'),
-    dependency('jsonrpc-glib-1.0', version: '>= 3.30'),
+    dependency('json-glib-1.0'),
     libvala,
     valac.find_library('posix'),
 ]
@@ -43,6 +43,16 @@ vls_src = files([
     'textdocument.vala',
     'util.vala'
 ])
+
+libjsonrpc_glib_dep = dependency('jsonrpc-glib-1.0', version: '>= 3.30', required: false)
+
+if not libjsonrpc_glib_dep.found()
+  libjsonrpc_glib_proj = subproject('jsonrpc-glib-3.34.0-prince781')
+  libjsonrpc_glib_dep = libjsonrpc_glib_proj.get_variable('libjsonrpc_glib_dep')
+  deps += libjsonrpc_glib_proj.get_variable('libjsonrpc_glib_vapi')
+endif
+
+deps += libjsonrpc_glib_dep
 
 if host_machine.system() == 'windows'
     deps += dependency('gio-windows-2.0')

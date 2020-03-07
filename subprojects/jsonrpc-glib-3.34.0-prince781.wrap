@@ -1,0 +1,5 @@
+[wrap-git]
+directory = jsonrpc-glib-3.34.0-prince781
+
+url = https://gitlab.gnome.org/Prince781/jsonrpc-glib.git
+revision = c1e1463f740774019419e063894b0fc350a7f58d
