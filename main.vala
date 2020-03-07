@@ -235,6 +235,7 @@ class Vls.Server : Object {
 
     void initialize (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         init_params = parse_variant<InitializeParams> (@params);
+        debug ("[initialize] got initialize params:\n %s", Json.to_string (Json.gvariant_serialize (@params), true));
 
         File root_dir = init_params.rootPath != null ? 
             File.new_for_path (init_params.rootPath) :
@@ -273,6 +274,7 @@ class Vls.Server : Object {
                 // run configure
                 try {
                     build_dir = DirUtils.make_tmp (@"vls-meson-$(str_hash (root_path))-XXXXXX");
+                    debug ("configuring meson in a temporary directory %s", build_dir);
                     Process.spawn_sync (
                         build_dir, 
                         spawn_args, 
@@ -324,9 +326,16 @@ class Vls.Server : Object {
                     // if everything went well, parse the targets from JSON
                     var targets_parser = new Json.Parser.immutable_new ();
                     targets_parser.load_from_data (proc_stdout);
+                    var json_data = targets_parser.get_root ();
+                    var json_array = json_data.get_node_type () == Json.NodeType.ARRAY ? json_data.get_array () : null;
+
+                    if (json_array == null) {
+                        debug ("[initialize] bad JSON data from meson introspect:\n%s", Json.to_string (json_data, true));
+                        throw new ProjectError.INTROSPECT (@"Failed to introspect in $build_dir: meson output is not an array");
+                    }
 
                     int nth = 0;
-                    foreach (var node in targets_parser.get_root ().get_array ().get_elements ()) {
+                    foreach (var node in json_array.get_elements ()) {
                         var target_info = Json.gobject_deserialize (typeof (Meson.TargetInfo), node) 
                             as Meson.TargetInfo;
                         if (target_info == null)
