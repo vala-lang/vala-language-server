@@ -1,5 +1,5 @@
 project('vala-language-server', 'vala', 'c',
-  version: '0.1-alpha',
+  version: '0.48-alpha',
   license: 'LGPL2.1+')
 
 valac = meson.get_compiler('vala')
