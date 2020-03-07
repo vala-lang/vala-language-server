@@ -1,0 +1,5 @@
+[wrap-git]
+directory = gobject-list-prince781
+
+url = https://github.com/Prince781/gobject-list
+revision = head
