@@ -1,9 +1,10 @@
 
 #!/usr/bin/env python
 
-#   vala.py
+#   vala_langserv.py
 #
 # Copyright 2016 Christian Hergert <chergert@redhat.com>
+# Copyright 2020 Princeton Ferro <chergert@redhat.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

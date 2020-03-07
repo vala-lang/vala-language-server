@@ -39,7 +39,7 @@
 - [ ] supported IDEs (see Setup below):
     - [x] vim with `vim-lsp` plugin installed
     - [x] Visual Studio Code
-    - [x] GNOME Builder >= 3.35
+    - [x] GNOME Builder >= 3.36
     - [ ] IntelliJ
 - [ ] supported project build systems
     - [x] meson
@@ -52,8 +52,8 @@
 - `gio-2.0` and either `gio-unix-2.0` or `gio-windows-2.0`
 - `gee-0.8`
 - `jsonrpc-glib-1.0`
-- `libvala-0.48` or later
-    - you MUST compile with vala master from commit `f8676a6584d5b67ac76e132061a9df5d92258b0f` or later
+- `libvala-0.48 / vala-0.48` release
+- you also need the `posix` VAPI, which should come preinstalled
 
 ### Setup
 
