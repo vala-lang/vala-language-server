@@ -21,14 +21,4 @@ namespace Vls {
 
         return linepos + 1 + charno;
     }
-
-    public static string? get_file_id (File file) {
-        try {
-            var finfo = file.query_info (FileAttribute.ID_FILE, FileQueryInfoFlags.NONE);
-            return finfo.get_attribute_string (FileAttribute.ID_FILE);
-        } catch (Error e) {
-            warning ("could not get file ID of %s: %s", file.get_uri (), e.message);
-            return null;
-        }
-    }
 }

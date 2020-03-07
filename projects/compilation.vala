@@ -12,17 +12,14 @@ class Vls.Compilation : Object {
     }
 
     static uint file_hash (File file) {
-        string? file_id = get_file_id (file);
-        return file_id != null ? str_hash (file_id) : 0 /* fallback */;
+        return str_hash (file.get_uri ().casefold ());
     }
 
     static bool files_equal (File file1, File file2) {
         if (file1.equal (file2))
             return true;
         debug ("equality test between %s and %s failed, trying FileInfo...", file1.get_uri (), file2.get_uri ());
-        string? file_id1 = get_file_id (file1);
-        string? file_id2 = get_file_id (file2);
-        return file_id1 != null && file_id2 != null && file_id1 == file_id2;
+        return file_hash (file1) == file_hash (file2);
     }
 
     private HashSet<string> _packages = new HashSet<string> ();
