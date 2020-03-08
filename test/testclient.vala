@@ -89,11 +89,13 @@ class Vls.TestClient : Jsonrpc.Server {
         }
     }
 
+#if WITH_JSONRPC_GLIB_3_30
     public override void client_closed (Jsonrpc.Client client) {
         if (client == vls_jsonrpc_client) {
             vls_jsonrpc_client = null;
         }
     }
+#endif
 
     private void initialize_server () throws Error {
         Variant? return_value;

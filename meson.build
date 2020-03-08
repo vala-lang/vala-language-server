@@ -13,6 +13,7 @@ valac = meson.get_compiler('vala')
 
 libvala = dependency('libvala-0.48')
 libgobject_dep = dependency('gobject-2.0')
+libjsonrpc_glib_dep = dependency('jsonrpc-glib-1.0', version: '>= 3.28')
 
 deps = [
     dependency('glib-2.0'),
@@ -20,10 +21,14 @@ deps = [
     dependency('gio-2.0'),
     dependency('gee-0.8'),
     dependency('json-glib-1.0'),
-    dependency('jsonrpc-glib-1.0', version: '>= 3.30'),
+    libjsonrpc_glib_dep,
     libvala,
     valac.find_library('posix'),
 ]
+
+if libjsonrpc_glib_dep.version() >= '3.30'
+  add_project_arguments(['--define=WITH_JSONRPC_GLIB_3_30'], language: 'vala')
+endif
 
 if get_option('debug_mem')
   libgobject_list_proj = subproject('gobject-list-prince781')

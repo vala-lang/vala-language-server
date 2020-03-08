@@ -155,9 +155,11 @@ class Vls.Server : Object {
 
         server.accept_io_stream (new SimpleIOStream (input_stream, output_stream));
 
+#if WITH_JSONRPC_GLIB_3_30
         event = server.client_closed.connect (client => {
             shutdown_real ();
         });
+#endif
 
         notif_handlers = new HashTable<string, NotificationHandler> (str_hash, str_equal);
         call_handlers = new HashTable<string, CallHandler> (str_hash, str_equal);
@@ -2501,7 +2503,8 @@ class Vls.Server : Object {
     void shutdown_real () {
         debug ("shutting down...");
         this.shutting_down = true;
-        server.disconnect (event);
+        if (event != 0)
+            server.disconnect (event);
         loop.quit ();
         foreach (uint id in g_sources)
             Source.remove (id);
