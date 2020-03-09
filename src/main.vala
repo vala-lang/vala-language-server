@@ -632,13 +632,15 @@ class Vls.Server : Object {
             while ((elem = iter.next_value ()) != null) {
                 var changeEvent = parse_variant<TextDocumentContentChangeEvent> (elem);
 
-                if (changeEvent.range == null /* && changeEvent.rangeLength == 0*/) {
+                if (changeEvent.range == null) {
                     sb.assign (changeEvent.text);
                 } else {
                     var start = changeEvent.range.start;
-                    size_t pos = get_string_pos (sb.str, start.line, start.character);
-                    sb.erase ((ssize_t) pos, changeEvent.rangeLength);
-                    sb.insert ((ssize_t) pos, changeEvent.text);
+                    var end = changeEvent.range.end;
+                    size_t pos_begin = get_string_pos (sb.str, start.line, start.character);
+                    size_t pos_end = get_string_pos (sb.str, end.line, end.character);
+                    sb.erase ((ssize_t) pos_begin, (ssize_t) (pos_end - pos_begin));
+                    sb.insert ((ssize_t) pos_begin, changeEvent.text);
                 }
             }
             source.content = sb.str;

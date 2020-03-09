@@ -9,6 +9,11 @@ namespace Vls {
         return Json.gvariant_deserialize (json, null);
     }
 
+    /**
+     * Gets the offset, in bytes, of the UTF-8 character at the given line and
+     * position.
+     * Both lineno and charno must be zero-indexed.
+     */
     public static size_t get_string_pos (string str, uint lineno, uint charno) {
         int linepos = -1;
 
@@ -19,6 +24,8 @@ namespace Vls {
             linepos = pos;
         }
 
-        return linepos + 1 + charno;
+        string remaining_str = str.substring (linepos + 1);
+
+        return linepos + 1 + remaining_str.index_of_nth_char (charno);
     }
 }
