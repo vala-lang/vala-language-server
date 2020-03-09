@@ -1,0 +1,23 @@
+Source: vala-language-server
+Maintainer: Princeton Ferro <princetonferro@gmail.com>
+Section: utils
+Priority: optional
+Standards-Version: 4.1.4
+Build-Depends: debhelper (>= 10),
+               valac,
+               libvala-0.48-dev,
+               libgee-0.8-dev,
+               libjsonrpc-glib-1.0-dev (>= 3.28),
+               libjson-glib-dev,
+               libglib2.0-dev,
+               meson (>= 0.40),
+               ninja-build
+Homepage: https://github.com/benwaffle/vala-language-server
+
+Package: vala-language-server
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: Language server for Vala and Genie languages
+ This is a language server for Vala and Genie. It communicates with clients
+ using the Language Server Protocol over JSON-RPC.

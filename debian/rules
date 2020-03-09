@@ -1,0 +1,21 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-O1 -Wl,-z,defs -Wl,--as-needed
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure --
+
+override_dh_makeshlibs:
+	dh_makeshlibs -- -c4
+
+override_dh_missing:
+	dh_missing --fail-missing
+
+# The stress test is sensitive to timing so disable parallel
+# as suggested by hergertme
+override_dh_auto_test:
+	dh_auto_test --no-parallel
