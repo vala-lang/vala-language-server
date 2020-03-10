@@ -570,7 +570,7 @@ class Vls.Server : Object {
     void textDocumentDidOpen (Jsonrpc.Client client, Variant @params) {
         var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
 
-        string uri          = (string) document.lookup_value ("uri",        VariantType.STRING);
+        string? uri         = (string) document.lookup_value ("uri",        VariantType.STRING);
         string languageId   = (string) document.lookup_value ("languageId", VariantType.STRING);
         string fileContents = (string) document.lookup_value ("text",       VariantType.STRING);
 
@@ -579,7 +579,12 @@ class Vls.Server : Object {
             return;
         }
 
-        TextDocument? doc = lookup_source_file (uri);
+        if (uri == null) {
+            debug (@"[textDocument/didOpen] null URI sent to vala language server");
+            return;
+        }
+
+        TextDocument? doc = lookup_source_file ((!) uri);
 
         // do nothing if this file does not belong to a project
         if (doc == null)
