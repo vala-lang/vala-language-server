@@ -81,6 +81,8 @@ class Vls.Server : Object {
 
     bool shutting_down = false;
 
+    bool is_initialized = false;
+
     [CCode (has_target = false)]
     delegate void NotificationHandler (Vls.Server self, Jsonrpc.Client client, Variant @params);
 
@@ -172,7 +174,9 @@ class Vls.Server : Object {
 
         server.notification.connect ((client, method, @params) => {
             debug (@"Got notification! $method");
-            if (notif_handlers.contains (method))
+            if (!is_initialized) {
+                debug ("Server is not initialized");
+            } else if (notif_handlers.contains (method))
                 ((NotificationHandler) notif_handlers[method]) (this, client, @params);
             else
                 debug (@"no notification handler for $method");
@@ -180,7 +184,12 @@ class Vls.Server : Object {
 
         server.handle_call.connect ((client, method, id, @params) => {
             debug (@"Got call! $method");
-            if (call_handlers.contains (method)) {
+            if (!is_initialized && !(method == "initialize" ||
+                                     method == "shutdown" ||
+                                     method == "exit")) {
+                debug ("Server is not initialized");
+                return false;
+            } else if (call_handlers.contains (method)) {
                 ((CallHandler) call_handlers[method]) (this, server, client, method, id, @params);
                 return true;
             } else {
@@ -307,28 +316,21 @@ class Vls.Server : Object {
             // containing directory, and if we can then create Meson targets.
             foreach (var ninja_file in ninja_files) {
                 string build_dir = Path.get_dirname (ninja_file);
-                string[] spawn_args = {"meson", "introspect", ".", "--targets"};
-                string proc_stdout, proc_stderr;
-                int proc_status;
-
+                string intro_targets_json_filename = Path.build_filename (
+                    build_dir, 
+                    "meson-info", 
+                    "intro-targets.json");
                 try {
-                    Process.spawn_sync (
-                        build_dir,
-                        spawn_args,
-                        null,
-                        SpawnFlags.SEARCH_PATH,
-                        null,
-                        out proc_stdout,
-                        out proc_stderr,
-                        out proc_status);
-
-                    if (proc_status != 0)
-                        throw new ProjectError.INTROSPECT (@"Failed to introspect in $build_dir: process exited with status $proc_status");
-
                     // if everything went well, parse the targets from JSON
                     var targets_parser = new Json.Parser.immutable_new ();
-                    targets_parser.load_from_data (proc_stdout);
+                    targets_parser.load_from_file (intro_targets_json_filename);
                     var json_data = targets_parser.get_root ();
+
+                    if (json_data == null) {
+                        debug ("[initialize] empty JSON data at %s", intro_targets_json_filename);
+                        throw new ProjectError.INTROSPECT (@"Failed to introspect in $build_dir: empty JSON data at $intro_targets_json_filename");
+                    }
+
                     var json_array = json_data.get_node_type () == Json.NodeType.ARRAY ? json_data.get_array () : null;
 
                     if (json_array == null) {
@@ -455,7 +457,10 @@ class Vls.Server : Object {
             ));
         } catch (Error e) {
             debug (@"[initialize] failed to reply to client: $(e.message)");
+            return;
         }
+
+        is_initialized = true;
 
         // publish diagnostics
         foreach (var build_target in builds)
