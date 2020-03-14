@@ -1,20 +1,24 @@
-# Vala Language Server [![Gitter](https://badges.gitter.im/vala-language-server/community.svg)](https://gitter.im/vala-language-server/community)
+# Vala Language Server
+[![Gitter](https://badges.gitter.im/vala-language-server/community.svg)](https://gitter.im/vala-language-server/community)
 
 ![vls-vscode](images/vls-vscode.png)
 ![vls-vim](images/vls-vim.png)
 ![vls-gb](images/vls-gb.png)
 
-## Contents
-1. Features
-2. Dependencies
-3. Setup
-    1. Building and Installing
-    2. With Vim
-    3. With Visual Studio Code
-    4. With GNOME Builder
-4. Contributing
+## Table of Contents
+- [Vala Language Server](#vala-language-server)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Dependencies](#dependencies)
+  - [Setup](#setup)
+    - [Installation](#installation)
+    - [Building from Source](#building-from-source)
+    - [With Vim](#with-vim)
+    - [With Visual Studio Code](#with-visual-studio-code)
+    - [With GNOME Builder](#with-gnome-builder)
+  - [Contributing](#contributing)
 
-### Features
+## Features
 - [x] diagnostics
 - [x] code completion
     - [x] basic (member access and scope-visible completion)
@@ -46,7 +50,7 @@
     - [ ] autotoools
     - [ ] cmake
 
-### Dependencies
+## Dependencies
 - `glib-2.0`
 - `gobject-2.0`
 - `gio-2.0` and either `gio-unix-2.0` or `gio-windows-2.0`
@@ -55,9 +59,13 @@
 - `libvala-0.48 / vala-0.48` release
 - you also need the `posix` VAPI, which should come preinstalled
 
-### Setup
+## Setup
 
-#### Building and Installing
+### Installation
+
+Arch Linux (via AUR): `yay -S vala-language-server`
+
+### Building from Source
 ```
 $ meson -Dprefix=$PREFIX build
 $ ninja -C build
@@ -66,7 +74,7 @@ $ sudo ninja -C build install
 
 This will install `vala-language-server` to `$PREFIX/bin`
 
-#### With Vim
+### With Vim
 Once you have VLS installed, you can use it with `vim`.
 
 1. Make sure [vim-lsp](https://github.com/prabirshrestha/vim-lsp) is installed
@@ -82,14 +90,14 @@ if executable('vala-language-server')
 endif
 ```
 
-#### With Visual Studio Code
+### With Visual Studio Code
 - Install the Vala plugin (https://marketplace.visualstudio.com/items?itemName=prince781.vala)
 
-#### With GNOME Builder
+### With GNOME Builder
 - Support is currently available with Builder 3.35 and up
 - Running `ninja -C build install` should install the plugin to `$PREFIX/lib/gnome-builder/plugins`. Make sure you disable the GVLS plugin.
 
-### Contributing
+## Contributing
 Want to help out? Here are some helpful resources:
 
 - If you're a newcomer, check out https://github.com/benwaffle/vala-language-server/issues?q=is%3Aissue+is%3Aopen+label%3Anewcomers
