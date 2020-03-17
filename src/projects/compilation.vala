@@ -11,11 +11,11 @@ class Vls.Compilation : Object {
         }
     }
 
-    static uint file_hash (File file) {
+    public static uint file_hash (File file) {
         return str_hash (file.get_uri ().casefold ());
     }
 
-    static bool files_equal (File file1, File file2) {
+    public static bool files_equal (File file1, File file2) {
         if (file1.equal (file2))
             return true;
         debug ("equality test between %s and %s failed, trying FileInfo...", file1.get_uri (), file2.get_uri ());
@@ -26,6 +26,7 @@ class Vls.Compilation : Object {
     // maps File -> TextDocument
     private HashMap<File, TextDocument> _sources = new HashMap<File, TextDocument> (file_hash, files_equal);
     private HashMap<File, TextDocument> _autosources = new HashMap<File, TextDocument> (file_hash, files_equal);
+    private HashSet<File> _transient_files = new HashSet<File> (file_hash, files_equal);
     private HashSet<string> _vapi_dirs = new HashSet<string> ();
     private HashSet<string> _gir_dirs = new HashSet<string> ();
     private HashSet<string> _metadata_dirs = new HashSet<string> ();
@@ -39,6 +40,21 @@ class Vls.Compilation : Object {
     public Vala.Profile profile { get; private set; }
     public bool abi_stability { get; private set; }
 
+    /**
+     * Absolute path to generated VAPI
+     */
+    public string? output_vapi { get; private set; }
+
+    /**
+     * Absolute path to generated GIR
+     */
+    public string? output_gir { get; private set; }
+
+    /**
+     * Absolute path ot generated internal VAPI
+     */
+    public string? output_internal_vapi { get; private set; }
+
     // code context
     /**
      * Whether the code context needs to be (re-)compiled.
@@ -51,6 +67,8 @@ class Vls.Compilation : Object {
      * for example.
      */
     public bool dirty { get; private set; default = true; }
+
+    public DateTime? last_compiled { get; private set; }
 
     private Vala.CodeContext? _ctx;
 
@@ -152,7 +170,10 @@ class Vls.Compilation : Object {
                         Collection<string>? gir_dirs = null,
                         Collection<string>? metadata_dirs = null,
                         Collection<string>? gresources_dirs = null,
-                        Collection<string>? defines = null) {
+                        Collection<string>? defines = null,
+                        string? output_vapi = null,
+                        string? output_gir = null,
+                        string? output_internal_vapi = null) {
         this._parent_target = parent;
 
         if (packages != null)
@@ -172,6 +193,9 @@ class Vls.Compilation : Object {
         this.experimental_non_null = experimental_non_null;
         this.profile = profile;
         this.abi_stability = abi_stability;
+        this.output_vapi = output_vapi;
+        this.output_gir = output_gir;
+        this.output_internal_vapi = output_internal_vapi;
     }
 
     public Compilation.without_parent () {
@@ -179,23 +203,35 @@ class Vls.Compilation : Object {
     }
 
     public TextDocument add_source_file (string filename, 
-        bool is_writable = true) throws ConvertError, FileError {
+        bool is_writable = true) throws ConvertError, FileError, CompilationError {
         var file = File.new_for_path (filename);
         if (_sources.has_key (file))
-            throw new FileError.FAILED (@"$(file.get_uri ()) is already in the compilation");
+            throw new CompilationError.DUPLICATE_FILE (@"$(file.get_uri ()) is already in the compilation");
         var source = new TextDocument (this, file, is_writable);
         _sources[file] = source;
-        debug (@"added source $(file.get_uri ())");
         if (source.file.package_name != null)
             _packages.remove (source.file.package_name);
         dirty = true;
         return source;
     }
 
+    public bool add_transient_file (File file) {
+        return _transient_files.add (file);
+    }
+
     public bool compile () {
         if (!(needs_compile || dirty) || _sources.is_empty)
             return false;
         Vala.CodeContext.push (this.code_context);
+
+        // add all transient files
+        foreach (File file in _transient_files) {
+            if (file.query_exists ())
+                code_context.add_source_file (new Vala.SourceFile (code_context, Vala.SourceFileType.PACKAGE, file.get_path ()));
+            else
+                warning (@"did not add transient file $(file.get_uri ()) because it does not exist at this moment");
+        }
+
         var parser = new Vala.Parser ();
         parser.parse (code_context);
 
@@ -211,8 +247,29 @@ class Vls.Compilation : Object {
             var file = File.new_for_path (auto_source.filename);
             _autosources[file] = new TextDocument.from_sourcefile (this, auto_source, false);
         }
+
+        // write out VAPI
+        if (output_vapi != null) {
+            // create the directories if they don't exist
+            DirUtils.create_with_parents (Path.get_dirname (output_vapi), 0755);
+            var interface_writer = new Vala.CodeWriter ();
+            interface_writer.write_file (code_context, output_vapi);
+        }
+        // write out GIR
+        if (output_gir != null) {
+            // TODO: output GIR (Vala.GIRWriter is private)
+        }
+        // write out internal VAPI
+        if (output_internal_vapi != null) {
+            // create the directories if they don't exist
+            DirUtils.create_with_parents (Path.get_dirname (output_internal_vapi), 0755);
+            var interface_writer = new Vala.CodeWriter (Vala.CodeWriterType.INTERNAL);
+            interface_writer.write_file (code_context, output_internal_vapi);
+        }
+
         Vala.CodeContext.pop ();
         needs_compile = false;
+        last_compiled = new DateTime.now ();
         return true;
     }
 
@@ -246,10 +303,15 @@ class Vls.Compilation : Object {
 
         if (_ctx != null)
             foreach (var source_file in _ctx.get_source_files ()) {
-                if (!_sources.has_key (File.new_for_path(source_file.filename)))
+                var file = File.new_for_path(source_file.filename);
+                if (!_sources.has_key (file) && !_transient_files.contains (file))
                     internal_files.add (source_file);
             }
 
         return internal_files;
     }
+}
+
+errordomain Vls.CompilationError {
+    DUPLICATE_FILE
 }

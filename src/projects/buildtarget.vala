@@ -21,32 +21,21 @@ abstract class Vls.BuildTarget : Object {
      */
     public string id { get; construct; }
 
-    /**
-     * Where build files are located.
-     */
-    public string build_dir { get; construct; }
+    public string type_name { get; construct; }
 
     /**
-     * The list of files produced by this target.
+     * The compilation for this build target
      */
-    public ArrayList<string> produced_files { get; protected set; }
-
-    /**
-     * The list of compilations, where each compilation
-     * includes a list of sources and compiler flags.
-     */
-    protected ArrayList<Compilation> compilations { get; protected set; }
+    public Compilation compilation { get; protected set; }
 
     /**
      * A list of all BuildTargets that produce files needed by some
      * of our compilations.
      */
-    public ArrayList<BuildTarget> dependencies { get; protected set; }
+    public HashTable<File, BuildTarget> dependencies { get; protected set; }
 
     construct {
-        produced_files = new ArrayList<string> ();
-        compilations = new ArrayList<Compilation> ();
-        dependencies = new ArrayList<BuildTarget> ();
+        dependencies = new HashTable<File, BuildTarget> (Compilation.file_hash, Compilation.files_equal);
     }
 
     public static uint hash (BuildTarget target) {
@@ -57,16 +46,12 @@ abstract class Vls.BuildTarget : Object {
         return bt1.id == bt2.id;
     }
 
-    protected BuildTarget (string script_uri, string id, string build_dir) {
-        Object (script_uri: script_uri, id: id, build_dir: build_dir);
+    protected BuildTarget (string script_uri, string id, string type_name) {
+        Object (script_uri: script_uri, id: id, type_name: type_name);
     }
 
-    public Iterator<Compilation> iterator () {
-        return compilations.iterator ();
-    }
-
-    public virtual string to_string () {
-        return @"BuildTarget($id @ $script_uri)";
+    public string to_string () {
+        return @"$type_name($id)";
     }
 
     /**
@@ -75,24 +60,18 @@ abstract class Vls.BuildTarget : Object {
     public bool compile () {
         bool updated = false;
         // compile our dependencies first
-        foreach (var target in dependencies)
+        foreach (var target in dependencies.get_values ()) {
             updated |= target.compile ();
-
-        foreach (var compilation in compilations)
-            updated |= compilation.compile ();
+            if (compilation.last_compiled != null && 
+                target.compilation.last_compiled.compare (compilation.last_compiled) > 0)
+                compilation.invalidate ();
+        }
+        // if our dependencies updated, their output updated too
+        updated |= compilation.compile ();
         return updated;
     }
 
     public TextDocument? lookup_source_file (string uri) {
-        int nth = 0;
-        foreach (var compilation in compilations) {
-            debug (@"looking inside compilation #$(nth) for $uri");
-            var result = compilation.lookup_source_file (uri);
-            if (result != null)
-                return result;
-            nth++;
-        }
-        debug (@"nothing found");
-        return null;
+        return compilation.lookup_source_file (uri);
     }
 }

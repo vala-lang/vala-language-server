@@ -90,7 +90,23 @@ class Vls.Server : Object {
     delegate void CallHandler (Vls.Server self, Jsonrpc.Server server, Jsonrpc.Client client, string method, Variant id, Variant @params);
 
     private void log_handler (string? log_domain, LogLevelFlags log_levels, string message) {
-        printerr ("%s: %s\n", log_domain == null ? "vls" : log_domain, message);
+        string level = "";
+
+        if ((log_levels & LogLevelFlags.LEVEL_MASK) == LogLevelFlags.LEVEL_MASK)
+            level = "-ALL";
+        else if ((log_levels & LogLevelFlags.LEVEL_CRITICAL) != 0)
+            level = "-CRITICAL";
+        else if ((log_levels & LogLevelFlags.LEVEL_DEBUG) != 0)
+            level = "-DEBUG";
+        else if ((log_levels & LogLevelFlags.LEVEL_ERROR) != 0)
+            level = "-ERROR";
+        else if ((log_levels & LogLevelFlags.LEVEL_INFO) != 0)
+            level = "-INFO";
+        else if ((log_levels & LogLevelFlags.LEVEL_MESSAGE) != 0)
+            level = "-MESSAGE";
+        else if ((log_levels & LogLevelFlags.LEVEL_WARNING) != 0)
+            level = "-WARNING";
+        printerr ("%s: %s\n", log_domain == null ? @"vls$level" : log_domain, message);
     }
 
     uint[] g_sources = {};
@@ -234,6 +250,8 @@ class Vls.Server : Object {
     }
 
     void showMessage (Jsonrpc.Client client, string message, MessageType type) {
+        if (type == MessageType.Error)
+            warning (message);
         try {
             client.send_notification ("window/showMessage", buildDict (
                 type: new Variant.int16 (type),
@@ -296,6 +314,9 @@ class Vls.Server : Object {
                 build_dir, 
                 "meson-info", 
                 "intro-targets.json");
+
+            var output_vapis = new HashMap<string, BuildTarget> ();
+
             try {
                 // if everything went well, parse the targets from JSON
                 var targets_parser = new Json.Parser.immutable_new ();
@@ -316,23 +337,132 @@ class Vls.Server : Object {
 
                 int nth = 0;
                 foreach (var node in json_array.get_elements ()) {
+                    nth++;
                     var target_info = Json.gobject_deserialize (typeof (Meson.TargetInfo), node) 
                         as Meson.TargetInfo;
                     if (target_info == null)
                         throw new ProjectError.JSON (@"Could not parse target #$(nth)'s JSON");
+                    if (target_info.target_sources.size == 0)
+                        continue;
                     try {
-                        builds.add (new MesonTarget (target_info, build_dir));
-                        nth++;
+                        var target = new MesonTarget (target_info, build_dir);
+                        builds.add (target);
+
+                        if (target.compilation.output_vapi != null) {
+                            if (output_vapis.has_key (target.compilation.output_vapi)) {
+                                throw new ProjectError.INTROSPECT (@"There is already a target for output VAPI @ $(target.compilation.output_vapi)");
+                            }
+                            output_vapis[target.compilation.output_vapi] = target;
+                            debug (@"found generated VAPI $(target.compilation.output_vapi) by $target");
+                        }
+
+                        if (target.compilation.output_internal_vapi != null) {
+                            if (output_vapis.has_key (target.compilation.output_internal_vapi)) {
+                                throw new ProjectError.INTROSPECT (@"There is already a target for output VAPI @ $(target.compilation.output_internal_vapi)");
+                            }
+                            output_vapis[target.compilation.output_internal_vapi] = target;
+                            debug (@"found generated internal VAPI $(target.compilation.output_internal_vapi) by $target");
+                        }
                     } catch (Error e) {
                         showMessage (client, @"Failed to parse meson target #$nth: $(e.message)", MessageType.Error);
                     }
                 }
-            } catch (SpawnError e) {
-                showMessage (client, @"Failed to spawn meson introspect: $(e.message)", MessageType.Error);
-            } catch (ProjectError e) {
-                showMessage (client, e.message, MessageType.Error);
             } catch (Error e) {
-                showMessage (client, @"Failed to parse meson targets: $(e.message)", MessageType.Error);
+                showMessage (client, @"Error: $(e.message)", MessageType.Error);
+            }
+
+
+            // Unfortunately, meson doesn't include the VAPIs/GIRs used by another target,
+            // so we have to get the extra information from compile_commands.json
+            // See https://github.com/benwaffle/vala-language-server/issues/60
+            var compile_commands_file = File.new_build_filename (build_dir, "compile_commands.json");
+            try {
+                var targets_parser = new Json.Parser.immutable_new ();
+                targets_parser.load_from_file (compile_commands_file.get_path ());
+
+                var json_data = targets_parser.get_root ();
+
+                if (json_data == null) {
+                    throw new ProjectError.JSON (@"null JSON root");
+                }
+
+                var json_array = json_data.get_node_type () == Json.NodeType.ARRAY ? json_data.get_array () : null;
+                if (json_array == null) {
+                    debug ("[initialize] bad JSON data:\n%s", Json.to_string (json_data, true));
+                    throw new ProjectError.INTROSPECT (@"JSON root is not an array");
+                }
+
+                // for each compile command, attempt to find any references to VAPIs in other projects
+                int nth = -1;
+                foreach (var node in json_array.get_elements ()) {
+                    nth++;
+                    var cc = Json.gobject_deserialize (typeof (CompileCommand), node) as CompileCommand;
+                    if (cc == null) {
+                        warning (@"failed to deserialize compile command #$nth");
+                        continue;
+                    }
+                    var gfile = File.new_build_filename (cc.directory, cc.file);
+
+                    string uri = gfile.get_uri ();
+                    if (!(uri.has_suffix (".vapi") || uri.has_suffix (".gir") || uri.has_suffix (".vala") || uri.has_suffix (".gs")))
+                        continue;
+
+                    string output_dir = cc.directory;       // may change
+                    var docs = lookup_source_files (uri);
+                    Compilation compilation;
+                    if (docs.size == 1) {
+                        compilation = docs[0].compilation;
+                    } else {
+                        Compilation? found_comp = null;
+                        if (cc.output.has_prefix ("meson-out/")) {
+                            string suffix = cc.output.substring ("meson-out/".length);
+                            string dirname = Path.get_dirname (suffix);
+
+                            if (dirname != ".") {
+                                var found_target = builds.first_match (b => b.id == dirname);
+                                if (found_target == null)
+                                    warning (@"could not find target for ID $dirname");
+                                else
+                                    found_comp = found_target.compilation;
+                            }
+                        }
+                        if (found_comp == null) {
+                            warning (@"could not match cc #$nth with a compilation");
+                            continue;
+                        }
+                        compilation = found_comp;
+                    }
+                    string? flag_name, arg_value;   // --<flag_name>[=<arg_value>]
+                    for (int arg_i = -1; (arg_i = iterate_valac_args (cc.command, out flag_name, out arg_value, arg_i)) < cc.command.length;) {
+                        if (flag_name == null && arg_value != null) {
+                            if (arg_value.has_suffix (".vapi")) {
+                                File vapi_file;
+
+                                if (Path.is_absolute (arg_value))
+                                    vapi_file = File.new_for_path (arg_value);
+                                else
+                                    vapi_file = File.new_build_filename (output_dir, arg_value);
+
+                                // look for a dependency associated with our VAPI
+                                BuildTarget? dependency = output_vapis[vapi_file.get_path ()];
+                                if (dependency == null) {
+                                    var vapi_in_target = compilation.lookup_source_file (vapi_file.get_uri ());
+                                    if (vapi_in_target == null)
+                                        warning ("could not find a dependency for VAPI %s in target %s", 
+                                                 vapi_file.get_path (), compilation.parent_target.to_string ());
+                                    continue;
+                                }
+
+                                compilation.parent_target.dependencies[vapi_file] = dependency;
+                                if (!compilation.add_transient_file (vapi_file))
+                                    warning ("could not add %s as transient file to target %s", 
+                                             vapi_file.get_path (), compilation.parent_target.to_string ());
+                            }
+                        }
+                    }
+                }
+            } catch (Error e) {
+                showMessage (client, @"Failed to parse $(compile_commands_file.get_uri ()): $(e.message)", MessageType.Error);
             }
         } else {
             try {
@@ -340,32 +470,29 @@ class Vls.Server : Object {
                 builds.add (new SimpleTarget (root_path));
             } catch (Error e) {
                 showMessage (client, @"Failed to add simple target for project: $(e.message)", MessageType.Error);
-                debug (@"Failed to add SimpleTarget: $(e.message)");
             }
         }
 
         // sanity checking
         var text_documents = new HashMap<string, TextDocument> ();
         foreach (var build_target in builds) {
-            foreach (var compilation in build_target) {
-                foreach (var document in compilation) {
-                    if (text_documents.has_key (document.uri)) {
-                        var other_document = text_documents[document.uri];
-                        LinkedList<TextDocument> dups_list;
-                        if (!shared_docs.contains (document.uri)) {
-                            dups_list = new LinkedList<TextDocument> ();
-                            shared_docs[document.uri] = dups_list;
-                        } else {
-                            dups_list = shared_docs[document.uri];
-                        }
-                        dups_list.add (other_document);
-                        dups_list.add (document);
-
-                        document.clones = dups_list;
-                        other_document.clones = dups_list;
+            foreach (var document in build_target.compilation) {
+                if (text_documents.has_key (document.uri)) {
+                    var other_document = text_documents[document.uri];
+                    LinkedList<TextDocument> dups_list;
+                    if (!shared_docs.contains (document.uri)) {
+                        dups_list = new LinkedList<TextDocument> ();
+                        shared_docs[document.uri] = dups_list;
                     } else {
-                        text_documents[document.uri] = document;
+                        dups_list = shared_docs[document.uri];
                     }
+                    dups_list.add (other_document);
+                    dups_list.add (document);
+
+                    document.clones = dups_list;
+                    other_document.clones = dups_list;
+                } else {
+                    text_documents[document.uri] = document;
                 }
             }
         }
@@ -377,31 +504,31 @@ class Vls.Server : Object {
         // shared_vapis/shared_girs setup
         var package_files = new HashMap<string, Vala.SourceFile> ();
         foreach (var build_target in builds) {
-            foreach (var compilation in build_target) {
-                foreach (var package_file in compilation.get_internal_files ()) {
-                    if (package_file.file_type != Vala.SourceFileType.PACKAGE)
-                        continue;
-                    bool is_vapi = package_file.filename.has_suffix (".vapi");
-                    bool is_gir = package_file.filename.has_suffix (".gir");
-                    if (package_files.has_key (package_file.filename)) {
-                        if (is_vapi && shared_vapis.lookup_source_file (package_file.filename) == null) {
-                            try {
-                                shared_vapis.add_source_file (package_file.filename, false);
-                                debug (@"[$method] added shared VAPI `$(package_file.filename)'");
-                            } catch (Error e) {
+            foreach (var package_file in build_target.compilation.get_internal_files ()) {
+                if (package_file.file_type != Vala.SourceFileType.PACKAGE)
+                    continue;
+                bool is_vapi = package_file.filename.has_suffix (".vapi");
+                bool is_gir = package_file.filename.has_suffix (".gir");
+                if (package_files.has_key (package_file.filename)) {
+                    if (is_vapi && shared_vapis.lookup_source_file (package_file.filename) == null) {
+                        try {
+                            shared_vapis.add_source_file (package_file.filename, false);
+                            debug (@"[$method] added shared VAPI `$(package_file.filename)'");
+                        } catch (Error e) {
+                            if (!(e is CompilationError.DUPLICATE_FILE))
                                 debug (@"[$method] failed to add `$(package_file.filename)' to shared_vapis: $(e.message)");
-                            }
-                        } else if (is_gir && shared_girs.lookup_source_file (package_file.filename) == null) {
-                            try {
-                                shared_girs.add_source_file (package_file.filename, false);
-                                debug (@"[$method] added shared GIR `$(package_file.filename)'");
-                            } catch (Error e) {
-                                debug (@"[$method] failed to add `$(package_file.filename)' to shared_girs: $(e.message)");
-                            }
                         }
-                    } else {
-                        package_files[package_file.filename] = package_file;
+                    } else if (is_gir && shared_girs.lookup_source_file (package_file.filename) == null) {
+                        try {
+                            shared_girs.add_source_file (package_file.filename, false);
+                            debug (@"[$method] added shared GIR `$(package_file.filename)'");
+                        } catch (Error e) {
+                            if (!(e is CompilationError.DUPLICATE_FILE))
+                                debug (@"[$method] failed to add `$(package_file.filename)' to shared_girs: $(e.message)");
+                        }
                     }
+                } else {
+                    package_files[package_file.filename] = package_file;
                 }
             }
         }
@@ -464,23 +591,38 @@ class Vls.Server : Object {
             debug (@"[cancelRequest] request $req not found");
     }
 
-    TextDocument? lookup_source_file (string escaped_uri) {
+    TextDocument? lookup_source_file (string escaped_uri, bool reject_if_multiple = false) {
+        var results = lookup_source_files (escaped_uri);
+        if (results.size > 1 && reject_if_multiple)
+            warning (@"lookup_source_file(): too many results for `$escaped_uri'; returning NULL");
+        else if (results.size >= 1) {
+            foreach (var result in results)
+                return result;
+        }
+        return null;
+    }
+
+    ArrayList<TextDocument> lookup_source_files (string escaped_uri) {
+        var results = new ArrayList<TextDocument> ();
         string uri = Uri.unescape_string (escaped_uri);
         var document = shared_vapis.lookup_source_file (uri);
-        if (document != null)
-            return document;
+        if (document != null) {
+            results.add (document);
+            return results;
+        }
         document = shared_girs.lookup_source_file (uri);
-        if (document != null)
-            return document;
-
-        foreach (var build_target in builds) {
-            var bt_document = build_target.lookup_source_file (uri);
-            if (bt_document != null)
-                return bt_document;
+        if (document != null) {
+            results.add (document);
+            return results;
         }
 
-        debug (@"failed to find text document for `$uri'");
-        return null;
+        foreach (var build_target in builds) {
+            document = build_target.lookup_source_file (uri);
+            if (document != null)
+                results.add (document);
+        }
+
+        return results;
     }
 
     Collection<TextDocument> get_source_files () {
@@ -492,11 +634,10 @@ class Vls.Server : Object {
             source_files[text_document.uri] = text_document;
 
         foreach (var build_target in builds)
-            foreach (var compilation in build_target)
-                foreach (var text_document in compilation) {
-                    if (!source_files.has_key (text_document.uri))
-                        source_files[text_document.uri] = text_document;
-                }
+            foreach (var text_document in build_target.compilation) {
+                if (!source_files.has_key (text_document.uri))
+                    source_files[text_document.uri] = text_document;
+            }
         return source_files.values;
     }
 
@@ -553,48 +694,44 @@ class Vls.Server : Object {
 
         var uri = (string) document.lookup_value ("uri", VariantType.STRING);
         var version = (int64) document.lookup_value ("version", VariantType.INT64);
-        TextDocument? source = lookup_source_file (uri);
 
-        if (source == null) {
-            debug (@"[textDocument/didChange] no document found for $uri");
-            return;
-        }
-
-        if (source.content == null) {
-            error (@"[textDocument/didChange] source content is null!");
-        }
-
-        if (source.version >= version) {
-            debug (@"[textDocument/didChange] rejecting outdated version of $uri");
-            return;
-        }
-
-        if (source.is_writable) {
-            source.version = (int) version;
-
-            var iter = changes.iterator ();
-            Variant? elem = null;
-            var sb = new StringBuilder (source.content);
-            while ((elem = iter.next_value ()) != null) {
-                var changeEvent = parse_variant<TextDocumentContentChangeEvent> (elem);
-
-                if (changeEvent.range == null) {
-                    sb.assign (changeEvent.text);
-                } else {
-                    var start = changeEvent.range.start;
-                    var end = changeEvent.range.end;
-                    size_t pos_begin = get_string_pos (sb.str, start.line, start.character);
-                    size_t pos_end = get_string_pos (sb.str, end.line, end.character);
-                    sb.erase ((ssize_t) pos_begin, (ssize_t) (pos_end - pos_begin));
-                    sb.insert ((ssize_t) pos_begin, changeEvent.text);
-                }
+        foreach (TextDocument source in lookup_source_files (uri)) {
+            if (source.content == null) {
+                error (@"[textDocument/didChange] source content is null!");
             }
-            source.content = sb.str;
-            source.synchronize_clones ();
 
-            request_context_update (client);
-        } else {
-            debug (@"[textDocument/didChange] ignoring requested changes to read-only $(source.uri)");
+            if (source.version >= version) {
+                debug (@"[textDocument/didChange] rejecting outdated version of $uri");
+                return;
+            }
+
+            if (source.is_writable) {
+                source.version = (int) version;
+
+                var iter = changes.iterator ();
+                Variant? elem = null;
+                var sb = new StringBuilder (source.content);
+                while ((elem = iter.next_value ()) != null) {
+                    var changeEvent = parse_variant<TextDocumentContentChangeEvent> (elem);
+
+                    if (changeEvent.range == null) {
+                        sb.assign (changeEvent.text);
+                    } else {
+                        var start = changeEvent.range.start;
+                        var end = changeEvent.range.end;
+                        size_t pos_begin = get_string_pos (sb.str, start.line, start.character);
+                        size_t pos_end = get_string_pos (sb.str, end.line, end.character);
+                        sb.erase ((ssize_t) pos_begin, (ssize_t) (pos_end - pos_begin));
+                        sb.insert ((ssize_t) pos_begin, changeEvent.text);
+                    }
+                }
+                source.content = sb.str;
+                source.synchronize_clones ();
+
+                request_context_update (client);
+            } else {
+                debug (@"[textDocument/didChange] ignoring requested changes to read-only $(source.uri)");
+            }
         }
     }
 
@@ -676,75 +813,72 @@ class Vls.Server : Object {
 
         debug ("publishing diagnostics for target %s", target.to_string ());
 
-        foreach (var compilation in target)
-            foreach (var doc in compilation)
-                docs_not_published[doc.uri] = doc;
+        foreach (var doc in target.compilation)
+            docs_not_published[doc.uri] = doc;
 
-        foreach (var compilation in target) {
             var file_to_doc = new HashMap<Vala.SourceFile,TextDocument> ();
             var doc_diags = new HashMap<TextDocument,Json.Array> ();
 
-            foreach (var document in compilation)
-                file_to_doc[document.file] = document;
-            
-            compilation.reporter.messages.foreach (err => {
-                if (err.loc == null) {
-                    diags_without_source.add_element (Json.gobject_serialize (new Diagnostic () {
-                        severity = err.severity,
-                        message = err.message
-                    }));
-                    return;
-                }
-                assert (err.loc.file != null);
-                if (!file_to_doc.has_key (err.loc.file)) {
-                    warning (@"diagnostic has source not in compilation! - $(err.message)");
-                    return;
-                }
-
-                var diag = new Diagnostic () {
-                    range = new Range () {
-                        start = new Position () {
-                            line = err.loc.begin.line - 1,
-                            character = err.loc.begin.column - 1
-                        },
-                        end = new Position () {
-                            line = err.loc.end.line - 1,
-                            character = err.loc.end.column
-                        }
-                    },
+        foreach (var document in target.compilation)
+            file_to_doc[document.file] = document;
+        
+        target.compilation.reporter.messages.foreach (err => {
+            if (err.loc == null) {
+                diags_without_source.add_element (Json.gobject_serialize (new Diagnostic () {
                     severity = err.severity,
                     message = err.message
-                };
+                }));
+                return;
+            }
+            assert (err.loc.file != null);
+            if (!file_to_doc.has_key (err.loc.file)) {
+                warning (@"diagnostic has source not in compilation! - $(err.message)");
+                return;
+            }
 
-                var node = Json.gobject_serialize (diag);
-                if (!doc_diags.has_key (file_to_doc[err.loc.file]))
-                    doc_diags[file_to_doc[err.loc.file]] = new Json.Array ();
-                doc_diags[file_to_doc[err.loc.file]].add_element (node);
-            });
+            var diag = new Diagnostic () {
+                range = new Range () {
+                    start = new Position () {
+                        line = err.loc.begin.line - 1,
+                        character = err.loc.begin.column - 1
+                    },
+                    end = new Position () {
+                        line = err.loc.end.line - 1,
+                        character = err.loc.end.column
+                    }
+                },
+                severity = err.severity,
+                message = err.message
+            };
 
-            // at the end, report diags for each text document
-            foreach (var entry in doc_diags.entries) {
-                Variant diags_variant_array;
+            var node = Json.gobject_serialize (diag);
+            if (!doc_diags.has_key (file_to_doc[err.loc.file]))
+                doc_diags[file_to_doc[err.loc.file]] = new Json.Array ();
+            doc_diags[file_to_doc[err.loc.file]].add_element (node);
+        });
 
-                docs_not_published.unset (entry.key.uri);
-                try {
-                    diags_variant_array = Json.gvariant_deserialize (
-                        new Json.Node.alloc ().init_array (entry.value),
-                        null);
-                } catch (Error e) {
-                    warning (@"[publishDiagnostics] failed to deserialize diags for `$(entry.key.uri)': $(e.message)");
-                    continue;
-                }
-                try {
-                    client.send_notification (
-                        "textDocument/publishDiagnostics",
-                        buildDict (
-                            uri: new Variant.string (entry.key.uri),
-                            diagnostics: diags_variant_array
-                        ));
-                } catch (Error e) {
-                    debug (@"[publishDiagnostics] failed to notify client: $(e.message)");
-                }
+        // at the end, report diags for each text document
+        foreach (var entry in doc_diags.entries) {
+            Variant diags_variant_array;
+
+            docs_not_published.unset (entry.key.uri);
+            try {
+                diags_variant_array = Json.gvariant_deserialize (
+                    new Json.Node.alloc ().init_array (entry.value),
+                    null);
+            } catch (Error e) {
+                warning (@"[publishDiagnostics] failed to deserialize diags for `$(entry.key.uri)': $(e.message)");
+                continue;
+            }
+            try {
+                client.send_notification (
+                    "textDocument/publishDiagnostics",
+                    buildDict (
+                        uri: new Variant.string (entry.key.uri),
+                        diagnostics: diags_variant_array
+                    ));
+            } catch (Error e) {
+                debug (@"[publishDiagnostics] failed to notify client: $(e.message)");
             }
         }
 
