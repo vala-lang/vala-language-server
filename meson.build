@@ -37,6 +37,7 @@ endif
 
 conf = configuration_data()
 conf.set('LIBVALA_VERSION', libvala.version())
+conf.set('VLS_VERSION', meson.project_version())
 
 conf_file = configure_file(input: 'config.vala.in',
                            output: 'config.vala',

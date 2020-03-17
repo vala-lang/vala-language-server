@@ -1,77 +1,44 @@
 using Gee;
 
-/**
- * Represents a single build target from a build script.
- * Usage:
- * 1. configure a build directory for a build script
- * 2. generate a BuildTarget for each target in the build directory
- * 3. generate a Compilation for each target source in each BuildTarget
- * 4. resolve dependencies between build targets
- */
-abstract class Vls.BuildTarget : Object {
-    /**
-     * The script this target is defined in, or
-     * the directory of the project if there is no
-     * build script.
-     */
-    public string script_uri { get; construct; }
-
-    /**
-     * The ID of the build target.
-     */
+abstract class Vls.BuildTarget : Object, Hashable<BuildTarget> {
+    public string build_dir { get; construct; }
+    public string name { get; construct; }
     public string id { get; construct; }
-
-    public string type_name { get; construct; }
-
-    /**
-     * The compilation for this build target
-     */
-    public Compilation compilation { get; protected set; }
+    public int no { get; construct; }
 
     /**
-     * A list of all BuildTargets that produce files needed by some
-     * of our compilations.
+     * Input to the build target
      */
-    public HashTable<File, BuildTarget> dependencies { get; protected set; }
+    public ArrayList<File> input { get; private set; default = new ArrayList<File> (Util.file_equal); }
 
-    construct {
-        dependencies = new HashTable<File, BuildTarget> (Compilation.file_hash, Compilation.files_equal);
-    }
+    /**
+     * Output of the build target
+     */
+    public ArrayList<File> output { get; private set; default = new ArrayList<File> (Util.file_equal); }
 
-    public static uint hash (BuildTarget target) {
-        return str_hash (target.id);
-    }
+    public HashMap<File, BuildTarget> dependencies { get; private set; default = new HashMap<File, BuildTarget> (Util.file_hash, Util.file_equal); }
 
-    public static bool equal (BuildTarget bt1, BuildTarget bt2) {
-        return bt1.id == bt2.id;
-    }
+    /**
+     * The time this target was last updated. Defaults to the start of the Unix epoch.
+     */
+    public DateTime last_updated { get; protected set; default = new DateTime.from_unix_utc (0); }
 
-    protected BuildTarget (string script_uri, string id, string type_name) {
-        Object (script_uri: script_uri, id: id, type_name: type_name);
-    }
-
-    public string to_string () {
-        return @"$type_name($id)";
+    protected BuildTarget (string build_dir, string name, string id, int no) {
+        Object (build_dir: build_dir, name: name, id: id, no: no);
     }
 
     /**
-     * Run the compiler for all compilations.
+     * Build the target only if it needs to be built from its sources and if
+     * its dependencies are newer than this target. This does not take care of 
+     * building the target's dependencies.
      */
-    public bool compile () {
-        bool updated = false;
-        // compile our dependencies first
-        foreach (var target in dependencies.get_values ()) {
-            updated |= target.compile ();
-            if (compilation.last_compiled != null && 
-                target.compilation.last_compiled.compare (compilation.last_compiled) > 0)
-                compilation.invalidate ();
-        }
-        // if our dependencies updated, their output updated too
-        updated |= compilation.compile ();
-        return updated;
+    public abstract void build_if_stale (Cancellable? cancellable = null) throws Error;
+
+    public bool equal_to (BuildTarget other) {
+        return build_dir == other.build_dir && name == other.name && id == other.id;
     }
 
-    public TextDocument? lookup_source_file (string uri) {
-        return compilation.lookup_source_file (uri);
+    public uint hash () {
+        return @"$build_dir::$name::$id".hash ();
     }
 }

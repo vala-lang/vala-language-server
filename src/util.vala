@@ -1,6 +1,6 @@
 using Gee;
 
-namespace Vls {
+namespace Vls.Util {
     public static T? parse_variant<T> (Variant variant) {
         var json = Json.gvariant_serialize (variant);
         return Json.gobject_deserialize (typeof (T), json);
@@ -49,7 +49,7 @@ namespace Vls {
         return args;
     }
 
-    public static int iterate_valac_args (string[] args, out string? flag_name, out string? arg_value, int last_arg_index = -1) {
+    public static int iterate_valac_args (string[] args, out string? flag_name, out string? arg_value, int last_arg_index) {
         last_arg_index = last_arg_index + 1;
 
         if (last_arg_index >= args.length) {
@@ -150,5 +150,106 @@ namespace Vls {
         } while (true);
 
         return last_arg_index;
+    }
+
+    public bool arg_is_file (string arg) {
+        return /\.(vala|vapi|gir|gs)(\.in)?$/.match (arg);
+    }
+
+
+    static bool ends_with_dir_separator (string s) {
+        return Path.is_dir_separator (s.get_char (s.length - 1));
+    }
+
+    /**
+     * Copied from libvala (see Vala.CodeContext.realpath ())
+     */
+    public static string realpath (string name, string? cwd = null) {
+        string rpath;
+
+        // start of path component
+        weak string start;
+        // end of path component
+        weak string end;
+
+        if (!Path.is_absolute (name)) {
+            // relative path
+            rpath = cwd == null ? Environment.get_current_dir () : cwd;
+
+            start = end = name;
+        } else {
+            // set start after root
+            start = end = Path.skip_root (name);
+
+            // extract root
+            rpath = name.substring (0, (int) ((char*) start - (char*) name));
+        }
+
+        long root_len = (long) ((char*) Path.skip_root (rpath) - (char*) rpath);
+
+        for (; start.get_char () != 0; start = end) {
+            // skip sequence of multiple path-separators
+            while (Path.is_dir_separator (start.get_char ())) {
+                start = start.next_char ();
+            }
+
+            // find end of path component
+            long len = 0;
+            for (end = start; end.get_char () != 0 && !Path.is_dir_separator (end.get_char ()); end = end.next_char ()) {
+                len++;
+            }
+
+            if (len == 0) {
+                break;
+            } else if (len == 1 && start.get_char () == '.') {
+                // do nothing
+            } else if (len == 2 && start.has_prefix ("..")) {
+                // back up to previous component, ignore if at root already
+                if (rpath.length > root_len) {
+                    do {
+                        rpath = rpath.substring (0, rpath.length - 1);
+                    } while (!ends_with_dir_separator (rpath));
+                }
+            } else {
+                if (!ends_with_dir_separator (rpath)) {
+                    rpath += Path.DIR_SEPARATOR_S;
+                }
+
+                // don't use len, substring works on bytes
+                rpath += start.substring (0, (long)((char*)end - (char*)start));
+            }
+        }
+
+        if (rpath.length > root_len && ends_with_dir_separator (rpath)) {
+            rpath = rpath.substring (0, rpath.length - 1);
+        }
+
+        if (Path.DIR_SEPARATOR != '/') {
+            // don't use backslashes internally,
+            // to avoid problems in #include directives
+            string[] components = rpath.split ("\\");
+            // casefold drive letters on Windows (c: -> C:)
+            if (components.length > 0)
+                components[0] = components[0].up ();
+            rpath = string.joinv ("/", components);
+        }
+
+        return rpath;
+    }
+
+    public uint file_hash (File file) {
+        return realpath (file.get_path ()).hash ();
+    }
+
+    public bool file_equal (File file1, File file2) {
+        return file_hash (file1) == file_hash (file2);
+    }
+
+    public uint source_file_hash (Vala.SourceFile source_file) {
+        return str_hash (source_file.filename);
+    }
+
+    public bool source_file_equal (Vala.SourceFile source_file1, Vala.SourceFile source_file2) {
+        return source_file_hash (source_file1) == source_file_hash (source_file2);
     }
 }
