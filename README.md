@@ -63,13 +63,21 @@
 
 ### Installation
 
-Arch Linux (via AUR): `yay -S vala-language-server`
+- Arch Linux (via AUR): `yay -S vala-language-server`
+
+- Ubuntu 18.04:
+
+    ```sh
+    sudo add-apt-repository ppa:prince781/vala-language-server
+    sudo apt-get update
+    sudo apt-get install vala-language-server
+    ```
 
 ### Building from Source
-```
-$ meson -Dprefix=$PREFIX build
-$ ninja -C build
-$ sudo ninja -C build install
+```sh
+meson -Dprefix=$PREFIX build
+ninja -C build
+sudo ninja -C build install
 ```
 
 This will install `vala-language-server` to `$PREFIX/bin`
