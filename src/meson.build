@@ -3,13 +3,14 @@ vls_src = files([
   'find_symbol.vala',
   'list_symbols.vala',
   'projects/buildtarget.vala',
+  'projects/buildtask.vala',
   'projects/compilation.vala',
-  'projects/mesontarget.vala',
-  'projects/simpletarget.vala',
+  'projects/mesonproject.vala',
+  'projects/project.vala',
+  'projects/textdocument.vala',
   'projects/types.vala',
   'protocol.vala',
   'reporter.vala',
-  'textdocument.vala'
 ])
 
 if get_option('parse_system_girs')
