@@ -2,8 +2,10 @@ using Gee;
 
 class Vls.TextDocument : Object {
     public weak Compilation compilation { get; private set; }
-    public File gfile { get; private set; }
     public string uri { get; private set; }
+    public string filename {
+        get { return file.filename; }
+    }
     public Vala.SourceFile file { get; private set; }
     public int version;
 
@@ -36,7 +38,6 @@ class Vls.TextDocument : Object {
         }
 
         this.compilation = compilation;
-        this.gfile = gfile;
         this.uri = gfile.get_uri ();
         this.is_writable = is_writable;
 
@@ -56,8 +57,7 @@ class Vls.TextDocument : Object {
                                          Vala.SourceFile file,
                                          bool is_writable = true) {
         this.compilation = compilation;
-        this.gfile = File.new_for_path (file.filename);
-        this.uri = gfile.get_uri ();
+        this.uri = File.new_for_path (file.filename).get_uri ();
         this.version = 0;
         this.file = file;
         this.is_writable = is_writable;
@@ -76,6 +76,6 @@ class Vls.TextDocument : Object {
     }
 
     public string to_string () {
-        return @"TextDocument($(gfile.get_path ()))";
+        return @"TextDocument($(file.filename)))";
     }
 }

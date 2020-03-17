@@ -3,7 +3,7 @@
  */
 class Vls.SimpleTarget : BuildTarget {
     public SimpleTarget (string root_dir, Cancellable? cancellable = null) throws Error {
-        base (root_dir, root_dir, root_dir);
+        base (root_dir, root_dir, "SimpleTarget");
 
         add_compilations_for_dir (File.new_for_path (root_dir), cancellable);
     }
@@ -15,7 +15,7 @@ class Vls.SimpleTarget : BuildTarget {
             cancellable);
 
         FileInfo? info = null;
-        var compilation = new Compilation (this, false, false, Vala.Profile.GOBJECT, false);
+        compilation = new Compilation (this, false, false, Vala.Profile.GOBJECT, false);
         int num_sources = 0;
 
         while ((cancellable == null ||
@@ -42,11 +42,6 @@ class Vls.SimpleTarget : BuildTarget {
 
         if (num_sources > 0) {
             debug (@"SimpleTarget: adding compilation for $(dir.get_path ())");
-            compilations.add (compilation);
         }
-    }
-
-    public override string to_string () {
-        return @"SimpleTarget($id)";
     }
 }
