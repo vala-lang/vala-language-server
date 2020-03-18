@@ -49,17 +49,26 @@ class Vls.MesonTarget : BuildTarget {
             } else if (flag_name == "directory") {
                 build_dir = File.new_build_filename (meson_build_dir, (!) arg_value).get_path ();
             } else if (flag_name == "vapi" || flag_name == "gir" || flag_name == "internal-vapi") {
+                if (arg_value == null) {
+                    warning (@"MesonTarget($(meson_target_info.id)) --$flag_name is null");
+                    continue;
+                }
+
                 string path;
-                if (build_dir == null) {
-                    warning (@"$this no build dir (--directory) known before --vapi, assuming Meson build dir ($meson_build_dir)");
-                    var guessed_file = File.new_build_filename (meson_build_dir, arg_value);
-                    if (meson_build_dir_file.get_relative_path (guessed_file) == null) {
-                        warning (@"$(guessed_file.get_path ()) is not within $meson_build_dir, so it will be ignored");
-                        continue;
-                    }
-                    path = guessed_file.get_path ();
+                if (Path.is_absolute (arg_value)) {
+                    path = (!) arg_value;
                 } else {
-                    path = File.new_build_filename (build_dir, arg_value).get_path ();
+                    if (build_dir == null) {
+                        warning (@"MesonTarget($(meson_target_info.id)) no build dir (--directory) known before --vapi, assuming Meson build dir ($meson_build_dir)");
+                        var guessed_file = File.new_build_filename (meson_build_dir, arg_value);
+                        if (meson_build_dir_file.get_relative_path (guessed_file) == null) {
+                            warning (@"$(guessed_file.get_path ()) is not within $meson_build_dir, so it will be ignored");
+                            continue;
+                        }
+                        path = guessed_file.get_path ();
+                    } else {
+                        path = File.new_build_filename (build_dir, arg_value).get_path ();
+                    }
                 }
                 debug ("MesonTarget(%s) setting %s to (path) %s", meson_target_info.id, flag_name, path);
                 if (flag_name == "vapi")
