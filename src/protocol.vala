@@ -40,7 +40,7 @@ namespace LanguageServer {
         Hint = 4
     }
 
-    class Position : Object {
+    class Position : Object, Gee.Comparable<Position> {
         /**
          * Line position in a document (zero-based).
          */
@@ -56,7 +56,7 @@ namespace LanguageServer {
          */
         public uint character { get; set; default = -1; }
 
-        public int compare (Position other) {
+        public int compare_to (Position other) {
             return line > other.line ? 1 :
                 (line == other.line ?
                  (character > other.character ? 1 :
@@ -85,7 +85,7 @@ namespace LanguageServer {
         }
     }
 
-    class Range : Object, Gee.Hashable<Range> {
+    class Range : Object, Gee.Hashable<Range>, Gee.Comparable<Range> {
         /**
          * The range's start position.
          */
@@ -110,13 +110,17 @@ namespace LanguageServer {
 
         public bool equal_to (Range other) { return this.to_string () == other.to_string (); }
 
+        public int compare_to (Range other) {
+            return start.compare_to (other.start);
+        }
+
         /**
          * Return a new range that includes `this` and `other`.
          */
         public Range union (Range other) {
             return new Range () {
-                start = start.compare (other.start) < 0 ? start : other.start,
-                end = end.compare (other.end) < 0 ? other.end : end
+                start = start.compare_to (other.start) < 0 ? start : other.start,
+                end = end.compare_to (other.end) < 0 ? other.end : end
             };
         }
     }

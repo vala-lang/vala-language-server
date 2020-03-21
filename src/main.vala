@@ -846,7 +846,7 @@ class Vls.Server : Object {
                 var node_begin = new Position.from_libvala (node.source_reference.begin);
                 var node_end = new Position.from_libvala (node.source_reference.end);
 
-                if (best_begin.compare (node_begin) <= 0 && node_end.compare (best_end) <= 0 &&
+                if (best_begin.compare_to (node_begin) <= 0 && node_end.compare_to (best_end) <= 0 &&
                     !(best.source_reference.begin.column == node.source_reference.begin.column &&
                         node.source_reference.end.column == best.source_reference.end.column &&
                         // don't get implicit `this` accesses
@@ -1824,7 +1824,7 @@ class Vls.Server : Object {
                             var sr_begin = new Position () { line = sr.begin.line, character = sr.begin.column - 1 };
 
                             // don't show local variables that are declared ahead of the cursor
-                            if (sr_begin.compare (fs.pos) > 0)
+                            if (sr_begin.compare_to (fs.pos) > 0)
                                 continue;
                             completions.add (new CompletionItem.from_symbol (sym, 
                                 (sym is Vala.Constant) ? CompletionItemKind.Constant : CompletionItemKind.Variable,

@@ -16,7 +16,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
         this.file = file;
         this.top_level_syms = new Gee.LinkedList<DocumentSymbol> ();
         this.containers = new Gee.LinkedList<DocumentSymbol> ();
-        this.syms_flat = new Gee.TreeMap<Range, DocumentSymbol> ((r1, r2) => r1.start.compare (r2.start));
+        this.syms_flat = new Gee.TreeMap<Range, DocumentSymbol> ();
         this.all_syms = new Gee.LinkedList<DocumentSymbol> ();
         this.ns_name_to_dsym = new Gee.HashMap<string, DocumentSymbol> ();
 
