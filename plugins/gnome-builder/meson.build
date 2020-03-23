@@ -1,7 +1,7 @@
-plugin_files = files([
-  'vala_langserv.plugin',
-  'vala_langserv.py',
-])
-
-prefix = get_option('prefix')
-install_data(plugin_files, install_dir: prefix + '/lib/gnome-builder/plugins')
+install_data(
+  files(
+  	'vala_langserv.plugin',
+  	'vala_langserv.py'
+  ),
+  install_dir: get_option('prefix') / get_option('libdir') / 'gnome-builder' / 'plugins'
+)
