@@ -11,6 +11,7 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **Software**
+OS:
 Code editor (e.g. VSCode):
 Vala Language Server (e.g. git commit, or AUR version):
 Vala version (`valac --version`):
