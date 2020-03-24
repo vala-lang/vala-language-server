@@ -11,9 +11,9 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **Software**
-OS:
+OS and version (e.g. Ubuntu 20.04):
 Code editor (e.g. VSCode):
-Vala Language Server (e.g. git commit, or AUR version):
+Vala Language Server (e.g. git commit, or PPA/AUR version):
 Vala version (`valac --version`):
 
 **To Reproduce**
