@@ -248,9 +248,7 @@ class Vls.Server : Object {
         init_params = parse_variant<InitializeParams> (@params);
         debug ("[initialize] got initialize params:\n %s", Json.to_string (Json.gvariant_serialize (@params), true));
 
-        File root_dir = init_params.rootPath != null ? 
-            File.new_for_path (init_params.rootPath) :
-            File.new_for_uri (init_params.rootUri);
+        var root_dir = File.new_for_uri (init_params.rootUri);
         if (!root_dir.is_native ()) {
             showMessage (client, "Non-native files not supported", MessageType.Error);
             error ("Non-native files not supported");
@@ -259,105 +257,82 @@ class Vls.Server : Object {
         debug (@"[initialize] root path is $root_path");
 
         // here is where we determine our project backend(s)
-        var meson_files = new ArrayList<string> ();
-        try {
-            find_files (root_dir, "meson.build", 1, null, meson_files);
-        } catch (Error e) {
-            debug (@"[initialize] could not search for meson files: $(e.message)");
-        }
-        // look for top-level meson file
-        if (meson_files.size == 1) {
-            // This is a meson project, do we have a build directory in place?
-            // Because we have a Meson script in the root dir, we can guess 
-            // that a subdir with a build.ninja script is a Meson build dir.
-            var ninja_files = new ArrayList<string> ();
+        var meson_file = root_dir.get_child ("meson.build");
+        if (meson_file.query_exists ()) {
+            // configure in a temporary directory
+            string[] spawn_args = {"meson", "setup", ".", root_path};
+            string build_dir = "(null)";
+            string proc_stdout, proc_stderr;
+            int proc_status = -1;
+            // run configure
             try {
-                find_files (root_dir, "build.ninja", -1, null, ninja_files);
-            } catch (Error e) {
-                debug (@"[initialize] could not search for ninja files: $(e.message)");
-            }
-            if (ninja_files.size == 0) {
-                // configure in a temporary directory
-                string[] spawn_args = {"meson", "setup", ".", root_path};
-                string build_dir = "";
-                string proc_stdout, proc_stderr;
-                int proc_status = -1;
-                // run configure
-                try {
-                    build_dir = DirUtils.make_tmp (@"vls-meson-$(str_hash (root_path))-XXXXXX");
-                    debug ("configuring meson in a temporary directory %s", build_dir);
-                    Process.spawn_sync (
-                        build_dir, 
-                        spawn_args, 
-                        null, 
-                        SpawnFlags.SEARCH_PATH, 
-                        null,
-                        out proc_stdout,
-                        out proc_stderr,
-                        out proc_status);
-                } catch (FileError e) {
-                    showMessage (client, @"Failed to make temporary directory: $(e.message)", MessageType.Error);
-                } catch (SpawnError e) {
-                    showMessage (client, @"Failed to spawn meson setup: $(e.message)", MessageType.Error);
-                }
-
-                if (proc_status == 0)
-                    ninja_files.add (Path.build_filename (build_dir, "build.ninja"));
-                else {
-                    showMessage (
-                        client, 
-                        @"Failed to configure Meson in `$build_dir': process exited with error code $proc_status", 
-                        MessageType.Error);
-                    return;
-                }
-            }
-
-            // For each Ninja build script found, attempt to Meson introspect its
-            // containing directory, and if we can then create Meson targets.
-            foreach (var ninja_file in ninja_files) {
-                string build_dir = Path.get_dirname (ninja_file);
-                string intro_targets_json_filename = Path.build_filename (
+                build_dir = DirUtils.make_tmp (@"vls-meson-$(str_hash (root_path))-XXXXXX");
+                debug ("configuring meson in a temporary directory %s", build_dir);
+                Process.spawn_sync (
                     build_dir, 
-                    "meson-info", 
-                    "intro-targets.json");
-                try {
-                    // if everything went well, parse the targets from JSON
-                    var targets_parser = new Json.Parser.immutable_new ();
-                    targets_parser.load_from_file (intro_targets_json_filename);
-                    var json_data = targets_parser.get_root ();
+                    spawn_args, 
+                    null, 
+                    SpawnFlags.SEARCH_PATH, 
+                    null,
+                    out proc_stdout,
+                    out proc_stderr,
+                    out proc_status);
+            } catch (FileError e) {
+                showMessage (client, @"Failed to make temporary directory: $(e.message)", MessageType.Error);
+            } catch (SpawnError e) {
+                showMessage (client, @"Failed to spawn meson setup: $(e.message)", MessageType.Error);
+            }
 
-                    if (json_data == null) {
-                        debug ("[initialize] empty JSON data at %s", intro_targets_json_filename);
-                        throw new ProjectError.INTROSPECT (@"Failed to introspect in $build_dir: empty JSON data at $intro_targets_json_filename");
-                    }
+            if (proc_status != 0) {
+                showMessage (
+                    client, 
+                    @"Failed to configure Meson in `$build_dir': process exited with error code $proc_status", 
+                    MessageType.Error);
+                reply_null (id, client, method);
+                return;
+            }
 
-                    var json_array = json_data.get_node_type () == Json.NodeType.ARRAY ? json_data.get_array () : null;
+            string intro_targets_json_filename = Path.build_filename (
+                build_dir, 
+                "meson-info", 
+                "intro-targets.json");
+            try {
+                // if everything went well, parse the targets from JSON
+                var targets_parser = new Json.Parser.immutable_new ();
+                targets_parser.load_from_file (intro_targets_json_filename);
+                var json_data = targets_parser.get_root ();
 
-                    if (json_array == null) {
-                        debug ("[initialize] bad JSON data from meson introspect:\n%s", Json.to_string (json_data, true));
-                        throw new ProjectError.INTROSPECT (@"Failed to introspect in $build_dir: meson output is not an array");
-                    }
-
-                    int nth = 0;
-                    foreach (var node in json_array.get_elements ()) {
-                        var target_info = Json.gobject_deserialize (typeof (Meson.TargetInfo), node) 
-                            as Meson.TargetInfo;
-                        if (target_info == null)
-                            throw new ProjectError.JSON (@"Could not parse target #$(nth)'s JSON");
-                        try {
-                            builds.add (new MesonTarget (target_info, build_dir));
-                            nth++;
-                        } catch (Error e) {
-                            showMessage (client, @"Failed to parse meson target #$nth: $(e.message)", MessageType.Error);
-                        }
-                    }
-                } catch (SpawnError e) {
-                    showMessage (client, @"Failed to spawn meson introspect: $(e.message)", MessageType.Error);
-                } catch (ProjectError e) {
-                    showMessage (client, e.message, MessageType.Error);
-                } catch (Error e) {
-                    showMessage (client, @"Failed to parse meson targets: $(e.message)", MessageType.Error);
+                if (json_data == null) {
+                    debug ("[initialize] empty JSON data at %s", intro_targets_json_filename);
+                    throw new ProjectError.INTROSPECT (@"Failed to introspect in $build_dir: empty JSON data at $intro_targets_json_filename");
                 }
+
+                var json_array = json_data.get_node_type () == Json.NodeType.ARRAY ? json_data.get_array () : null;
+
+                if (json_array == null) {
+                    debug ("[initialize] bad JSON data from meson introspect:\n%s", Json.to_string (json_data, true));
+                    throw new ProjectError.INTROSPECT (@"Failed to introspect in $build_dir: meson output is not an array");
+                }
+
+                int nth = 0;
+                foreach (var node in json_array.get_elements ()) {
+                    var target_info = Json.gobject_deserialize (typeof (Meson.TargetInfo), node) 
+                        as Meson.TargetInfo;
+                    if (target_info == null)
+                        throw new ProjectError.JSON (@"Could not parse target #$(nth)'s JSON");
+                    try {
+                        builds.add (new MesonTarget (target_info, build_dir));
+                        nth++;
+                    } catch (Error e) {
+                        showMessage (client, @"Failed to parse meson target #$nth: $(e.message)", MessageType.Error);
+                    }
+                }
+            } catch (SpawnError e) {
+                showMessage (client, @"Failed to spawn meson introspect: $(e.message)", MessageType.Error);
+            } catch (ProjectError e) {
+                showMessage (client, e.message, MessageType.Error);
+            } catch (Error e) {
+                showMessage (client, @"Failed to parse meson targets: $(e.message)", MessageType.Error);
             }
         } else {
             try {
@@ -475,45 +450,6 @@ class Vls.Server : Object {
             check_update_context ();
             return !this.shutting_down;
         });
-    }
-
-    /**
-     * List all files matching target from the current directory (dir).
-     */
-    ArrayList<string> find_files (File dir, 
-                                  string target, 
-                                  int max_depth = -1, 
-                                  Cancellable? cancellable = null,
-                                  ArrayList<string> results = new ArrayList<string> ()) 
-                                  throws Error {
-        if (max_depth == 0)
-            return results;
-
-        FileEnumerator enumerator = dir.enumerate_children (
-            "standard::*",
-            FileQueryInfoFlags.NOFOLLOW_SYMLINKS,
-            cancellable);
-
-        FileInfo? info = null;
-        while ((cancellable == null || !cancellable.is_cancelled ()) &&
-                (info = enumerator.next_file (cancellable)) != null) {
-            if (info.get_file_type () == FileType.DIRECTORY) {
-                find_files (
-                    enumerator.get_child (info), 
-                    target, 
-                    max_depth < 0 ? -1 : max_depth - 1, 
-                    cancellable,
-                    results);
-            } else if (!info.get_is_backup () && !info.get_is_hidden ()){
-                if (info.get_name () == target)
-                    results.add (enumerator.get_child (info).get_path ());
-            }
-        }
-
-        if (cancellable != null && cancellable.is_cancelled ())
-            throw new IOError.CANCELLED ("Operation was cancelled");
-
-        return results;
     }
 
     void cancelRequest (Jsonrpc.Client client, Variant @params) {
