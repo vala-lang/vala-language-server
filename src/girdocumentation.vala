@@ -7,7 +7,6 @@ class Vls.GirDocumentation {
      */
     public GirDocumentation (Gee.Collection<Vala.SourceFile> packages) {
         context = new Vala.CodeContext ();
-        context.profile = Vala.Profile.GOBJECT;
         context.add_define ("GOBJECT");
 
         // add packages

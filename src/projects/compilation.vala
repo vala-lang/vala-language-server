@@ -156,7 +156,6 @@ class Vls.Compilation : BuildTarget {
             vapi_directories = _vapi_dirs.to_array (),
             gir_directories = _gir_dirs.to_array (),
             metadata_directories = _metadata_dirs.to_array (),
-            profile = _profile,
             keep_going = true,
             // report = new Reporter (_fatal_warnings),
             entry_point_name = _entry_point_name,
