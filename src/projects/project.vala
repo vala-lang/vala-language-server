@@ -124,7 +124,11 @@ abstract class Vls.Project : Object {
         }
     }
 
-    public abstract void reconfigure_if_stale (Cancellable? cancellable = null) throws Error;
+    /**
+     * Reconfigure the project if there were changes to the build files that warrant doing so.
+     * Returns true if the project was actually reconfigured, false otherwise.
+     */
+    public abstract bool reconfigure_if_stale (Cancellable? cancellable = null) throws Error;
 
     /**
      * Build those elements of the project that need to be rebuilt.

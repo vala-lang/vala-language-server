@@ -333,6 +333,7 @@ class Vls.Server : Object {
         }
 
         // listen for context update requests
+        update_context_client = client;
         g_sources += Timeout.add (check_update_context_period_ms, () => {
             check_update_context ();
             return !this.shutting_down;
@@ -460,11 +461,12 @@ class Vls.Server : Object {
      */
     void check_update_context () {
         try {
-            // TODO: generate a context update request on stale event
-            project.reconfigure_if_stale (cancellable);
+            if (project.reconfigure_if_stale (cancellable))
+                request_context_update (update_context_client);
         } catch (Error e) {
             warning ("failed to reconfigure stale project: %s", e.message);
         }
+
         if (update_context_requests > 0 && get_monotonic_time () >= update_context_time_us) {
             debug ("updating contexts and publishing diagnostics...");
             update_context_requests = 0;
