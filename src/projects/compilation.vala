@@ -143,6 +143,14 @@ class Vls.Compilation : BuildTarget {
             _generated_sources.add (generated_source_file);
             input.add (generated_source_file);
         }
+
+        // finally, add these very important packages
+        if (_profile == Vala.Profile.GOBJECT) {
+            _packages.add ("glib-2.0");
+            _packages.add ("gobject-2.0");
+        } else if (_profile == Vala.Profile.POSIX) {
+            _packages.add ("posix");
+        }
     }
 
     private void configure (Cancellable? cancellable = null) throws Error {
