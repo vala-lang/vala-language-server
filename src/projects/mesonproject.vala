@@ -11,22 +11,22 @@ class Vls.MesonProject : Project {
 
     public const string OUTDIR = "meson-out";
 
-    public override void reconfigure_if_stale (Cancellable? cancellable = null) throws Error {
+    public override bool reconfigure_if_stale (Cancellable? cancellable = null) throws Error {
         if (!build_files_have_changed) {
-            return;
+            return false;
         }
 
-        foreach (var file_monitor in meson_build_files.values) {
-            file_monitor.cancel ();
-            file_monitor.changed.disconnect (file_changed_event);
-        }
-        meson_build_files.clear ();
         build_targets.clear ();
         build_files_have_changed = false;
 
         // 1. configure new build directory
         var root_meson_build = File.new_build_filename (root_path, "meson.build");
-        meson_build_files[root_meson_build] = root_meson_build.monitor_file (FileMonitorFlags.WATCH_HARD_LINKS, cancellable);
+        if (!meson_build_files.has_key (root_meson_build)) {
+            debug ("MesonProject: obtaining a new file monitor for %s ...", root_meson_build.get_path ());
+            FileMonitor file_monitor = root_meson_build.monitor_file (FileMonitorFlags.NONE, cancellable);
+            file_monitor.changed.connect (file_changed_event);
+            meson_build_files[root_meson_build] = file_monitor;
+        }
         build_dir = DirUtils.make_tmp (@"vls-meson-$(str_hash (root_path))-XXXXXX");
 
         string[] spawn_args = {"meson", "setup", ".", root_path};
@@ -102,8 +102,10 @@ class Vls.MesonProject : Project {
             // finally, monitor the file that this build target was defined in
             var defined_in = File.new_for_path (meson_target_info.defined_in);
             if (!meson_build_files.has_key (defined_in)) {
-                debug ("MesonProject: obtaining a file monitor for %s ...", defined_in.get_path ());
-                meson_build_files[defined_in] = defined_in.monitor_file (FileMonitorFlags.WATCH_HARD_LINKS, cancellable);
+                debug ("MesonProject: obtaining a new file monitor for %s ...", defined_in.get_path ());
+                FileMonitor file_monitor = defined_in.monitor_file (FileMonitorFlags.NONE, cancellable);
+                file_monitor.changed.connect (file_changed_event);
+                meson_build_files[defined_in] = file_monitor;
             }
         }
 
@@ -177,6 +179,8 @@ class Vls.MesonProject : Project {
 
         // 4. perform final analysis and sanity checking
         analyze_build_targets ();
+
+        return true;
     }
 
     public MesonProject (string root_path, Cancellable? cancellable = null) throws Error {
@@ -185,11 +189,22 @@ class Vls.MesonProject : Project {
     }
 
     private void file_changed_event (File src, File? dest, FileMonitorEvent event_type) {
+        if ((event_type & FileMonitorEvent.ATTRIBUTE_CHANGED) != 0) {
+            debug ("MesonProject: watched file %s had an attribute changed", src.get_path ());
+            build_files_have_changed = true;
+        }
         if ((event_type & FileMonitorEvent.CHANGED) != 0) {
             debug ("MesonProject: watched file %s was changed", src.get_path ());
             build_files_have_changed = true;
-        } else if ((event_type & FileMonitorEvent.DELETED) != 0) {
+        }
+        if ((event_type & FileMonitorEvent.DELETED) != 0) {
             debug ("MesonProject: watched file %s was deleted", src.get_path ());
+            // remove this file monitor since the file was deleted
+            FileMonitor file_monitor;
+            if (meson_build_files.unset (src, out file_monitor)) {
+                file_monitor.cancel ();
+                file_monitor.changed.disconnect (file_changed_event);
+            }
             build_files_have_changed = true;
         }
     }
