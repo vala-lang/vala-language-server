@@ -50,7 +50,7 @@ extra_vala_sources = files([
 
 if host_machine.system() == 'windows'
     deps += dependency('gio-windows-2.0')
-    extra_vala_sources += 'windows.vapi'
+    extra_vala_sources += files(['src/windows.vapi'])
     add_project_arguments(['--define=WINDOWS'], language: 'vala')
 else
     deps += dependency('gio-unix-2.0')
