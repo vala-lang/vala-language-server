@@ -66,6 +66,9 @@ class Vls.Server : Object {
 
     bool is_initialized = false;
 
+    /**
+     * The global cancellable object
+     */
     static Cancellable cancellable = new Cancellable ();
 
     [CCode (has_target = false)]
@@ -241,9 +244,9 @@ class Vls.Server : Object {
             client.send_notification ("window/showMessage", buildDict (
                 type: new Variant.int16 (type),
                 message: new Variant.string (message)
-            ));
+            ), cancellable);
         } catch (Error e) {
-            GLib.debug (@"showMessage: failed to notify client: $(e.message)");
+            debug (@"showMessage: failed to notify client: $(e.message)");
         }
     }
 
@@ -313,7 +316,7 @@ class Vls.Server : Object {
                     name: new Variant.string ("Vala Language Server"),
                     version: new Variant.string (Config.version)
                 )
-            ));
+            ), cancellable);
         } catch (Error e) {
             error (@"[initialize] failed to reply to client: $(e.message)");
         }
@@ -352,7 +355,7 @@ class Vls.Server : Object {
 
     void reply_null (Variant id, Jsonrpc.Client client, string method) {
         try {
-            client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+            client.reply (id, new Variant.maybe (VariantType.VARIANT, null), cancellable);
         } catch (Error e) {
             debug (@"[$method] failed to reply to client: $(e.message)");
         }
@@ -451,19 +454,29 @@ class Vls.Server : Object {
         debug (@"Context(s) update (re-)scheduled in $((int) (delay_us / 1000)) ms");
     }
 
+    /** 
+     * Reconfigure the project if needed, and check whether we need to rebuild
+     * the project if we have context update requests.
+     */
     void check_update_context () {
+        try {
+            // TODO: generate a context update request on stale event
+            project.reconfigure_if_stale (cancellable);
+        } catch (Error e) {
+            warning ("failed to reconfigure stale project: %s", e.message);
+        }
         if (update_context_requests > 0 && get_monotonic_time () >= update_context_time_us) {
             debug ("updating contexts and publishing diagnostics...");
             update_context_requests = 0;
             update_context_time_us = 0;
-            /* This must come after the resetting of the two variables above,
-             * since it's possible for publishDiagnostics to eventually call
-             * one of our JSON-RPC callbacks through g_main_context_iteration (),
-             * if we get a new message while sending the textDocument/publishDiagnostics
-             * notifications. */
             try {
-                project.build_if_stale ();
+                project.build_if_stale (cancellable);
                 foreach (var compilation in project.get_compilations ())
+                    /* This must come after the resetting of the two variables above,
+                     * since it's possible for publishDiagnostics to eventually call
+                     * one of our JSON-RPC callbacks through g_main_context_iteration (),
+                     * if we get a new message while sending the textDocument/publishDiagnostics
+                     * notifications. */
                     publishDiagnostics (compilation, update_context_client);
             } catch (Error e) {
                 warning ("Failed to rebuild project: %s", e.message);
@@ -584,7 +597,8 @@ class Vls.Server : Object {
                     buildDict (
                         uri: new Variant.string (gfile.get_uri ()),
                         diagnostics: diags_variant_array
-                    ));
+                    ),
+                    cancellable);
             } catch (Error e) {
                 debug (@"[publishDiagnostics] failed to notify client: $(e.message)");
             }
@@ -598,7 +612,8 @@ class Vls.Server : Object {
                     buildDict (
                         uri: new Variant.string (gfile.get_uri ()),
                         diagnostics: new Variant.array (VariantType.VARIANT, new Variant[]{})
-                    ));
+                    ),
+                    cancellable);
             } catch (Error e) {
                 debug (@"[publishDiagnostics] failed to publish empty diags for $(gfile.get_uri ()): $(e.message)");
             }
@@ -612,7 +627,8 @@ class Vls.Server : Object {
                 "textDocument/publishDiagnostics",
                 buildDict (
                     diagnostics: diags_wo_src_variant_array
-                ));
+                ),
+                cancellable);
         } catch (Error e) {
             debug (@"[publishDiagnostics] failed to publish diags without source: $(e.message)");
         }
@@ -706,7 +722,7 @@ class Vls.Server : Object {
 
             if (fs.result.size == 0) {
                 try {
-                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null), cancellable);
                 } catch (Error e) {
                     debug("[textDocument/definition] failed to reply to client: %s", e.message);
                 }
@@ -731,7 +747,7 @@ class Vls.Server : Object {
                     best = dt.symbol;
             } else {
                 try {
-                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null));
+                    client.reply (id, new Variant.maybe (VariantType.VARIANT, null), cancellable);
                 } catch (Error e) {
                     debug("[textDocument/definition] failed to reply to client: %s", e.message);
                 }
@@ -742,7 +758,7 @@ class Vls.Server : Object {
             var location = new Location.from_sourceref (best.source_reference);
             debug ("[textDocument/definition] found location ... %s", location.uri);
             try {
-                client.reply (id, Util.object_to_variant (location));
+                client.reply (id, Util.object_to_variant (location), cancellable);
             } catch (Error e) {
                 debug("[textDocument/definition] failed to reply to client: %s", e.message);
             }
@@ -786,7 +802,7 @@ class Vls.Server : Object {
 
             try {
                 Variant result = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (array), null);
-                client.reply (id, result);
+                client.reply (id, result, cancellable);
             } catch (Error e) {
                 debug (@"[textDocument/documentSymbol] failed to reply to client: $(e.message)");
             }
@@ -1721,7 +1737,7 @@ class Vls.Server : Object {
 
             try {
                 Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
-                client.reply (id, variant_array);
+                client.reply (id, variant_array, cancellable);
             } catch (Error e) {
                 debug (@"[$method] failed to reply to client: $(e.message)");
             }
@@ -1949,7 +1965,7 @@ class Vls.Server : Object {
                 client.reply (id, buildDict (
                     signatures: variant_array,
                     activeParameter: new Variant.int32 (active_param)
-                ));
+                ), cancellable);
             } catch (Error e) {
                 debug (@"[textDocument/signatureHelp] failed to reply to client: $(e.message)");
             }
@@ -2056,7 +2072,7 @@ class Vls.Server : Object {
             debug (@"[textDocument/hover] got $result $(result.type_name)");
 
             try {
-                client.reply (id, Util.object_to_variant (hoverInfo));
+                client.reply (id, Util.object_to_variant (hoverInfo), cancellable);
             } catch (Error e) {
                 debug ("[textDocument/hover] failed to reply to client: %s", e.message);
             }
@@ -2162,7 +2178,7 @@ class Vls.Server : Object {
 
             try {
                 Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
-                client.reply (id, variant_array);
+                client.reply (id, variant_array, cancellable);
             } catch (Error e) {
                 debug (@"[$method] failed to reply to client: $(e.message)");
             }
@@ -2258,7 +2274,7 @@ class Vls.Server : Object {
 
             try {
                 Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
-                client.reply (id, variant_array);
+                client.reply (id, variant_array, cancellable);
             } catch (Error e) {
                 debug (@"[$method] failed to reply to client: $(e.message)");
             }
@@ -2296,7 +2312,7 @@ class Vls.Server : Object {
             debug (@"[$method] found $(json_array.get_length ()) element(s) matching `$query'");
             try {
                 Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
-                client.reply (id, variant_array);
+                client.reply (id, variant_array, cancellable);
             } catch (Error e) {
                 debug (@"[$method] failed to reply to client: $(e.message)");
             }
@@ -2315,6 +2331,7 @@ class Vls.Server : Object {
     void shutdown_real () {
         debug ("shutting down...");
         this.shutting_down = true;
+        cancellable.cancel ();
         if (event != 0)
             server.disconnect (event);
         loop.quit ();
