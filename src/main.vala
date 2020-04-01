@@ -2215,7 +2215,7 @@ class Vls.Server : Object {
                         label = get_symbol_data_type (parameter, false, null, true),
                         documentation = get_symbol_documentation (parameter)
                     });
-                    debug (@"found parameter $parameter (name = $(parameter.name))");
+                    debug (@"found parameter $parameter (name = $(parameter.ellipsis ? "..." :parameter.name))");
                 }
                 signatures.add (si);
             }
