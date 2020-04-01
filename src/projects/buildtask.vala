@@ -58,7 +58,7 @@ class Vls.BuildTask : BuildTarget {
 
         Subprocess process = launcher.spawnv (arguments);
         process.wait (cancellable);
-        if (cancellable != null && cancellable.is_cancelled ()) {
+        if (cancellable.is_cancelled ()) {
             process.force_exit ();
             cancellable.set_error_if_cancelled ();
         } else if (!process.get_successful ()) {
