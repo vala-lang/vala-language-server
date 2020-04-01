@@ -11,6 +11,46 @@ class Vls.MesonProject : Project {
 
     public const string OUTDIR = "meson-out";
 
+    private string[] substitute_target_args (Meson.TargetInfo meson_target_info, 
+                                             Meson.TargetSourceInfo target_source, 
+                                             string[] args) {
+        var substituted_args = new LinkedList<string> ();
+        for (int i = 0; i < args.length; i++) {
+            MatchInfo match_info;
+            if (/^@\w+@$/.match (args[i], 0, out match_info)) {
+                string special_arg_name = args[i];
+                if (special_arg_name == "@INPUT@") {
+                    string substitute = "";
+                    foreach (string input_arg in target_source.sources) {
+                        substituted_args.add(input_arg);
+                        if (substitute == "")
+                            substitute += " ";
+                        substitute += input_arg;
+                    }
+                    debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) for %s",
+                           meson_target_info.id, i, special_arg_name, substitute);
+                } else if (special_arg_name == "@OUTPUT@") {
+                    string substitute = "";
+                    foreach (string output_arg in meson_target_info.filename) {
+                        substituted_args.add (output_arg);
+                        if (substitute == "")
+                            substitute += " ";
+                        substitute += output_arg;
+                    }
+                    debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) for %s",
+                           meson_target_info.id, i, special_arg_name, substitute);
+                } else {
+                    warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'", 
+                             meson_target_info.id, special_arg_name);
+                    substituted_args.add (args[i]);
+                }
+            } else {
+                substituted_args.add (args[i]);
+            }
+        }
+        return substituted_args.to_array ();
+    }
+
     public override bool reconfigure_if_stale (Cancellable? cancellable = null) throws Error {
         if (!build_files_have_changed) {
             return false;
@@ -76,6 +116,13 @@ class Vls.MesonProject : Project {
 
             // ignore additional sources in target
             Meson.TargetSourceInfo first_source = meson_target_info.target_sources[0];
+            // first, substitute special arguments
+            first_source.parameters = substitute_target_args (meson_target_info, 
+                                                              first_source, 
+                                                              first_source.parameters);
+            first_source.compiler = substitute_target_args (meson_target_info,
+                                                            first_source,
+                                                            first_source.compiler);
             if (first_source.language == "vala")
                 build_targets.add (new Compilation (build_dir,
                                                     meson_target_info.name, 
