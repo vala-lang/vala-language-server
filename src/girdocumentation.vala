@@ -107,32 +107,6 @@ class Vls.GirDocumentation {
      * Find the symbol from this 
      */
     public Vala.Symbol? find_gir_symbol (Vala.Symbol sym) {
-        var symbols = new Queue<Vala.Symbol> ();
-        Vala.Symbol? gir_sym = null;
-
-        for (Vala.Symbol? current_sym = sym;
-             current_sym != null && current_sym != context.root && current_sym.to_string () != "(root namespace)";
-             current_sym = current_sym.parent_symbol) {
-            symbols.push_head (current_sym);
-        }
-
-        gir_sym = context.root.scope.lookup (symbols.pop_head ().name);
-        while (!symbols.is_empty () && gir_sym != null) {
-            var symtab = gir_sym.scope.get_symbol_table ();
-            if (symtab != null) {
-                gir_sym = symtab[symbols.pop_head ().name];
-            } else {
-                // workaround:
-                if (gir_sym.name == "GLib") {
-                    gir_sym = context.root.scope.lookup ("G");
-                } else 
-                    gir_sym = null;
-            }
-        }
-
-        if (!symbols.is_empty ())
-            return null;
-
-        return gir_sym;
+        return Util.find_matching_symbol (context, sym);
     }
 }
