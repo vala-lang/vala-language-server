@@ -254,14 +254,15 @@ namespace Vls.Util {
     }
 
     /**
-     * Find a symbool in `context` matching `sym` or NULL
+     * Find a symbol in `context` matching `sym` or NULL
      */
     public Vala.Symbol? find_matching_symbol (Vala.CodeContext context, Vala.Symbol sym) {
         var symbols = new GLib.Queue<Vala.Symbol> ();
         Vala.Symbol? matching_sym = null;
 
+        // walk up the symbol hierarchy to the root
         for (Vala.Symbol? current_sym = sym;
-             current_sym != null && current_sym != context.root && current_sym.to_string () != "(root namespace)";
+             current_sym != null && current_sym.name != null && current_sym.to_string () != "(root namespace)";
              current_sym = current_sym.parent_symbol) {
             symbols.push_head (current_sym);
         }
