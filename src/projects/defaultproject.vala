@@ -18,10 +18,15 @@ class Vls.DefaultProject : Project {
     public override void open (string escaped_uri, Cancellable? cancellable = null) throws Error {
         // create a new compilation
         var file = File.new_for_uri (Uri.unescape_string (escaped_uri));
+        Compilation btarget;
         string filename = file.get_path ();
-        var btarget = new Compilation (root_path, filename, filename, build_targets.size,
-                                       new string[] {"valac"}, new string[]{}, new string[] {filename}, new string[]{});
-        btarget.input.add (file);
+        string[] sources = {};
+        // glib-2.0.vapi and gobject-2.0.vapi are already added
+        if (!filename.has_suffix ("glib-2.0.vapi") && !filename.has_suffix ("gobject-2.0.vapi")) {
+            sources += filename;
+        }
+        btarget = new Compilation (root_path, filename, filename, build_targets.size,
+                                   new string[] {"valac"}, new string[]{}, sources, new string[]{});
         // build it now so that information is available immediately on
         // file open (other projects compile on LSP initialize(), so they don't
         // need to do this)
