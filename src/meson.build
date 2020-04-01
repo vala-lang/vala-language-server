@@ -5,6 +5,7 @@ vls_src = files([
   'projects/buildtarget.vala',
   'projects/buildtask.vala',
   'projects/compilation.vala',
+  'projects/defaultproject.vala',
   'projects/mesonproject.vala',
   'projects/project.vala',
   'projects/textdocument.vala',

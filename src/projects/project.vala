@@ -155,6 +155,16 @@ abstract class Vls.Project : Object {
         return results;
     }
 
+    /**
+     * Open the file
+     */
+    public virtual void open (string escaped_uri, Cancellable? cancellable = null) throws Error { /* do nothing */ }
+
+    /**
+     * Close the file
+     */
+    public virtual void close (string escaped_uri) throws Error { /* do nothing */ }
+
 #if PARSE_SYSTEM_GIRS
     /**
      * Get all unique packages used in this project
