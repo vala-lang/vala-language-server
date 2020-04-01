@@ -203,8 +203,7 @@ class Vls.Compilation : BuildTarget {
                 } else
                     _generated_sources.add (file);
 
-                if (cancellable != null && cancellable.is_cancelled ())
-                    cancellable.set_error_if_cancelled ();
+                cancellable.set_error_if_cancelled ();
             }
         }
 
@@ -232,8 +231,7 @@ class Vls.Compilation : BuildTarget {
             // clear all code nodes from file
             doc.get_nodes ().clear ();
 
-            if (cancellable != null && cancellable.is_cancelled ())
-                cancellable.set_error_if_cancelled ();
+            cancellable.set_error_if_cancelled ();
         }
 
         // packages (should come after in case we've wrapped any package files in TextDocuments)
@@ -317,8 +315,7 @@ class Vls.Compilation : BuildTarget {
         }
         if (stale) {
             configure (cancellable);
-            if (cancellable != null && cancellable.is_cancelled ())
-                cancellable.set_error_if_cancelled ();
+            cancellable.set_error_if_cancelled ();
             // TODO: cancellable compilation
             compile ();
         }
