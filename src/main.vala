@@ -208,6 +208,7 @@ class Vls.Server : Object {
 
         call_handlers["textDocument/definition"] = this.textDocumentDefinition;
         notif_handlers["textDocument/didOpen"] = this.textDocumentDidOpen;
+        notif_handlers["textDocument/didClose"] = this.textDocumentDidClose;
         notif_handlers["textDocument/didChange"] = this.textDocumentDidChange;
         call_handlers["textDocument/documentSymbol"] = this.textDocumentDocumentSymbol;
         call_handlers["textDocument/completion"] = this.textDocumentCompletion;
@@ -253,7 +254,13 @@ class Vls.Server : Object {
     void initialize (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         init_params = Util.parse_variant<InitializeParams> (@params);
 
-        var root_dir = File.new_for_uri (init_params.rootUri);
+        File root_dir;
+        if (init_params.rootUri != null)
+            root_dir = File.new_for_uri (init_params.rootUri);
+        else if (init_params.rootPath != null)
+            root_dir = File.new_for_path (init_params.rootPath);
+        else
+            root_dir = File.new_for_path (Environment.get_current_dir ());
         if (!root_dir.is_native ()) {
             showMessage (client, "Non-native files not supported", MessageType.Error);
             error ("Non-native files not supported");
@@ -267,10 +274,7 @@ class Vls.Server : Object {
             if (meson_file.query_exists (cancellable)) {
                 project = new MesonProject (root_path, cancellable);
             } else {
-                reply_null (id, client, method);
-                warning ("no meson project detected");
-                showMessage (client, "no meson project detected", MessageType.Info);
-                return;
+                project = new DefaultProject (root_path);
             }
         } catch (Error e) {
             reply_null (id, client, method);
@@ -379,17 +383,41 @@ class Vls.Server : Object {
             return;
         }
 
+        try {
+            project.open (uri, cancellable);
+        } catch (Error e) {
+            warning ("[textDocument/didOpen] failed to open %s - %s", uri, e.message);
+            return;
+        }
+
         foreach (Pair<Vala.SourceFile, Compilation> doc_w_bt in project.lookup_compile_input_source_file (uri)) {
             var doc = doc_w_bt.first;
             if (doc is TextDocument) {
-                debug (@"[textDocument/didOpen] opened $(Uri.unescape_string (uri)); requesting context update");
-                if (doc.content == null || doc.content != fileContents) {
+                debug (@"[textDocument/didOpen] opened $(Uri.unescape_string (uri))");
+                if (doc.content == null || doc.content != fileContents)
                     doc.content = fileContents;
-                    request_context_update (client);
-                }
+                request_context_update (client);
+                debug (@"[textDocument/didOpen] requested context update");
             } else {
                 debug (@"[textDocument/didOpen] opened read-only $(Uri.unescape_string (uri))");
             }
+        }
+    }
+
+    void textDocumentDidClose (Jsonrpc.Client client, Variant @params) {
+        var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
+        string? uri         = (string) document.lookup_value ("uri",        VariantType.STRING);
+
+        if (uri == null) {
+            warning (@"[textDocument/didClose] null URI sent to vala language server");
+            return;
+        }
+
+        try {
+            project.close (uri);
+            request_context_update (client);
+        } catch (Error e) {
+            warning ("[textDocument/didClose] failed to close %s - %s", uri, e.message);
         }
     }
 
