@@ -275,6 +275,13 @@ class Vls.Server : Object {
                 project = new MesonProject (root_path, cancellable);
             } else {
                 project = new DefaultProject (root_path);
+                var cmake_file = root_dir.get_child ("CMakeLists.txt");
+                var autogen_sh = root_dir.get_child ("autogen.sh");
+
+                if (cmake_file.query_exists (cancellable))
+                    showMessage (client, @"CMake build system is not currently supported. Only Meson is. See https://github.com/benwaffle/vala-language-server/issues/73", MessageType.Warning);
+                if (autogen_sh.query_exists (cancellable))
+                    showMessage (client, @"Autotools build system is not currently supported. Consider switching to Meson.", MessageType.Warning);
             }
         } catch (Error e) {
             reply_null (id, client, method);
