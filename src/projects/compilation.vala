@@ -192,9 +192,15 @@ class Vls.Compilation : BuildTarget {
             if (input.is_empty)
                 warning ("Compilation(%s): no input sources to load!", id);
             foreach (File file in input) {
-                if (!dependencies.has_key (file))
-                    _project_sources[file] = new TextDocument (code_context, file, true);
-                else
+                if (!dependencies.has_key (file)) {
+                    try {
+                        _project_sources[file] = new TextDocument (code_context, file, true);
+                    } catch (Error e) {
+                        // TODO: fix meson introspection bugs (see buildtask.vala)
+                        //       and then remove this error handler
+                        warning ("Compilation(%s): %s", id, e.message);
+                    }
+                } else
                     _generated_sources.add (file);
 
                 if (cancellable != null && cancellable.is_cancelled ())
@@ -252,7 +258,10 @@ class Vls.Compilation : BuildTarget {
                 code_context.add_source_file (new TextDocument (code_context, generated_file));
             } catch (Error e) {
                 Vala.CodeContext.pop ();
-                throw e;        // rethrow
+                // TODO: fix Meson introspection bugs (see buildtask.vala)
+                //       first before enabling the following line
+
+                // throw e;        // rethrow
             }
         }
 

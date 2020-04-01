@@ -6,6 +6,8 @@ using Gee;
 class Vls.BuildTask : BuildTarget {
     private string[] arguments = {};
     private string exe_name = "";
+    private SubprocessLauncher launcher;
+    private bool failed_last = false;
 
     /**
      * Because a built task could be any command, we don't know whether the files
@@ -16,21 +18,31 @@ class Vls.BuildTask : BuildTarget {
     public BuildTask (string build_dir, string name, string id, int no,
                       string[] compiler, string[] args, string[] sources, string[] generated_sources) {
         base (build_dir, name, id, no);
+        // don't pipe stderr since we want to print that if something goes wrong
+        launcher = new SubprocessLauncher (SubprocessFlags.STDOUT_PIPE);
+        launcher.set_cwd (build_dir);
 
         foreach (string arg in compiler) {
-            arguments += arg;
+            if (arguments.length > 0)
+                exe_name += " ";
             exe_name += arg;
+            arguments += arg;
         }
 
-        foreach (string arg in args)
+        foreach (string arg in args) {
+            if (arguments.length > 0)
+                exe_name += " ";
+            exe_name += arg;
             arguments += arg;
+        }
 
         foreach (string arg in arguments)
             if (Util.arg_is_file (arg))
                 used_files.add (File.new_for_commandline_arg_and_cwd (arg, build_dir));
 
         foreach (string arg in sources) {
-            arguments += arg;
+            // we don't need to add arg to arguments here since we've already substituted
+            // the arguments in [compiler] and [args] from the sources
             used_files.add (File.new_for_commandline_arg_and_cwd (arg, build_dir));
         }
 
@@ -41,17 +53,32 @@ class Vls.BuildTask : BuildTarget {
     }
 
     public override void build_if_stale (Cancellable? cancellable = null) throws Error {
-        var process = new Subprocess.newv (arguments, SubprocessFlags.NONE);
+        if (failed_last)
+            return;
+
+        Subprocess process = launcher.spawnv (arguments);
         process.wait (cancellable);
         if (cancellable != null && cancellable.is_cancelled ()) {
             process.force_exit ();
             cancellable.set_error_if_cancelled ();
         } else if (!process.get_successful ()) {
+            string failed_msg = "";
             if (process.get_if_exited ()) {
-                throw new ProjectError.TASK_FAILED (@"BuildTask($id) `$exe_name' returned with status $(process.get_exit_status ())");
-            } else
-                throw new ProjectError.TASK_FAILED (@"BuildTask($id) `$exe_name' terminated");
+                failed_msg = @"BuildTask($id) `$exe_name' returned with status $(process.get_exit_status ()) (launched from $build_dir)";
+            } else {
+                failed_msg = @"BuildTask($id) `$exe_name' terminated (launched from $build_dir)";
+            }
+            // TODO: fix these Meson issues before enabling the following line:
+            // 1. gnome.compile_resources() with depfile produces @DEPFILE@ in
+            //    targets without reference to depfle file (see plugins/files/meson.build in gitg)
+            // 2. possible issue with how arguments to glib-compile-resources are introspected
+            //    when using gnome.compile_resources() (again, see plugins/files/meson.build in gitg)
+
+            // throw new ProjectError.TASK_FAILED (failed_msg);
+            warning (failed_msg);
+            failed_last = true;
+        } else {
+            last_updated = new DateTime.now ();
         }
-        last_updated = new DateTime.now ();
     }
 }
