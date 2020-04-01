@@ -735,6 +735,30 @@ class Vls.Server : Object {
         return topmost;
     }
 
+    /**
+     * Gets the symbol you really want, not something from a generated file.
+     *
+     * If `sym` comes from a generated file (eg. a VAPI), then
+     * it would be more useful to show the file specific to the compilation
+     * that generated the file.
+     */
+    Vala.Symbol find_real_sym (Vala.Symbol sym) {
+        Compilation alter_comp;
+        
+        if (sym.source_reference == null || sym.source_reference.file == null)
+            return sym;
+
+        if (project.lookup_compilation_for_output_file (sym.source_reference.file.filename, out alter_comp)) {
+            Vala.Symbol? matching_sym;
+            if (sym is Vala.Symbol) {
+                if ((matching_sym = Util.find_matching_symbol (alter_comp.code_context, (Vala.Symbol)sym)) != null) {
+                    return matching_sym;
+                }
+            }
+        }
+        return sym;
+    }
+
     void textDocumentDefinition (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams> (@params);
         var results = project.lookup_compile_input_source_file (p.textDocument.uri);
@@ -791,6 +815,9 @@ class Vls.Server : Object {
                 Vala.CodeContext.pop ();
                 return;
             }
+
+            if (best is Vala.Symbol)
+                best = find_real_sym ((Vala.Symbol) best);
 
             var location = new Location.from_sourceref (best.source_reference);
             debug ("[textDocument/definition] found location ... %s", location.uri);
@@ -1141,6 +1168,8 @@ class Vls.Server : Object {
     }
 
     public LanguageServer.MarkupContent? get_symbol_documentation (Vala.Symbol sym) {
+        Vala.Symbol real_sym = find_real_sym (sym);
+        sym = real_sym;
 #if PARSE_SYSTEM_GIRS
         var gir_sym = documentation.find_gir_symbol (sym);
 #endif
@@ -2041,6 +2070,10 @@ class Vls.Server : Object {
             }
 
             Vala.CodeNode result = get_best (fs, doc);
+            if (result is Vala.Symbol) {
+                Vala.Symbol real_sym = find_real_sym ((Vala.Symbol)result);
+                result = real_sym;
+            }
             var hoverInfo = new Hover () {
                 range = new Range.from_sourceref (result.source_reference)
             };
@@ -2306,8 +2339,12 @@ class Vls.Server : Object {
             }
 
             debug (@"[$method] found $(references.size) reference(s)");
-            foreach (var node in references)
-                json_array.add_element (Json.gobject_serialize (new Location.from_sourceref (node.source_reference)));
+            foreach (var node in references) {
+                Vala.CodeNode real_node = node;
+                if (node is Vala.Symbol)
+                    real_node = find_real_sym ((Vala.Symbol) node);
+                json_array.add_element (Json.gobject_serialize (new Location.from_sourceref (real_node.source_reference)));
+            }
 
             try {
                 Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);

@@ -156,6 +156,24 @@ abstract class Vls.Project : Object {
     }
 
     /**
+     * Determine the Compilation that outputs `filename`
+     * Return true if found, false otherwise.
+     */
+    public bool lookup_compilation_for_output_file (string filename, out Compilation compilation) {
+        var file = File.new_for_path (filename);
+        foreach (var btarget in build_targets) {
+            if (!(btarget is Compilation))
+                continue;
+            if (btarget.output.contains (file)) {
+                compilation = (Compilation)btarget;
+                return true;
+            }
+        }
+        compilation = null;
+        return false;
+    }
+
+    /**
      * Open the file
      */
     public virtual void open (string escaped_uri, Cancellable? cancellable = null) throws Error { /* do nothing */ }

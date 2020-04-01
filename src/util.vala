@@ -252,4 +252,37 @@ namespace Vls.Util {
     public bool source_file_equal (Vala.SourceFile source_file1, Vala.SourceFile source_file2) {
         return source_file_hash (source_file1) == source_file_hash (source_file2);
     }
+
+    /**
+     * Find a symbool in `context` matching `sym` or NULL
+     */
+    public Vala.Symbol? find_matching_symbol (Vala.CodeContext context, Vala.Symbol sym) {
+        var symbols = new GLib.Queue<Vala.Symbol> ();
+        Vala.Symbol? matching_sym = null;
+
+        for (Vala.Symbol? current_sym = sym;
+             current_sym != null && current_sym != context.root && current_sym.to_string () != "(root namespace)";
+             current_sym = current_sym.parent_symbol) {
+            symbols.push_head (current_sym);
+        }
+
+        matching_sym = context.root.scope.lookup (symbols.pop_head ().name);
+        while (!symbols.is_empty () && matching_sym != null) {
+            var symtab = matching_sym.scope.get_symbol_table ();
+            if (symtab != null) {
+                matching_sym = symtab[symbols.pop_head ().name];
+            } else {
+                // workaround:
+                if (matching_sym.name == "GLib") {
+                    matching_sym = context.root.scope.lookup ("G");
+                } else 
+                    matching_sym = null;
+            }
+        }
+
+        if (!symbols.is_empty ())
+            return null;
+
+        return matching_sym;
+    }
 }
