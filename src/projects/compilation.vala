@@ -49,6 +49,8 @@ class Vls.Compilation : BuildTarget {
      */
     private string? _output_internal_vapi;
 
+    private bool _completed_first_compile;
+
     /**
      * The reporter for the code context
      */
@@ -292,6 +294,7 @@ class Vls.Compilation : BuildTarget {
         }
 
         last_updated = new DateTime.now ();
+        _completed_first_compile = true;
         Vala.CodeContext.pop ();
     }
 
@@ -313,7 +316,7 @@ class Vls.Compilation : BuildTarget {
                 break;
             }
         }
-        if (stale) {
+        if (stale || !_completed_first_compile) {
             configure (cancellable);
             cancellable.set_error_if_cancelled ();
             // TODO: cancellable compilation
