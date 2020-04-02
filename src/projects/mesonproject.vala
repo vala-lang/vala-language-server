@@ -224,7 +224,40 @@ class Vls.MesonProject : Project {
             }
         }
 
-        // 4. perform final analysis and sanity checking
+        // 4. look for more file monitors
+        var bs_files_parser = new Json.Parser.immutable_new ();
+        var bs_files = File.new_build_filename (build_dir, "meson-info", "intro-buildsystem_files.json");
+        debug ("MesonProject: loading file %s ...", bs_files.get_path ());
+        try {
+            bs_files_parser.load_from_stream (bs_files.read (cancellable), cancellable);
+            Json.Node? bsf_json_root = bs_files_parser.get_root ();
+            if (bsf_json_root == null) {
+                throw new ProjectError.INTROSPECTION (@"JSON root of $(bs_files.get_path ()) is null!");
+            } else if (bsf_json_root.get_node_type () != Json.NodeType.ARRAY) {
+                throw new ProjectError.INTROSPECTION (@"JSON root of $(bs_files.get_path ()) is not an array!");
+            }
+
+            foreach (Json.Node elem_node in bsf_json_root.get_array ().get_elements ()) {
+                string? path = elem_node.get_string ();
+                if (path != null && (path.has_suffix ("meson.build") || path.has_suffix ("meson_options.txt"))) {
+                    var build_file = File.new_for_path ((!) path);
+                    if (!meson_build_files.has_key (build_file)) {
+                        debug ("MesonProject: obtaining a new file monitor for %s ...", build_file.get_path ());
+                        try {
+                            FileMonitor file_monitor = build_file.monitor_file (FileMonitorFlags.NONE, cancellable);
+                            file_monitor.changed.connect (file_changed_event);
+                            meson_build_files[build_file] = file_monitor;
+                        } catch (Error e) {
+                            warning ("MesonProject: ... failed - %s", e.message);
+                        }
+                    }
+                }
+            }
+        } catch (Error e) {
+            warning ("MesonProject: ... failed to load file - %s", e.message);
+        }
+
+        // 5. perform final analysis and sanity checking
         analyze_build_targets ();
 
         return true;
@@ -236,15 +269,15 @@ class Vls.MesonProject : Project {
     }
 
     private void file_changed_event (File src, File? dest, FileMonitorEvent event_type) {
-        if ((event_type & FileMonitorEvent.ATTRIBUTE_CHANGED) != 0) {
+        if ((event_type & FileMonitorEvent.ATTRIBUTE_CHANGED) == FileMonitorEvent.ATTRIBUTE_CHANGED) {
             debug ("MesonProject: watched file %s had an attribute changed", src.get_path ());
             build_files_have_changed = true;
         }
-        if ((event_type & FileMonitorEvent.CHANGED) != 0) {
+        if ((event_type & FileMonitorEvent.CHANGED) == FileMonitorEvent.CHANGED) {
             debug ("MesonProject: watched file %s was changed", src.get_path ());
             build_files_have_changed = true;
         }
-        if ((event_type & FileMonitorEvent.DELETED) != 0) {
+        if ((event_type & FileMonitorEvent.DELETED) == FileMonitorEvent.DELETED) {
             debug ("MesonProject: watched file %s was deleted", src.get_path ());
             // remove this file monitor since the file was deleted
             FileMonitor file_monitor;
