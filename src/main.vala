@@ -1613,28 +1613,62 @@ class Vls.Server : Object {
         Compilation compilation = results[0].second;
         bool is_pointer_access = false;
         long idx = (long) Util.get_string_pos (doc.content, p.position.line, p.position.character);
-        Position pos = p.position;
-        Position end_pos = p.position.to_libvala ();
+
+        Position pos = p.position.to_libvala ();
+        Position end_pos = pos.dup ();
         bool is_member_access = false;
+
+        // move back to the nearest member access if there is one
+        long lb_idx = idx;
+
+        // first, move back off the end of the current line
+        if (doc.content[lb_idx] == '\n') {
+            lb_idx--;
+            if (doc.content[lb_idx] == '\r')    // TODO: is this really necessary?
+                lb_idx--;
+        }
+
+        // now move back to an identifier
+        while (lb_idx > 0 && !doc.content[lb_idx].isalnum () 
+               && doc.content[lb_idx] != '_' && !doc.content[lb_idx-1].isspace ()
+               && doc.content[lb_idx] != '.' && !(doc.content[lb_idx-1] == '-' && doc.content[lb_idx] == '>'))
+            lb_idx--;
+
+        // now attempt to find a member access
+        while (lb_idx >= 0 && !doc.content[lb_idx].isspace ()) {
+            if (doc.content[lb_idx] == '.' || (lb_idx >= 1 && doc.content[lb_idx-1] == '-' && doc.content[lb_idx] == '>')) {
+                var new_pos = pos.translate (0, (int) (lb_idx - idx));
+                debug ("[%s] moved cursor back from %s -> %s", method, pos.to_string (), new_pos.to_string ());
+                idx = lb_idx;
+                pos = new_pos;
+                end_pos = pos.dup ();
+                break;
+            } else if (!doc.content[lb_idx].isalnum() && doc.content[lb_idx] != '_') {
+                // if this character does not belong to an identifier, break
+                debug ("[%s] breaking, since we could not find a member access", method);
+                var new_pos = pos.translate (0, (int) (lb_idx - idx));
+                debug ("[%s] moved cursor back from %s -> %s (char = %c)", 
+                       method, pos.to_string (), new_pos.to_string (), doc.content[lb_idx]);
+                break;
+            }
+            lb_idx--;
+        }
         
-        if (idx >= 2 && doc.content[idx-2:idx] == "->") {
+        if (idx >= 1 && doc.content[idx-1] == '-' && doc.content[idx] == '>') {
             is_pointer_access = true;
             is_member_access = true;
-            debug (@"[$method] found pointer access");
-            pos = p.position.translate (0, -2);
+            debug (@"[$method] found pointer access @ $pos");
+            pos = pos.translate (0, -2);
+        } else if (doc.content[idx] == '.') {
+            pos = pos.translate (0, -1);
+            is_member_access = true;
         } else if (p.context != null) {
             if (p.context.triggerKind == CompletionTriggerKind.TriggerCharacter) {
-                pos = p.position.translate (0, -1);
+                pos = pos.translate (0, -1);
                 is_member_access = true;
             } else if (p.context.triggerKind == CompletionTriggerKind.Invoked)
-                debug (@"[$method] invoked");
-            // TODO: incomplete completions 
-        } else {
-            // try to figure out the completion context without the client's help
-            if (idx >= 1 && doc.content[idx-1:idx] == ".") {
-                pos = p.position.translate (0, -1);
-                is_member_access = true;
-            }
+                debug (@"[$method] invoked @ $pos");
+            // TODO: incomplete completions
         }
 
         wait_for_context_update (id, request_cancelled => {
