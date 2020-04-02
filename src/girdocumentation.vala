@@ -7,6 +7,7 @@ class Vls.GirDocumentation {
      */
     public GirDocumentation (Gee.Collection<Vala.SourceFile> packages) {
         context = new Vala.CodeContext ();
+        Vala.CodeContext.push (context);
         context.add_define ("GOBJECT");
 
         // add packages
@@ -87,7 +88,6 @@ class Vls.GirDocumentation {
         context.root.add_namespace (glib_ns);
 
         // compile once
-        Vala.CodeContext.push (context);
         var parser = new Vala.Parser ();
         parser.parse (context);
         var gir_parser = new Vala.GirParser ();
