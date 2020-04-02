@@ -257,7 +257,7 @@ class Vls.Compilation : BuildTarget {
                     throw new FileError.NOENT (@"file $(generated_file.get_uri ()) does not exist");
                 code_context.add_source_file (new TextDocument (code_context, generated_file));
             } catch (Error e) {
-                Vala.CodeContext.pop ();
+                // Vala.CodeContext.pop ();
                 // TODO: fix Meson introspection bugs (see buildtask.vala)
                 //       first before enabling the following line
 
