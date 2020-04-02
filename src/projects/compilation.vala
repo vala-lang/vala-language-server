@@ -147,11 +147,13 @@ class Vls.Compilation : BuildTarget {
         }
 
         // finally, add these very important packages
-        if (_profile == Vala.Profile.GOBJECT) {
+        if (_profile == Vala.Profile.POSIX) {
+            _packages.add ("posix");
+        } else {
             _packages.add ("glib-2.0");
             _packages.add ("gobject-2.0");
-        } else if (_profile == Vala.Profile.POSIX) {
-            _packages.add ("posix");
+            if (_profile != Vala.Profile.GOBJECT)
+                warning ("Compilation(%s) no --profile argument given, assuming GOBJECT", id);
         }
     }
 
