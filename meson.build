@@ -7,11 +7,13 @@ project('vala-language-server', 'vala', 'c',
 )
 
 valac = meson.get_compiler('vala')
-# libvala_version = run_command(valac, '--api-version').stdout().strip()
-# 
-# libvala = dependency('libvala-@0@'.format(libvala_version))
+libvala_version = run_command(valac, '--api-version').stdout().strip()
+if not libvala_version.version_compare('>=0.48' )
+  error('libvala needs to be 0.48 or above')
+endif
 
-libvala = dependency('libvala-0.48')
+libvala = dependency('libvala-@0@'.format(libvala_version))
+
 libgobject_dep = dependency('gobject-2.0')
 libjsonrpc_glib_dep = dependency('jsonrpc-glib-1.0', version: '>= 3.28')
 
