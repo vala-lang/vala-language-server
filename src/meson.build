@@ -2,6 +2,7 @@ vls_src = files([
   'main.vala',
   'find_symbol.vala',
   'list_symbols.vala',
+  'completion/symbolextractor.vala',
   'projects/buildtarget.vala',
   'projects/buildtask.vala',
   'projects/ccproject.vala',

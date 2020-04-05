@@ -737,7 +737,7 @@ class Vls.Server : Object {
         return (!) best;
     }
 
-    Vala.Scope get_current_scope (Vala.CodeNode code_node) {
+    public Vala.Scope get_current_scope (Vala.CodeNode code_node) {
         Vala.Scope? best = null;
 
         for (Vala.CodeNode? node = code_node; node != null; node = node.parent_node) {

@@ -1,13 +1,14 @@
 using LanguageServer;
 
 class Vls.FindSymbol : Vala.CodeVisitor {
-    public LanguageServer.Position? pos { get; private set; }
-    private LanguageServer.Position? end_pos;
+    public Position? pos { get; private set; }
+    private Position? end_pos;
     private Vala.SourceFile file;
     public bool search_multiline { get; private set; }
     public bool include_blocks { get; private set; }
-    public Gee.List<Vala.CodeNode> result;
-    private Gee.HashSet<Vala.CodeNode> seen;
+    public Gee.List<Vala.CodeNode> result = new Gee.ArrayList<Vala.CodeNode> ();
+    private Gee.HashSet<Vala.CodeNode> seen = new Gee.HashSet<Vala.CodeNode> ();
+    private Gee.HashMap<Vala.Symbol, Range> blocks = new Gee.HashMap<Vala.Symbol, Range> ();
 
     [CCode (has_target = false)]
     public delegate bool Filter (Vala.CodeNode needle, Vala.CodeNode hay_node);
@@ -29,6 +30,14 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         if (sr.begin.line > sr.end.line) {
             warning (@"wtf vala: $(node.type_name): $sr");
             return false;
+        }
+
+        if (((node is Vala.Namespace) || (node is Vala.Block) || (node is Vala.TypeSymbol)) && pos != null) {
+            var range = new Range.from_sourceref (sr);
+            if (range.start.compare_to (pos) <= 0 && pos.compare_to (range.end) <= 0){
+                blocks[(Vala.Symbol) node] = range;
+                debug ("block %s matched", sr.to_string ());
+            }
         }
 
         if (filter != null)
@@ -69,27 +78,54 @@ class Vls.FindSymbol : Vala.CodeVisitor {
      * TODO: are children of a CodeNode guaranteed to have a source_reference within the parent?
      * if so, this can be much faster
      */
-    public FindSymbol (Vala.SourceFile file, LanguageServer.Position pos, 
-                        bool search_multiline = false,
-                        bool include_blocks = false,
-                        LanguageServer.Position? end_pos = null) {
+    public FindSymbol (Vala.SourceFile file, Position pos, 
+                       bool search_multiline = false,
+                       bool include_blocks = false,
+                       Position? end_pos = null) {
         this.pos = pos;
         this.end_pos = end_pos;
         this.file = file;
         this.search_multiline = search_multiline;
         this.include_blocks = include_blocks;
-        result = new Gee.ArrayList<Vala.CodeNode> ();
-        seen = new Gee.HashSet<Vala.CodeNode> ();
         this.visit_source_file (file);
+        this.try_symbol_extractor ();
     }
 
     public FindSymbol.with_filter (Vala.SourceFile file, Vala.CodeNode needle, Filter filter_func) {
         this.file = file;
         this.needle = needle;
         this.filter = filter_func;
-        result = new Gee.ArrayList<Vala.CodeNode> ();
-        seen = new Gee.HashSet<Vala.CodeNode> ();
         this.visit_source_file (file);
+    }
+
+    private void try_symbol_extractor () {
+        if (!result.is_empty)
+            return;
+        Vala.Symbol smallest_block = file.context.root;
+        if (blocks.is_empty) {
+            debug ("FindSymbol: no results, and no block scope to try SymbolExtractor from, assuming global (root) scope");
+        } else {
+            // get best scope
+            Range? best_range = file.context.root.source_reference != null ?
+                new Range.from_sourceref (file.context.root.source_reference) : null;
+            foreach (var entry in blocks.entries) {
+                Vala.Symbol block = entry.key;
+                Range scope_range = entry.value;
+
+                if (best_range == null ||
+                    best_range.start.compare_to (scope_range.start) <= 0 && scope_range.end.compare_to (best_range.end) <= 0 &&
+                    !(best_range.start.compare_to (scope_range.start) == 0 && scope_range.end.compare_to (best_range.end) == 0)) {
+                    smallest_block = block;
+                    best_range = scope_range;
+                }
+            }
+            debug ("trying SymbolExtractor in block %s", smallest_block.source_reference.to_string ());
+        }
+        var se = new SymbolExtractor (pos, smallest_block, file);
+        if (se.extracted_expression != null)
+            result.add (se.extracted_expression);
+        else
+            warning ("failed to extract symbol!");
     }
 
     public override void visit_source_file (Vala.SourceFile file) {
