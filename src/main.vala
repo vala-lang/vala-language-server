@@ -268,40 +268,6 @@ class Vls.Server : Object {
         string root_path = Util.realpath ((!) root_dir.get_path ());
         debug (@"[initialize] root path is $root_path");
 
-        var meson_file = root_dir.get_child ("meson.build");
-        // TODO: autotools, make(?), cmake(?), default backend
-        if (meson_file.query_exists (cancellable)) {
-            try {
-                project = new MesonProject (root_path, cancellable);
-            } catch (Error e) {
-                showMessage (client, @"Failed to initialize Meson project - $(e.message)", MessageType.Error);
-                project = new DefaultProject (root_path);       // fallback
-            }
-        } else {
-            project = new DefaultProject (root_path);
-            var cmake_file = root_dir.get_child ("CMakeLists.txt");
-            var autogen_sh = root_dir.get_child ("autogen.sh");
-
-            if (cmake_file.query_exists (cancellable))
-                showMessage (client, @"CMake build system is not currently supported. Only Meson is. See https://github.com/benwaffle/vala-language-server/issues/73", MessageType.Warning);
-            if (autogen_sh.query_exists (cancellable))
-                showMessage (client, @"Autotools build system is not currently supported. Consider switching to Meson.", MessageType.Warning);
-        }
-
-        try {
-            project.build_if_stale (cancellable);
-        } catch (Error e) {
-            warning ("[initialize] failed to build project - %s", e.message);
-            reply_null (id, client, method);
-            showMessage (client, @"failed to build project - $(e.message)", MessageType.Error);
-            return;
-        }
-
-#if PARSE_SYSTEM_GIRS
-        // create documentation (compiles GIR files too)
-        documentation = new GirDocumentation (project.get_packages ());
-#endif
-
         // respond
         try {
             client.reply (id, buildDict (
@@ -329,6 +295,39 @@ class Vls.Server : Object {
         } catch (Error e) {
             error (@"[initialize] failed to reply to client: $(e.message)");
         }
+
+        var meson_file = root_dir.get_child ("meson.build");
+        // TODO: autotools, make(?), cmake(?), default backend
+        if (meson_file.query_exists (cancellable)) {
+            try {
+                project = new MesonProject (root_path, cancellable);
+            } catch (Error e) {
+                showMessage (client, @"Failed to initialize Meson project - $(e.message)", MessageType.Error);
+                project = new DefaultProject (root_path);       // fallback
+            }
+        } else {
+            project = new DefaultProject (root_path);
+            var cmake_file = root_dir.get_child ("CMakeLists.txt");
+            var autogen_sh = root_dir.get_child ("autogen.sh");
+
+            if (cmake_file.query_exists (cancellable))
+                showMessage (client, @"CMake build system is not currently supported. Only Meson is. See https://github.com/benwaffle/vala-language-server/issues/73", MessageType.Warning);
+            if (autogen_sh.query_exists (cancellable))
+                showMessage (client, @"Autotools build system is not currently supported. Consider switching to Meson.", MessageType.Warning);
+        }
+
+        try {
+            project.build_if_stale (cancellable);
+        } catch (Error e) {
+            showMessage (client, @"failed to build project - $(e.message)", MessageType.Error);
+            warning ("[initialize] failed to build project - %s", e.message);
+            return;
+        }
+
+#if PARSE_SYSTEM_GIRS
+        // create documentation (compiles GIR files too)
+        documentation = new GirDocumentation (project.get_packages ());
+#endif
 
         // build and publish diagnostics
         try {
