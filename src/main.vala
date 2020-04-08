@@ -1769,7 +1769,10 @@ class Vls.Server : Object {
                                 get_symbol_documentation (sym)));
                         }
                     } else if (owner is Vala.TypeSymbol) {
-                        add_completions_for_type ((Vala.TypeSymbol) owner, completions, best_scope, in_instance, in_oce, seen_props);
+                        if (in_instance)
+                            add_completions_for_type ((Vala.TypeSymbol) owner, completions, best_scope, true, in_oce, seen_props);
+                        // always show static members
+                        add_completions_for_type ((Vala.TypeSymbol) owner, completions, best_scope, false, in_oce, seen_props);
                         // once we leave a type symbol, we're no longer in an instance
                         in_instance = false;
                     } else if (owner is Vala.Namespace) {
