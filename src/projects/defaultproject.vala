@@ -35,9 +35,12 @@ class Vls.DefaultProject : Project {
         debug ("DefaultProject: added file %s", filename);
     }
 
-    public override void close (string escaped_uri) {
+    public override bool close (string escaped_uri) {
+        bool files_removed = false;
         foreach (Pair<Vala.SourceFile, Compilation> result in lookup_compile_input_source_file (escaped_uri)) {
             build_targets.remove (result.second);
+            files_removed = true;
         }
+        return files_removed;
     }
 }

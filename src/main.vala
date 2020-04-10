@@ -398,10 +398,13 @@ class Vls.Server : Object {
             var doc = doc_w_bt.first;
             if (doc is TextDocument) {
                 debug (@"[textDocument/didOpen] opened $(Uri.unescape_string (uri))");
-                if (doc.content == null || doc.content != fileContents)
+                if (doc.content == null)
+                    doc.get_mapped_contents ();
+                if (doc.content != fileContents) {
                     doc.content = fileContents;
-                request_context_update (client);
-                debug (@"[textDocument/didOpen] requested context update");
+                    request_context_update (client);
+                    debug (@"[textDocument/didOpen] requested context update");
+                }
             } else {
                 debug (@"[textDocument/didOpen] opened read-only $(Uri.unescape_string (uri))");
             }
@@ -418,8 +421,10 @@ class Vls.Server : Object {
         }
 
         try {
-            project.close (uri);
-            request_context_update (client);
+            if (project.close (uri)) {
+                request_context_update (client);
+                debug (@"[textDocument/didClose] requested context update");
+            }
         } catch (Error e) {
             warning ("[textDocument/didClose] failed to close %s - %s", uri, e.message);
         }

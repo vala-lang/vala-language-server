@@ -179,9 +179,11 @@ abstract class Vls.Project : Object {
     public virtual void open (string escaped_uri, Cancellable? cancellable = null) throws Error { /* do nothing */ }
 
     /**
-     * Close the file
+     * Close the file. Returns whether a context update is required.
      */
-    public virtual void close (string escaped_uri) throws Error { /* do nothing */ }
+    public virtual bool close (string escaped_uri) throws Error {
+        return false;
+    }
 
 #if PARSE_SYSTEM_GIRS
     /**
