@@ -237,6 +237,32 @@ namespace Vls.Util {
         return rpath;
     }
 
+    /**
+     * Like a cross-platform `rm -rf`
+     */
+    public void remove_dir (string path) {
+        try {
+            var dir = File.new_for_path (path);
+            FileEnumerator enumerator = dir.enumerate_children (FileAttribute.ID_FILE, FileQueryInfoFlags.NOFOLLOW_SYMLINKS);
+            FileInfo? finfo;
+
+            while ((finfo = enumerator.next_file ()) != null) {
+                File child = dir.get_child (finfo.get_name ());
+                try {
+                    if (finfo.get_file_type () == FileType.DIRECTORY)
+                        remove_dir (child.get_path ());
+                    else
+                        child.@delete ();
+                } catch (Error e) {
+                    // ignore error
+                }
+            }
+            dir.@delete ();
+        } catch (Error e) {
+            // ignore error
+        }
+    }
+
     public uint file_hash (File file) {
         return realpath (file.get_path ()).hash ();
     }

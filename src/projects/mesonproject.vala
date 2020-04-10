@@ -67,7 +67,6 @@ class Vls.MesonProject : Project {
             file_monitor.changed.connect (file_changed_event);
             meson_build_files[root_meson_build] = file_monitor;
         }
-        build_dir = DirUtils.make_tmp (@"vls-meson-$(str_hash (root_path))-XXXXXX");
 
         string[] spawn_args = {"meson", "setup", ".", root_path};
         string proc_stdout, proc_stderr;
@@ -265,7 +264,12 @@ class Vls.MesonProject : Project {
 
     public MesonProject (string root_path, Cancellable? cancellable = null) throws Error {
         this.root_path = root_path;
+        this.build_dir = DirUtils.make_tmp (@"vls-meson-$(str_hash (root_path))-XXXXXX");
         reconfigure_if_stale (cancellable);
+    }
+
+    ~MesonProject () {
+        Util.remove_dir (build_dir);
     }
 
     private void file_changed_event (File src, File? dest, FileMonitorEvent event_type) {
