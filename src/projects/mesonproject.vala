@@ -191,7 +191,12 @@ class Vls.MesonProject : Project {
 
             if (src_relative_path != null) {
                 src_relative_path = Path.get_dirname (src_relative_path);
-                target_build_dir = build_dir + Path.DIR_SEPARATOR_S + src_relative_path;
+                // for some reason, the arguments passed to Vala targets are relative to
+                // the root build dir
+                if (first_source.language != "vala")
+                    target_build_dir = build_dir + Path.DIR_SEPARATOR_S + src_relative_path;
+                else
+                    target_build_dir = build_dir;
                 // if (meson_target_info.target_type == "executable"
                 //     || meson_target_info.target_type == "shared library"
                 //     || meson_target_info.target_type == "static library")
