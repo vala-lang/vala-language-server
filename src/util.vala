@@ -153,7 +153,7 @@ namespace Vls.Util {
     }
 
     public bool arg_is_file (string arg) {
-        return /\.(vala|vapi|gir|gs)(\.in)?$/.match (arg);
+        return /^.*\.(vala|vapi|gir|gs)(\.in)?$/.match (arg);
     }
 
 

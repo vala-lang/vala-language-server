@@ -74,7 +74,8 @@ namespace Meson {
     class TargetInfo : Object, Json.Serializable {
         public string name { get; set; }
         public string id { get; set; }
-        // public string type { get; set; }
+        // Vala codegen forbids having 'type' as a property
+        public string target_type { get; set; }
         public string defined_in { get; set; }
         public string[] filename { get; set; }
         public ArrayList<TargetSourceInfo> target_sources { get; set; }
@@ -90,6 +91,8 @@ namespace Meson {
         }
 
         public unowned ParamSpec? find_property (string name) {
+            if (name == "type")
+                return this.get_class ().find_property ("target_type");
             return this.get_class ().find_property (name);
         }
 
@@ -130,5 +133,15 @@ namespace Meson {
             val = Value (pspec.value_type);
             return false;
         }
+    }
+
+    /**
+     * can be found in `$BUILD_ROOT/meson-info/intro-dependencies.json`
+     */
+    class Dependency : Object {
+        public string name { get; set; }
+        public string version { get; set; }
+        public string[] compile_args { get; set; }
+        public string[] link_args { get; set; }
     }
 }

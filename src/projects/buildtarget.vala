@@ -4,7 +4,7 @@ abstract class Vls.BuildTarget : Object, Hashable<BuildTarget> {
     public string build_dir { get; construct; }
     public string name { get; construct; }
     public string id { get; construct; }
-    public int no { get; construct; }
+    public int no { get; construct set; }
 
     /**
      * Input to the build target
@@ -25,6 +25,7 @@ abstract class Vls.BuildTarget : Object, Hashable<BuildTarget> {
 
     protected BuildTarget (string build_dir, string name, string id, int no) {
         Object (build_dir: build_dir, name: name, id: id, no: no);
+        DirUtils.create_with_parents (build_dir, 0755);
     }
 
     /**

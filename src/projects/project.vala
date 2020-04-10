@@ -44,9 +44,11 @@ abstract class Vls.Project : Object {
             if (!is_consumer_or_producer) {
                 if (!(btarget is BuildTask))
                     throw new ProjectError.CONFIGURATION (@"Only build tasks can be initially neither producers nor consumers, yet $(btarget.get_class ().get_name ()) is neither!");
-                neither.add ((BuildTask) btarget);
                 debug ("\t- %s neither produces nor consumes any files (for now)", btarget.id);
             }
+            // add btarget to neither anyway, if it is a build task
+            if (btarget is BuildTask)
+                neither.add ((BuildTask) btarget);
         }
 
         // 2. For those in the 'neither' category, attempt to guess whether
@@ -58,16 +60,22 @@ abstract class Vls.Project : Object {
         foreach (var btask in neither) {
             var files_categorized = new HashSet<File> (Util.file_hash, Util.file_equal);
             foreach (var file in btask.used_files) {
+                if (file in btask.input || file in btask.output) {
+                    files_categorized.add (file);
+                    continue;
+                }
                 if (producer_for.has_key (file)) {
                     if (!consumers_of.has_key (file))
                         consumers_of[file] = new HashSet<BuildTarget> ();
                     consumers_of[file].add (btask);
                     btask.input.add (file);
                     files_categorized.add (file);
+                    debug ("\t- %s consumes %s", btask.id, file.get_path ());
                 } else if (consumers_of.has_key (file)) {
                     producer_for[file] = btask;
                     btask.output.add (file);
                     files_categorized.add (file);
+                    debug ("\t- %s produces %s", btask.id, file.get_path ());
                 }
             }
             btask.used_files.remove_all (files_categorized);
@@ -81,6 +89,7 @@ abstract class Vls.Project : Object {
                 }
                 producer_for[uncategorized_file] = btask;
                 btask.output.add (uncategorized_file);
+                debug ("\t- %s produces %s", btask.id, uncategorized_file.get_path ());
             }
             btask.used_files.clear ();
         }
