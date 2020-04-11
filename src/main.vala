@@ -713,20 +713,17 @@ class Vls.Server : Object {
                 var node_begin = new Position.from_libvala (node.source_reference.begin);
                 var node_end = new Position.from_libvala (node.source_reference.end);
 
+                // it turns out that if multiple CodeNodes share the same range, the first one we
+                // encounter will usually be the "right" one
                 if (best_begin.compare_to (node_begin) <= 0 && node_end.compare_to (best_end) <= 0 &&
-                    !(best.source_reference.begin.column == node.source_reference.begin.column &&
-                        node.source_reference.end.column == best.source_reference.end.column &&
-                        // don't get implicit `this` accesses
-                        ((node is Vala.MemberAccess && 
-                         ((Vala.MemberAccess)node).member_name == "this" &&
-                         ((Vala.MemberAccess)node).inner == null) ||
-                        // fix for creation method quirks
-                         (best is Vala.CreationMethod) ||
-                        // fix for class/interface declaration quirks
-                         (best is Vala.TypeSymbol) ||
-                        // fix for variable declared in foreach
-                         ((best is Vala.LocalVariable) && !(node is Vala.LocalVariable)))))
+                    (!(best_begin.compare_to (node_begin) == 0 && node_end.compare_to (best_end) == 0) ||
+                    // allow exception for local variables (pick the last one) - this helps foreach
+                    (best is Vala.LocalVariable && node is Vala.LocalVariable) ||
+                    // allow exception for lone properties - their implicit _* fields are declared in the same location
+                    (best is Vala.Field && node is Vala.Property)
+                )) {
                     best = node;
+                }
             }
         }
 
@@ -1614,7 +1611,7 @@ class Vls.Server : Object {
         bool is_pointer_access = false;
         long idx = (long) Util.get_string_pos (doc.content, p.position.line, p.position.character);
 
-        Position pos = p.position.to_libvala ();
+        Position pos = p.position;
         Position end_pos = pos.dup ();
         bool is_member_access = false;
 
@@ -1638,7 +1635,8 @@ class Vls.Server : Object {
         while (lb_idx >= 0 && !doc.content[lb_idx].isspace ()) {
             if (doc.content[lb_idx] == '.' || (lb_idx >= 1 && doc.content[lb_idx-1] == '-' && doc.content[lb_idx] == '>')) {
                 var new_pos = pos.translate (0, (int) (lb_idx - idx));
-                debug ("[%s] moved cursor back from %s -> %s", method, pos.to_string (), new_pos.to_string ());
+                debug ("[%s] moved cursor back from '%c'@%s -> '%c'@%s",
+                    method, doc.content[idx], pos.to_string (), doc.content[lb_idx], new_pos.to_string ());
                 idx = lb_idx;
                 pos = new_pos;
                 end_pos = pos.dup ();
@@ -1647,8 +1645,8 @@ class Vls.Server : Object {
                 // if this character does not belong to an identifier, break
                 debug ("[%s] breaking, since we could not find a member access", method);
                 var new_pos = pos.translate (0, (int) (lb_idx - idx));
-                debug ("[%s] moved cursor back from %s -> %s (char = %c)", 
-                       method, pos.to_string (), new_pos.to_string (), doc.content[lb_idx]);
+                debug ("[%s] moved cursor back from '%c'@%s -> '%c'@%s",
+                    method, doc.content[idx], pos.to_string (), doc.content[lb_idx], new_pos.to_string ());
                 break;
             }
             lb_idx--;
@@ -1658,13 +1656,13 @@ class Vls.Server : Object {
             is_pointer_access = true;
             is_member_access = true;
             debug (@"[$method] found pointer access @ $pos");
-            pos = pos.translate (0, -2);
+            // pos = pos.translate (0, -2);
         } else if (doc.content[idx] == '.') {
-            pos = pos.translate (0, -1);
+            // pos = pos.translate (0, -1);
             is_member_access = true;
         } else if (p.context != null) {
             if (p.context.triggerKind == CompletionTriggerKind.TriggerCharacter) {
-                pos = pos.translate (0, -1);
+                // pos = pos.translate (0, -1);
                 is_member_access = true;
             } else if (p.context.triggerKind == CompletionTriggerKind.Invoked)
                 debug (@"[$method] invoked @ $pos");
@@ -1789,7 +1787,7 @@ class Vls.Server : Object {
                 Vala.CodeNode? peeled = null;
                 Vala.Scope current_scope = get_current_scope (result);
 
-                debug (@"[$method] member: got $(result.type_name) `$result' (semanalyzed = $(result.checked)))");
+                debug (@"[$method] member: got best, $(result.type_name) `$result' (semanalyzed = $(result.checked)))");
 
                 do {
                     if (result is Vala.MemberAccess) {

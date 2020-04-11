@@ -63,7 +63,9 @@ namespace LanguageServer {
                   (character == other.character ? 0 : -1)) : -1);
         }
 
-        public string to_string () { return @"$line:$character"; }
+        public string to_string () {
+            return @"$line:$character" + (is_libvala ? "" : " (line zero-indexed)");
+        }
 
         public bool is_libvala { get; protected set; }
 
