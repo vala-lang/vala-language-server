@@ -346,8 +346,14 @@ class Vls.Server : Object {
             check_update_context ();
             return !this.shutting_down;
         });
+        project.changed.connect (project_changed_event);
 
         is_initialized = true;
+    }
+
+    void project_changed_event () {
+        request_context_update (update_context_client);
+        debug ("requested context update for project change event");
     }
 
     void cancelRequest (Jsonrpc.Client client, Variant @params) {
@@ -501,18 +507,12 @@ class Vls.Server : Object {
      * the project if we have context update requests.
      */
     void check_update_context () {
-        try {
-            if (project.reconfigure_if_stale (cancellable))
-                request_context_update (update_context_client);
-        } catch (Error e) {
-            warning ("failed to reconfigure stale project: %s", e.message);
-        }
-
         if (update_context_requests > 0 && get_monotonic_time () >= update_context_time_us) {
             debug ("updating contexts and publishing diagnostics...");
             update_context_requests = 0;
             update_context_time_us = 0;
             try {
+                project.reconfigure_if_stale (cancellable);
                 project.build_if_stale (cancellable);
                 foreach (var compilation in project.get_compilations ())
                     /* This must come after the resetting of the two variables above,
@@ -522,7 +522,7 @@ class Vls.Server : Object {
                      * notifications. */
                     publishDiagnostics (compilation, update_context_client);
             } catch (Error e) {
-                warning ("Failed to rebuild project: %s", e.message);
+                warning ("Failed to rebuild and/or reconfigure project: %s", e.message);
             }
         }
     }
@@ -2414,6 +2414,7 @@ class Vls.Server : Object {
         cancellable.cancel ();
         if (event != 0)
             server.disconnect (event);
+        project.changed.disconnect (project_changed_event);
         loop.quit ();
         foreach (uint id in g_sources)
             Source.remove (id);

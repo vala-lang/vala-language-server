@@ -453,7 +453,7 @@ class Vls.MesonProject : Project {
         }
 
         // 6. perform final analysis and sanity checking
-        analyze_build_targets ();
+        analyze_build_targets (cancellable);
 
         configured_once = true;
 
@@ -471,15 +471,17 @@ class Vls.MesonProject : Project {
     }
 
     private void file_changed_event (File src, File? dest, FileMonitorEvent event_type) {
-        if ((event_type & FileMonitorEvent.ATTRIBUTE_CHANGED) == FileMonitorEvent.ATTRIBUTE_CHANGED) {
+        if (FileMonitorEvent.ATTRIBUTE_CHANGED in event_type) {
             debug ("MesonProject: watched file %s had an attribute changed", src.get_path ());
             build_files_have_changed = true;
+            changed ();
         }
-        if ((event_type & FileMonitorEvent.CHANGED) == FileMonitorEvent.CHANGED) {
+        if (FileMonitorEvent.CHANGED in event_type) {
             debug ("MesonProject: watched file %s was changed", src.get_path ());
             build_files_have_changed = true;
+            changed ();
         }
-        if ((event_type & FileMonitorEvent.DELETED) == FileMonitorEvent.DELETED) {
+        if (FileMonitorEvent.DELETED in event_type) {
             debug ("MesonProject: watched file %s was deleted", src.get_path ());
             // remove this file monitor since the file was deleted
             FileMonitor file_monitor;
@@ -488,6 +490,7 @@ class Vls.MesonProject : Project {
                 file_monitor.changed.disconnect (file_changed_event);
             }
             build_files_have_changed = true;
+            changed ();
         }
     }
 }

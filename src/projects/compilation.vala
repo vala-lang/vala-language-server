@@ -129,7 +129,7 @@ class Vls.Compilation : BuildTarget {
             } else if (flag_name == null) {
                 if (arg_value == null) {
                     warning ("Compilation(%s) failed to parse argument #%d (%s)", id, arg_i, args[arg_i]);
-                } else if (Util.arg_is_file (arg_value)) {
+                } else if (Util.arg_is_vala_file (arg_value)) {
                     var file_from_arg = File.new_for_path (Util.realpath (arg_value, _directory));
                     if (build_dir_file.get_relative_path (file_from_arg) != null)
                         _generated_sources.add (file_from_arg);

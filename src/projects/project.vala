@@ -10,11 +10,17 @@ abstract class Vls.Project : Object {
     protected ArrayList<BuildTarget> build_targets = new ArrayList<BuildTarget> (); 
 
     /** 
+     * Directories of additional files (mainly C sources) that have to be
+     * monitored because they have an indirect influence on Vala code.
+     */
+    private HashMap<File, FileMonitor> monitored_files = new HashMap<File, FileMonitor> (Util.file_hash, Util.file_equal);
+
+    /** 
      * Determine dependencies and remove build targets that are not needed.
      * This is the final operation needed before the project is ready to be
      * built.
      */
-    protected void analyze_build_targets () throws Error {
+    protected void analyze_build_targets (Cancellable? cancellable = null) throws Error {
         // there may be multiple consumers of a file
         var consumers_of = new HashMap<File, HashSet<BuildTarget>> (Util.file_hash, Util.file_equal);
         // there can only be one producer for a file
@@ -131,7 +137,56 @@ abstract class Vls.Project : Object {
             if (build_targets[i].no < build_targets[i-1].no)
                 throw new ProjectError.CONFIGURATION (@"Project: build target #$(build_targets[i].no) ($(build_targets[i].id)) comes after build target #$(build_targets[i-1].no) ($(build_targets[i-1].id))");
         }
+
+        // 5. monitor source directories of non-Vala build targets
+        foreach (BuildTarget btarget in build_targets) {
+            if (btarget is Compilation)
+                continue;
+            foreach (File file in btarget.input) {
+                File? parent = file.get_parent ();
+                if (parent != null && parent.query_file_type (FileQueryInfoFlags.NONE) == FileType.DIRECTORY) {
+                    if (!monitored_files.has_key (parent)) {
+                        debug ("Project: obtaining a new file monitor for %s ...", parent.get_path ());
+                        FileMonitor file_monitor = parent.monitor_directory (FileMonitorFlags.NONE, cancellable);
+                        file_monitor.changed.connect (file_changed_event);
+                        monitored_files[parent] = file_monitor;
+                    }
+                }
+            }
+        }
     }
+
+    private void file_changed_event (File src, File? dest, FileMonitorEvent event_type) {
+        // ignore file changed events for Vala source files
+        if (Util.arg_is_vala_file (src.get_path ()) ||
+            (dest != null && Util.arg_is_vala_file (dest.get_path ())))
+            return;
+
+        if (FileMonitorEvent.ATTRIBUTE_CHANGED in event_type) {
+            debug ("Project: watched file %s had an attribute changed", src.get_path ());
+            changed ();
+        }
+        if (FileMonitorEvent.CHANGED in event_type) {
+            debug ("Project: watched file %s was changed", src.get_path ());
+            changed ();
+        }
+        if (FileMonitorEvent.DELETED in event_type) {
+            debug ("Project: watched file %s was deleted", src.get_path ());
+            // remove this file monitor since the file was deleted
+            FileMonitor file_monitor;
+            if (monitored_files.unset (src, out file_monitor)) {
+                file_monitor.cancel ();
+                file_monitor.changed.disconnect (file_changed_event);
+            }
+            changed ();
+        }
+    }
+
+    /**
+     * Emitted when build files change. This is mainly useful for tracking files that indirectly
+     * affect Vala messages, such as C sources or build scripts.
+     */
+    public signal void changed ();
 
     /**
      * Reconfigure the project if there were changes to the build files that warrant doing so.
