@@ -396,10 +396,13 @@ class Vls.Server : Object {
 
         foreach (Pair<Vala.SourceFile, Compilation> doc_w_bt in project.lookup_compile_input_source_file (uri)) {
             var doc = doc_w_bt.first;
+            // We want to load the document unconditionally, to avoid
+            // errors later on in textDocument/didChange. However, we
+            // only want to edit it if it is an actual TextDocument.
+            if (doc.content == null)
+                doc.get_mapped_contents ();
             if (doc is TextDocument) {
-                debug (@"[textDocument/didOpen] opened $(Uri.unescape_string (uri))");
-                if (doc.content == null)
-                    doc.get_mapped_contents ();
+                debug (@"[textDocument/didOpen] opened $(Uri.unescape_string (uri))"); 
                 if (doc.content != fileContents) {
                     doc.content = fileContents;
                     request_context_update (client);
@@ -443,9 +446,6 @@ class Vls.Server : Object {
 
         foreach (Pair<Vala.SourceFile, Compilation> pair in project.lookup_compile_input_source_file (uri)) {
             var source_file = pair.first;
-            if (source_file.content == null) {
-                error (@"[textDocument/didChange] source content is null!");
-            }
 
             if (!(source_file is TextDocument)) {
                 debug (@"[textDocument/didChange] Ignoring change to system file");
@@ -456,6 +456,10 @@ class Vls.Server : Object {
             if (source.version >= version) {
                 debug (@"[textDocument/didChange] rejecting outdated version of $uri");
                 return;
+            }
+
+            if (source_file.content == null) {
+                error (@"[textDocument/didChange] source content is null!");
             }
 
             // update the document
