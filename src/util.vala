@@ -152,10 +152,9 @@ namespace Vls.Util {
         return last_arg_index;
     }
 
-    public bool arg_is_file (string arg) {
+    public bool arg_is_vala_file (string arg) {
         return /^.*\.(vala|vapi|gir|gs)(\.in)?$/.match (arg);
     }
-
 
     static bool ends_with_dir_separator (string s) {
         return Path.is_dir_separator (s.get_char (s.length - 1));

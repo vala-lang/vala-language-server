@@ -39,9 +39,9 @@ class Vls.BuildTask : BuildTarget {
         }
 
         foreach (string arg in arguments) {
-            if (Util.arg_is_file (arg)) {
+            if (Util.arg_is_vala_file (arg)) {
                 used_files.add (File.new_for_commandline_arg_and_cwd (arg, build_dir));
-                debug ("BuildTask(%s): uses file %s", id, arg);
+                debug ("BuildTask(%s): uses Vala file %s", id, arg);
             }
         }
 
