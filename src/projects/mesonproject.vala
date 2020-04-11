@@ -8,6 +8,7 @@ class Vls.MesonProject : Project {
     private HashMap<File, FileMonitor> meson_build_files = new HashMap<File, FileMonitor> (Util.file_hash, Util.file_equal);
     private string root_path;
     private string build_dir;
+    private bool configured_once;
 
     public const string OUTDIR = "meson-out";
 
@@ -71,7 +72,9 @@ class Vls.MesonProject : Project {
         string[] spawn_args = {"meson", "setup", ".", root_path};
         string proc_stdout, proc_stderr;
         int proc_status;
-        debug ("MesonProject: configuring build dir %s ...", build_dir);
+        debug ("MesonProject: %sconfiguring build dir %s ...", configured_once ? "re" : "", build_dir);
+        if (configured_once)
+            spawn_args += "--reconfigure";
         Process.spawn_sync (
             build_dir,
             spawn_args, 
@@ -258,6 +261,8 @@ class Vls.MesonProject : Project {
 
         // 5. perform final analysis and sanity checking
         analyze_build_targets ();
+
+        configured_once = true;
 
         return true;
     }
