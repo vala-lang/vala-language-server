@@ -26,6 +26,8 @@ class Vls.Compilation : BuildTarget {
     private bool _experimental;
     private bool _experimental_non_null;
     private bool _abi_stability;
+    private string? _target_glib;
+
     /**
      * The output directory.
      */
@@ -98,6 +100,8 @@ class Vls.Compilation : BuildTarget {
                     throw new ProjectError.INTROSPECTION (@"Compilation($id) unsupported Vala profile `$arg_value'");
             } else if (flag_name == "abi-stability") {
                 _abi_stability = true;
+            } else if (flag_name == "target-glib") {
+                _target_glib = arg_value;
             } else if (flag_name == "directory") {
                 if (arg_value == null) {
                     warning ("Compilation(%s) null --directory", id);
@@ -177,6 +181,10 @@ class Vls.Compilation : BuildTarget {
         // Vala compiler bug requires us to initialize things this way instead of
         // the alternative above
         code_context.report = new Reporter (_fatal_warnings);
+
+        // set target GLib version if specified
+        if (_target_glib != null)
+            code_context.set_target_glib_version (_target_glib);
         Vala.CodeContext.push (code_context);
 
         switch (_profile) {
