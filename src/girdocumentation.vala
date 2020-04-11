@@ -1,12 +1,20 @@
 class Vls.GirDocumentation {
     private Vala.CodeContext context;
 
+    private class Sink : Vala.Report {
+        public override void depr (Vala.SourceReference? sr, string message) { /* do nothing */ }
+        public override void err (Vala.SourceReference? sr, string message) { /* do nothing */ }
+        public override void warn (Vala.SourceReference? sr, string message) { /* do nothing */ }
+        public override void note (Vala.SourceReference? sr, string message) { /* do nothing */ }
+    }
+
     /**
      * Create a new holder for GIR docs by adding all GIRs found in
      * `/usr/share/gir-1.0` and `/usr/local/share/gir-1.0`
      */
     public GirDocumentation (Gee.Collection<Vala.SourceFile> packages) {
         context = new Vala.CodeContext ();
+        context.report = new Sink ();
         Vala.CodeContext.push (context);
         context.add_define ("GOBJECT");
 
