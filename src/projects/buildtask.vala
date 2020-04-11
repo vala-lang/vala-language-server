@@ -56,6 +56,25 @@ class Vls.BuildTask : BuildTarget {
         if (failed_last)
             return;
 
+        // don't run this task if our inputs haven't changed
+        if (!input.is_empty && !output.is_empty) {
+            bool inputs_modified_after = false;
+
+            foreach (File file in input) {
+                FileInfo info = file.query_info (FileAttribute.TIME_MODIFIED, FileQueryInfoFlags.NONE, cancellable);
+                DateTime? file_last_modified = info.get_modification_date_time ();
+                if (file_last_modified == null)
+                    warning ("BuildTask(%s) could not get last modified time of %s", id, file.get_path ());
+                else if (file_last_modified.compare (last_updated) > 0) {
+                    inputs_modified_after = true;
+                    break;
+                }
+            }
+
+            if (!inputs_modified_after)
+                return;
+        }
+
         Subprocess process = launcher.spawnv (arguments);
         process.wait (cancellable);
         if (cancellable.is_cancelled ()) {
