@@ -26,6 +26,8 @@ class Vls.GirDocumentation {
         added.add ("GLib-2.0");
         foreach (string data_dir in Environment.get_system_data_dirs ()) {
             File dir = File.new_for_path (Path.build_filename (data_dir, "gir-1.0"));
+            if (!dir.query_exists ())
+                continue;
             try {
                 var enumerator = dir.enumerate_children (
                     "standard::*",
