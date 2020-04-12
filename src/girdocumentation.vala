@@ -13,7 +13,6 @@ class Vls.GirDocumentation {
         string? girpath = context.get_gir_path (package);
         if (girpath != null) {
             context.add_source_file (new Vala.SourceFile (context, Vala.SourceFileType.PACKAGE, girpath));
-            context.add_package (package);
             added.add (package);
         }
     }
