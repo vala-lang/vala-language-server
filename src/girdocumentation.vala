@@ -25,7 +25,12 @@ class Vls.GirDocumentation {
         context = new Vala.CodeContext ();
         context.report = new Sink ();
         Vala.CodeContext.push (context);
+#if VALA_0_50
+        context.set_target_profile (Vala.Profile.GOBJECT, false);
+#else
+        context.profile = Vala.Profile.GOBJECT;
         context.add_define ("GOBJECT");
+#endif
 
         // add packages
         add_gir ("GLib-2.0");
