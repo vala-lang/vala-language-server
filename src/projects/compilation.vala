@@ -72,6 +72,19 @@ class Vls.Compilation : BuildTarget {
         var build_dir_file = File.new_for_path (build_dir);
         bool set_directory = false;
         string? flag_name, arg_value;           // --<flag_name>[=<arg_value>]
+
+        // because we rely on --directory for determining the location of output files
+        for (int arg_i = -1; (arg_i = Util.iterate_valac_args (args, out flag_name, out arg_value, arg_i)) < args.length;) {
+            if (flag_name == "directory") {
+                if (arg_value == null) {
+                    warning ("Compilation(%s) null --directory", id);
+                    continue;
+                }
+                _directory = Util.realpath (arg_value, build_dir);
+                set_directory = true;
+            }
+        }
+
         for (int arg_i = -1; (arg_i = Util.iterate_valac_args (args, out flag_name, out arg_value, arg_i)) < args.length;) {
             if (flag_name == "pkg") {
                 _packages.add (arg_value);
@@ -102,13 +115,6 @@ class Vls.Compilation : BuildTarget {
                 _abi_stability = true;
             } else if (flag_name == "target-glib") {
                 _target_glib = arg_value;
-            } else if (flag_name == "directory") {
-                if (arg_value == null) {
-                    warning ("Compilation(%s) null --directory", id);
-                    continue;
-                }
-                _directory = Util.realpath (arg_value, build_dir);
-                set_directory = true;
             } else if (flag_name == "vapi" || flag_name == "gir" || flag_name == "internal-vapi") {
                 if (arg_value == null) {
                     warning ("Compilation(%s) --%s is null", id, flag_name);
@@ -117,7 +123,7 @@ class Vls.Compilation : BuildTarget {
 
                 string path = Util.realpath (arg_value, _directory);
                 if (!set_directory)
-                    warning ("Compilation(%s) no --directory before --%s, assuming %s", id, flag_name, _directory);
+                    warning ("Compilation(%s) no --directory given, assuming %s", id, _directory);
                 if (flag_name == "vapi")
                     _output_vapi = path;
                 else if (flag_name == "gir")
