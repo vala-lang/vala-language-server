@@ -382,7 +382,7 @@ class Vls.MesonProject : Project {
                     // try again: attempt to match ...${meson_target_id}...
                     Compilation? found_comp = null;
                     MatchInfo match_info;
-                    if (/[A-Z0-9a-z]+@@\S+@\w+/.match (cc.output, 0, out match_info)) {
+                    if (/[^\\\/]+(@@[^\\\/]+)?@\w+/.match (cc.output, 0, out match_info)) {
                         string id = match_info.fetch (0);
 
                         BuildTarget? btarget_found = build_targets.first_match (t => t.id == id);
