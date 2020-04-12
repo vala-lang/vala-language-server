@@ -1,11 +1,20 @@
 class Vls.GirDocumentation {
     private Vala.CodeContext context;
+    private Gee.HashSet<string> added = new Gee.HashSet<string> ();
 
     private class Sink : Vala.Report {
         public override void depr (Vala.SourceReference? sr, string message) { /* do nothing */ }
         public override void err (Vala.SourceReference? sr, string message) { /* do nothing */ }
         public override void warn (Vala.SourceReference? sr, string message) { /* do nothing */ }
         public override void note (Vala.SourceReference? sr, string message) { /* do nothing */ }
+    }
+
+    private void add_gir (string package) {
+        string? girpath = context.get_gir_path (package);
+        if (girpath != null) {
+            context.add_source_file (new Vala.SourceFile (context, Vala.SourceFileType.PACKAGE, girpath));
+            added.add (package);
+        }
     }
 
     /**
@@ -19,11 +28,9 @@ class Vls.GirDocumentation {
         context.add_define ("GOBJECT");
 
         // add packages
-        var added = new Gee.HashSet<string> ();
-        context.add_external_package ("GObject-2.0");
-        added.add ("GObject-2.0");
-        context.add_external_package ("GLib-2.0");
-        added.add ("GLib-2.0");
+        add_gir ("GLib-2.0");
+        add_gir ("GObject-2.0");
+
         foreach (string data_dir in Environment.get_system_data_dirs ()) {
             File dir = File.new_for_path (Path.build_filename (data_dir, "gir-1.0"));
             if (!dir.query_exists ())
@@ -45,8 +52,7 @@ class Vls.GirDocumentation {
                         pkg => pkg.gir_version != null && @"$(pkg.gir_namespace)-$(pkg.gir_version)" == gir_pkg);
                     if (!added.contains (gir_pkg) && vapi_pkg_match != null) {
                         debug (@"adding GIR $gir_pkg for package $(vapi_pkg_match.package_name)");
-                        context.add_external_package (gir_pkg);
-                        added.add (gir_pkg);
+                        add_gir (gir_pkg);
                     }
                 }
             } catch (Error e) {
