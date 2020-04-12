@@ -72,6 +72,7 @@
     sudo apt-get update
     sudo apt-get install vala-language-server
     ```
+- Alpine Linux Edge: `apk add vala-language-server`
 
 ### Building from Source
 ```sh
