@@ -48,7 +48,7 @@ class Vls.Server : Object {
     InitializeParams init_params;
 
     const uint check_update_context_period_ms = 100;
-    const int64 update_context_delay_inc_us = 1000;
+    const int64 update_context_delay_inc_us = 500 * 1000;
     const int64 update_context_delay_max_us = 1000 * 1000;
     const uint wait_for_context_update_delay_ms = 200;
 
@@ -737,7 +737,7 @@ class Vls.Server : Object {
         return (!) best;
     }
 
-    public Vala.Scope get_current_scope (Vala.CodeNode code_node) {
+    public static Vala.Scope get_scope_containing_node (Vala.CodeNode code_node) {
         Vala.Scope? best = null;
 
         for (Vala.CodeNode? node = code_node; node != null; node = node.parent_node) {
@@ -1543,10 +1543,10 @@ class Vls.Server : Object {
     /**
      * Find the type of a symbol in the code.
      */
-    Vala.TypeSymbol? get_type_symbol (Vala.CodeContext code_context, 
-                                      Vala.CodeNode symbol, 
-                                      bool is_pointer, 
-                                      ref bool is_instance) {
+    public static Vala.TypeSymbol? get_type_symbol (Vala.CodeContext code_context, 
+                                                    Vala.CodeNode symbol, 
+                                                    bool is_pointer, 
+                                                    ref bool is_instance) {
         Vala.DataType? data_type = null;
         Vala.TypeSymbol? type_symbol = null;
         if (symbol is Vala.Variable) {
@@ -1596,6 +1596,209 @@ class Vls.Server : Object {
         }
 
         return type_symbol;
+    }
+
+    void textDocumentCompletion_finish (Jsonrpc.Client client, Variant id, Variant @params,
+                                        Collection<CompletionItem> completions) {
+        var json_array = new Json.Array ();
+        foreach (CompletionItem comp in completions)
+            json_array.add_element (Json.gobject_serialize (comp));
+
+        try {
+            Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
+            client.reply (id, variant_array, cancellable);
+        } catch (Error e) {
+            debug (@"[textDocument/completion] failed to reply to client: $(e.message)");
+        }
+    }
+
+    /**
+     * Fill the completion list with all scope-visible symbols
+     */
+    void textDocumentCompletion_list_symbols (Vala.SourceFile doc, Position pos, Set<CompletionItem> completions) {
+        string method = "textDocument/completion";
+        Vala.Scope best_scope = new FindScope (doc, pos).best_block.scope;
+        bool in_instance = false;
+        var seen_props = new HashSet<string> ();
+
+        if (best_scope.owner.source_reference != null)
+            debug (@"[$method] best scope SR is $(best_scope.owner.source_reference)");
+        else
+            debug (@"[$method] listing symbols from $(best_scope.owner)");
+        for (Vala.Scope? current_scope = best_scope;
+                current_scope != null;
+                current_scope = current_scope.parent_scope) {
+            Vala.Symbol owner = current_scope.owner;
+            if (owner is Vala.Callable || owner is Vala.Statement || owner is Vala.Block || 
+                owner is Vala.Subroutine) {
+                Vala.Symbol? this_param = null;
+                if (owner is Vala.Method)
+                    this_param = ((Vala.Method)owner).this_parameter;
+                else if (owner is Vala.PropertyAccessor)
+                    this_param = ((Vala.PropertyAccessor)owner).prop.this_parameter;
+                else if (owner is Vala.Constructor)
+                    this_param = ((Vala.Constructor)owner).this_parameter;
+                else if (owner is Vala.Destructor)
+                    this_param = ((Vala.Destructor)owner).this_parameter;
+                in_instance = this_param != null;
+                if (in_instance) {
+                    // add `this' parameter
+                    completions.add (new CompletionItem.from_symbol (this_param, CompletionItemKind.Constant, get_symbol_documentation (this_param)));
+                }
+                var symtab = current_scope.get_symbol_table ();
+                if (symtab == null)
+                    continue;
+                foreach (Vala.Symbol sym in symtab.get_values ()) {
+                    if (sym.name == null || sym.name[0] == '.')
+                        continue;
+                    var sr = sym.source_reference;
+                    if (sr == null)
+                        continue;
+                    var sr_begin = new Position () { line = sr.begin.line, character = sr.begin.column - 1 };
+
+                    // don't show local variables that are declared ahead of the cursor
+                    if (sr_begin.compare_to (pos) > 0)
+                        continue;
+                    completions.add (new CompletionItem.from_symbol (sym, 
+                        (sym is Vala.Constant) ? CompletionItemKind.Constant : CompletionItemKind.Variable,
+                        get_symbol_documentation (sym)));
+                }
+            } else if (owner is Vala.TypeSymbol) {
+                if (in_instance)
+                    add_completions_for_type ((Vala.TypeSymbol) owner, completions, best_scope, true, false, seen_props);
+                // always show static members
+                add_completions_for_type ((Vala.TypeSymbol) owner, completions, best_scope, false, false, seen_props);
+                // once we leave a type symbol, we're no longer in an instance
+                in_instance = false;
+            } else if (owner is Vala.Namespace) {
+                add_completions_for_ns ((Vala.Namespace) owner, completions, false);
+            } else {
+                debug (@"[$method] ignoring owner ($owner) ($(owner.type_name)) of scope");
+            }
+        }
+        // show members of all imported namespaces
+        foreach (var ud in doc.current_using_directives)
+            add_completions_for_ns ((Vala.Namespace) ud.namespace_symbol, completions, false);
+    }   
+
+    /**
+     * Fill the completion list with members of {@result}
+     * If scope is null, the current scope will be calculated.
+     */
+    void textDocumentCompletion_for_ma (Vala.SourceFile doc, Compilation compilation,
+                                        bool is_pointer_access, bool in_oce,
+                                        Vala.CodeNode result, Vala.Scope? scope, Set<CompletionItem> completions,
+                                        bool retry_inner = true) {
+        string method = "textDocument/completion";
+        Vala.CodeNode? peeled = null;
+        Vala.Scope current_scope = scope ?? get_scope_containing_node (result);
+
+        debug (@"[$method] member: got best, $(result.type_name) `$result' (semanalyzed = $(result.checked)))");
+
+        do {
+            if (result is Vala.MemberAccess) {
+                var ma = result as Vala.MemberAccess;
+                for (Vala.Expression? code_node = ma.inner; code_node != null; ) {
+                    debug (@"[$method] MA inner: $code_node");
+                    if (code_node is Vala.MemberAccess)
+                        code_node = ((Vala.MemberAccess)code_node).inner;
+                    else
+                        code_node = null;
+                }
+                if (ma.symbol_reference != null) {
+                    debug (@"peeling away symbol_reference from MemberAccess: $(ma.symbol_reference.type_name)");
+                    peeled = ma.symbol_reference;
+                } else {
+                    debug ("MemberAccess does not have symbol_reference");
+                    if (!ma.checked) {
+                        for (Vala.CodeNode? parent = ma.parent_node; 
+                            parent != null;
+                            parent = parent.parent_node)
+                        {
+                            debug (@"parent ($parent) semanalyzed = $(parent.checked)");
+                        }
+                    }
+                }
+            }
+
+            bool is_instance = true;
+            Vala.TypeSymbol? type_sym = get_type_symbol (compilation.code_context, 
+                                                            result, is_pointer_access, ref is_instance);
+
+            // try again
+            if (type_sym == null && peeled != null)
+                type_sym = get_type_symbol (compilation.code_context,
+                                            peeled, is_pointer_access, ref is_instance);
+
+            if (type_sym != null)
+                add_completions_for_type (type_sym, completions, current_scope, is_instance, in_oce);
+            // and try some more
+            else if (peeled is Vala.Signal)
+                add_completions_for_signal ((Vala.Signal) peeled, completions);
+            else if (peeled is Vala.Namespace)
+                add_completions_for_ns ((Vala.Namespace) peeled, completions, in_oce);
+            else if (peeled is Vala.Method && ((Vala.Method) peeled).coroutine)
+                add_completions_for_async_method ((Vala.Method) peeled, completions);
+            else {
+                if (result is Vala.MemberAccess &&
+                    ((Vala.MemberAccess)result).inner != null &&
+                    // don't try inner if the outer expression already has a symbol reference
+                    peeled == null &&
+                    // don't try inner if the MemberAccess was generted by SymbolExtractor
+                    retry_inner) {
+                    result = ((Vala.MemberAccess)result).inner;
+                    debug (@"[$method] trying MemberAccess.inner");
+                    // (new Object ()).
+                    in_oce = false;
+                    // maybe our expression was wrapped in extra parentheses:
+                    // (x as T). for example
+                    continue;
+                }
+                if (result is Vala.ObjectCreationExpression &&
+                    ((Vala.ObjectCreationExpression)result).member_name != null) {
+                    result = ((Vala.ObjectCreationExpression)result).member_name;
+                    debug (@"[$method] trying ObjectCreationExpression.member_name");
+                    in_oce = true;
+                    // maybe our object creation expression contains a member access
+                    // from a namespace or some other type
+                    // new Vls. for example
+                    continue;
+                }
+                debug ("[%s] could not get datatype for %s", method,
+                        result == null ? "(null)" : @"($(result.type_name)) $result");
+            }
+            break;      // break by default
+        } while (true);
+    }
+
+    /**
+     * Use this for accurate member access completions after the code context has been updated.
+     */
+    void textDocumentCompletion_continue_for_ma (Jsonrpc.Client client, Variant id, Variant @params,
+                                                 Vala.SourceFile doc, Compilation compilation,
+                                                 bool is_pointer_access,
+                                                 Position pos, Position? end_pos, Set<CompletionItem> completions) {
+        string method = "textDocument/completion";
+        debug (@"[$method] FindSymbol @ $pos" + (end_pos != null ? @" -> $end_pos" : ""));
+        Vala.CodeContext.push (compilation.code_context);
+
+        var fs = new FindSymbol (doc, pos, true, end_pos);
+
+        if (fs.result.size == 0) {
+            debug (@"[$method] no results found for member access");
+            reply_null (id, client, method);
+            return;
+        }
+        
+        bool in_oce = false;
+
+        foreach (var res in fs.result) {
+            debug (@"[$method] found $(res.type_name) (semanalyzed = $(res.checked))");
+            in_oce |= res is Vala.ObjectCreationExpression;
+        }
+
+        Vala.CodeNode result = get_best (fs, doc);
+        textDocumentCompletion_for_ma (doc, compilation, is_pointer_access, in_oce, result, null, completions);
     }
 
     void textDocumentCompletion (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
@@ -1669,212 +1872,47 @@ class Vls.Server : Object {
             // TODO: incomplete completions
         }
 
-        wait_for_context_update (id, request_cancelled => {
-            if (request_cancelled) {
-                reply_null (id, client, method);
-                return;
-            }
+        var completions = new HashSet<CompletionItem> ();
 
-            debug (@"[$method] FindSymbol @ $(pos.to_libvala ())");
-            Vala.CodeContext.push (compilation.code_context);
-
-            var fs = new FindSymbol (doc, pos.to_libvala (), true, !is_member_access,
-                 is_member_access ? end_pos.to_libvala () : null);
-
-            if (fs.result.size == 0) {
-                debug (@"[$method] no results found" + (is_member_access ? " for member access" : ""));
-                reply_null (id, client, method);
-                Vala.CodeContext.pop ();
-                return;
-            }
+        // convert language server positions (0-indexed lines) to Vala positions (1-indexed lines)
+        pos = pos.to_libvala ();
+        end_pos = end_pos.to_libvala ();
 
 
-            bool in_oce = false;
+        Vala.CodeContext.push (compilation.code_context);
+        if (is_member_access) {
+            // attempt SymbolExtractor first, and if that fails, then wait for
+            // the next context update
 
-            foreach (var res in fs.result) {
-                debug (@"[$method] found $(res.type_name) (semanalyzed = $(res.checked))");
-                in_oce |= res is Vala.ObjectCreationExpression;
-            }
-            
-            var json_array = new Json.Array ();
-            var completions = new Gee.HashSet<CompletionItem> ();
+            var se = new SymbolExtractor (pos, doc);
+            if (se.extracted_expression != null)
+                textDocumentCompletion_for_ma (doc, compilation, is_pointer_access, false /* TODO */, 
+                                               se.extracted_expression, se.block.scope, completions, false);
 
-            if (!is_member_access) {
-                var fs_results_saved = fs.result;
-                fs.result = new Gee.ArrayList<Vala.CodeNode> ();
+            if (completions.is_empty) {
+                debug ("[%s] trying MA completion again after context update ...", method);
+                wait_for_context_update (id, request_cancelled => {
+                    if (request_cancelled) {
+                        reply_null (id, client, method);
+                        return;
+                    }
 
-                // attempt to filter results
-                foreach (var sym in fs_results_saved) 
-                    if (sym is Vala.Block || sym is Vala.Symbol)
-                        fs.result.add (sym);
-
-                if (fs.result.is_empty)
-                    fs.result = fs_results_saved;
-                Vala.CodeNode best = get_best (fs, doc);
-                Vala.Scope best_scope;
-                bool in_instance = false;
-                var seen_props = new Gee.HashSet<string> ();
-
-                if (best is Vala.Block)
-                    best_scope = ((Vala.Block) best).scope;
-                else {
-                    for (Vala.CodeNode? node = best; node != null; node = node.parent_node)
-                        if (node is Vala.Symbol)
-                            best_scope = ((Vala.Symbol) node).scope;
-                    warning (@"[$method] invoke: could not get block from $best ($(best.type_name))");
-                    reply_null (id, client, method);
+                    Vala.CodeContext.push (compilation.code_context);
+                    textDocumentCompletion_continue_for_ma (client, id, @params, 
+                                                            doc, compilation, 
+                                                            is_pointer_access, 
+                                                            pos, end_pos, completions);
+                    textDocumentCompletion_finish (client, id, @params, completions);
                     Vala.CodeContext.pop ();
-                    return;
-                }
-
-                debug (@"[$method] best scope SR is $(best_scope.owner.source_reference)");
-                for (Vala.Scope? current_scope = best_scope;
-                     current_scope != null;
-                     current_scope = current_scope.parent_scope) {
-                    Vala.Symbol owner = current_scope.owner;
-                    if (owner is Vala.Callable || owner is Vala.Statement || owner is Vala.Block || 
-                        owner is Vala.Subroutine) {
-                        Vala.Symbol? this_param = null;
-                        if (owner is Vala.Method)
-                            this_param = ((Vala.Method)owner).this_parameter;
-                        else if (owner is Vala.PropertyAccessor)
-                            this_param = ((Vala.PropertyAccessor)owner).prop.this_parameter;
-                        else if (owner is Vala.Constructor)
-                            this_param = ((Vala.Constructor)owner).this_parameter;
-                        else if (owner is Vala.Destructor)
-                            this_param = ((Vala.Destructor)owner).this_parameter;
-                        in_instance = this_param != null;
-                        if (in_instance) {
-                            // add `this' parameter
-                            completions.add (new CompletionItem.from_symbol (this_param, CompletionItemKind.Constant, get_symbol_documentation (this_param)));
-                        }
-                        var symtab = current_scope.get_symbol_table ();
-                        if (symtab == null)
-                            continue;
-                        foreach (Vala.Symbol sym in symtab.get_values ()) {
-                            if (sym.name == null || sym.name[0] == '.')
-                                continue;
-                            var sr = sym.source_reference;
-                            if (sr == null)
-                                continue;
-                            var sr_begin = new Position () { line = sr.begin.line, character = sr.begin.column - 1 };
-
-                            // don't show local variables that are declared ahead of the cursor
-                            if (sr_begin.compare_to (fs.pos) > 0)
-                                continue;
-                            completions.add (new CompletionItem.from_symbol (sym, 
-                                (sym is Vala.Constant) ? CompletionItemKind.Constant : CompletionItemKind.Variable,
-                                get_symbol_documentation (sym)));
-                        }
-                    } else if (owner is Vala.TypeSymbol) {
-                        if (in_instance)
-                            add_completions_for_type ((Vala.TypeSymbol) owner, completions, best_scope, true, in_oce, seen_props);
-                        // always show static members
-                        add_completions_for_type ((Vala.TypeSymbol) owner, completions, best_scope, false, in_oce, seen_props);
-                        // once we leave a type symbol, we're no longer in an instance
-                        in_instance = false;
-                    } else if (owner is Vala.Namespace) {
-                        add_completions_for_ns ((Vala.Namespace) owner, completions, false);
-                    } else {
-                        debug (@"[$method] ignoring owner ($owner) ($(owner.type_name)) of scope");
-                    }
-                }
-                // show members of all imported namespaces
-                foreach (var ud in doc.current_using_directives)
-                    add_completions_for_ns ((Vala.Namespace) ud.namespace_symbol, completions, in_oce);
+                });
             } else {
-                Vala.CodeNode result = get_best (fs, doc);
-                Vala.CodeNode? peeled = null;
-                Vala.Scope current_scope = get_current_scope (result);
-
-                debug (@"[$method] member: got best, $(result.type_name) `$result' (semanalyzed = $(result.checked)))");
-
-                do {
-                    if (result is Vala.MemberAccess) {
-                        var ma = result as Vala.MemberAccess;
-                        for (Vala.Expression? code_node = ma.inner; code_node != null; ) {
-                            debug (@"[$method] MA inner: $code_node");
-                            if (code_node is Vala.MemberAccess)
-                                code_node = ((Vala.MemberAccess)code_node).inner;
-                            else
-                                code_node = null;
-                        }
-                        if (ma.symbol_reference != null) {
-                            debug (@"peeling away symbol_reference from MemberAccess: $(ma.symbol_reference.type_name)");
-                            peeled = ma.symbol_reference;
-                        } else {
-                            debug ("MemberAccess does not have symbol_reference");
-                            if (!ma.checked) {
-                                for (Vala.CodeNode? parent = ma.parent_node; 
-                                    parent != null;
-                                    parent = parent.parent_node)
-                                {
-                                    debug (@"parent ($parent) semanalyzed = $(parent.checked)");
-                                }
-                            }
-                        }
-                    }
-
-                    bool is_instance = true;
-                    Vala.TypeSymbol? type_sym = get_type_symbol (compilation.code_context, 
-                                                                 result, is_pointer_access, ref is_instance);
-
-                    // try again
-                    if (type_sym == null && peeled != null)
-                        type_sym = get_type_symbol (compilation.code_context,
-                                                    peeled, is_pointer_access, ref is_instance);
-
-                    if (type_sym != null)
-                        add_completions_for_type (type_sym, completions, current_scope, is_instance, in_oce);
-                    // and try some more
-                    else if (peeled is Vala.Signal)
-                        add_completions_for_signal ((Vala.Signal) peeled, completions);
-                    else if (peeled is Vala.Namespace)
-                        add_completions_for_ns ((Vala.Namespace) peeled, completions, in_oce);
-                    else if (peeled is Vala.Method && ((Vala.Method) peeled).coroutine)
-                        add_completions_for_async_method ((Vala.Method) peeled, completions);
-                    else {
-                        if (result is Vala.MemberAccess &&
-                            ((Vala.MemberAccess)result).inner != null &&
-                            // don't try inner if the outer expression already has a symbol reference
-                            peeled == null) {
-                            result = ((Vala.MemberAccess)result).inner;
-                            debug (@"[$method] trying MemberAccess.inner");
-                            // (new Object ()).
-                            in_oce = false;
-                            // maybe our expression was wrapped in extra parentheses:
-                            // (x as T). for example
-                            continue; 
-                        }
-                        if (result is Vala.ObjectCreationExpression &&
-                            ((Vala.ObjectCreationExpression)result).member_name != null) {
-                            result = ((Vala.ObjectCreationExpression)result).member_name;
-                            debug (@"[$method] trying ObjectCreationExpression.member_name");
-                            in_oce = true;
-                            // maybe our object creation expression contains a member access
-                            // from a namespace or some other type
-                            // new Vls. for example
-                            continue;
-                        }
-                        debug ("[%s] could not get datatype for %s", method,
-                                result == null ? "(null)" : @"($(result.type_name)) $result");
-                    }
-                    break;      // break by default
-                } while (true);
+                textDocumentCompletion_finish (client, id, @params, completions);
             }
-
-            foreach (CompletionItem comp in completions)
-                json_array.add_element (Json.gobject_serialize (comp));
-
-            try {
-                Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
-                client.reply (id, variant_array, cancellable);
-            } catch (Error e) {
-                debug (@"[$method] failed to reply to client: $(e.message)");
-            }
-
-            Vala.CodeContext.pop ();
-        });
+        } else {
+            textDocumentCompletion_list_symbols (doc, pos, completions);
+            textDocumentCompletion_finish (client, id, @params, completions);
+        }
+        Vala.CodeContext.pop ();
     }
 
     void textDocumentSignatureHelp (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {

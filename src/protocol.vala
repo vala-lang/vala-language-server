@@ -136,6 +136,10 @@ namespace LanguageServer {
                 end = end.compare_to (other.end) < 0 ? other.end : end
             };
         }
+
+        public bool contains (Position pos) {
+            return start.compare_to (pos) <= 0 && pos.compare_to (end) <= 0;
+        }
     }
 
     class Diagnostic : Object {
