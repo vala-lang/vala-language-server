@@ -184,6 +184,12 @@ class Vls.Compilation : BuildTarget {
             gresources_directories = _gresources_dirs.to_array ()
         };
 
+#if VALA_0_50
+        code_context.set_target_profile (_profile, false);
+#else
+        code_context.profile = _profile;
+#endif
+
         // Vala compiler bug requires us to initialize things this way instead of
         // the alternative above
         code_context.report = new Reporter (_fatal_warnings);
