@@ -175,9 +175,26 @@ class Vls.BuildTask : BuildTarget {
             }
         }
 
+        var temp_outputs = new ArrayList<File> (Util.file_equal);
+        foreach (string? output_filename in target_output_files) {
+            if (output_filename != null)
+                temp_outputs.add (File.new_for_commandline_arg_and_cwd (output_filename, build_dir));
+        }
+
         if (language == "c") {
-            foreach (string output_filename in target_output_files)
-                output.add (File.new_for_commandline_arg_and_cwd (output_filename, build_dir));
+            output.add_all (temp_outputs);
+        } else {
+            // other kinds of targets may transform *.in files to their outputs, so
+            // we look for all files in target_output_files that correspond to these inputs
+            foreach (File input_file in input) {
+                string input_path = (!) input_file.get_path ();
+                if (input_path.has_suffix (".in")) {
+                    foreach (File output_file in temp_outputs) {
+                        if (input_path == output_file.get_path () + ".in")
+                            output.add (output_file);
+                    }
+                }
+            }
         }
     }
 

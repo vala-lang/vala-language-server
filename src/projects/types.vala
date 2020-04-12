@@ -77,7 +77,7 @@ namespace Meson {
         // Vala codegen forbids having 'type' as a property
         public string target_type { get; set; }
         public string defined_in { get; set; }
-        public string[] filename { get; set; }
+        public string?[] filename { get; set; }
         public ArrayList<TargetSourceInfo> target_sources { get; set; }
 
         public new void Json.Serializable.set_property (ParamSpec pspec, Value value) {
