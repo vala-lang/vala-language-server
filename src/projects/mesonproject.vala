@@ -92,6 +92,54 @@ class Vls.MesonProject : Project {
         return substituted_args.to_array ();
     }
 
+    private void load_introspection_json (Json.Parser parser, string build_dir, string command, 
+                                          Cancellable? cancellable = null) throws Error {
+        // first, try to load the file in ${build_dir}/meson-info/intro-${command}.json
+        try {
+            var input_file = File.new_build_filename (build_dir, "meson-info", @"intro-$command.json");
+            debug ("MesonProject: loading file %s ...", input_file.get_path ());
+            parser.load_from_stream (input_file.read (cancellable), cancellable);
+        } catch (IOError e) {
+            if (e is IOError.NOT_FOUND) {
+                // retry with the other method: get output of `meson introspect --${command} ${build_dir}`
+                string subst_command = command.replace("_", "-");
+                string[] spawn_args = {"meson", "introspect", @"--$subst_command", "."};
+                string proc_stdout, proc_stderr;
+                int proc_status;
+
+                string command_str = "";
+                foreach (string part in spawn_args) {
+                    if (command_str != "")
+                        command_str += " ";
+                    command_str += part;
+                }
+
+                debug ("MesonProject: file does not exist, fallback to %s", command_str);
+
+                Process.spawn_sync (
+                    build_dir,
+                    spawn_args,
+                    null,
+                    SpawnFlags.SEARCH_PATH,
+                    null,
+                    out proc_stdout,
+                    out proc_stderr,
+                    out proc_status);
+
+                if (proc_status != 0) {
+                    warning ("MesonProject: command `%s' in %s failed with exit code %d\n----stdout:\n%s\n----stderr:\n%s", 
+                             command_str, build_dir, proc_status, proc_stdout, proc_stderr);
+                    throw new ProjectError.INTROSPECTION (@"meson command `$command_str' failed with exit code $proc_status");
+                }
+
+                parser.load_from_data (proc_stdout);
+            } else {
+                // otherwise, rethrow
+                throw e;
+            }
+        }
+    }
+
     public override bool reconfigure_if_stale (Cancellable? cancellable = null) throws Error {
         if (!build_files_have_changed) {
             return false;
@@ -134,9 +182,7 @@ class Vls.MesonProject : Project {
         // 2. load project dependencies, which may be of use to C build targets
         var raw_dependencies = new ArrayList<Meson.Dependency> ();
         var dependencies_parser = new Json.Parser.immutable_new ();
-        var dependencies_file = File.new_build_filename (build_dir, "meson-info", "intro-dependencies.json");
-        debug ("MesonProject: loading file %s ...", dependencies_file.get_path ());
-        dependencies_parser.load_from_stream (dependencies_file.read (cancellable), cancellable);
+        load_introspection_json (dependencies_parser, build_dir, "dependencies", cancellable);
         Json.Node? rd_json_root = dependencies_parser.get_root ();
         if (rd_json_root == null) {
             warning ("MesonProject: JSON root is null! C code targets may fail to build.");
@@ -158,16 +204,14 @@ class Vls.MesonProject : Project {
 
         // 3. create build targets
         var targets_parser = new Json.Parser.immutable_new ();
-        var targets_file = File.new_build_filename (build_dir, "meson-info", "intro-targets.json");
-        debug ("MesonProject: loading file %s ...", targets_file.get_path ());
-        targets_parser.load_from_stream (targets_file.read (cancellable), cancellable);
+        load_introspection_json(targets_parser, build_dir, "targets", cancellable);
         Json.Node? tg_json_root = targets_parser.get_root ();
         if (tg_json_root == null) {
             warning ("MesonProject: JSON root is null! Bailing out");
-            throw new ProjectError.INTROSPECTION (@"JSON root of $(targets_file.get_path ()) is null!");
+            throw new ProjectError.INTROSPECTION (@"Meson targets: JSON root is null!");
         } else if (tg_json_root.get_node_type () != Json.NodeType.ARRAY) {
             warning ("MesonProject: JSON root is not an array! Bailing out");
-            throw new ProjectError.INTROSPECTION (@"JSON root of $(targets_file.get_path ()) is not an array!");
+            throw new ProjectError.INTROSPECTION (@"Meson targets: JSON root is not an array!");
         }
         var root_dir = File.new_for_path (root_path);
         int elem_idx = -1;
@@ -421,15 +465,13 @@ class Vls.MesonProject : Project {
 
         // 5. look for more file monitors
         var bs_files_parser = new Json.Parser.immutable_new ();
-        var bs_files = File.new_build_filename (build_dir, "meson-info", "intro-buildsystem_files.json");
-        debug ("MesonProject: loading file %s ...", bs_files.get_path ());
         try {
-            bs_files_parser.load_from_stream (bs_files.read (cancellable), cancellable);
+            load_introspection_json(bs_files_parser, build_dir, "buildsystem_files", cancellable);
             Json.Node? bsf_json_root = bs_files_parser.get_root ();
             if (bsf_json_root == null) {
-                throw new ProjectError.INTROSPECTION (@"JSON root of $(bs_files.get_path ()) is null!");
+                throw new ProjectError.INTROSPECTION (@"Meson buildsystem files: JSON root is null!");
             } else if (bsf_json_root.get_node_type () != Json.NodeType.ARRAY) {
-                throw new ProjectError.INTROSPECTION (@"JSON root of $(bs_files.get_path ()) is not an array!");
+                throw new ProjectError.INTROSPECTION (@"Meson buildsystem files: JSON root is not an array!");
             }
 
             foreach (Json.Node elem_node in bsf_json_root.get_array ().get_elements ()) {
