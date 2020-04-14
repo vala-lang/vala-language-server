@@ -246,7 +246,7 @@ class Vls.MesonProject : Project {
                 //     || meson_target_info.target_type == "static library")
                 //     target_build_dir += Path.DIR_SEPARATOR_S + meson_target_info.id;
             } else {
-                throw new ProjectError.INTROSPECTION (@"defined-in for $(meson_target_info.id) is not relative to build dir $build_dir");
+                throw new ProjectError.INTROSPECTION (@"defined-in for $(meson_target_info.id) is not relative to source dir $(root_dir.get_path ())");
             }
 
             bool swap_with_previous_target = false;
