@@ -806,7 +806,7 @@ class Vls.Server : Object {
             Compilation compilation = results[0].second;
 
             Vala.CodeContext.push (compilation.code_context);
-            var fs = new FindSymbol (file, p.position.to_libvala ());
+            var fs = new FindSymbol (file, p.position);
 
             if (fs.result.size == 0) {
                 try {
@@ -1874,11 +1874,6 @@ class Vls.Server : Object {
 
         var completions = new HashSet<CompletionItem> ();
 
-        // convert language server positions (0-indexed lines) to Vala positions (1-indexed lines)
-        pos = pos.to_libvala ();
-        end_pos = end_pos.to_libvala ();
-
-
         Vala.CodeContext.push (compilation.code_context);
         if (is_member_access) {
             // attempt SymbolExtractor first, and if that fails, then wait for
@@ -1949,7 +1944,7 @@ class Vls.Server : Object {
                 pos = p.position.translate (0, -1);
             }
 
-            var fs = new FindSymbol (doc, pos.to_libvala (), true);
+            var fs = new FindSymbol (doc, pos, true);
 
             // filter the results for MethodCall's and ExpressionStatements
             var fs_results = fs.result;
@@ -2163,7 +2158,7 @@ class Vls.Server : Object {
             Compilation compilation = results[0].second;
             Vala.CodeContext.push (compilation.code_context);
 
-            var fs = new FindSymbol (doc, pos.to_libvala (), true);
+            var fs = new FindSymbol (doc, pos, true);
 
             if (fs.result.size == 0) {
                 debug ("[textDocument/hover] no results found");
@@ -2302,7 +2297,7 @@ class Vls.Server : Object {
             Compilation compilation = results[0].second;
             Vala.CodeContext.push (compilation.code_context);
 
-            var fs = new FindSymbol (doc, pos.to_libvala (), true);
+            var fs = new FindSymbol (doc, pos, true);
 
             if (fs.result.size == 0) {
                 debug (@"[$method] no results found");
@@ -2380,7 +2375,7 @@ class Vls.Server : Object {
             Compilation compilation = results[0].second;
             Vala.CodeContext.push (compilation.code_context);
 
-            var fs = new FindSymbol (doc, pos.to_libvala (), true);
+            var fs = new FindSymbol (doc, pos, true);
 
             if (fs.result.size == 0) {
                 debug (@"[$method] no results found");

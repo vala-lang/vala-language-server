@@ -22,7 +22,7 @@ class Vls.SymbolExtractor : Object {
     }
 
     public SymbolExtractor (Position pos, Vala.SourceFile source_file, Vala.CodeContext? context = null) {
-        this.idx = (long) Util.get_string_pos (source_file.content, pos.line - 1, pos.character);
+        this.idx = (long) Util.get_string_pos (source_file.content, pos.line, pos.character);
         this.pos = pos;
         this.source_file = source_file;
         if (context != null)

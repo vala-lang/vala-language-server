@@ -6,6 +6,7 @@ class Vls.FindScope : Vala.CodeVisitor {
     Vala.SourceFile file;
     Position pos;
     ArrayList<Vala.Symbol> candidate_blocks = new ArrayList<Vala.Symbol> ();
+    bool before_context_update;
 
     private Vala.Symbol _best_block;
 
@@ -17,11 +18,13 @@ class Vls.FindScope : Vala.CodeVisitor {
         }
     }
 
-    public FindScope (Vala.SourceFile file, Position pos) {
+    public FindScope (Vala.SourceFile file, Position pos, bool before_context_update = true) {
         assert (Vala.CodeContext.get () == file.context);
+        debug ("FindScope @ %s", pos.to_string ());
         this.context = file.context;
         this.file = file;
         this.pos = pos;
+        this.before_context_update = before_context_update;
         this.visit_source_file (file);
     }
 
@@ -59,12 +62,23 @@ class Vls.FindScope : Vala.CodeVisitor {
             return;
         }
 
-        if (!(node is Vala.Block || node is Vala.Namespace || node is Vala.TypeSymbol))
+        if (!(node is Vala.Symbol))
             return;
         
         var range = new Range.from_sourceref (sr);
-        if (range.contains (pos))
+        // compare to rang.end.line + 1 if before context update, assuming that
+        // it's possible the user expanded the current scope
+        Position new_end = before_context_update ? range.end.translate (2) : range.end;
+        bool pos_within_start = range.start.compare_to (pos) <= 0;
+        bool pos_within_end = pos.compare_to (range.end) <= 0 || pos.compare_to (new_end) <= 0;
+        if (pos_within_start && pos_within_end) {
             candidate_blocks.add ((Vala.Symbol) node);
+            debug ("%s (%s, @ %s / %s) added to candidates",
+                node.to_string (), node.type_name, node.source_reference.to_string (), range.to_string ());
+        } else {
+            debug ("%s (%s, @ %s / %s) not in candidates for %s",
+                node.to_string (), node.type_name, node.source_reference.to_string (), range.to_string (), pos.to_string ());
+        }
     }
 
     public override void visit_source_file (Vala.SourceFile file) {

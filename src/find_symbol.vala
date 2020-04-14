@@ -33,11 +33,10 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         if (filter != null)
             return filter (needle, node);
 
-        var begin = new Position () { line = sr.begin.line, character = sr.begin.column - 1 };
-        var end = new Position () { line = sr.end.line, character = sr.end.column };
+        var range = new Range.from_sourceref (sr);
 
         if (!search_multiline) {
-            if (sr.begin.line != sr.end.line) {
+            if (range.start.line != range.end.line) {
                 //  var from = (long)Server.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
                 //  var to = (long)Server.get_string_pos (file.content, sr.end.line-1, sr.end.column);
                 //  string contents = file.content [from:to];
@@ -48,14 +47,14 @@ class Vls.FindSymbol : Vala.CodeVisitor {
                 return false;
             }
 
-            if (sr.begin.line != pos.line) {
+            if (range.start.line != pos.line) {
                 return false;
             }
         } else if (node is Vala.Statement || node is Vala.LambdaExpression || node is Vala.CatchClause) {
             return false;       // we only want to find symbols, right?
         }
 
-        if (begin.compare_to (pos) <= 0 && pos.compare_to (end) <= 0 && (end_pos == null || end.compare_to (end_pos) <= 0)) {
+        if (range.contains (pos) && (end_pos == null || range.contains (end_pos))) {
             debug ("Got node: %s (%s) @ %s", node.type_name, node.to_string (), sr.to_string ());
             return true;
         } else {

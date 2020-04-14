@@ -64,20 +64,7 @@ namespace LanguageServer {
         }
 
         public string to_string () {
-            return @"$line:$character" + (is_libvala ? "" : " (line zero-indexed)");
-        }
-
-        public bool is_libvala { get; protected set; }
-
-        public Position to_libvala () {
-            Position new_pos;
-            if (is_libvala) {
-                new_pos = this.translate ();
-            } else {
-                new_pos = this.translate (1);
-            }
-            new_pos.is_libvala = true;
-            return new_pos;
+            return @"$line:$character";
         }
 
         public Position.from_libvala (Vala.SourceLocation sloc) {
@@ -92,8 +79,7 @@ namespace LanguageServer {
         public Position translate (int dl = 0, int dc = 0) {
             return new Position () {
                 line = this.line + dl,
-                character = this.character + dc,
-                is_libvala = is_libvala
+                character = this.character + dc
             };
         }
     }
