@@ -5,6 +5,23 @@ using LanguageServer;
  * symbol at the cursor. This is less accurate than the Vala parser.
  */
 class Vls.SymbolExtractor : Object {
+    /**
+     * Represents a fake expression that the SE extracted.
+     */
+    class FakeExpr {
+        public string member_name { get; private set; }
+        public bool is_methodcall { get; private set; }
+
+        public FakeExpr (string member_name, bool is_methodcall = false) {
+            this.member_name = member_name;
+            this.is_methodcall = is_methodcall;
+        }
+
+        public string to_string () {
+            return member_name + (is_methodcall ? " ()" : "");
+        }
+    }
+
     private long idx;
     private Position pos;
     public Vala.Symbol block { get; private set; }
@@ -12,8 +29,8 @@ class Vls.SymbolExtractor : Object {
     private Vala.CodeContext context;
 
     private bool attempted_extract;
-    private Vala.MemberAccess? _extracted_expression;
-    public Vala.MemberAccess? extracted_expression {
+    private Vala.Expression? _extracted_expression;
+    public Vala.Expression? extracted_expression {
         get {
             if (_extracted_expression == null && !attempted_extract)
                 compute_extracted_expression ();
@@ -171,17 +188,18 @@ class Vls.SymbolExtractor : Object {
     }
 
     private void compute_extracted_expression () {
-        var queue = new Queue<string> ();
+        var queue = new Queue<FakeExpr> ();
 
         debug ("extracting symbol at %s (char = %c) ...", pos.to_string (), source_file.content[idx]);
 
         skip_whitespace ();
-        skip_char ('.');
+        skip_member_access ();
         skip_whitespace ();
-        for (string? ident = null; (ident = parse_ident ()) != null; ) {
-            queue.push_head (ident);
+        for (FakeExpr? expr = null; (expr = parse_fake_expr ()) != null; ) {
+            queue.push_head (expr);
+            debug ("got fake expression `%s'", expr.to_string ());
             skip_whitespace ();
-            if (!skip_char ('.'))
+            if (!skip_member_access ())
                 break;
             skip_whitespace ();
         }
@@ -199,19 +217,19 @@ class Vls.SymbolExtractor : Object {
         //    for additional components
         // 3. resolve the member accesses, and get the symbol_reference
 
-        string first_part = queue.pop_head ();
+        FakeExpr first_part = queue.pop_head ();
         Vala.Symbol? current_block = block;
         Vala.Symbol? head_sym = null;
         bool might_exist = false;
         while (current_block != null &&
                current_block.scope != null && 
                head_sym == null) {
-            head_sym = current_block.scope.lookup (first_part);
+            head_sym = current_block.scope.lookup (first_part.member_name);
             if (head_sym == null) {
                 var symtab = current_block.scope.get_symbol_table ();
-                if (symtab != null && symtab.contains (first_part)) {
+                if (symtab != null && symtab.contains (first_part.member_name)) {
                     debug ("found first part `%s' in symbol table @ %s, but the symbol was null",
-                           first_part, current_block.source_reference.to_string ());
+                           first_part.member_name, current_block.source_reference.to_string ());
                     // exit this loop early and go to the other measure
                     might_exist = true;
                     break;
@@ -224,7 +242,7 @@ class Vls.SymbolExtractor : Object {
         if (head_sym == null) {
             debug ("symbol has entry, but entry is null; performing exhaustive search within %s",
                    (current_block ?? block).to_string ());
-            var pair = find_variable_visible_in_block (first_part, current_block ?? block);
+            var pair = find_variable_visible_in_block (first_part.member_name, current_block ?? block);
             if (pair != null) {
                 head_sym = pair.first;
                 container = pair.second;
@@ -234,35 +252,49 @@ class Vls.SymbolExtractor : Object {
         }
 
         if (head_sym == null) {
-            debug ("failed to find symbol for head symbol %s", first_part);
+            debug ("failed to find symbol for head symbol %s", first_part.member_name);
             return;
         }
 
         context.analyzer.current_symbol = container;
 
-        var ma = new Vala.MemberAccess (null, first_part);
+        Vala.Expression ma = new Vala.MemberAccess (null, first_part.member_name);
         ma.symbol_reference = head_sym;
-        Vala.DataType? current_data_type = get_data_type (head_sym);
+        Vala.DataType? current_data_type;
+
+        if (first_part.is_methodcall && head_sym is Vala.Callable) {
+            current_data_type = ((Vala.Callable) head_sym).return_type;
+            ma = new Vala.MethodCall (ma);
+            ma.value_type = current_data_type;
+        } else {
+            current_data_type = get_data_type (head_sym);
+        }
 
         debug ("current type sym is %s", current_data_type != null ? current_data_type.to_string () : null);
         while (!queue.is_empty ()) {
-            string member_name = queue.pop_head ();
+            FakeExpr expr = queue.pop_head ();
             Vala.Symbol? member = null;
             if (current_data_type != null) {
-                member = Vala.SemanticAnalyzer.symbol_lookup_inherited (current_data_type.type_symbol, member_name);
+                member = Vala.SemanticAnalyzer.symbol_lookup_inherited (current_data_type.type_symbol, expr.member_name);
                 debug ("symbol_lookup_inherited (%s, %s) = %s", 
-                       current_data_type.to_string (), member_name, member != null ? member.to_string () : null);
+                       current_data_type.to_string (), expr.member_name, member != null ? member.to_string () : null);
             } else if (ma.symbol_reference != null) {
-                member = lookup_symbol_member (ma.symbol_reference, member_name);
+                member = lookup_symbol_member (ma.symbol_reference, expr.member_name);
                 debug ("lookup_symbol_member (%s, %s) = %s",
-                ma.symbol_reference.to_string (), member_name, member != null ? member.to_string () : null);
+                ma.symbol_reference.to_string (), expr.member_name, member != null ? member.to_string () : null);
             }
-            ma = new Vala.MemberAccess (ma, member_name);
+            ma = new Vala.MemberAccess (ma, expr.member_name);
             ma.symbol_reference = member;
             if (member != null) {
                 current_data_type = get_data_type (member);
                 debug ("current type sym is %s", current_data_type != null ? current_data_type.to_string () : null);
                 ma.value_type = current_data_type;
+
+                if (expr.is_methodcall && member is Vala.Callable) {
+                    current_data_type = ((Vala.Callable) member).return_type;
+                    ma = new Vala.MethodCall (ma);
+                    ma.value_type = current_data_type;
+                }
             }
         }
 
@@ -274,6 +306,16 @@ class Vls.SymbolExtractor : Object {
             if (idx > 0)
                 idx--;
             return true;
+        }
+        return false;
+    }
+
+    private bool skip_string (string s) {
+        if (idx >= s.length) {
+            if (source_file.content[idx-s.length+1:idx+1] == s) {
+                idx -= s.length;
+                return true;
+            }
         }
         return false;
     }
@@ -293,5 +335,27 @@ class Vls.SymbolExtractor : Object {
         idx = lb_idx;   // update idx
 
         return ident.length == 0 ? null : ident;
+    }
+
+    private bool skip_member_access () {
+        return skip_char ('.') || skip_string ("->");
+    }
+
+    private string? parse_parenthesized_expr () {
+        // TODO: improve this
+        if (skip_string ("()"))
+            return "()";
+        return null;
+    }
+
+    private FakeExpr? parse_fake_expr () {
+        string? paren_expr = parse_parenthesized_expr ();
+        skip_whitespace ();
+        string? ident = parse_ident ();
+
+        if (ident == null)
+            return null;
+        
+        return new FakeExpr (ident, paren_expr != null);
     }
 }
