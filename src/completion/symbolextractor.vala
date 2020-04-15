@@ -177,11 +177,13 @@ class Vls.SymbolExtractor : Object {
 
         skip_whitespace ();
         skip_char ('.');
+        skip_whitespace ();
         for (string? ident = null; (ident = parse_ident ()) != null; ) {
             queue.push_head (ident);
             skip_whitespace ();
             if (!skip_char ('.'))
                 break;
+            skip_whitespace ();
         }
 
         attempted_extract = true;
