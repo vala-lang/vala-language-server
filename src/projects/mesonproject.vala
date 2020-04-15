@@ -78,6 +78,7 @@ class Vls.MesonProject : Project {
                     } else {
                         warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'", 
                                  meson_target_info.id, match.fetch (0));
+                        result.append (match.fetch (0));
                         return true;
                     }
                     return false;
