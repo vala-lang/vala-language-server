@@ -39,7 +39,7 @@ namespace Vls.Util {
         MatchInfo match_info;
         string[] args = {};
 
-        if (/(?(?<=')((\\\\|[^'\\]|\\')*(?='))|((?!')((?!\\ )(\\\\|\S)|\\ ))+)/.match (str, 0, out match_info)) {
+        if (/(?(?<=')((\\\\|[^'\\\s]|\\')(\\\\|[^'\\]|\\')*(?='))|((?!')((?!\\ )(\\\\|\S)|\\ ))+)/.match (str, 0, out match_info)) {
             while (match_info.matches ()) {
                 args += match_info.fetch (0);
                 match_info.next ();
