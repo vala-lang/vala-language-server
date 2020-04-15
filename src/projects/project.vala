@@ -21,6 +21,10 @@ abstract class Vls.Project : Object {
      * built.
      */
     protected void analyze_build_targets (Cancellable? cancellable = null) throws Error {
+        // first, check that at least one target is a Compilation
+        if (!build_targets.any_match (t => t is Compilation))
+            throw new ProjectError.CONFIGURATION (@"project has no Vala targets");
+
         // there may be multiple consumers of a file
         var consumers_of = new HashMap<File, HashSet<BuildTarget>> (Util.file_hash, Util.file_equal);
         // there can only be one producer for a file

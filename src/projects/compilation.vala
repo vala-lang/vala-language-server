@@ -74,6 +74,7 @@ class Vls.Compilation : BuildTarget {
         string? flag_name, arg_value;           // --<flag_name>[=<arg_value>]
 
         // because we rely on --directory for determining the location of output files
+        // because we rely on --basedir (if defined) for determining the location of input files
         for (int arg_i = -1; (arg_i = Util.iterate_valac_args (args, out flag_name, out arg_value, arg_i)) < args.length;) {
             if (flag_name == "directory") {
                 if (arg_value == null) {
@@ -136,7 +137,7 @@ class Vls.Compilation : BuildTarget {
                 if (arg_value == null) {
                     warning ("Compilation(%s) failed to parse argument #%d (%s)", id, arg_i, args[arg_i]);
                 } else if (Util.arg_is_vala_file (arg_value)) {
-                    var file_from_arg = File.new_for_path (Util.realpath (arg_value, _directory));
+                    var file_from_arg = File.new_for_path (Util.realpath (arg_value, build_dir));
                     if (build_dir_file.get_relative_path (file_from_arg) != null)
                         _generated_sources.add (file_from_arg);
                     input.add (file_from_arg);
@@ -147,11 +148,11 @@ class Vls.Compilation : BuildTarget {
         }
 
         foreach (string source in sources) {
-            input.add (File.new_for_path (Util.realpath (source, _directory)));
+            input.add (File.new_for_path (Util.realpath (source, build_dir)));
         }
 
         foreach (string generated_source in generated_sources) {
-            var generated_source_file = File.new_for_path (Util.realpath (generated_source, _directory));
+            var generated_source_file = File.new_for_path (Util.realpath (generated_source, build_dir));
             _generated_sources.add (generated_source_file);
             input.add (generated_source_file);
         }
