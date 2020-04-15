@@ -297,7 +297,13 @@ class Vls.Server : Object {
         }
 
         var meson_file = root_dir.get_child ("meson.build");
-        // TODO: autotools, make(?), cmake(?), default backend
+        ArrayList<File> cc_files = new ArrayList<File> ();
+        try {
+            cc_files = Util.find_files (root_dir, /compile_commands\.json/, 2);
+        } catch (Error e) {
+            warning ("could not enumerate root dir - %s", e.message);
+        }
+        // TODO: autotools, make(?), cmake(?)
         if (meson_file.query_exists (cancellable)) {
             try {
                 project = new MesonProject (root_path, cancellable);
@@ -305,9 +311,25 @@ class Vls.Server : Object {
                 if (!(e is ProjectError.VERSION_UNSUPPORTED)) {
                     showMessage (client, @"Failed to initialize Meson project - $(e.message)", MessageType.Error);
                 }
-                project = new DefaultProject (root_path);       // fallback
             }
-        } else {
+        }
+        
+        // try compile_commands.json if Meson failed
+        if (project == null && !cc_files.is_empty) {
+            foreach (var cc_file in cc_files) {
+                try {
+                    project = new CcProject (root_path, cc_file.get_path (), cancellable);
+                    debug ("[initialize] initialized CcProject with %s", cc_file.get_path ());
+                    break;
+                } catch (Error e) {
+                    debug ("[initialize] CcProject failed with %s - %s", cc_file.get_path (), e.message);
+                    continue;
+                }
+            }
+        }
+
+        // use DefaultProject as a last resort
+        if (project == null) {
             project = new DefaultProject (root_path);
             var cmake_file = root_dir.get_child ("CMakeLists.txt");
             var autogen_sh = root_dir.get_child ("autogen.sh");

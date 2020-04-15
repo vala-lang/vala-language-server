@@ -262,6 +262,33 @@ namespace Vls.Util {
         }
     }
 
+    public ArrayList<File> find_files (File dir, Regex basename_pattern, 
+                                       uint max_depth = 1, Cancellable? cancellable = null,
+                                       ArrayList<File> found = new ArrayList<File> ()) throws Error {
+        assert (max_depth >= 1);
+        FileEnumerator enumerator = dir.enumerate_children (
+            "standard::*",
+            FileQueryInfoFlags.NOFOLLOW_SYMLINKS,
+            cancellable);
+
+        try {
+            FileInfo? finfo;
+            while ((finfo = enumerator.next_file (cancellable)) != null) {
+                if (finfo.get_file_type () == FileType.DIRECTORY) {
+                    if (max_depth > 1) {
+                        find_files (enumerator.get_child (finfo), basename_pattern, max_depth - 1, cancellable, found);
+                    }
+                } else if (basename_pattern.match (finfo.get_name ())) {
+                    found.add (enumerator.get_child (finfo));
+                }
+            }
+        } catch (Error e) {
+            warning ("could not get next file in dir %s", dir.get_path ());
+        }
+
+        return found;
+    }
+
     public uint file_hash (File file) {
         return realpath (file.get_path ()).hash ();
     }
