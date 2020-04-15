@@ -1,13 +1,25 @@
+using Gee;
+
 /**
  * A backend for `compile_commands.json` files. 
  */
 class Vls.CcProject : Project {
+    private bool build_files_have_changed = true;
+    private File cc_json_file;
+    private HashMap<File, FileMonitor> build_files = new HashMap<File, FileMonitor> (Util.file_hash, Util.file_equal);
+
     private string root_path;
     private string build_dir;
-    private File cc_json_file;
 
     public override bool reconfigure_if_stale (Cancellable? cancellable = null) throws Error {
         debug ("CcProject: configuring in build dir %s ...", build_dir);
+
+        if (!build_files.has_key (cc_json_file)) {
+            debug ("CcProject: obtaining a new file monitor for %s ...", cc_json_file.get_path ());
+            FileMonitor file_monitor = cc_json_file.monitor_file (FileMonitorFlags.NONE, cancellable);
+            file_monitor.changed.connect (file_changed_event);
+            build_files[cc_json_file] = file_monitor;
+        }
 
         var parser = new Json.Parser.immutable_new ();
         parser.load_from_stream (cc_json_file.read (cancellable), cancellable);
@@ -56,5 +68,29 @@ class Vls.CcProject : Project {
         this.cc_json_file = cc_json_file;
 
         reconfigure_if_stale (cancellable);
+    }
+
+    private void file_changed_event (File src, File? dest, FileMonitorEvent event_type) {
+        if (FileMonitorEvent.ATTRIBUTE_CHANGED in event_type) {
+            debug ("CcProject: watched file %s had an attribute changed", src.get_path ());
+            build_files_have_changed = true;
+            changed ();
+        }
+        if (FileMonitorEvent.CHANGED in event_type) {
+            debug ("CcProject: watched file %s was changed", src.get_path ());
+            build_files_have_changed = true;
+            changed ();
+        }
+        if (FileMonitorEvent.DELETED in event_type) {
+            debug ("CcProject: watched file %s was deleted", src.get_path ());
+            // remove this file monitor since the file was deleted
+            FileMonitor file_monitor;
+            if (build_files.unset (src, out file_monitor)) {
+                file_monitor.cancel ();
+                file_monitor.changed.disconnect (file_changed_event);
+            }
+            build_files_have_changed = true;
+            changed ();
+        }
     }
 }
