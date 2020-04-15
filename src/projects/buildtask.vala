@@ -7,7 +7,6 @@ class Vls.BuildTask : BuildTarget {
     private string[] arguments = {};
     private string exe_name = "";
     private SubprocessLauncher launcher;
-    private bool failed_last = false;
 
     /**
      * Because a built task could be any command, we don't know whether the files
@@ -199,9 +198,6 @@ class Vls.BuildTask : BuildTarget {
     }
 
     public override void build_if_stale (Cancellable? cancellable = null) throws Error {
-        if (failed_last)
-            return;
-
         // don't run this task if our inputs haven't changed
         if (!input.is_empty && !output.is_empty) {
             bool inputs_modified_after = false;
@@ -247,7 +243,6 @@ class Vls.BuildTask : BuildTarget {
 
             // throw new ProjectError.TASK_FAILED (failed_msg);
             warning (failed_msg);
-            failed_last = true;
         } else {
             last_updated = new DateTime.now ();
         }
