@@ -159,7 +159,7 @@ namespace Vls.CompletionEngine {
                     var sr = sym.source_reference;
                     if (sr == null)
                         continue;
-                    var sr_begin = new Position () { line = sr.begin.line, character = sr.begin.column - 1 };
+                    var sr_begin = new Position.from_libvala (sr.begin);
 
                     // don't show local variables that are declared ahead of the cursor
                     if (sr_begin.compare_to (pos) > 0)
