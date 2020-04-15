@@ -291,6 +291,11 @@ abstract class Vls.Project : Object {
 
 errordomain Vls.ProjectError {
     /**
+     * Project backend has unsupported version.
+     */
+    VERSION_UNSUPPORTED,
+
+    /**
      * Generic error during project introspection.
      */
     INTROSPECTION,

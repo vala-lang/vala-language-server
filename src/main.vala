@@ -302,7 +302,9 @@ class Vls.Server : Object {
             try {
                 project = new MesonProject (root_path, cancellable);
             } catch (Error e) {
-                showMessage (client, @"Failed to initialize Meson project - $(e.message)", MessageType.Error);
+                if (!(e is ProjectError.VERSION_UNSUPPORTED)) {
+                    showMessage (client, @"Failed to initialize Meson project - $(e.message)", MessageType.Error);
+                }
                 project = new DefaultProject (root_path);       // fallback
             }
         } else {
