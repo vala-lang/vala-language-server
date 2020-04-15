@@ -178,6 +178,33 @@ class Vls.MesonProject : Project {
         build_targets.clear ();
         build_files_have_changed = false;
 
+        // 0. we support only Meson >= 0.50
+        string meson_version_proc_stdout, meson_version_proc_stderr;
+        int meson_version_proc_status;
+
+        Process.spawn_sync (
+            build_dir,
+            "meson --version".split (" "),
+            null,
+            SpawnFlags.SEARCH_PATH,
+            null,
+            out meson_version_proc_stdout,
+            out meson_version_proc_stderr,
+            out meson_version_proc_status);
+
+        if (meson_version_proc_status != 0) {
+            warning ("MesonProject: failed to get version, exit code %d\n----stdout:\n%s\n----stderr:\n%s", 
+                     meson_version_proc_status, meson_version_proc_stdout, meson_version_proc_stderr);
+            throw new ProjectError.CONFIGURATION (@"meson --version failed with exit code $meson_version_proc_status");
+        }
+
+        meson_version_proc_stdout = meson_version_proc_stdout.strip ();
+
+        if (Util.compare_versions (meson_version_proc_stdout, "0.50.0") < 0) {
+            warning ("MesonProject: meson < 0.50.0 not supported (version was '%s')", meson_version_proc_stdout);
+            throw new ProjectError.VERSION_UNSUPPORTED (@"meson < 0.50.0 not supported");
+        }
+
         // 1. configure new build directory
         var root_meson_build = File.new_build_filename (root_path, "meson.build");
         if (!meson_build_files.has_key (root_meson_build)) {

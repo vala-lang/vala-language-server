@@ -311,4 +311,50 @@ namespace Vls.Util {
 
         return matching_sym;
     }
+
+
+    /**
+     * (stolen from VersionAttribute.cmp_versions in `vala/valaversionattribute.vala`)
+     * A simple version comparison function.
+     *
+     * @param v1str a version number
+     * @param v2str a version number
+     * @return an integer less than, equal to, or greater than zero, if v1str is <, == or > than v2str
+     * @see GLib.CompareFunc
+     */
+    public static int compare_versions (string v1str, string v2str) {
+        string[] v1arr = v1str.split (".");
+        string[] v2arr = v2str.split (".");
+        int i = 0;
+
+        while (v1arr[i] != null && v2arr[i] != null) {
+            int v1num = int.parse (v1arr[i]);
+            int v2num = int.parse (v2arr[i]);
+
+            if (v1num < 0 || v2num < 0) {
+                // invalid format
+                return 0;
+            }
+
+            if (v1num > v2num) {
+                return 1;
+            }
+
+            if (v1num < v2num) {
+                return -1;
+            }
+
+            i++;
+        }
+
+        if (v1arr[i] != null && v2arr[i] == null) {
+            return 1;
+        }
+
+        if (v1arr[i] == null && v2arr[i] != null) {
+            return -1;
+        }
+
+        return 0;
+    }
 }
