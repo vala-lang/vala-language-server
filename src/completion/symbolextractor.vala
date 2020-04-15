@@ -34,13 +34,18 @@ class Vls.SymbolExtractor : Object {
         this.block = new FindScope (source_file, pos).best_block;
     }
 
-    private static Pair<Vala.Symbol, Vala.Symbol>? find_variable_visible_in_block (string variable_name, Vala.Symbol closest_block) {
+    private Pair<Vala.Symbol, Vala.Symbol>? find_variable_visible_in_block (string variable_name, Vala.Symbol closest_block) {
         Vala.Block? actual_block = null;
 
         if (closest_block is Vala.Block)
             actual_block = (Vala.Block) closest_block;
         else if (closest_block is Vala.Method)
             actual_block = ((Vala.Method) closest_block).body;
+        else {
+            var member = lookup_symbol_member (closest_block, variable_name);
+            if (member != null)
+                return new Pair<Vala.Symbol, Vala.Symbol> (member, closest_block);
+        }
 
         if (actual_block != null) {
             foreach (var lconst in actual_block.get_local_constants ())
@@ -49,11 +54,21 @@ class Vls.SymbolExtractor : Object {
             foreach (var lvar in actual_block.get_local_variables ())
                 if (lvar.name == variable_name)
                     return new Pair<Vala.Symbol, Vala.Symbol> (lvar, actual_block.parent_symbol);
-        } // else: TODO for Namespace, TypeSymbol
+        }
 
         // attempt parent block if we didn't succeed
         if (closest_block.parent_symbol != null)
             return find_variable_visible_in_block (variable_name, (!) closest_block.parent_symbol);
+        else {
+            // otherwise, as a final attempt, look in the imported using directives
+            foreach (var ud in source_file.current_using_directives) {
+                var ns = (Vala.Namespace) ud.namespace_symbol;
+                var member = lookup_symbol_member (ns, variable_name);
+
+                if (member != null)
+                    return new Pair<Vala.Symbol, Vala.Symbol> (member, ns);
+            }
+        }
 
         return null;
     }
