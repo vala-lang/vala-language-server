@@ -98,7 +98,8 @@ class Vls.Server : Object {
     }
 
     uint[] g_sources = {};
-    ulong event;
+    ulong client_closed_event_id;
+    ulong project_changed_event_id;
 
     static construct {
         Process.@signal (ProcessSignal.INT, () => {
@@ -166,7 +167,7 @@ class Vls.Server : Object {
         server.accept_io_stream (new SimpleIOStream (input_stream, output_stream));
 
 #if WITH_JSONRPC_GLIB_3_30
-        event = server.client_closed.connect (client => {
+        client_closed_event_id = server.client_closed.connect (client => {
             shutdown_real ();
         });
 #endif
@@ -370,7 +371,7 @@ class Vls.Server : Object {
             check_update_context ();
             return !this.shutting_down;
         });
-        project.changed.connect (project_changed_event);
+        project_changed_event_id = project.changed.connect (project_changed_event);
 
         is_initialized = true;
     }
@@ -1866,9 +1867,10 @@ class Vls.Server : Object {
         debug ("shutting down...");
         this.shutting_down = true;
         cancellable.cancel ();
-        if (event != 0)
-            server.disconnect (event);
-        project.changed.disconnect (project_changed_event);
+        if (client_closed_event_id != 0)
+            server.disconnect (client_closed_event_id);
+        if (project_changed_event_id != 0)
+            project.disconnect (project_changed_event_id);
         loop.quit ();
         foreach (uint id in g_sources)
             Source.remove (id);
