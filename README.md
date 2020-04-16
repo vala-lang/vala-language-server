@@ -1,6 +1,23 @@
 # Vala Language Server
 [![Gitter](https://badges.gitter.im/vala-language-server/community.svg)](https://gitter.im/vala-language-server/community)
 
+### Installation
+
+We recommend using VSCode with the [Vala plugin](vscode:extension/prince781.vala) ([install now](vscode:extension/prince781.vala)).
+
+- Ubuntu 18.04 and elementary:
+
+    ```sh
+    sudo add-apt-repository ppa:prince781/vala-language-server
+    sudo apt-get update
+    sudo apt-get install vala-language-server
+    ```
+
+- Arch Linux (via AUR): `yay -S vala-language-server`
+
+- Alpine Linux Edge: `apk add vala-language-server`
+
+
 ![vls-vscode](images/vls-vscode.png)
 ![vls-vim](images/vls-vim.png)
 ![vls-gb](images/vls-gb.png)
@@ -61,19 +78,6 @@
 
 ## Setup
 
-### Installation
-
-- Arch Linux (via AUR): `yay -S vala-language-server`
-
-- Ubuntu 18.04:
-
-    ```sh
-    sudo add-apt-repository ppa:prince781/vala-language-server
-    sudo apt-get update
-    sudo apt-get install vala-language-server
-    ```
-- Alpine Linux Edge: `apk add vala-language-server`
-
 ### Building from Source
 ```sh
 meson -Dprefix=$PREFIX build
@@ -90,10 +94,10 @@ Once you have VLS installed, you can use it with `vim`.
 2. Add the following to your `.vimrc`:
 
 ```vim
-if executable('vala-language-server')                     
-  au User lsp_setup call lsp#register_server({              
+if executable('vala-language-server')
+  au User lsp_setup call lsp#register_server({
         \ 'name': 'vala-language-server',
-        \ 'cmd': {server_info->[&shell, &shellcmdflag, 'vala-language-server']}, 
+        \ 'cmd': {server_info->[&shell, &shellcmdflag, 'vala-language-server']},
         \ 'whitelist': ['vala'],
         \ })
 endif
