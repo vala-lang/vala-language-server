@@ -318,12 +318,13 @@ class Vls.Server : Object {
         // try compile_commands.json if Meson failed
         if (project == null && !cc_files.is_empty) {
             foreach (var cc_file in cc_files) {
+                string cc_file_path = Util.realpath (cc_file.get_path ());
                 try {
-                    project = new CcProject (root_path, cc_file.get_path (), cancellable);
-                    debug ("[initialize] initialized CcProject with %s", cc_file.get_path ());
+                    project = new CcProject (root_path, cc_file_path, cancellable);
+                    debug ("[initialize] initialized CcProject with %s", cc_file_path);
                     break;
                 } catch (Error e) {
-                    debug ("[initialize] CcProject failed with %s - %s", cc_file.get_path (), e.message);
+                    debug ("[initialize] CcProject failed with %s - %s", cc_file_path, e.message);
                     continue;
                 }
             }
