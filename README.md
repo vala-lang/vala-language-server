@@ -3,7 +3,7 @@
 
 ### Installation
 
-We recommend using VSCode with the [Vala plugin](vscode:extension/prince781.vala) ([install now](vscode:extension/prince781.vala)).
+We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudio.com/items?itemName=prince781.vala).
 
 - Ubuntu 18.04 and elementary:
 
