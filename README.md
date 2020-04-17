@@ -5,6 +5,10 @@
 
 We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudio.com/items?itemName=prince781.vala).
 
+- Arch Linux (via AUR): `yay -S vala-language-server`
+
+- Alpine Linux Edge: `apk add vala-language-server`
+
 - Ubuntu 18.04 and elementary:
 
     ```sh
@@ -13,10 +17,12 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
     sudo apt-get install vala-language-server
     ```
 
-- Arch Linux (via AUR): `yay -S vala-language-server`
+- Fedora 32:
 
-- Alpine Linux Edge: `apk add vala-language-server`
-
+    ```sh
+    sudo dnf copr enable prince781/vala-language-server
+    sudo dnf -y install vala-language-server
+    ```
 
 ![vls-vscode](images/vls-vscode.png)
 ![vls-vim](images/vls-vim.png)
