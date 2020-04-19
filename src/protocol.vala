@@ -384,12 +384,19 @@ namespace LanguageServer {
         public CompletionContext? context { get; set; }
     }
 
-    class CompletionItem : Object, Gee.Hashable<CompletionItem> {
+    
+    enum CompletionItemTag {
+        // Render a completion as obsolete, usually using a strike-out.
+        Deprecated = 1,
+    }
+
+    class CompletionItem : Object, Gee.Hashable<CompletionItem>, Json.Serializable {
         public string label { get; set; }
         public CompletionItemKind kind { get; set; }
         public string detail { get; set; }
         public MarkupContent? documentation { get; set; }
         public bool deprecated { get; set; }
+        public Gee.List<CompletionItemTag> tags { get; private set; }
         private uint _hash;
         protected string _hash_string;
 
@@ -401,9 +408,15 @@ namespace LanguageServer {
             this.kind = kind;
             this.detail = Vls.Server.get_symbol_data_type (sym, false, null, false, label_override);
             this.documentation = documentation;
-            this.deprecated = sym.get_attribute_bool ("Version", "deprecated");
             this._hash_string = @"$label $(Vls.Server.get_symbol_data_type (sym, true)) $kind";
             this._hash = _hash_string.hash ();
+            this.tags = new Gee.ArrayList<CompletionItemTag>();
+
+            var version = sym.get_attribute ("Version");
+            if (version != null && (version.get_bool ("deprecated") || version.get_string ("deprecated_since") != null)) {
+                this.tags.add (CompletionItemTag.Deprecated);
+                this.deprecated = true;
+            }
         }
 
         public uint hash () {
@@ -413,6 +426,39 @@ namespace LanguageServer {
         public bool equal_to (CompletionItem other) {
             return other._hash_string == this._hash_string;
         }
+
+        public new void Json.Serializable.set_property (ParamSpec pspec, Value value) {
+            base.set_property (pspec.get_name (), value);
+        }
+
+        public new Value Json.Serializable.get_property (ParamSpec pspec) {
+            Value val = Value(pspec.value_type);
+            base.get_property (pspec.get_name (), ref val);
+            return val;
+        }
+
+        public unowned ParamSpec? find_property (string name) {
+            return this.get_class ().find_property (name);
+        }
+
+        public Json.Node serialize_property (string property_name, Value value, ParamSpec pspec) {
+            if (property_name != "tags")
+                return default_serialize_property (property_name, value, pspec);
+
+            var node = new Json.Node (Json.NodeType.ARRAY);
+            node.init_array (new Json.Array ());
+            var array = node.get_array ();
+            foreach (var tag in this.tags) {
+                array.add_int_element (tag);
+            }
+
+            return node;
+        }
+
+        public bool deserialize_property (string property_name, out Value value, ParamSpec pspec, Json.Node property_node) {
+            error ("deserialization not supported");
+        }
+
     }
 
     class MarkupContent : Object {
