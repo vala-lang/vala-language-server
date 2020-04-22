@@ -12,6 +12,13 @@ class Vls.CcProject : Project {
     private string build_dir;
 
     public override bool reconfigure_if_stale (Cancellable? cancellable = null) throws Error {
+        if (!build_files_have_changed) {
+            return false;
+        }
+
+        build_targets.clear ();
+        build_files_have_changed = false;
+
         debug ("CcProject: configuring in build dir %s ...", build_dir);
 
         if (!build_files.has_key (cc_json_file)) {
