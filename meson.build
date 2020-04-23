@@ -6,6 +6,8 @@ project('vala-language-server', 'vala', 'c',
   ]
 )
 
+add_global_arguments(['-DG_LOG_DOMAIN="vls"'], language:'c')
+
 valac = meson.get_compiler('vala')
 libvala_version = run_command(valac, '--api-version').stdout().strip()
 if not libvala_version.version_compare('>=0.48' )

@@ -77,26 +77,6 @@ class Vls.Server : Object {
     [CCode (has_target = false)]
     delegate void CallHandler (Vls.Server self, Jsonrpc.Server server, Jsonrpc.Client client, string method, Variant id, Variant @params);
 
-    private void log_handler (string? log_domain, LogLevelFlags log_levels, string message) {
-        string level = "";
-
-        if ((log_levels & LogLevelFlags.LEVEL_MASK) == LogLevelFlags.LEVEL_MASK)
-            level = "-ALL";
-        else if ((log_levels & LogLevelFlags.LEVEL_CRITICAL) != 0)
-            level = "-CRITICAL";
-        else if ((log_levels & LogLevelFlags.LEVEL_DEBUG) != 0)
-            level = "-DEBUG";
-        else if ((log_levels & LogLevelFlags.LEVEL_ERROR) != 0)
-            level = "-ERROR";
-        else if ((log_levels & LogLevelFlags.LEVEL_INFO) != 0)
-            level = "-INFO";
-        else if ((log_levels & LogLevelFlags.LEVEL_MESSAGE) != 0)
-            level = "-MESSAGE";
-        else if ((log_levels & LogLevelFlags.LEVEL_WARNING) != 0)
-            level = "-WARNING";
-        printerr ("%s: %s\n", log_domain == null ? @"vls$level" : log_domain, message);
-    }
-
     uint[] g_sources = {};
     ulong client_closed_event_id;
     ulong project_changed_event_id;
@@ -115,10 +95,6 @@ class Vls.Server : Object {
     }
 
     public Server (MainLoop loop) {
-        // capture logging
-        Log.set_handler (null, LogLevelFlags.LEVEL_MASK, log_handler);
-        Log.set_handler ("jsonrpc-server", LogLevelFlags.LEVEL_MASK, log_handler);
-
         this.loop = loop;
         this.server = new Jsonrpc.Server ();
 
