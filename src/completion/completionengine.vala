@@ -294,6 +294,7 @@ namespace Vls.CompletionEngine {
         if (fs.result.size == 0) {
             debug (@"[$method] no results found for member access");
             Server.reply_null (id, client, method);
+            Vala.CodeContext.pop ();
             return;
         }
         
@@ -306,6 +307,7 @@ namespace Vls.CompletionEngine {
 
         Vala.CodeNode result = Server.get_best (fs, doc);
         show_members (lang_serv, doc, compilation, is_pointer_access, in_oce, result, null, completions);
+        Vala.CodeContext.pop ();
     }
 
     /**
