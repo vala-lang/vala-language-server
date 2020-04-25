@@ -828,6 +828,19 @@ class Vls.Server : Object {
             // ignore multiple results
             Vala.SourceFile file = results[0].first;
             Compilation compilation = results[0].second;
+
+            if (compilation.code_context != file.context) {
+                // This means the file was probably deleted from the current code context,
+                // and so it's no longer valid. This is often the case for system files 
+                // that are added automatically in Vala.CodeContext
+                // This seems to be especially a problem on GNOME Builder, which runs
+                // this query on all files right after the user updates a file, but before
+                // the code context is updated.
+                debug ("[%s] file (%s) context != compilation.code_context; not proceeding further",
+                    method, p.textDocument.uri);
+                return;
+            }
+
             Vala.CodeContext.push (compilation.code_context);
 
             var array = new Json.Array ();
