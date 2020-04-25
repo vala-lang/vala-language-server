@@ -547,6 +547,8 @@ namespace Vls.CompletionEngine {
                 completions.add (new CompletionItem.from_symbol (delg_sym, CompletionItemKind.Interface, lang_serv.get_symbol_documentation (delg_sym)));
             foreach (var enum_sym in ns.get_enums ())
                 completions.add (new CompletionItem.from_symbol (enum_sym, CompletionItemKind.Enum, lang_serv.get_symbol_documentation (enum_sym)));
+            foreach (var field_sym in ns.get_fields ())
+                completions.add (new CompletionItem.from_symbol (field_sym, CompletionItemKind.Field, lang_serv.get_symbol_documentation (field_sym)));
         }
     }
     
