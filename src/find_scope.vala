@@ -85,6 +85,14 @@ class Vls.FindScope : Vala.CodeVisitor {
         file.accept_children (this);
     }
 
+    public override void visit_assignment (Vala.Assignment a) {
+        a.accept_children (this);
+    }
+
+    public override void visit_binary_expression (Vala.BinaryExpression expr) {
+        expr.accept_children (this);
+    }
+
     public override void visit_block (Vala.Block b) {
         add_if_matches (b);
         b.accept_children (this);
@@ -97,6 +105,10 @@ class Vls.FindScope : Vala.CodeVisitor {
     public override void visit_class (Vala.Class cl) {
         add_if_matches (cl);
         cl.accept_children (this);
+    }
+
+    public override void visit_conditional_expression (Vala.ConditionalExpression expr) {
+        expr.accept_children (this);
     }
 
     public override void visit_constructor (Vala.Constructor c) {
@@ -115,6 +127,18 @@ class Vls.FindScope : Vala.CodeVisitor {
     }
 
     public override void visit_do_statement (Vala.DoStatement stmt) {
+        stmt.accept_children (this);
+    }
+
+    public override void visit_enum (Vala.Enum en) {
+        en.accept_children (this);
+    }
+
+    public override void visit_error_domain (Vala.ErrorDomain edomain) {
+        edomain.accept_children (this);
+    }
+
+    public override void visit_expression_statement (Vala.ExpressionStatement stmt) {
         stmt.accept_children (this);
     }
 
@@ -147,14 +171,31 @@ class Vls.FindScope : Vala.CodeVisitor {
         stmt.accept_children (this);
     }
 
+    public override void visit_member_access (Vala.MemberAccess expr) {
+        expr.accept_children (this);
+    }
+
     public override void visit_method (Vala.Method m) {
         add_if_matches (m);
         m.accept_children (this);
     }
 
+    public override void visit_method_call (Vala.MethodCall mc) {
+        add_if_matches (mc);
+        mc.accept_children (this);
+    }
+
     public override void visit_namespace (Vala.Namespace ns) {
         add_if_matches (ns);
         ns.accept_children (this);
+    }
+
+    public override void visit_object_creation_expression (Vala.ObjectCreationExpression expr) {
+        expr.accept_children (this);
+    }
+
+    public override void visit_postfix_expression (Vala.PostfixExpression expr) {
+        expr.accept_children (this);
     }
 
     public override void visit_property (Vala.Property prop) {
@@ -165,6 +206,14 @@ class Vls.FindScope : Vala.CodeVisitor {
     public override void visit_property_accessor (Vala.PropertyAccessor acc) {
         add_if_matches (acc);
         acc.accept_children (this);
+    }
+
+    public override void visit_return_statement (Vala.ReturnStatement stmt) {
+        stmt.accept_children (this);
+    }
+
+    public override void visit_signal (Vala.Signal sig) {
+        sig.accept_children (this);
     }
 
     public override void visit_struct (Vala.Struct st) {
@@ -189,7 +238,15 @@ class Vls.FindScope : Vala.CodeVisitor {
         stmt.accept_children (this);
     }
 
+    public override void visit_unary_expression (Vala.UnaryExpression expr) {
+        expr.accept_children (this);
+    }
+
     public override void visit_while_statement (Vala.WhileStatement stmt) {
+        stmt.accept_children (this);
+    }
+
+    public override void visit_yield_statement (Vala.YieldStatement stmt) {
         stmt.accept_children (this);
     }
 }
