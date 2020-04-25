@@ -36,7 +36,7 @@ class Vls.FindScope : Vala.CodeVisitor {
         foreach (Vala.Symbol block in candidate_blocks) {
             var scope_range = new Range.from_sourceref (block.source_reference);
             if (best_range == null ||
-                best_range.start.compare_to (scope_range.start) <= 0 && scope_range.end.compare_to (best_range.end) <= 0 &&
+                best_range.start.compare_to (scope_range.start) <= 0 &&
                 !(best_range.start.compare_to (scope_range.start) == 0 && scope_range.end.compare_to (best_range.end) == 0)) {
                 smallest_block = block;
                 best_range = scope_range;
@@ -73,11 +73,11 @@ class Vls.FindScope : Vala.CodeVisitor {
         bool pos_within_end = pos.compare_to (range.end) <= 0 || pos.compare_to (new_end) <= 0;
         if (pos_within_start && pos_within_end) {
             candidate_blocks.add ((Vala.Symbol) node);
-            debug ("%s (%s, @ %s / %s) added to candidates",
-                node.to_string (), node.type_name, node.source_reference.to_string (), range.to_string ());
-        } else {
-            debug ("%s (%s, @ %s / %s) not in candidates for %s",
+            debug ("%s (%s, @ %s / %s) added to candidates for %s",
                 node.to_string (), node.type_name, node.source_reference.to_string (), range.to_string (), pos.to_string ());
+        } else {
+            // debug ("%s (%s, @ %s / %s) not in candidates for %s",
+            //     node.to_string (), node.type_name, node.source_reference.to_string (), range.to_string (), pos.to_string ());
         }
     }
 
