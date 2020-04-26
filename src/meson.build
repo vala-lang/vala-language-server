@@ -1,4 +1,5 @@
 vls_src = files([
+  'jsonrpc.vala',
   'list_symbols.vala',
   'codehelp/completionengine.vala',
   'codehelp/find_scope.vala',

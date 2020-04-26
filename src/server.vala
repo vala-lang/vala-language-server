@@ -2,7 +2,6 @@ using LanguageServer;
 using Gee;
 
 class Vls.Server : Object {
-    private static bool received_signal = false;
     Jsonrpc.Server server;
     MainLoop loop;
 
@@ -25,8 +24,6 @@ class Vls.Server : Object {
 #endif
     HashSet<Request> pending_requests;
 
-    bool shutting_down = false;
-
     bool is_initialized = false;
 
     /**
@@ -41,75 +38,32 @@ class Vls.Server : Object {
     delegate void CallHandler (Vls.Server self, Jsonrpc.Server server, Jsonrpc.Client client, string method, Variant id, Variant @params);
 
     uint[] g_sources = {};
-    ulong client_closed_event_id;
     ulong project_changed_event_id;
 
+    static void handle_signal (int signum) {
+        debug ("handle_signal: %d", signum);
+        if (!cancellable.is_cancelled ()) {
+            cancellable.cancel ();
+        }
+    }
+
     static construct {
-        Process.@signal (ProcessSignal.INT, () => {
-            if (!Server.received_signal)
-                cancellable.cancel ();
-            Server.received_signal = true;
-        });
-        Process.@signal (ProcessSignal.TERM, () => {
-            if (!Server.received_signal)
-                cancellable.cancel ();
-            Server.received_signal = true;
-        });
+        Process.@signal (ProcessSignal.INT, handle_signal);
+        Process.@signal (ProcessSignal.TERM, handle_signal);
     }
 
     public Server (MainLoop loop) {
         this.loop = loop;
-        this.server = new Jsonrpc.Server ();
-
-        // hack to prevent other things from corrupting JSON-RPC pipe:
-        // create a new handle to stdout, and close the old one (or move it to stderr)
-#if WINDOWS
-        var new_stdout_fd = Windows._dup (Posix.STDOUT_FILENO);
-        Windows._close (Posix.STDOUT_FILENO);
-        Windows._dup2 (Posix.STDERR_FILENO, Posix.STDOUT_FILENO);
-        void* new_stdin_handle = Windows._get_osfhandle (Posix.STDIN_FILENO);
-        void* new_stdout_handle = Windows._get_osfhandle (new_stdout_fd);
-
-        // we can't use the names 'stdin' or 'stdout' for these variables
-        // since it causes build problems for mingw-w64-x86_64-gcc
-        var input_stream = new Win32InputStream (new_stdin_handle, false);
-        var output_stream = new Win32OutputStream (new_stdout_handle, false);
-#else
-        var new_stdout_fd = Posix.dup (Posix.STDOUT_FILENO);
-        Posix.close (Posix.STDOUT_FILENO);
-        Posix.dup2 (Posix.STDERR_FILENO, Posix.STDOUT_FILENO);
-
-        var input_stream = new UnixInputStream (Posix.STDIN_FILENO, false);
-        var output_stream = new UnixOutputStream (new_stdout_fd, false);
-
-        // set nonblocking
-        try {
-            if (!Unix.set_fd_nonblocking (Posix.STDIN_FILENO, true)
-             || !Unix.set_fd_nonblocking (new_stdout_fd, true))
-             error ("could not set pipes to nonblocking.\n");
-        } catch (Error e) {
-            debug ("failed to set FDs to nonblocking");
+        cancellable.cancelled.connect (() => {
+            debug ("cancelled, quit()");
             loop.quit ();
-            return;
+        });
+
+        try {
+            this.server = new JsonrpcServer (cancellable);
+        } catch (Error e) {
+            error ("Cannot create server: %s", e.message);
         }
-#endif
-
-        // shutdown if/when we get a signal
-        g_sources += Timeout.add (1 * 1000, () => {
-            if (Server.received_signal) {
-                shutdown_real ();
-                return Source.REMOVE;
-            }
-            return !this.shutting_down;
-        });
-
-        server.accept_io_stream (new SimpleIOStream (input_stream, output_stream));
-
-#if WITH_JSONRPC_GLIB_3_30
-        client_closed_event_id = server.client_closed.connect (client => {
-            shutdown_real ();
-        });
-#endif
 
         notif_handlers = new HashTable<string, NotificationHandler> (str_hash, str_equal);
         call_handlers = new HashTable<string, CallHandler> (str_hash, str_equal);
@@ -309,7 +263,7 @@ class Vls.Server : Object {
         update_context_client = client;
         g_sources += Timeout.add (check_update_context_period_ms, () => {
             check_update_context ();
-            return !this.shutting_down;
+            return true;
         });
         project_changed_event_id = project.changed.connect (project_changed_event);
 
@@ -1602,24 +1556,21 @@ class Vls.Server : Object {
 
     void shutdown (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         reply_null (id, client, "shutdown");
-        shutdown_real ();
+        cancellable.cancel ();
     }
 
     void exit (Jsonrpc.Client client, Variant @params) {
-        shutdown_real ();
+        cancellable.cancel ();
     }
 
-    void shutdown_real () {
-        debug ("shutting down...");
-        this.shutting_down = true;
-        cancellable.cancel ();
-        if (client_closed_event_id != 0)
-            server.disconnect (client_closed_event_id);
-        if (project_changed_event_id != 0)
+    ~Server () {
+        if (project_changed_event_id != 0) {
             project.disconnect (project_changed_event_id);
-        loop.quit ();
-        foreach (uint id in g_sources)
+        }
+        foreach (uint id in g_sources) {
             Source.remove (id);
+        }
+        debug ("~Server ()");
     }
 }
 
