@@ -10,15 +10,18 @@ class Vls.SymbolExtractor : Object {
      */
     class FakeExpr {
         public string member_name { get; private set; }
-        public bool is_methodcall { get; private set; }
+        public int method_arguments { get; private set; }
+        public bool is_methodcall {
+            get { return method_arguments >= 0; }
+        }
 
-        public FakeExpr (string member_name, bool is_methodcall = false) {
+        public FakeExpr (string member_name, int method_arguments = -1) {
             this.member_name = member_name;
-            this.is_methodcall = is_methodcall;
+            this.method_arguments = method_arguments;
         }
 
         public string to_string () {
-            return member_name + (is_methodcall ? " ()" : "");
+            return member_name + (is_methodcall ? @" ([$method_arguments arg(s)])" : "");
         }
     }
 
@@ -37,6 +40,17 @@ class Vls.SymbolExtractor : Object {
             return _extracted_expression;
         }
     }
+
+
+#if !VALA_FEATURE_INITIAL_ARGUMENT_COUNT
+    /**
+     * If extracted_expression is a method call, this is the number of
+     * arguments supplied to that method call.
+     * This feature is only used if the version of Vala VLS was compiled
+     * with lacks initial_argument_count fields for Vala.MethodCall
+     */
+    public int method_arguments { get; private set; default = -1; }
+#endif
 
     public SymbolExtractor (Position pos, Vala.SourceFile source_file, Vala.CodeContext? context = null) {
         this.idx = (long) Util.get_string_pos (source_file.content, pos.line, pos.character);
@@ -220,9 +234,9 @@ class Vls.SymbolExtractor : Object {
         debug ("extracting symbol at %s (char = %c) ...", pos.to_string (), source_file.content[idx]);
 
         skip_whitespace ();
-        skip_member_access ();
+        bool is_member_access = skip_member_access ();
         skip_whitespace ();
-        for (FakeExpr? expr = null; (expr = parse_fake_expr (queue.is_empty ())) != null; ) {
+        for (FakeExpr? expr = null; (expr = parse_fake_expr (queue.is_empty () && !is_member_access)) != null; ) {
             queue.push_head (expr);
             debug ("got fake expression `%s'", expr.to_string ());
             skip_whitespace ();
@@ -297,6 +311,10 @@ class Vls.SymbolExtractor : Object {
             current_data_type = get_data_type (head_sym);
         }
 
+#if !VALA_FEATURE_INITIAL_ARGUMENT_COUNT
+        this.method_arguments = first_part.method_arguments;
+#endif
+
         debug ("current type sym is %s", current_data_type != null ? current_data_type.to_string () : null);
         while (!queue.is_empty ()) {
             FakeExpr expr = queue.pop_head ();
@@ -322,8 +340,14 @@ class Vls.SymbolExtractor : Object {
                     ma = new Vala.MethodCall (ma);
                     ma.value_type = current_data_type;
                     ((Vala.MethodCall) ma).call.value_type = get_callable_type_for_callable ((Vala.Callable) member);
+#if VALA_FEATURE_INITIAL_ARGUMENT_COUNT
+                    ((Vala.MethodCall) ma).initial_argument_count = expr.method_arguments;
+#endif
                 }
             }
+#if !VALA_FEATURE_INITIAL_ARGUMENT_COUNT
+            this.method_arguments = expr.method_arguments;
+#endif
         }
 
         _extracted_expression = ma;
@@ -369,25 +393,50 @@ class Vls.SymbolExtractor : Object {
         return skip_char ('.') || skip_string ("->");
     }
 
-    private bool skip_method_arguments (bool first_expr) {
+    private bool skip_method_arguments (bool accept_within_method_call, out int arg_count = null) {
         // TODO: skip arguments
         // allow for incomplete method call if first expression (useful for SignatureHelp)
-        if (!skip_char (')') && !first_expr)
+        arg_count = -1;
+        long saved_idx = this.idx;
+        if (!skip_char (')') && !accept_within_method_call)
             return false;
+
+        arg_count = 0;
         skip_whitespace ();
+        if (accept_within_method_call) {
+            if (skip_char (','))
+                arg_count++;
+        }
+        skip_whitespace ();
+        while (skip_fake_expr ()) {
+            arg_count++;
+            skip_whitespace ();
+            if (skip_string ("out"))
+                skip_whitespace ();
+            else if (skip_string ("ref"))
+                skip_whitespace ();
+            skip_char (',');
+        }
         if (skip_char ('('))
             return true;
+        this.idx = saved_idx;           // restore saved index 
+        arg_count = -1;
         return false;
     }
 
-    private FakeExpr? parse_fake_expr (bool first_expr) {
-        bool have_method_arguments = skip_method_arguments (first_expr);
+    private bool skip_fake_expr () {
+        return parse_fake_expr () != null;
+    }
+
+    private FakeExpr? parse_fake_expr (bool accept_within_method_call = false) {
+        int method_arguments;
+        skip_method_arguments (accept_within_method_call, out method_arguments);
         skip_whitespace ();
         string? ident = parse_ident ();
 
         if (ident == null)
             return null;
         
-        return new FakeExpr (ident, have_method_arguments);
+        return new FakeExpr (ident, method_arguments);
     }
 }

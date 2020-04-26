@@ -15,12 +15,16 @@ namespace Vls.SignatureHelpEngine {
         }
 
         var signatures = new ArrayList<SignatureInformation> ();
-        int active_param = 0;
+        int active_param = -1;
 
         Vala.CodeContext.push (compilation.code_context);
         var se = new SymbolExtractor (pos, doc, compilation.code_context);
-        if (se.extracted_expression != null)
+        if (se.extracted_expression != null) {
+#if !VALA_FEATURE_INITIAL_ARGUMENT_COUNT
+            active_param = se.method_arguments - 1;
+#endif
             show_help (lang_serv, method, se.extracted_expression, signatures, ref active_param);
+        }
         
         if (signatures.is_empty) {
             lang_serv.wait_for_context_update (id, request_cancelled => {
@@ -237,6 +241,7 @@ namespace Vls.SignatureHelpEngine {
             json_array.add_element (Json.gobject_serialize (sinfo));
 
         try {
+            debug ("sending with active_param = %d", active_param);
             client.reply (id, Util.object_to_variant (new SignatureHelp () {
                 signatures = signatures,
                 activeParameter = active_param
