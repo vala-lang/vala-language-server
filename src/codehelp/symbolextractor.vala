@@ -228,7 +228,7 @@ class Vls.SymbolExtractor : Object {
         return null;
     }
 
-    private void compute_extracted_expression () {
+    private void compute_extracted_expression (bool allow_parse_as_method_call = true) {
         var queue = new Queue<FakeExpr> ();
 
         debug ("extracting symbol at %s (char = %c) ...", pos.to_string (), source_file.content[idx]);
@@ -236,7 +236,9 @@ class Vls.SymbolExtractor : Object {
         skip_whitespace ();
         bool is_member_access = skip_member_access ();
         skip_whitespace ();
-        for (FakeExpr? expr = null; (expr = parse_fake_expr (queue.is_empty () && !is_member_access)) != null; ) {
+        for (FakeExpr? expr = null; (expr = parse_fake_expr (queue.is_empty () && 
+                                                             !is_member_access &&
+                                                             allow_parse_as_method_call)) != null; ) {
             queue.push_head (expr);
             debug ("got fake expression `%s'", expr.to_string ());
             skip_whitespace ();
@@ -293,6 +295,9 @@ class Vls.SymbolExtractor : Object {
 
         if (head_sym == null) {
             debug ("failed to find symbol for head symbol %s", first_part.member_name);
+            // try again
+            if (allow_parse_as_method_call)
+                compute_extracted_expression (false);
             return;
         }
 
