@@ -1,10 +1,9 @@
 vls_src = files([
-  'main.vala',
-  'find_symbol.vala',
-  'find_scope.vala',
   'list_symbols.vala',
-  'completion/completionengine.vala',
-  'completion/symbolextractor.vala',
+  'codehelp/completionengine.vala',
+  'codehelp/find_scope.vala',
+  'codehelp/find_symbol.vala',
+  'codehelp/symbolextractor.vala',
   'projects/buildtarget.vala',
   'projects/buildtask.vala',
   'projects/ccproject.vala',
@@ -15,7 +14,9 @@ vls_src = files([
   'projects/textdocument.vala',
   'projects/types.vala',
   'protocol.vala',
-  'reporter.vala',
+  'server.vala',
+  'servertypes.vala',
+  'reporter.vala'
 ])
 
 if get_option('parse_system_girs')
