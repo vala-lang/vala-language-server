@@ -203,6 +203,17 @@ class Vls.SymbolExtractor : Object {
         return null;
     }
 
+    static Vala.CallableType? get_callable_type_for_callable (Vala.Callable callable) {
+        if (callable is Vala.Method)
+            return new Vala.MethodType ((Vala.Method) callable);
+        if (callable is Vala.Signal)
+            return new Vala.SignalType ((Vala.Signal) callable);
+        if (callable is Vala.DelegateType)
+            return new Vala.DelegateType ((Vala.Delegate) callable);
+        warning ("unknown Callable node %s", callable.type_name);
+        return null;
+    }
+
     private void compute_extracted_expression () {
         var queue = new Queue<FakeExpr> ();
 
@@ -211,7 +222,7 @@ class Vls.SymbolExtractor : Object {
         skip_whitespace ();
         skip_member_access ();
         skip_whitespace ();
-        for (FakeExpr? expr = null; (expr = parse_fake_expr ()) != null; ) {
+        for (FakeExpr? expr = null; (expr = parse_fake_expr (queue.is_empty ())) != null; ) {
             queue.push_head (expr);
             debug ("got fake expression `%s'", expr.to_string ());
             skip_whitespace ();
@@ -281,6 +292,7 @@ class Vls.SymbolExtractor : Object {
             current_data_type = ((Vala.Callable) head_sym).return_type;
             ma = new Vala.MethodCall (ma);
             ma.value_type = current_data_type;
+            ((Vala.MethodCall)ma).call.value_type = get_callable_type_for_callable ((Vala.Callable) head_sym);
         } else {
             current_data_type = get_data_type (head_sym);
         }
@@ -309,6 +321,7 @@ class Vls.SymbolExtractor : Object {
                     current_data_type = ((Vala.Callable) member).return_type;
                     ma = new Vala.MethodCall (ma);
                     ma.value_type = current_data_type;
+                    ((Vala.MethodCall) ma).call.value_type = get_callable_type_for_callable ((Vala.Callable) member);
                 }
             }
         }
@@ -356,21 +369,25 @@ class Vls.SymbolExtractor : Object {
         return skip_char ('.') || skip_string ("->");
     }
 
-    private string? parse_parenthesized_expr () {
-        // TODO: improve this
-        if (skip_string ("()"))
-            return "()";
-        return null;
+    private bool skip_method_arguments (bool first_expr) {
+        // TODO: skip arguments
+        // allow for incomplete method call if first expression (useful for SignatureHelp)
+        if (!skip_char (')') && !first_expr)
+            return false;
+        skip_whitespace ();
+        if (skip_char ('('))
+            return true;
+        return false;
     }
 
-    private FakeExpr? parse_fake_expr () {
-        string? paren_expr = parse_parenthesized_expr ();
+    private FakeExpr? parse_fake_expr (bool first_expr) {
+        bool have_method_arguments = skip_method_arguments (first_expr);
         skip_whitespace ();
         string? ident = parse_ident ();
 
         if (ident == null)
             return null;
         
-        return new FakeExpr (ident, paren_expr != null);
+        return new FakeExpr (ident, have_method_arguments);
     }
 }

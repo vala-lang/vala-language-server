@@ -553,6 +553,28 @@ namespace LanguageServer {
         }
     }
 
+    class SignatureHelp : Object, Json.Serializable {
+        public Gee.Collection<SignatureInformation> signatures { get; set; default = new Gee.ArrayList<SignatureInformation> (); }
+        public int activeSignature { get; set; }
+        public int activeParameter { get; set; }
+
+        public Json.Node serialize_property (string property_name, Value value, ParamSpec pspec) {
+            if (property_name != "signatures")
+                return default_serialize_property (property_name, value, pspec);
+
+            var node = new Json.Node (Json.NodeType.ARRAY);
+            node.init_array (new Json.Array ());
+            var array = node.get_array ();
+            foreach (var child in signatures)
+                array.add_element (Json.gobject_serialize (child));
+            return node;
+        }
+
+        public bool deserialize_property (string property_name, out Value value, ParamSpec pspec, Json.Node property_node) {
+            error ("deserialization not supported");
+        }
+    }
+
     class ParameterInformation : Object {
         public string label { get; set; }
         public MarkupContent documentation { get; set; }
