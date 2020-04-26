@@ -62,6 +62,22 @@ class Vls.SymbolExtractor : Object {
             var member = lookup_symbol_member (closest_block, variable_name);
             if (member != null)
                 return new Pair<Vala.Symbol, Vala.Symbol> (member, closest_block);
+            // try base types
+            if (closest_block is Vala.Class) {
+                var cl = (Vala.Class) closest_block;
+                foreach (var base_type in cl.get_base_types ()) {
+                    member = lookup_symbol_member (base_type.type_symbol, variable_name);
+                    if (member != null)
+                        return new Pair<Vala.Symbol, Vala.Symbol> (member, closest_block);
+                }
+            } else if (closest_block is Vala.Interface) {
+                var iface = (Vala.Interface) closest_block;
+                foreach (var prereq_type in iface.get_prerequisites ()) {
+                    member = lookup_symbol_member (prereq_type.type_symbol, variable_name);
+                    if (member != null)
+                        return new Pair<Vala.Symbol, Vala.Symbol> (member, closest_block);
+                }
+            }
         }
 
         if (actual_block != null) {
@@ -240,8 +256,7 @@ class Vls.SymbolExtractor : Object {
 
         Vala.Symbol? container = context.root;
         if (head_sym == null) {
-            debug ("symbol has entry, but entry is null; performing exhaustive search within %s",
-                   (current_block ?? block).to_string ());
+            debug ("performing exhaustive search within %s", (current_block ?? block).to_string ());
             var pair = find_variable_visible_in_block (first_part.member_name, current_block ?? block);
             if (pair != null) {
                 head_sym = pair.first;
