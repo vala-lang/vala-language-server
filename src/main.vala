@@ -1521,6 +1521,12 @@ class Vls.Server : Object {
             }
 
             Vala.CodeNode result = get_best (fs, doc);
+            // don't show lambda expressions on hover
+            if (result is Vala.Method && ((Vala.Method)result).closure) {
+                reply_null (id, client, "textDocument/hover");
+                Vala.CodeContext.pop ();
+                return;
+            }
             if (result is Vala.Symbol) {
                 Vala.Symbol real_sym = find_real_sym ((Vala.Symbol)result);
                 result = real_sym;
