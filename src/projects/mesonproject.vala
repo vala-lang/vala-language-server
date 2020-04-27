@@ -6,7 +6,6 @@ using Gee;
 class Vls.MesonProject : Project {
     private bool build_files_have_changed = true;
     private HashMap<File, FileMonitor> meson_build_files = new HashMap<File, FileMonitor> (Util.file_hash, Util.file_equal);
-    private string root_path;
     private string build_dir;
     private bool configured_once;
 
@@ -560,7 +559,7 @@ class Vls.MesonProject : Project {
     }
 
     public MesonProject (string root_path, Cancellable? cancellable = null) throws Error {
-        this.root_path = root_path;
+        base (root_path);
         this.build_dir = DirUtils.make_tmp (@"vls-meson-$(str_hash (root_path))-XXXXXX");
         reconfigure_if_stale (cancellable);
     }

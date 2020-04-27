@@ -15,8 +15,6 @@ class Vls.Server : Object {
     const int64 update_context_delay_max_us = 1000 * 1000;
     const uint wait_for_context_update_delay_ms = 200;
 
-    Project project;
-
 #if PARSE_SYSTEM_GIRS
     /**
      * Contains documentation from found GIR files.
@@ -42,7 +40,8 @@ class Vls.Server : Object {
 
     uint[] g_sources = {};
     ulong client_closed_event_id;
-    ulong project_changed_event_id;
+    HashTable<Project, ulong> projects;
+    DefaultProject default_project;
 
     static construct {
         Process.@signal (ProcessSignal.INT, () => {
@@ -141,6 +140,8 @@ class Vls.Server : Object {
                 return false;
             }
         });
+
+        this.projects = new HashTable<Project, ulong> (GLib.direct_hash, GLib.direct_equal);
 
         call_handlers["initialize"] = this.initialize;
         call_handlers["shutdown"] = this.shutdown;
@@ -243,10 +244,13 @@ class Vls.Server : Object {
         } catch (Error e) {
             warning ("could not enumerate root dir - %s", e.message);
         }
+
+        var new_projects = new ArrayList<Project> ();
+        Project? backend_project = null;
         // TODO: autotools, make(?), cmake(?)
         if (meson_file.query_exists (cancellable)) {
             try {
-                project = new MesonProject (root_path, cancellable);
+                backend_project = new MesonProject (root_path, cancellable);
             } catch (Error e) {
                 if (!(e is ProjectError.VERSION_UNSUPPORTED)) {
                     showMessage (client, @"Failed to initialize Meson project - $(e.message)", MessageType.Error);
@@ -255,11 +259,11 @@ class Vls.Server : Object {
         }
         
         // try compile_commands.json if Meson failed
-        if (project == null && !cc_files.is_empty) {
+        if (backend_project == null && !cc_files.is_empty) {
             foreach (var cc_file in cc_files) {
                 string cc_file_path = Util.realpath (cc_file.get_path ());
                 try {
-                    project = new CcProject (root_path, cc_file_path, cancellable);
+                    backend_project = new CcProject (root_path, cc_file_path, cancellable);
                     debug ("[initialize] initialized CcProject with %s", cc_file_path);
                     break;
                 } catch (Error e) {
@@ -269,9 +273,8 @@ class Vls.Server : Object {
             }
         }
 
-        // use DefaultProject as a last resort
-        if (project == null) {
-            project = new DefaultProject (root_path);
+        // show messages if we could not get a backend-specific project
+        if (backend_project == null) {
             var cmake_file = root_dir.get_child ("CMakeLists.txt");
             var autogen_sh = root_dir.get_child ("autogen.sh");
 
@@ -279,30 +282,42 @@ class Vls.Server : Object {
                 showMessage (client, @"CMake build system is not currently supported. Only Meson is. See https://github.com/benwaffle/vala-language-server/issues/73", MessageType.Warning);
             if (autogen_sh.query_exists (cancellable))
                 showMessage (client, @"Autotools build system is not currently supported. Consider switching to Meson.", MessageType.Warning);
+        } else {
+            new_projects.add (backend_project);
         }
 
-        try {
-            project.build_if_stale (cancellable);
-        } catch (Error e) {
-            showMessage (client, @"failed to build project - $(e.message)", MessageType.Error);
-            warning ("[initialize] failed to build project - %s", e.message);
-            return;
+        // always have default project
+        default_project = new DefaultProject (root_path);
+
+        foreach (var project in new_projects) {
+            try {
+                project.build_if_stale (cancellable);
+            } catch (Error e) {
+                showMessage (client, @"failed to build project - $(e.message)", MessageType.Error);
+                warning ("[initialize] failed to build project - %s", e.message);
+                return;
+            }
         }
 
 #if PARSE_SYSTEM_GIRS
         // create documentation (compiles GIR files too)
-        documentation = new GirDocumentation (project.get_packages ());
+        var packages = new HashSet<Vala.SourceFile> ();
+        foreach (var project in new_projects)
+            packages.add_all (project.get_packages ());
+        documentation = new GirDocumentation (packages);
 #endif
 
         // build and publish diagnostics
-        try {
-            debug ("Building project ...");
-            project.build_if_stale ();
-            debug ("Publishing diagnostics ...");
-            foreach (var compilation in project.get_compilations ())
-                publishDiagnostics (compilation, client);
-        } catch (Error e) {
-            showMessage (client, @"Failed to build project - $(e.message)", MessageType.Error);
+        foreach (var project in new_projects) {
+            try {
+                debug ("Building project ...");
+                project.build_if_stale ();
+                debug ("Publishing diagnostics ...");
+                foreach (var compilation in project.get_compilations ())
+                    publishDiagnostics (compilation, client);
+            } catch (Error e) {
+                showMessage (client, @"Failed to build project - $(e.message)", MessageType.Error);
+            }
         }
 
         // listen for context update requests
@@ -311,7 +326,10 @@ class Vls.Server : Object {
             check_update_context ();
             return !this.shutting_down;
         });
-        project_changed_event_id = project.changed.connect (project_changed_event);
+
+        // listen for project changed events
+        foreach (Project project in new_projects)
+            projects[project] = project.changed.connect (project_changed_event);
 
         is_initialized = true;
     }
@@ -358,30 +376,49 @@ class Vls.Server : Object {
             return;
         }
 
-        try {
-            project.open (uri, cancellable);
-        } catch (Error e) {
-            warning ("[textDocument/didOpen] failed to open %s - %s", uri, e.message);
+        Pair<Vala.SourceFile, Compilation>? doc_w_bt = null;
+
+        foreach (var project in projects.get_keys_as_array ()) {
+            try {
+                doc_w_bt = project.open (uri, fileContents, cancellable).first ();
+                break;
+            } catch (Error e) {
+                if (!(e is ProjectError.NOT_FOUND))
+                    warning ("[textDocument/didOpen] failed to open %s - %s", uri, e.message);
+            }
+        }
+
+        // fallback to default project
+        if (doc_w_bt == null) {
+            try {
+                doc_w_bt = default_project.open (uri, fileContents, cancellable).first ();
+                // show diagnostics for the newly-opened file
+                request_context_update (client);
+            } catch (Error e) {
+                warning ("[textDocumnt/didOpen] failed to open %s - %s", uri, e.message);
+            }
+        }
+
+        if (doc_w_bt == null) {
+            warning ("[textDocument/didOpen] could not open %s", Uri.escape_string (uri));
             return;
         }
 
-        foreach (Pair<Vala.SourceFile, Compilation> doc_w_bt in project.lookup_compile_input_source_file (uri)) {
-            var doc = doc_w_bt.first;
-            // We want to load the document unconditionally, to avoid
-            // errors later on in textDocument/didChange. However, we
-            // only want to edit it if it is an actual TextDocument.
-            if (doc.content == null)
-                doc.get_mapped_contents ();
-            if (doc is TextDocument) {
-                debug (@"[textDocument/didOpen] opened $(Uri.unescape_string (uri))"); 
-                if (doc.content != fileContents) {
-                    doc.content = fileContents;
-                    request_context_update (client);
-                    debug (@"[textDocument/didOpen] requested context update");
-                }
-            } else {
-                debug (@"[textDocument/didOpen] opened read-only $(Uri.unescape_string (uri))");
+        var doc = doc_w_bt.first;
+        // We want to load the document unconditionally, to avoid
+        // errors later on in textDocument/didChange. However, we
+        // only want to edit it if it is an actual TextDocument.
+        if (doc.content == null)
+            doc.get_mapped_contents ();
+        if (doc is TextDocument) {
+            debug (@"[textDocument/didOpen] opened $(Uri.unescape_string (uri))"); 
+            if (doc.content != fileContents) {
+                doc.content = fileContents;
+                request_context_update (client);
+                debug (@"[textDocument/didOpen] requested context update");
             }
+        } else {
+            debug (@"[textDocument/didOpen] opened read-only $(Uri.unescape_string (uri))");
         }
     }
 
@@ -394,13 +431,19 @@ class Vls.Server : Object {
             return;
         }
 
-        try {
-            if (project.close (uri)) {
-                request_context_update (client);
-                debug (@"[textDocument/didClose] requested context update");
+        Project[] all_projects = projects.get_keys_as_array ();
+        all_projects += default_project;
+
+        foreach (var project in all_projects) {
+            try {
+                if (project.close (uri)) {
+                    request_context_update (client);
+                    debug (@"[textDocument/didClose] requested context update");
+                }
+            } catch (Error e) {
+                if (!(e is ProjectError.NOT_FOUND))
+                    warning ("[textDocument/didClose] failed to close %s - %s", uri, e.message);
             }
-        } catch (Error e) {
-            warning ("[textDocument/didClose] failed to close %s - %s", uri, e.message);
         }
     }
 
@@ -415,47 +458,52 @@ class Vls.Server : Object {
         var uri = (string) document.lookup_value ("uri", VariantType.STRING);
         var version = (int64) document.lookup_value ("version", VariantType.INT64);
 
-        foreach (Pair<Vala.SourceFile, Compilation> pair in project.lookup_compile_input_source_file (uri)) {
-            var source_file = pair.first;
+        Project[] all_projects = projects.get_keys_as_array ();
+        all_projects += default_project;
 
-            if (!(source_file is TextDocument)) {
-                debug (@"[textDocument/didChange] Ignoring change to system file");
-                return;
-            }
+        foreach (var project in all_projects) {
+            foreach (Pair<Vala.SourceFile, Compilation> pair in project.lookup_compile_input_source_file (uri)) {
+                var source_file = pair.first;
 
-            var source = (TextDocument) source_file;
-            if (source.version >= version) {
-                debug (@"[textDocument/didChange] rejecting outdated version of $uri");
-                return;
-            }
-
-            if (source_file.content == null) {
-                error (@"[textDocument/didChange] source content is null!");
-            }
-
-            // update the document
-            var iter = changes.iterator ();
-            Variant? elem = null;
-            var sb = new StringBuilder (source.content);
-            while ((elem = iter.next_value ()) != null) {
-                var changeEvent = Util.parse_variant<TextDocumentContentChangeEvent> (elem);
-
-                if (changeEvent.range == null) {
-                    sb.assign (changeEvent.text);
-                } else {
-                    var start = changeEvent.range.start;
-                    var end = changeEvent.range.end;
-                    size_t pos_begin = Util.get_string_pos (sb.str, start.line, start.character);
-                    size_t pos_end = Util.get_string_pos (sb.str, end.line, end.character);
-                    sb.erase ((ssize_t) pos_begin, (ssize_t) (pos_end - pos_begin));
-                    sb.insert ((ssize_t) pos_begin, changeEvent.text);
+                if (!(source_file is TextDocument)) {
+                    warning (@"[textDocument/didChange] Ignoring change to system file");
+                    return;
                 }
-            }
-            source.content = sb.str;
-            source.last_updated = new DateTime.now ();
-            source.version = (int) version;
 
-            request_context_update (client);
+                var source = (TextDocument) source_file;
+                if (source.version >= version) {
+                    warning (@"[textDocument/didChange] rejecting outdated version of $uri");
+                    return;
+                }
+
+                if (source_file.content == null) {
+                    error (@"[textDocument/didChange] source content is null!");
+                }
+
+                // update the document
+                var iter = changes.iterator ();
+                Variant? elem = null;
+                var sb = new StringBuilder (source.content);
+                while ((elem = iter.next_value ()) != null) {
+                    var changeEvent = Util.parse_variant<TextDocumentContentChangeEvent> (elem);
+
+                    if (changeEvent.range == null) {
+                        sb.assign (changeEvent.text);
+                    } else {
+                        var start = changeEvent.range.start;
+                        var end = changeEvent.range.end;
+                        size_t pos_begin = Util.get_string_pos (sb.str, start.line, start.character);
+                        size_t pos_end = Util.get_string_pos (sb.str, end.line, end.character);
+                        sb.erase ((ssize_t) pos_begin, (ssize_t) (pos_end - pos_begin));
+                        sb.insert ((ssize_t) pos_begin, changeEvent.text);
+                    }
+                }
+                source.content = sb.str;
+                source.last_updated = new DateTime.now ();
+                source.version = (int) version;
+
+                request_context_update (client);
+            }
         }
     }
 
@@ -476,18 +524,22 @@ class Vls.Server : Object {
             debug ("updating contexts and publishing diagnostics...");
             update_context_requests = 0;
             update_context_time_us = 0;
-            try {
-                project.reconfigure_if_stale (cancellable);
-                project.build_if_stale (cancellable);
-                foreach (var compilation in project.get_compilations ())
-                    /* This must come after the resetting of the two variables above,
-                     * since it's possible for publishDiagnostics to eventually call
-                     * one of our JSON-RPC callbacks through g_main_context_iteration (),
-                     * if we get a new message while sending the textDocument/publishDiagnostics
-                     * notifications. */
-                    publishDiagnostics (compilation, update_context_client);
-            } catch (Error e) {
-                warning ("Failed to rebuild and/or reconfigure project: %s", e.message);
+            Project[] all_projects = projects.get_keys_as_array ();
+            all_projects += default_project;
+            foreach (var project in all_projects) {
+                try {
+                    project.reconfigure_if_stale (cancellable);
+                    project.build_if_stale (cancellable);
+                    foreach (var compilation in project.get_compilations ())
+                        /* This must come after the resetting of the two variables above,
+                        * since it's possible for publishDiagnostics to eventually call
+                        * one of our JSON-RPC callbacks through g_main_context_iteration (),
+                        * if we get a new message while sending the textDocument/publishDiagnostics
+                        * notifications. */
+                        publishDiagnostics (compilation, update_context_client);
+                } catch (Error e) {
+                    warning ("Failed to rebuild and/or reconfigure project: %s", e.message);
+                }
             }
         }
     }
@@ -588,7 +640,7 @@ class Vls.Server : Object {
         // at the end, report diags for each source file
         foreach (var entry in doc_diags.entries) {
             Variant diags_variant_array;
-            var gfile = File.new_for_path (entry.key.filename);
+            var gfile = File.new_for_commandline_arg_and_cwd (entry.key.filename, target.code_context.directory);
 
             files_not_published.remove (entry.key);
             try {
@@ -613,7 +665,7 @@ class Vls.Server : Object {
         }
 
         foreach (var entry in files_not_published) {
-            var gfile = File.new_for_path (entry.filename);
+            var gfile = File.new_for_commandline_arg_and_cwd (entry.filename, target.code_context.directory);
             try {
                 client.send_notification (
                     "textDocument/publishDiagnostics",
@@ -685,7 +737,7 @@ class Vls.Server : Object {
      * it would be more useful to show the file specific to the compilation
      * that generated the file.
      */
-    Vala.Symbol find_real_sym (Vala.Symbol sym) {
+    Vala.Symbol find_real_sym (Project project, Vala.Symbol sym) {
         Compilation alter_comp;
         
         if (sym.source_reference == null || sym.source_reference.file == null)
@@ -704,7 +756,20 @@ class Vls.Server : Object {
 
     void textDocumentDefinition (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams> (@params);
-        var results = project.lookup_compile_input_source_file (p.textDocument.uri);
+        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
+        Project selected_project = null;
+        foreach (var project in projects.get_keys_as_array ()) {
+            results = project.lookup_compile_input_source_file (p.textDocument.uri);
+            if (!results.is_empty) {
+                selected_project = project;
+                break;
+            }
+        }
+        // fallback to default project
+        if (selected_project == null) {
+            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
+            selected_project = default_project;
+        }
         if (results.is_empty) {
             debug (@"[$method] file `$(p.textDocument.uri)' not found");
             reply_null (id, client, method);
@@ -760,7 +825,7 @@ class Vls.Server : Object {
             }
 
             if (best is Vala.Symbol)
-                best = find_real_sym ((Vala.Symbol) best);
+                best = find_real_sym (selected_project, (Vala.Symbol) best);
 
             var location = new Location.from_sourceref (best.source_reference);
             debug ("[textDocument/definition] found location ... %s", location.uri);
@@ -775,7 +840,20 @@ class Vls.Server : Object {
 
     void textDocumentDocumentSymbol (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
-        var results = project.lookup_compile_input_source_file (p.textDocument.uri);
+        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
+        Project selected_project = null;
+        foreach (var project in projects.get_keys_as_array ()) {
+            results = project.lookup_compile_input_source_file (p.textDocument.uri);
+            if (!results.is_empty) {
+                selected_project = project;
+                break;
+            }
+        }
+        // fallback to default project
+        if (selected_project == null) {
+            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
+            selected_project = default_project;
+        }
         if (results.is_empty) {
             debug (@"[$method] file `$(p.textDocument.uri)' not found");
             reply_null (id, client, method);
@@ -1123,8 +1201,8 @@ class Vls.Server : Object {
         return null;
     }
 
-    public LanguageServer.MarkupContent? get_symbol_documentation (Vala.Symbol sym) {
-        Vala.Symbol real_sym = find_real_sym (sym);
+    public LanguageServer.MarkupContent? get_symbol_documentation (Project project, Vala.Symbol sym) {
+        Vala.Symbol real_sym = find_real_sym (project, sym);
         sym = real_sym;
 #if PARSE_SYSTEM_GIRS
         var gir_sym = documentation.find_gir_symbol (sym);
@@ -1213,14 +1291,27 @@ class Vls.Server : Object {
 
     void textDocumentCompletion (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<LanguageServer.CompletionParams>(@params);
-        var results = project.lookup_compile_input_source_file (p.textDocument.uri);
+        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
+        Project selected_project = null;
+        foreach (var project in projects.get_keys_as_array ()) {
+            results = project.lookup_compile_input_source_file (p.textDocument.uri);
+            if (!results.is_empty) {
+                selected_project = project;
+                break;
+            }
+        }
+        // fallback to default project
+        if (selected_project == null) {
+            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
+            selected_project = default_project;
+        }
         if (results.is_empty) {
             debug (@"[$method] failed to find file $(p.textDocument.uri)");
             reply_null (id, client, method);
             return;
         }
 
-        CompletionEngine.begin_response (this,
+        CompletionEngine.begin_response (this, selected_project,
                                          client, id, method,
                                          results[0].first, results[0].second,
                                          p.position, p.context);
@@ -1228,14 +1319,27 @@ class Vls.Server : Object {
 
     void textDocumentSignatureHelp (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
-        var results = project.lookup_compile_input_source_file (p.textDocument.uri);
+        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
+        Project selected_project = null;
+        foreach (var project in projects.get_keys_as_array ()) {
+            results = project.lookup_compile_input_source_file (p.textDocument.uri);
+            if (!results.is_empty) {
+                selected_project = project;
+                break;
+            }
+        }
+        // fallback to default project
+        if (selected_project == null) {
+            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
+            selected_project = default_project;
+        }
         if (results.is_empty) {
             debug ("unknown file %s", p.textDocument.uri);
             reply_null (id, client, "textDocument/signatureHelp");
             return;
         }
 
-        SignatureHelpEngine.begin_response (this,
+        SignatureHelpEngine.begin_response (this, selected_project,
                                             client, id, method,
                                             results[0].first, results[0].second,
                                             p.position);
@@ -1243,7 +1347,20 @@ class Vls.Server : Object {
 
     void textDocumentHover (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
-        var results = project.lookup_compile_input_source_file (p.textDocument.uri);
+        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
+        Project selected_project = null;
+        foreach (var project in projects.get_keys_as_array ()) {
+            results = project.lookup_compile_input_source_file (p.textDocument.uri);
+            if (!results.is_empty) {
+                selected_project = project;
+                break;
+            }
+        }
+        // fallback to default project
+        if (selected_project == null) {
+            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
+            selected_project = default_project;
+        }
         if (results.is_empty) {
             debug (@"file `$(p.textDocument.uri)' not found");
             reply_null (id, client, "textDocument/hover");
@@ -1278,7 +1395,7 @@ class Vls.Server : Object {
                 return;
             }
             if (result is Vala.Symbol) {
-                Vala.Symbol real_sym = find_real_sym ((Vala.Symbol)result);
+                Vala.Symbol real_sym = find_real_sym (selected_project, (Vala.Symbol)result);
                 result = real_sym;
             }
             var hoverInfo = new Hover () {
@@ -1307,7 +1424,7 @@ class Vls.Server : Object {
                         language = "vala",
                         value = get_symbol_data_type (result as Vala.Symbol, false, null, true)
                     });
-                    var comment = get_symbol_documentation (result as Vala.Symbol);
+                    var comment = get_symbol_documentation (selected_project, result as Vala.Symbol);
                     if (comment != null) {
                         hoverInfo.contents.add (new MarkedString () {
                             value = comment.value
@@ -1322,7 +1439,7 @@ class Vls.Server : Object {
                         value = get_symbol_data_type (sym, 
                             result is Vala.Literal || (is_temp_expr && !(sym is Vala.Callable)), null, true)
                     });
-                    var comment = get_symbol_documentation (sym);
+                    var comment = get_symbol_documentation (selected_project, sym);
                     if (comment != null) {
                         hoverInfo.contents.add (new MarkedString () {
                             value = comment.value
@@ -1387,7 +1504,20 @@ class Vls.Server : Object {
 
     void textDocumentReferences (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
-        var results = project.lookup_compile_input_source_file (p.textDocument.uri);
+        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
+        Project selected_project = null;
+        foreach (var project in projects.get_keys_as_array ()) {
+            results = project.lookup_compile_input_source_file (p.textDocument.uri);
+            if (!results.is_empty) {
+                selected_project = project;
+                break;
+            }
+        }
+        // fallback to default project
+        if (selected_project == null) {
+            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
+            selected_project = default_project;
+        }
         if (results.is_empty) {
             debug (@"file `$(p.textDocument.uri)' not found");
             reply_null (id, client, method);
@@ -1466,7 +1596,20 @@ class Vls.Server : Object {
 
     void textDocumentImplementation (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
-        var results = project.lookup_compile_input_source_file (p.textDocument.uri);
+        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
+        Project selected_project = null;
+        foreach (var project in projects.get_keys_as_array ()) {
+            results = project.lookup_compile_input_source_file (p.textDocument.uri);
+            if (!results.is_empty) {
+                selected_project = project;
+                break;
+            }
+        }
+        // fallback to default project
+        if (selected_project == null) {
+            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
+            selected_project = default_project;
+        }
         if (results.is_empty) {
             debug (@"file `$(p.textDocument.uri)' not found");
             reply_null (id, client, method);
@@ -1549,7 +1692,7 @@ class Vls.Server : Object {
             foreach (var node in references) {
                 Vala.CodeNode real_node = node;
                 if (node is Vala.Symbol)
-                    real_node = find_real_sym ((Vala.Symbol) node);
+                    real_node = find_real_sym (selected_project, (Vala.Symbol) node);
                 json_array.add_element (Json.gobject_serialize (new Location.from_sourceref (real_node.source_reference)));
             }
 
@@ -1575,19 +1718,24 @@ class Vls.Server : Object {
             }
 
             var json_array = new Json.Array ();
-            foreach (var text_document in project.get_project_source_files ()) {
-                Vala.CodeContext.push (text_document.context);
-                new ListSymbols (text_document)
-                    .flattened ()
-                    // NOTE: if introspection for g_str_match_string () / string.match_string ()
-                    // is fixed, this will have to be changed to `dsym.name.match_sting (query, true)`
-                    .filter (dsym => query.match_string (dsym.name, true))
-                    .foreach (dsym => {
-                        var si = new SymbolInformation.from_document_symbol (dsym, File.new_for_path (text_document.filename).get_uri ());
-                        json_array.add_element (Json.gobject_serialize (si));
-                        return true;
-                    });
-                Vala.CodeContext.pop ();
+            Project[] all_projects = projects.get_keys_as_array ();
+            all_projects += default_project;
+            foreach (var project in all_projects) {
+                foreach (var text_document in project.get_project_source_files ()) {
+                    Vala.CodeContext.push (text_document.context);
+                    new ListSymbols (text_document)
+                        .flattened ()
+                        // NOTE: if introspection for g_str_match_string () / string.match_string ()
+                        // is fixed, this will have to be changed to `dsym.name.match_sting (query, true)`
+                        .filter (dsym => query.match_string (dsym.name, true))
+                        .foreach (dsym => {
+                            var si = new SymbolInformation.from_document_symbol (dsym, 
+                                File.new_for_commandline_arg_and_cwd (text_document.filename, project.root_path).get_uri ());
+                            json_array.add_element (Json.gobject_serialize (si));
+                            return true;
+                        });
+                    Vala.CodeContext.pop ();
+                }
             }
 
             debug (@"[$method] found $(json_array.get_length ()) element(s) matching `$query'");
@@ -1615,8 +1763,8 @@ class Vls.Server : Object {
         cancellable.cancel ();
         if (client_closed_event_id != 0)
             server.disconnect (client_closed_event_id);
-        if (project_changed_event_id != 0)
-            project.disconnect (project_changed_event_id);
+        foreach (var project in projects.get_keys_as_array ())
+            project.disconnect (projects[project]);
         loop.quit ();
         foreach (uint id in g_sources)
             Source.remove (id);

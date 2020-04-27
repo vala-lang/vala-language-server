@@ -5,6 +5,11 @@ using Gee;
  */
 abstract class Vls.Project : Object {
     /**
+     * The root path for this project.
+     */
+    public string root_path { get; private set; }
+
+    /**
      * This collection must be topologically sorted.
      */
     protected ArrayList<BuildTarget> build_targets = new ArrayList<BuildTarget> (); 
@@ -14,6 +19,10 @@ abstract class Vls.Project : Object {
      * monitored because they have an indirect influence on Vala code.
      */
     private HashMap<File, FileMonitor> monitored_files = new HashMap<File, FileMonitor> (Util.file_hash, Util.file_equal);
+
+    protected Project (string root_path) {
+        this.root_path = root_path;
+    }
 
     /** 
      * Determine dependencies and remove build targets that are not needed.
@@ -228,7 +237,7 @@ abstract class Vls.Project : Object {
      * Return true if found, false otherwise.
      */
     public bool lookup_compilation_for_output_file (string filename, out Compilation compilation) {
-        var file = File.new_for_path (filename);
+        var file = File.new_for_commandline_arg_and_cwd (filename, root_path);
         foreach (var btarget in build_targets) {
             if (!(btarget is Compilation))
                 continue;
@@ -242,9 +251,15 @@ abstract class Vls.Project : Object {
     }
 
     /**
-     * Open the file
+     * Open the file. Is guaranteed to return a non-empty result, or will
+     * throw an error.
      */
-    public virtual void open (string escaped_uri, Cancellable? cancellable = null) throws Error { /* do nothing */ }
+    public virtual ArrayList<Pair<Vala.SourceFile, Compilation>> open (string escaped_uri, string? content = null, Cancellable? cancellable = null) throws Error {
+        var results = lookup_compile_input_source_file (escaped_uri);
+        if (results.is_empty)
+            throw new ProjectError.NOT_FOUND ("cannot open %s - file cannot be created for this type of project", escaped_uri);
+        return results;
+    }
 
     /**
      * Close the file. Returns whether a context update is required.
@@ -312,5 +327,10 @@ errordomain Vls.ProjectError {
     /**
      * If a build task failed. 
      */
-    TASK_FAILED
+    TASK_FAILED,
+
+    /**
+     * Opening a file failed because it was not found
+     */
+    NOT_FOUND
 }
