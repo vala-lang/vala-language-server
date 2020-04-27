@@ -31,16 +31,25 @@ class Vls.SymbolExtractor : Object {
     private Vala.SourceFile source_file;
     private Vala.CodeContext context;
 
-    private bool attempted_extract;
+    private bool attempted_extract_string;
+    private string? _extracted_string;
+    public string extracted_string {
+        get {
+            if (_extracted_string == null && !attempted_extract_string)
+                compute_extracted_string ();
+            return _extracted_string;
+        }
+    }
+
+    private bool attempted_extract_expression;
     private Vala.Expression? _extracted_expression;
     public Vala.Expression? extracted_expression {
         get {
-            if (_extracted_expression == null && !attempted_extract)
+            if (_extracted_expression == null && !attempted_extract_expression)
                 compute_extracted_expression ();
             return _extracted_expression;
         }
     }
-
 
 #if !VALA_FEATURE_INITIAL_ARGUMENT_COUNT
     /**
@@ -228,7 +237,7 @@ class Vls.SymbolExtractor : Object {
         return null;
     }
 
-    private void compute_extracted_expression (bool allow_parse_as_method_call = true) {
+    private Queue<FakeExpr> compute_extracted_string (bool allow_parse_as_method_call = true) {
         var queue = new Queue<FakeExpr> ();
 
         debug ("extracting symbol at %s (char = %c) ...", pos.to_string (), source_file.content[idx]);
@@ -247,9 +256,20 @@ class Vls.SymbolExtractor : Object {
             skip_whitespace ();
         }
 
-        attempted_extract = true;
+        attempted_extract_string = true;
 
-        // perform lookup
+        _extracted_string = "";
+        for (unowned List<FakeExpr> node = queue.head; node != null; node = node.next)
+            _extracted_string += node.data.to_string ();
+
+        return queue;
+    }
+
+    private void compute_extracted_expression (bool allow_parse_as_method_call = true) {
+        var queue = compute_extracted_string (allow_parse_as_method_call);
+        attempted_extract_expression = true;
+
+        // check lookup was successful
         if (queue.length == 0) {
             debug ("could not parse a symbol");
             return;
