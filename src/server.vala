@@ -886,7 +886,7 @@ class Vls.Server : Object {
                     parent_str = @"$(parent_str)::";
                 else
                     parent_str = "";
-                return @"$weak_kw$(prop_sym.property_type) $parent_str$(prop_sym.name)";
+                return @"$weak_kw$(prop_sym.property_type) $parent_str$(name_override ?? prop_sym.name)";
             }
         } else if (sym is Vala.Callable) {
             var method_sym = sym as Vala.Callable;
@@ -972,7 +972,7 @@ class Vls.Server : Object {
                         param_string += p.variable_type.type_symbol.to_string ();
                 } else {
                     param_string += p.variable_type.to_string ();
-                    param_string += " " + p.name;
+                    param_string += " " + (name_override ?? p.name);
                     if (show_inits && p.initializer != null && p.initializer.source_reference != null)
                         param_string += @" = $(get_expr_repr (p.initializer))";
                 }
@@ -1003,7 +1003,7 @@ class Vls.Server : Object {
                         init_str = @" = $(get_expr_repr (var_sym.initializer))";
                     }
                 }
-                return @"$weak_kw$(var_sym.variable_type) $parent_str$(var_sym.name)$init_str";
+                return @"$weak_kw$(var_sym.variable_type) $parent_str$(name_override ?? var_sym.name)$init_str";
             }
         } else if (sym is Vala.EnumValue) {
             var ev_sym = sym as Vala.EnumValue;

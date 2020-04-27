@@ -66,6 +66,18 @@ class Vls.FindScope : Vala.CodeVisitor {
             return;
         
         var range = new Range.from_sourceref (sr);
+
+        if (node is Vala.TypeSymbol || node is Vala.Namespace) {
+            var sym = (Vala.Symbol) node;
+            var symtab = sym.scope.get_symbol_table ();
+            if (symtab != null) {
+                foreach (Vala.Symbol member in symtab.get_values ()) {
+                    if (member.source_reference != null && member.source_reference.file == sr.file)
+                        range = range.union (new Range.from_sourceref (member.source_reference));
+                }
+            }
+        }
+
         // compare to rang.end.line + 1 if before context update, assuming that
         // it's possible the user expanded the current scope
         Position new_end = before_context_update ? range.end.translate (2) : range.end;

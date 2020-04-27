@@ -98,7 +98,21 @@ namespace Vls.CompletionEngine {
                 finish (client, id, completions);
             }
         } else {
-            list_symbols (lang_serv, doc, pos, completions);
+            Vala.Scope best_scope;
+            Vala.Symbol nearest_symbol;
+            bool in_loop;
+            bool showing_override_suggestions = false;
+            walk_up_current_scope (lang_serv, doc, pos, out best_scope, out nearest_symbol, out in_loop);
+            if (nearest_symbol is Vala.Class) {
+                string string_at_cursor = (new SymbolExtractor (pos, doc, compilation.code_context)).extracted_string;
+                var results = gather_missing_prereqs_and_unimplemented_symbols (doc, (Vala.Class) nearest_symbol);
+                list_unimplemented_symbols (lang_serv, doc, string_at_cursor, results.second, completions);
+                showing_override_suggestions = !completions.is_empty;
+            }
+            if (!showing_override_suggestions) {
+                list_symbols (lang_serv, doc, pos, best_scope, completions);
+                list_keywords (lang_serv, doc, nearest_symbol, in_loop, completions);
+            }
             finish (client, id, completions);
         }
         Vala.CodeContext.pop ();
@@ -117,12 +131,50 @@ namespace Vls.CompletionEngine {
         }
     }
 
+    void walk_up_current_scope (Server lang_serv, 
+                                Vala.SourceFile doc, Position pos, 
+                                out Vala.Scope best_scope, out Vala.Symbol nearest_symbol, out bool in_loop) {
+        best_scope = new FindScope (doc, pos).best_block.scope;
+        in_loop = false;
+        nearest_symbol = null;
+        for (Vala.Scope? scope = best_scope; 
+             scope != null; 
+             scope = scope.parent_scope) {
+            Vala.Symbol owner = scope.owner;
+            if (owner.parent_node is Vala.WhileStatement ||
+                owner.parent_node is Vala.ForStatement ||
+                owner.parent_node is Vala.ForeachStatement ||
+                owner.parent_node is Vala.DoStatement ||
+                owner.parent_node is Vala.Loop)
+                in_loop = true;
+
+            if (owner is Vala.Callable || owner is Vala.Statement || owner is Vala.Block || 
+                owner is Vala.Subroutine) {
+                if (owner is Vala.Method) {
+                    if (nearest_symbol == null)
+                        nearest_symbol = owner;
+                }
+            } else if (owner is Vala.TypeSymbol) {
+                if (nearest_symbol == null)
+                    nearest_symbol = owner;
+            } else if (owner is Vala.Namespace) {
+                if (nearest_symbol == null)
+                    nearest_symbol = owner;
+            }
+        }
+
+        if (nearest_symbol == null)
+            nearest_symbol = best_scope.owner;
+    }
+
     /**
      * Fill the completion list with all scope-visible symbols
      */
-    void list_symbols (Server lang_serv, Vala.SourceFile doc, Position pos, Set<CompletionItem> completions) {
+    void list_symbols (Server lang_serv,
+                       Vala.SourceFile doc, Position pos, 
+                       Vala.Scope best_scope, 
+                       Set<CompletionItem> completions) {
         string method = "textDocument/completion";
-        Vala.Scope best_scope = new FindScope (doc, pos).best_block.scope;
         bool in_instance = false;
         var seen_props = new HashSet<string> ();
 
@@ -130,26 +182,16 @@ namespace Vls.CompletionEngine {
             debug (@"[$method] best scope SR is $(best_scope.owner.source_reference)");
         else
             debug (@"[$method] listing symbols from $(best_scope.owner)");
-        Vala.Symbol? nearest_symbol = null;
-        bool in_loop = false;
         for (Vala.Scope? current_scope = best_scope;
                 current_scope != null;
                 current_scope = current_scope.parent_scope) {
             Vala.Symbol owner = current_scope.owner;
-            if (owner.parent_node is Vala.WhileStatement ||
-                owner.parent_node is Vala.ForStatement ||
-                owner.parent_node is Vala.ForeachStatement ||
-                owner.parent_node is Vala.DoStatement ||
-                owner.parent_node is Vala.Loop)
-                in_loop = true;
             if (owner is Vala.Callable || owner is Vala.Statement || owner is Vala.Block || 
                 owner is Vala.Subroutine) {
                 Vala.Symbol? this_param = null;
-                if (owner is Vala.Method) {
+                if (owner is Vala.Method)
                     this_param = ((Vala.Method)owner).this_parameter;
-                    if (nearest_symbol == null)
-                        nearest_symbol = owner;
-                } else if (owner is Vala.PropertyAccessor)
+                else if (owner is Vala.PropertyAccessor)
                     this_param = ((Vala.PropertyAccessor)owner).prop.this_parameter;
                 else if (owner is Vala.Constructor)
                     this_param = ((Vala.Constructor)owner).this_parameter;
@@ -185,12 +227,8 @@ namespace Vls.CompletionEngine {
                 add_completions_for_type (lang_serv, (Vala.TypeSymbol) owner, completions, best_scope, false, false, seen_props);
                 // once we leave a type symbol, we're no longer in an instance
                 in_instance = false;
-                if (nearest_symbol == null)
-                    nearest_symbol = owner;
             } else if (owner is Vala.Namespace) {
                 add_completions_for_ns (lang_serv, (Vala.Namespace) owner, completions, false);
-                if (nearest_symbol == null)
-                    nearest_symbol = owner;
             } else {
                 debug (@"[$method] ignoring owner ($owner) ($(owner.type_name)) of scope");
             }
@@ -198,8 +236,15 @@ namespace Vls.CompletionEngine {
         // show members of all imported namespaces
         foreach (var ud in doc.current_using_directives)
             add_completions_for_ns (lang_serv, (Vala.Namespace) ud.namespace_symbol, completions, false);
+    }
 
-        // show keywords
+    /**
+     * Fill the completion list with keywords.
+     */
+    void list_keywords (Server lang_serv,
+                        Vala.SourceFile doc, 
+                        Vala.Symbol? nearest_symbol, bool in_loop, 
+                        Set<CompletionItem> completions) {
         if (nearest_symbol is Vala.TypeSymbol) {
             completions.add_all_array({
                 new CompletionItem.keyword ("async"),
@@ -276,6 +321,200 @@ namespace Vls.CompletionEngine {
         completions.add_all_array ({
             new CompletionItem.keyword ("global", "global::")
         });
+    }
+
+    void list_unimplemented_symbols (Server lang_serv,
+                                     Vala.SourceFile doc, 
+                                     string prefix, Gee.List<Vala.Symbol> missing_symbols,
+                                     Set<CompletionItem> completions) {
+        foreach (var sym in missing_symbols) {
+            var kind = CompletionItemKind.Method;
+
+            if (sym is Vala.Property)
+                kind = CompletionItemKind.Property;
+            
+            string label = "";
+            string insert_text = "";
+
+            if (sym is Vala.Callable) {
+                string access_str = ((Vala.Callable)sym).access.to_string ();
+                string override_str = (sym.parent_symbol is Vala.Interface) ? "" : "override ";
+                string return_type_str = ((Vala.Callable)sym).return_type.to_string ();
+
+                insert_text += access_str + " ";
+                insert_text += override_str;
+                insert_text += return_type_str + " ";
+                insert_text += sym.name;
+
+                label += @"$access_str $override_str$return_type_str $(sym.name) (";
+                insert_text += " (";
+                foreach (Vala.Parameter p in ((Vala.Callable) sym).get_parameters ()) {
+                    if (_p_index > 0) {
+                        insert_text += ", ";
+                        label += ", ";
+                    }
+                    insert_text += Server.get_symbol_data_type (p, false, null, true, "${" + @"$(_p_index + 1):$(p.name)" + "}");
+                    label += Server.get_symbol_data_type (sym);
+                }
+                insert_text += ")";
+                label += ")";
+            } else if (sym is Vala.Property) {
+                // TODO
+                warning ("TODO");
+                continue;
+            } else {
+                warning ("list_unimplemented_symbols: unknown sym type %s", sym.type_name);
+                continue;
+            }
+
+            insert_text += "$0";
+            completions.add (
+                new CompletionItem.from_unimplemented_symbol (
+                    sym, label, kind, insert_text, 
+                    lang_serv.get_symbol_documentation (sym)
+                ));
+        }
+    }
+
+    /**
+     * also taken from `Vala.Class` in `vala/valaclass.vala`
+     */
+    private void get_all_prerequisites (Vala.Interface iface, Gee.List<Vala.TypeSymbol> list) {
+        foreach (Vala.DataType prereq in iface.get_prerequisites ()) {
+            Vala.TypeSymbol type = prereq.type_symbol;
+            /* skip on previous errors */
+            if (type == null) {
+                continue;
+            }
+
+            list.add (type);
+            if (type is Vala.Interface) {
+                get_all_prerequisites ((Vala.Interface) type, list);
+
+            }
+        }
+    }
+
+    /**
+     * Taken from `Vala.Class.check ()` in `vala/valaclass.vala`
+     * @param doc the current document 
+     * @param csym the class symbol
+     */
+    Pair<Gee.List<Vala.TypeSymbol>, Gee.List<Vala.Symbol>>? 
+        gather_missing_prereqs_and_unimplemented_symbols (Vala.SourceFile doc, Vala.Class csym) {
+        if (csym.is_compact) {
+            // compact classes cannot derive from anything
+            return null;
+        }
+
+        /* gather all prerequisites */
+        var prerequisites = new ArrayList<Vala.TypeSymbol> ();
+        foreach (Vala.DataType base_type in csym.get_base_types ()) {
+            if (base_type.type_symbol is Vala.Interface) {
+                get_all_prerequisites ((Vala.Interface) base_type.type_symbol, prerequisites);
+            }
+        }
+        /* check whether all prerequisites are met */
+        var missing_prereqs = new ArrayList<Vala.TypeSymbol> ();
+        foreach (Vala.TypeSymbol prereq in prerequisites) {
+            if (!csym.is_a ((Vala.ObjectTypeSymbol) prereq)) {
+                missing_prereqs.insert (0, prereq);
+            }
+        }
+
+        var missing_symbols = new ArrayList<Vala.Symbol> ();
+        /* VAPI classes don't have to specify overridden methods */
+        if (doc.file_type == Vala.SourceFileType.SOURCE) {
+            /* all abstract symbols defined in base types have to be at least defined (or implemented) also in this type */
+            foreach (Vala.DataType base_type in csym.get_base_types ()) {
+                if (base_type.type_symbol is Vala.Interface) {
+                    unowned Vala.Interface iface = (Vala.Interface) base_type.type_symbol;
+
+                    if (csym.base_class != null && csym.base_class.is_subtype_of (iface)) {
+                        // reimplementation of interface, class is not required to reimplement all methods
+                        break;
+                    }
+
+                    /* We do not need to do expensive equality checking here since this is done
+                     * already. We only need to guarantee the symbols are present.
+                     */
+
+                    /* check methods */
+                    foreach (Vala.Method m in iface.get_methods ()) {
+                        if (m.is_abstract) {
+                            var implemented = false;
+                            unowned Vala.Class? base_class = csym;
+                            while (base_class != null && !implemented) {
+                                foreach (var impl in base_class.get_methods ()) {
+                                    if (impl.base_interface_method == m || (base_class != csym
+                                                                            && impl.base_interface_method == null && impl.name == m.name
+                                                                            && (impl.base_interface_type == null || impl.base_interface_type.type_symbol == iface)
+                                                                            && impl.compatible_no_error (m))) {
+                                        implemented = true;
+                                        break;
+                                    }
+                                }
+                                base_class = base_class.base_class;
+                            }
+                            if (!implemented) {
+                                missing_symbols.add (m);
+                            }
+                        }
+                    }
+
+                    /* check properties */
+                    foreach (Vala.Property prop in iface.get_properties ()) {
+                        if (prop.is_abstract) {
+                            Vala.Symbol sym = null;
+                            unowned Vala.Class? base_class = csym;
+                            while (base_class != null && !(sym is Vala.Property)) {
+                                sym = base_class.scope.lookup (prop.name);
+                                base_class = base_class.base_class;
+                            }
+                            if (sym is Vala.Property) {
+                                var base_prop = (Vala.Property) sym;
+                                string? invalid_match = null;
+                                // No check at all for "new" classified properties, really?
+                                if (!base_prop.hides && !base_prop.compatible (prop, out invalid_match)) {
+                                    // we prefer to show fixup suggestions rather than completion suggestions for
+                                    // this type of error, so ignore it
+
+                                    // Report.error (source_reference, "Type and/or accessors of inherited properties `%s' and `%s' do not match: %s.".printf (prop.get_full_name (), base_prop.get_full_name (), invalid_match));
+                                }
+                            } else {
+                                missing_symbols.add (prop);
+                            }
+                        }
+                    }
+                }
+            }
+
+            /* all abstract symbols defined in base classes have to be implemented in non-abstract classes */
+            if (!csym.is_abstract) {
+                unowned Vala.Class? base_class = csym.base_class;
+                while (base_class != null && base_class.is_abstract) {
+                    foreach (Vala.Method base_method in base_class.get_methods ()) {
+                        if (base_method.is_abstract) {
+                            var override_method = Vala.SemanticAnalyzer.symbol_lookup_inherited (csym, base_method.name) as Vala.Method;
+                            if (override_method == null || !override_method.overrides) {
+                                missing_symbols.add (base_method);
+                            }
+                        }
+                    }
+                    foreach (Vala.Property base_property in base_class.get_properties ()) {
+                        if (base_property.is_abstract) {
+                            var override_property = Vala.SemanticAnalyzer.symbol_lookup_inherited (csym, base_property.name) as Vala.Property;
+                            if (override_property == null || !override_property.overrides) {
+                                missing_symbols.add (base_property);
+                            }
+                        }
+                    }
+                    base_class = base_class.base_class;
+                }
+            }
+        }
+
+        return new Pair<Gee.List<Vala.TypeSymbol>, Gee.List<Vala.Symbol>> (missing_prereqs, missing_symbols);
     }
 
     /**

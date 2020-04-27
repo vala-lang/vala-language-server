@@ -449,6 +449,20 @@ namespace LanguageServer {
             }
         }
 
+        public CompletionItem.from_unimplemented_symbol (Vala.Symbol sym, 
+                                                         string label, CompletionItemKind kind,
+                                                         string insert_text,
+                                                         MarkupContent? documentation) {
+            this.label = label;
+            this.kind = kind;
+            this.insertText = insert_text;
+            if (insert_text.contains ("$0") || insert_text.contains ("${0"))
+                this.insertTextFormat = InsertTextFormat.Snippet;
+            this.documentation = documentation;
+            this._hash_string = @"$label $insert_text $kind";
+            this._hash = _hash_string.hash ();
+        }
+
         public uint hash () {
             return this._hash;
         }
