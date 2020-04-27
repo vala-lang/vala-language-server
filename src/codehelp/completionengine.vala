@@ -130,16 +130,26 @@ namespace Vls.CompletionEngine {
             debug (@"[$method] best scope SR is $(best_scope.owner.source_reference)");
         else
             debug (@"[$method] listing symbols from $(best_scope.owner)");
+        Vala.Symbol? nearest_symbol = null;
+        bool in_loop = false;
         for (Vala.Scope? current_scope = best_scope;
                 current_scope != null;
                 current_scope = current_scope.parent_scope) {
             Vala.Symbol owner = current_scope.owner;
+            if (owner.parent_node is Vala.WhileStatement ||
+                owner.parent_node is Vala.ForStatement ||
+                owner.parent_node is Vala.ForeachStatement ||
+                owner.parent_node is Vala.DoStatement ||
+                owner.parent_node is Vala.Loop)
+                in_loop = true;
             if (owner is Vala.Callable || owner is Vala.Statement || owner is Vala.Block || 
                 owner is Vala.Subroutine) {
                 Vala.Symbol? this_param = null;
-                if (owner is Vala.Method)
+                if (owner is Vala.Method) {
                     this_param = ((Vala.Method)owner).this_parameter;
-                else if (owner is Vala.PropertyAccessor)
+                    if (nearest_symbol == null)
+                        nearest_symbol = owner;
+                } else if (owner is Vala.PropertyAccessor)
                     this_param = ((Vala.PropertyAccessor)owner).prop.this_parameter;
                 else if (owner is Vala.Constructor)
                     this_param = ((Vala.Constructor)owner).this_parameter;
@@ -175,8 +185,12 @@ namespace Vls.CompletionEngine {
                 add_completions_for_type (lang_serv, (Vala.TypeSymbol) owner, completions, best_scope, false, false, seen_props);
                 // once we leave a type symbol, we're no longer in an instance
                 in_instance = false;
+                if (nearest_symbol == null)
+                    nearest_symbol = owner;
             } else if (owner is Vala.Namespace) {
                 add_completions_for_ns (lang_serv, (Vala.Namespace) owner, completions, false);
+                if (nearest_symbol == null)
+                    nearest_symbol = owner;
             } else {
                 debug (@"[$method] ignoring owner ($owner) ($(owner.type_name)) of scope");
             }
@@ -184,7 +198,85 @@ namespace Vls.CompletionEngine {
         // show members of all imported namespaces
         foreach (var ud in doc.current_using_directives)
             add_completions_for_ns (lang_serv, (Vala.Namespace) ud.namespace_symbol, completions, false);
-    }   
+
+        // show keywords
+        if (nearest_symbol is Vala.TypeSymbol) {
+            completions.add_all_array({
+                new CompletionItem.keyword ("async"),
+                new CompletionItem.keyword ("override"),
+                new CompletionItem.keyword ("protected"),
+                new CompletionItem.keyword ("weak"),
+            });
+        }
+
+        if (nearest_symbol is Vala.Namespace) {
+            if (!(nearest_symbol is Vala.TypeSymbol))
+                completions.add (new CompletionItem.keyword ("namespace"));
+            if (!(nearest_symbol is Vala.TypeSymbol) || nearest_symbol is Vala.ObjectTypeSymbol)
+                completions.add (new CompletionItem.keyword ("struct"));
+
+            completions.add_all_array ({
+                new CompletionItem.keyword ("delegate"),
+                new CompletionItem.keyword ("enum"),
+                new CompletionItem.keyword ("errordomain"),
+                new CompletionItem.keyword ("interface"),
+                new CompletionItem.keyword ("internal"),
+                new CompletionItem.keyword ("unowned"),
+                new CompletionItem.keyword ("params"),
+                new CompletionItem.keyword ("private"),
+                new CompletionItem.keyword ("public"),
+                new CompletionItem.keyword ("void"),
+            });
+        }
+
+        if (nearest_symbol is Vala.Namespace || nearest_symbol is Vala.ObjectTypeSymbol) {
+            completions.add_all_array ({
+                new CompletionItem.keyword ("abstract"),
+                new CompletionItem.keyword ("virtual"),
+            });
+        }
+
+        if (nearest_symbol is Vala.Callable) {
+            completions.add_all_array ({
+                new CompletionItem.keyword ("catch", "catch ($1) {$2}$0"),
+                new CompletionItem.keyword ("delete", "delete $1;$0"),
+                new CompletionItem.keyword ("do", "do {$2} while (${1:<condition>});$0"),
+                new CompletionItem.keyword ("else"),
+                new CompletionItem.keyword ("else if", "else if (${1:<condition>})$0"),
+                new CompletionItem.keyword ("finally", "finally {$1}$0"),
+                new CompletionItem.keyword ("false"),
+                new CompletionItem.keyword ("for", "for (${3:var} ${1:i} = ${2:<expression>}; ${4:<condition>}; ${5:<expression>})$0"),
+                new CompletionItem.keyword ("foreach", "foreach (${3:var} ${1:thing} in ${2:<expression>})$0"),
+                new CompletionItem.keyword ("if", "if (${1:<condition>})$0"),
+                new CompletionItem.keyword ("in"),
+                new CompletionItem.keyword ("is"),
+                new CompletionItem.keyword ("new"),
+                new CompletionItem.keyword ("null"),
+                new CompletionItem.keyword ("return"),
+                new CompletionItem.keyword ("switch", "switch (${1:<expression>}) {$0}"),
+                new CompletionItem.keyword ("throw"),
+                new CompletionItem.keyword ("true"),
+                new CompletionItem.keyword ("try", "try {$1} catch ($2) {$3}$0"),
+                new CompletionItem.keyword ("var"),
+                new CompletionItem.keyword ("while", "while (${1:<condition>})$0"),
+                new CompletionItem.keyword ("yield"),
+            });
+        }
+
+        if (nearest_symbol == Vala.CodeContext.get ().root)
+            completions.add (new CompletionItem.keyword ("using"));
+        
+        if (in_loop) {
+            completions.add_all_array ({
+                new CompletionItem.keyword ("break"),
+                new CompletionItem.keyword ("continue"),
+            });
+        }
+
+        completions.add_all_array ({
+            new CompletionItem.keyword ("global", "global::")
+        });
+    }
 
     /**
      * Fill the completion list with members of {@result}

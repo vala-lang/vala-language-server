@@ -384,10 +384,27 @@ namespace LanguageServer {
         public CompletionContext? context { get; set; }
     }
 
-    
     enum CompletionItemTag {
         // Render a completion as obsolete, usually using a strike-out.
         Deprecated = 1,
+    }
+
+    [CCode (default_value = "LANGUAGE_SERVER_INSERT_TEXT_FORMAT_PlainText")]
+    enum InsertTextFormat {
+        /**
+         * The primary text to be inserted is treated as a plain string.
+         */
+        PlainText = 1,
+
+        /**
+    	 * The primary text to be inserted is treated as a snippet.
+    	 *
+    	 * A snippet can define tab stops and placeholders with `$1`, `$2`
+    	 * and `${3:foo}`. `$0` defines the final tab stop, it defaults to
+    	 * the end of the snippet. Placeholders with equal identifiers are linked,
+    	 * that is typing in one will update others too.
+    	 */
+        Snippet = 2,
     }
 
     class CompletionItem : Object, Gee.Hashable<CompletionItem>, Json.Serializable {
@@ -396,11 +413,25 @@ namespace LanguageServer {
         public string detail { get; set; }
         public MarkupContent? documentation { get; set; }
         public bool deprecated { get; set; }
-        public Gee.List<CompletionItemTag> tags { get; private set; }
+        public Gee.List<CompletionItemTag> tags { get; private set; default = new Gee.ArrayList<CompletionItemTag> (); }
+        public string? insertText { get; set; }
+        public InsertTextFormat insertTextFormat { get; set; }
         private uint _hash;
         protected string _hash_string;
 
         private CompletionItem () {}
+
+        public CompletionItem.keyword (string keyword, string? insert_text = null, string? documentation = null) {
+            this.label = keyword;
+            this.kind = CompletionItemKind.Keyword;
+            this.insertText = insert_text;
+            if (insert_text != null && (insert_text.contains ("$0") || insert_text.contains ("${0")))
+                this.insertTextFormat = InsertTextFormat.Snippet;
+            if (documentation != null)
+                this.documentation = new MarkupContent.plaintext(documentation);
+            this._hash_string = @"$label $kind";
+            this._hash = _hash_string.hash ();
+        }
 
         public CompletionItem.from_symbol (Vala.Symbol sym, CompletionItemKind kind,
             MarkupContent? documentation, string? label_override = null) {
@@ -410,7 +441,6 @@ namespace LanguageServer {
             this.documentation = documentation;
             this._hash_string = @"$label $(Vls.Server.get_symbol_data_type (sym, true)) $kind";
             this._hash = _hash_string.hash ();
-            this.tags = new Gee.ArrayList<CompletionItemTag>();
 
             var version = sym.get_attribute ("Version");
             if (version != null && (version.get_bool ("deprecated") || version.get_string ("deprecated_since") != null)) {
