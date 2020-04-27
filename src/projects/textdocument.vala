@@ -8,19 +8,22 @@ class Vls.TextDocument : SourceFile {
     public DateTime last_updated { get; set; default = new DateTime.now (); }
     public int version { get; set; }
 
-    public TextDocument (CodeContext context, File file, bool cmdline = false) throws FileError {
-        string cont;
-        string path = Util.realpath ((!) file.get_path ());
-        FileUtils.get_contents (path, out cont);
+    public TextDocument (CodeContext context, File file, string? content = null, bool cmdline = false) throws FileError {
+        string? cont = content;
+        string uri = file.get_uri ();
+        string? path = file.get_path ();
+        path = path != null ? Util.realpath (path) : null;
+        if (path != null && cont == null)
+            FileUtils.get_contents (path, out cont);
         SourceFileType ftype;
-        if (path.has_suffix (".vapi") || path.has_suffix (".gir"))
+        if (uri.has_suffix (".vapi") || uri.has_suffix (".gir"))
             ftype = SourceFileType.PACKAGE;
-        else if (path.has_suffix (".vala") || path.has_suffix (".gs"))
+        else if (uri.has_suffix (".vala") || uri.has_suffix (".gs"))
             ftype = SourceFileType.SOURCE;
         else {
             ftype = SourceFileType.NONE;
-            warning ("TextDocument: file %s is neither a package nor a source file", path);
+            warning ("TextDocument: file %s is neither a package nor a source file", uri);
         }
-        base (context, ftype, path, cont, cmdline);
+        base (context, ftype, uri, cont, cmdline);
     }
 }

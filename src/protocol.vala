@@ -201,7 +201,7 @@ namespace LanguageServer {
 
         internal Location () {}
         public Location.from_sourceref (Vala.SourceReference sref) {
-            this.uri = File.new_for_path (sref.file.filename).get_uri ();
+            this.uri = File.new_for_commandline_arg (sref.file.filename).get_uri ();
             this.range = new Range.from_sourceref (sref);
         }
     }

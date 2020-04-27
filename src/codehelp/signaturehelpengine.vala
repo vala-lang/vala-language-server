@@ -2,7 +2,7 @@ using Gee;
 using LanguageServer;
 
 namespace Vls.SignatureHelpEngine {
-    void begin_response (Server lang_serv,
+    void begin_response (Server lang_serv, Project project,
                          Jsonrpc.Client client, Variant id, string method,
                          Vala.SourceFile doc, Compilation compilation,
                          Position pos) {
@@ -23,7 +23,7 @@ namespace Vls.SignatureHelpEngine {
 #if !VALA_FEATURE_INITIAL_ARGUMENT_COUNT
             active_param = se.method_arguments - 1;
 #endif
-            show_help (lang_serv, method, se.extracted_expression, signatures, ref active_param);
+            show_help (lang_serv, project, method, se.extracted_expression, signatures, ref active_param);
         }
         
         if (signatures.is_empty) {
@@ -34,7 +34,7 @@ namespace Vls.SignatureHelpEngine {
                 }
 
                 Vala.CodeContext.push (compilation.code_context);
-                show_help_with_updated_context (lang_serv,
+                show_help_with_updated_context (lang_serv, project,
                                                 method,
                                                 doc, compilation, pos, 
                                                 signatures, ref active_param);
@@ -51,7 +51,7 @@ namespace Vls.SignatureHelpEngine {
         Vala.CodeContext.pop ();
     }
 
-    void show_help (Server lang_serv,
+    void show_help (Server lang_serv, Project project,
                     string method, Vala.CodeNode result,
                     Collection<SignatureInformation> signatures,
                     ref int active_param) {
@@ -165,26 +165,26 @@ namespace Vls.SignatureHelpEngine {
 
         if (explicit_sym == null) {
             si.label = Server.get_symbol_data_type (type_sym, false, null, true);
-            si.documentation = lang_serv.get_symbol_documentation (type_sym);
+            si.documentation = lang_serv.get_symbol_documentation (project, type_sym);
         } else {
             // TODO: need a function to display symbol names correctly given context
             if (type_sym != null) {
                 si.label = Server.get_symbol_data_type (type_sym, false, null, true, coroutine_name);
-                si.documentation = lang_serv.get_symbol_documentation (type_sym);
+                si.documentation = lang_serv.get_symbol_documentation (project, type_sym);
             } else {
                 si.label = Server.get_symbol_data_type (explicit_sym, false, parent_sym, true, coroutine_name);
             }
             // try getting the documentation for the explicit symbol
             // if the type does not have any documentation
             if (si.documentation == null)
-                si.documentation = lang_serv.get_symbol_documentation (explicit_sym);
+                si.documentation = lang_serv.get_symbol_documentation (project, explicit_sym);
         }
 
         if (param_list != null) {
             foreach (var parameter in param_list) {
                 si.parameters.add (new ParameterInformation () {
                     label = Server.get_symbol_data_type (parameter, false, null, true),
-                    documentation = lang_serv.get_symbol_documentation (parameter)
+                    documentation = lang_serv.get_symbol_documentation (project, parameter)
                 });
                 debug (@"found parameter $parameter (name = $(parameter.ellipsis ? "..." :parameter.name))");
             }
@@ -192,7 +192,7 @@ namespace Vls.SignatureHelpEngine {
         }
     }
 
-    void show_help_with_updated_context (Server lang_serv,
+    void show_help_with_updated_context (Server lang_serv, Project project,
                                          string method,
                                          Vala.SourceFile doc, Compilation compilation,
                                          Position pos,
@@ -231,7 +231,7 @@ namespace Vls.SignatureHelpEngine {
         Vala.CodeNode result = Server.get_best (fs, doc);
         debug (@"[$method] got best: $(result.type_name) @ $(result.source_reference)");
 
-        show_help (lang_serv, method, result, signatures, ref active_param);
+        show_help (lang_serv, project, method, result, signatures, ref active_param);
     }
 
     void finish (Jsonrpc.Client client, Variant id, Collection<SignatureInformation> signatures, int active_param) {

@@ -15,6 +15,12 @@ class Vls.Compilation : BuildTarget {
     private HashMap<File, TextDocument> _project_sources = new HashMap<File, TextDocument> (Util.file_hash, Util.file_equal);
 
     /**
+     * This is the list of initial content for project source files.
+     * Used for files that do not exist ('untitled' files);
+     */
+    private HashMap<File, string> _sources_initial_content = new HashMap<File, string> (Util.file_hash, Util.file_equal);
+
+    /**
      * These may not exist until right before we compile the code context.
      */
     private HashSet<File> _generated_sources = new HashSet<File> (Util.file_hash, Util.file_equal);
@@ -64,7 +70,8 @@ class Vls.Compilation : BuildTarget {
     }
 
     public Compilation (string build_dir, string name, string id, int no,
-                        string[] compiler, string[] args, string[] sources, string[] generated_sources) throws Error {
+                        string[] compiler, string[] args, string[] sources, string[] generated_sources,
+                        string[]? sources_content = null) throws Error {
         base (build_dir, name, id, no);
         _directory = build_dir;
 
@@ -147,8 +154,18 @@ class Vls.Compilation : BuildTarget {
             }
         }
 
-        foreach (string source in sources) {
-            input.add (File.new_for_path (Util.realpath (source, build_dir)));
+        for (int i = 0; i < sources.length; i++) {
+            unowned string source = sources[i];
+            unowned string? content = sources_content != null ? sources_content[i] : null;
+
+            if (Uri.parse_scheme (source) != null) {
+                var file = File.new_for_uri (source);
+                input.add (file);
+                if (content != null)
+                    _sources_initial_content[file] = content;
+            } else {
+                input.add (File.new_for_path (Util.realpath (source, build_dir)));
+            }
         }
 
         foreach (string generated_source in generated_sources) {
@@ -219,7 +236,7 @@ class Vls.Compilation : BuildTarget {
             foreach (File file in input) {
                 if (!dependencies.has_key (file)) {
                     try {
-                        _project_sources[file] = new TextDocument (code_context, file, true);
+                        _project_sources[file] = new TextDocument (code_context, file, _sources_initial_content[file], true);
                     } catch (Error e) {
                         // TODO: fix meson introspection bugs (see buildtask.vala)
                         //       and then remove this error handler
@@ -348,9 +365,11 @@ class Vls.Compilation : BuildTarget {
     }
 
     public bool lookup_input_source_file (File file, out Vala.SourceFile input_source) {
-        string filename = Util.realpath (file.get_path ());
+        string? path = file.get_path ();
+        string? filename = path != null ? Util.realpath (path) : null;
+        string uri = file.get_uri ();
         foreach (var source_file in code_context.get_source_files ()) {
-            if (source_file.filename == filename) {
+            if (filename != null && source_file.filename == filename || source_file.filename == uri) {
                 input_source = source_file;
                 return true;
             }

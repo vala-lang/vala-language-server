@@ -8,7 +8,6 @@ class Vls.CcProject : Project {
     private File cc_json_file;
     private HashMap<File, FileMonitor> build_files = new HashMap<File, FileMonitor> (Util.file_hash, Util.file_equal);
 
-    private string root_path;
     private string build_dir;
 
     public override bool reconfigure_if_stale (Cancellable? cancellable = null) throws Error {
@@ -62,6 +61,8 @@ class Vls.CcProject : Project {
     }
 
     public CcProject (string root_path, string cc_location, Cancellable? cancellable = null) throws Error {
+        base (root_path);
+
         var root_dir = File.new_for_path (root_path);
         var cc_json_file = File.new_for_commandline_arg_and_cwd (cc_location, root_path);
         string? relative_path = root_dir.get_relative_path (cc_json_file);
@@ -70,7 +71,6 @@ class Vls.CcProject : Project {
             throw new ProjectError.INTROSPECTION (@"$cc_location is not relative to project root");
         }
 
-        this.root_path = root_path;
         this.build_dir = cc_json_file.get_parent ().get_path ();
         this.cc_json_file = cc_json_file;
 

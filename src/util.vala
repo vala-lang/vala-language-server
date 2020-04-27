@@ -290,7 +290,10 @@ namespace Vls.Util {
     }
 
     public uint file_hash (File file) {
-        return realpath (file.get_path ()).hash ();
+        string? path = file.get_path ();
+        if (path != null)
+            return realpath (path).hash ();
+        return file.get_uri ().hash ();
     }
 
     public bool file_equal (File file1, File file2) {
