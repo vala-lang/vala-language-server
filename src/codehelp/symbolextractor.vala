@@ -379,16 +379,15 @@ class Vls.SymbolExtractor : Object {
     }
 
     private bool skip_char (char c) {
-        if (source_file.content[idx] == c) {
-            if (idx > 0)
-                idx--;
+        if (idx > 0 && source_file.content[idx] == c) {
+            idx--;
             return true;
         }
         return false;
     }
 
     private bool skip_string (string s) {
-        if (idx >= s.length) {
+        if (idx >= s.length && idx + 1 <= source_file.content.length) {
             if (source_file.content[idx-s.length+1:idx+1] == s) {
                 idx -= s.length;
                 return true;
@@ -407,6 +406,9 @@ class Vls.SymbolExtractor : Object {
 
         while (lb_idx > 0 && (source_file.content[lb_idx].isalnum () || source_file.content[lb_idx] == '_'))
             lb_idx--;
+
+        if (lb_idx == idx)
+            return null;
 
         string ident = source_file.content.substring (lb_idx + 1, idx - lb_idx);
         idx = lb_idx;   // update idx
