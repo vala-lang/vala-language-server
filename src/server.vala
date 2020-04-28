@@ -1237,8 +1237,8 @@ class Vls.Server : Object {
     public static Vala.TypeSymbol? get_type_symbol (Vala.CodeContext code_context, 
                                                     Vala.CodeNode symbol, 
                                                     bool is_pointer, 
-                                                    ref bool is_instance) {
-        Vala.DataType? data_type = null;
+                                                    ref bool is_instance,
+                                                    ref Vala.DataType? data_type) {
         Vala.TypeSymbol? type_symbol = null;
         if (symbol is Vala.Variable) {
             var var_sym = symbol as Vala.Variable;
@@ -1454,8 +1454,10 @@ class Vls.Server : Object {
                     });
                 } else {
                     bool is_instance = true;
+                    Vala.DataType? data_type = null;    // XXX: currently unused
                     Vala.TypeSymbol? type_sym = Server.get_type_symbol (compilation.code_context,
-                                                                        result, false, ref is_instance);
+                                                                        result, false, ref is_instance,
+                                                                        ref data_type);
                     hoverInfo.contents.add (new MarkedString () {
                         language = "vala",
                         value = type_sym != null ? get_symbol_data_type (type_sym, true, null, true) : 

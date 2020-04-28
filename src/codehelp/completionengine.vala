@@ -529,6 +529,7 @@ namespace Vls.CompletionEngine {
                        bool retry_inner = true) {
         string method = "textDocument/completion";
         Vala.CodeNode? peeled = null;
+        Vala.DataType? data_type = null;
         Vala.Scope current_scope = scope ?? get_scope_containing_node (result);
 
         // debug (@"[$method] member: got best, $(result.type_name) `$result' (semanalyzed = $(result.checked)))");
@@ -561,12 +562,14 @@ namespace Vls.CompletionEngine {
 
             bool is_instance = true;
             Vala.TypeSymbol? type_sym = Server.get_type_symbol (compilation.code_context, 
-                                                                result, is_pointer_access, ref is_instance);
+                                                                result, is_pointer_access, ref is_instance,
+                                                                ref data_type);
 
             // try again
             if (type_sym == null && peeled != null)
                 type_sym = Server.get_type_symbol (compilation.code_context,
-                                                   peeled, is_pointer_access, ref is_instance);
+                                                   peeled, is_pointer_access, ref is_instance,
+                                                   ref data_type);
 
             if (type_sym != null)
                 add_completions_for_type (lang_serv, project, type_sym, completions, current_scope, is_instance, in_oce);
@@ -577,6 +580,8 @@ namespace Vls.CompletionEngine {
                 add_completions_for_ns (lang_serv, project, (Vala.Namespace) peeled, completions, in_oce);
             else if (peeled is Vala.Method && ((Vala.Method) peeled).coroutine)
                 add_completions_for_async_method ((Vala.Method) peeled, completions);
+            else if (data_type is Vala.ArrayType)
+                add_completions_for_array_type ((Vala.ArrayType) data_type, completions);
             else {
                 if (result is Vala.MemberAccess &&
                     ((Vala.MemberAccess)result).inner != null &&
@@ -897,6 +902,26 @@ namespace Vls.CompletionEngine {
             new CompletionItem.from_symbol (sig_type.get_member ("disconnect"), CompletionItemKind.Method,
                 new MarkupContent.plaintext ("Disconnect signal"))
         });
+    }
+
+    /**
+     * Use this to complete members of an array.
+     */
+    void add_completions_for_array_type (Vala.ArrayType atype, Set<CompletionItem> completions) {
+        var length_member = atype.get_member ("length");
+        if (length_member != null)
+            completions.add (new CompletionItem.from_symbol (
+                length_member, 
+                CompletionItemKind.Property,
+                (atype.fixed_length && atype.length != null ? 
+                    new MarkupContent.plaintext(@"(= $(Server.get_expr_repr (atype.length)))") : null)));
+        foreach (string method_name in new string[] {"copy", "move", "resize"}) {
+            var method = atype.get_member (method_name);
+            if (method != null)
+                completions.add (new CompletionItem.from_symbol (
+                    method,
+                    CompletionItemKind.Method, null));
+        }
     }
 
     /**
