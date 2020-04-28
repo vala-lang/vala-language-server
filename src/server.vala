@@ -1190,13 +1190,12 @@ class Vls.Server : Object {
             return (only_type_names ? "" : "enum ") + @"$(enum_sym.name)";
         } else if (sym is Vala.Destructor) {
             var dtor = sym as Vala.Destructor;
-            string parent_str = parent != null ? parent.to_string () : 
-                (dtor.this_parameter.variable_type.type_symbol.to_string ());
+            string parent_str = parent != null ? parent.name : dtor.this_parameter.variable_type.type_symbol.name;
             string dtor_name = dtor.name ?? dtor.this_parameter.variable_type.type_symbol.name;
             return @"$parent_str::~$dtor_name ()";
         } else if (sym is Vala.TypeParameter) {
             return sym.name;
-        } else {
+        } else if (!(sym is Vala.Constructor || sym is Vala.PropertyAccessor)) {
             warning (@"get_symbol_data_type: unsupported symbol $(sym.type_name)");
         }
         return null;
@@ -1390,7 +1389,9 @@ class Vls.Server : Object {
 
             Vala.CodeNode result = get_best (fs, doc);
             // don't show lambda expressions on hover
-            if (result is Vala.Method && ((Vala.Method)result).closure) {
+            // don't show property accessors
+            if (result is Vala.Method && ((Vala.Method)result).closure ||
+                result is Vala.PropertyAccessor) {
                 reply_null (id, client, "textDocument/hover");
                 Vala.CodeContext.pop ();
                 return;
