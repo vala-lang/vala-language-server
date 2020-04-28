@@ -6,13 +6,13 @@ namespace Vls.SignatureHelpEngine {
                          Jsonrpc.Client client, Variant id, string method,
                          Vala.SourceFile doc, Compilation compilation,
                          Position pos) {
-        long idx = (long) Util.get_string_pos (doc.content, pos.line, pos.character);
+        // long idx = (long) Util.get_string_pos (doc.content, pos.line, pos.character);
 
-        if (idx >= 2 && doc.content[idx-1:idx] == "(") {
-            debug ("[textDocument/signatureHelp] possible argument list");
-        } else if (idx >= 1 && doc.content[idx-1:idx] == ",") {
-            debug ("[textDocument/signatureHelp] possible ith argument in list");
-        }
+        // if (idx >= 2 && doc.content[idx-1:idx] == "(") {
+        //     debug ("[textDocument/signatureHelp] possible argument list");
+        // } else if (idx >= 1 && doc.content[idx-1:idx] == ",") {
+        //     debug ("[textDocument/signatureHelp] possible ith argument in list");
+        // }
 
         var signatures = new ArrayList<SignatureInformation> ();
         int active_param = -1;
@@ -58,7 +58,7 @@ namespace Vls.SignatureHelpEngine {
         if (result is Vala.ExpressionStatement) {
             var estmt = result as Vala.ExpressionStatement;
             result = estmt.expression;
-            debug (@"[$method] peeling away expression statement: $(result)");
+            // debug (@"[$method] peeling away expression statement: $(result)");
         }
 
         var si = new SignatureInformation ();
@@ -76,16 +76,16 @@ namespace Vls.SignatureHelpEngine {
 
         if (result is Vala.MethodCall) {
             var mc = result as Vala.MethodCall;
-            var arg_list = mc.get_argument_list ();
+            // var arg_list = mc.get_argument_list ();
             // TODO: NamedArgument's, whenever they become supported in upstream
 #if VALA_FEATURE_INITIAL_ARGUMENT_COUNT
             active_param = mc.initial_argument_count - 1;
 #endif
             if (active_param < 0)
                 active_param = 0;
-            foreach (var arg in arg_list) {
-                debug (@"[$method] $mc: found argument ($arg)");
-            }
+            // foreach (var arg in arg_list) {
+            //     debug (@"[$method] $mc: found argument ($arg)");
+            // }
 
             // get the method type from the expression
             Vala.DataType data_type = mc.call.value_type;
@@ -129,22 +129,22 @@ namespace Vls.SignatureHelpEngine {
 #endif
         ) {
             var oce = result as Vala.ObjectCreationExpression;
-            var arg_list = oce.get_argument_list ();
+            // var arg_list = oce.get_argument_list ();
             // TODO: NamedArgument's, whenever they become supported in upstream
 #if VALA_FEATURE_INITIAL_ARGUMENT_COUNT
             active_param = oce.initial_argument_count - 1;
 #endif
             if (active_param < 0)
                 active_param = 0;
-            foreach (var arg in arg_list) {
-                debug (@"$oce: found argument ($arg)");
-            }
+            // foreach (var arg in arg_list) {
+            //     debug (@"$oce: found argument ($arg)");
+            // }
 
             explicit_sym = oce.symbol_reference;
 
             if (explicit_sym == null && oce.member_name != null) {
                 explicit_sym = oce.member_name.symbol_reference;
-                debug (@"[textDocument/signatureHelp] explicit_sym = $explicit_sym $(explicit_sym.type_name)");
+                // debug (@"[textDocument/signatureHelp] explicit_sym = $explicit_sym $(explicit_sym.type_name)");
             }
 
             if (explicit_sym != null && explicit_sym is Vala.Callable) {
@@ -154,12 +154,12 @@ namespace Vls.SignatureHelpEngine {
 
             parent_sym = explicit_sym.parent_symbol;
         } else {
-            debug (@"[$method] %s neither a method call nor (complete) object creation expr", result.to_string ());
+            // debug (@"[$method] %s neither a method call nor (complete) object creation expr", result.to_string ());
             return;     // early exit
         } 
 
         if (explicit_sym == null && type_sym == null) {
-            debug (@"[$method] could not get explicit_sym and type_sym from $(result.type_name)");
+            // debug (@"[$method] could not get explicit_sym and type_sym from $(result.type_name)");
             return;     // early exit
         }
 
@@ -186,7 +186,7 @@ namespace Vls.SignatureHelpEngine {
                     label = Server.get_symbol_data_type (parameter, false, null, true),
                     documentation = lang_serv.get_symbol_documentation (project, parameter)
                 });
-                debug (@"found parameter $parameter (name = $(parameter.ellipsis ? "..." :parameter.name))");
+                // debug (@"found parameter $parameter (name = $(parameter.ellipsis ? "..." :parameter.name))");
             }
             signatures.add (si);
         }
@@ -204,7 +204,7 @@ namespace Vls.SignatureHelpEngine {
         fs.result = new Gee.ArrayList<Vala.CodeNode> ();
 
         foreach (var res in fs_results) {
-            debug (@"[textDocument/signatureHelp] found $(res.type_name) (semanalyzed = $(res.checked))");
+            // debug (@"[textDocument/signatureHelp] found $(res.type_name) (semanalyzed = $(res.checked))");
             if (res is Vala.ExpressionStatement || res is Vala.MethodCall
                 || res is Vala.ObjectCreationExpression)
                 fs.result.add (res);
@@ -224,12 +224,12 @@ namespace Vls.SignatureHelpEngine {
         }
 
         if (fs.result.size == 0) {
-            debug (@"[$method] no results found");
+            // debug (@"[$method] no results found");
             return;     // early exit
         }
 
         Vala.CodeNode result = Server.get_best (fs, doc);
-        debug (@"[$method] got best: $(result.type_name) @ $(result.source_reference)");
+        // debug (@"[$method] got best: $(result.type_name) @ $(result.source_reference)");
 
         show_help (lang_serv, project, method, result, signatures, ref active_param);
     }
@@ -241,13 +241,13 @@ namespace Vls.SignatureHelpEngine {
             json_array.add_element (Json.gobject_serialize (sinfo));
 
         try {
-            debug ("sending with active_param = %d", active_param);
+            // debug ("sending with active_param = %d", active_param);
             client.reply (id, Util.object_to_variant (new SignatureHelp () {
                 signatures = signatures,
                 activeParameter = active_param
             }), Server.cancellable);
         } catch (Error e) {
-            debug (@"[textDocument/signatureHelp] failed to reply to client: $(e.message)");
+            warning (@"[textDocument/signatureHelp] failed to reply to client: $(e.message)");
         }
     }
 }

@@ -55,7 +55,7 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         }
 
         if (range.contains (pos) && (end_pos == null || range.contains (end_pos))) {
-            debug ("Got node: %s (%s) @ %s", node.type_name, node.to_string (), sr.to_string ());
+            // debug ("Got node: %s (%s) @ %s", node.type_name, node.to_string (), sr.to_string ());
             return true;
         } else {
             return false;

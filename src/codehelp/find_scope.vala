@@ -20,7 +20,7 @@ class Vls.FindScope : Vala.CodeVisitor {
 
     public FindScope (Vala.SourceFile file, Position pos, bool before_context_update = true) {
         assert (Vala.CodeContext.get () == file.context);
-        debug ("FindScope @ %s", pos.to_string ());
+        // debug ("FindScope @ %s", pos.to_string ());
         this.context = file.context;
         this.file = file;
         this.pos = pos;
@@ -85,8 +85,8 @@ class Vls.FindScope : Vala.CodeVisitor {
         bool pos_within_end = pos.compare_to (range.end) <= 0 || pos.compare_to (new_end) <= 0;
         if (pos_within_start && pos_within_end) {
             candidate_blocks.add ((Vala.Symbol) node);
-            debug ("%s (%s, @ %s / %s) added to candidates for %s",
-                node.to_string (), node.type_name, node.source_reference.to_string (), range.to_string (), pos.to_string ());
+            // debug ("%s (%s, @ %s / %s) added to candidates for %s",
+            //     node.to_string (), node.type_name, node.source_reference.to_string (), range.to_string (), pos.to_string ());
         } else {
             // debug ("%s (%s, @ %s / %s) not in candidates for %s",
             //     node.to_string (), node.type_name, node.source_reference.to_string (), range.to_string (), pos.to_string ());

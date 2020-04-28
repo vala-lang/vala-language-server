@@ -32,18 +32,18 @@ namespace Vls.CompletionEngine {
         while (lb_idx >= 0 && !doc.content[lb_idx].isspace ()) {
             if (doc.content[lb_idx] == '.' || (lb_idx >= 1 && doc.content[lb_idx-1] == '-' && doc.content[lb_idx] == '>')) {
                 var new_pos = pos.translate (0, (int) (lb_idx - idx));
-                debug ("[%s] moved cursor back from '%c'@%s -> '%c'@%s",
-                    method, doc.content[idx], pos.to_string (), doc.content[lb_idx], new_pos.to_string ());
+                // debug ("[%s] moved cursor back from '%c'@%s -> '%c'@%s",
+                //     method, doc.content[idx], pos.to_string (), doc.content[lb_idx], new_pos.to_string ());
                 idx = lb_idx;
                 pos = new_pos;
                 end_pos = pos.dup ();
                 break;
             } else if (!doc.content[lb_idx].isalnum() && doc.content[lb_idx] != '_') {
                 // if this character does not belong to an identifier, break
-                debug ("[%s] breaking, since we could not find a member access", method);
-                var new_pos = pos.translate (0, (int) (lb_idx - idx));
-                debug ("[%s] moved cursor back from '%c'@%s -> '%c'@%s",
-                    method, doc.content[idx], pos.to_string (), doc.content[lb_idx], new_pos.to_string ());
+                // debug ("[%s] breaking, since we could not find a member access", method);
+                // var new_pos = pos.translate (0, (int) (lb_idx - idx));
+                // debug ("[%s] moved cursor back from '%c'@%s -> '%c'@%s",
+                //     method, doc.content[idx], pos.to_string (), doc.content[lb_idx], new_pos.to_string ());
                 break;
             }
             lb_idx--;
@@ -52,7 +52,7 @@ namespace Vls.CompletionEngine {
         if (idx >= 1 && doc.content[idx-1] == '-' && doc.content[idx] == '>') {
             is_pointer_access = true;
             is_member_access = true;
-            debug (@"[$method] found pointer access @ $pos");
+            // debug (@"[$method] found pointer access @ $pos");
             // pos = pos.translate (0, -2);
         } else if (doc.content[idx] == '.') {
             // pos = pos.translate (0, -1);
@@ -61,8 +61,8 @@ namespace Vls.CompletionEngine {
             if (completion_context.triggerKind == CompletionTriggerKind.TriggerCharacter) {
                 // pos = pos.translate (0, -1);
                 is_member_access = true;
-            } else if (completion_context.triggerKind == CompletionTriggerKind.Invoked)
-                debug (@"[$method] invoked @ $pos");
+            } /* else if (completion_context.triggerKind == CompletionTriggerKind.Invoked)
+                debug (@"[$method] invoked @ $pos"); */
             // TODO: incomplete completions
         }
 
@@ -79,7 +79,7 @@ namespace Vls.CompletionEngine {
                               se.extracted_expression, se.block.scope, completions, false);
 
             if (completions.is_empty) {
-                debug ("[%s] trying MA completion again after context update ...", method);
+                // debug ("[%s] trying MA completion again after context update ...", method);
                 lang_serv.wait_for_context_update (id, request_cancelled => {
                     if (request_cancelled) {
                         Server.reply_null (id, client, method);
@@ -128,7 +128,7 @@ namespace Vls.CompletionEngine {
             Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
             client.reply (id, variant_array, Server.cancellable);
         } catch (Error e) {
-            debug (@"[textDocument/completion] failed to reply to client: $(e.message)");
+            warning (@"[textDocument/completion] failed to reply to client: $(e.message)");
         }
     }
 
@@ -179,10 +179,10 @@ namespace Vls.CompletionEngine {
         bool in_instance = false;
         var seen_props = new HashSet<string> ();
 
-        if (best_scope.owner.source_reference != null)
-            debug (@"[$method] best scope SR is $(best_scope.owner.source_reference)");
-        else
-            debug (@"[$method] listing symbols from $(best_scope.owner)");
+        // if (best_scope.owner.source_reference != null)
+        //     debug (@"[$method] best scope SR is $(best_scope.owner.source_reference)");
+        // else
+        //     debug (@"[$method] listing symbols from $(best_scope.owner)");
         for (Vala.Scope? current_scope = best_scope;
                 current_scope != null;
                 current_scope = current_scope.parent_scope) {
@@ -531,31 +531,31 @@ namespace Vls.CompletionEngine {
         Vala.CodeNode? peeled = null;
         Vala.Scope current_scope = scope ?? get_scope_containing_node (result);
 
-        debug (@"[$method] member: got best, $(result.type_name) `$result' (semanalyzed = $(result.checked)))");
+        // debug (@"[$method] member: got best, $(result.type_name) `$result' (semanalyzed = $(result.checked)))");
 
         do {
             if (result is Vala.MemberAccess) {
                 var ma = result as Vala.MemberAccess;
                 for (Vala.Expression? code_node = ma.inner; code_node != null; ) {
-                    debug (@"[$method] MA inner: $code_node");
+                    // debug (@"[$method] MA inner: $code_node");
                     if (code_node is Vala.MemberAccess)
                         code_node = ((Vala.MemberAccess)code_node).inner;
                     else
                         code_node = null;
                 }
                 if (ma.symbol_reference != null) {
-                    debug (@"peeling away symbol_reference from MemberAccess: $(ma.symbol_reference.type_name)");
+                    // debug (@"peeling away symbol_reference from MemberAccess: $(ma.symbol_reference.type_name)");
                     peeled = ma.symbol_reference;
                 } else {
                     debug ("MemberAccess does not have symbol_reference");
-                    if (!ma.checked) {
-                        for (Vala.CodeNode? parent = ma.parent_node; 
-                            parent != null;
-                            parent = parent.parent_node)
-                        {
-                            debug (@"parent ($parent) semanalyzed = $(parent.checked)");
-                        }
-                    }
+                    // if (!ma.checked) {
+                    //     for (Vala.CodeNode? parent = ma.parent_node; 
+                    //         parent != null;
+                    //         parent = parent.parent_node)
+                    //     {
+                    //         debug (@"parent ($parent) semanalyzed = $(parent.checked)");
+                    //     }
+                    // }
                 }
             }
 
@@ -618,7 +618,7 @@ namespace Vls.CompletionEngine {
                                             bool is_pointer_access,
                                             Position pos, Position? end_pos, Set<CompletionItem> completions) {
         string method = "textDocument/completion";
-        debug (@"[$method] FindSymbol @ $pos" + (end_pos != null ? @" -> $end_pos" : ""));
+        // debug (@"[$method] FindSymbol @ $pos" + (end_pos != null ? @" -> $end_pos" : ""));
         Vala.CodeContext.push (compilation.code_context);
 
         var fs = new FindSymbol (doc, pos, true, end_pos);
@@ -633,7 +633,7 @@ namespace Vls.CompletionEngine {
         bool in_oce = false;
 
         foreach (var res in fs.result) {
-            debug (@"[$method] found $(res.type_name) (semanalyzed = $(res.checked))");
+            // debug (@"[$method] found $(res.type_name) (semanalyzed = $(res.checked))");
             in_oce |= res is Vala.ObjectCreationExpression;
         }
 
@@ -659,7 +659,7 @@ namespace Vls.CompletionEngine {
              */
             var object_type = type as Vala.ObjectTypeSymbol;
 
-            debug (@"completion: type is object $(object_type.name) (is_instance = $is_instance, in_oce = $in_oce)");
+            debug (@"type is object $(object_type.name) (is_instance = $is_instance, in_oce = $in_oce)");
 
             foreach (var method_sym in object_type.get_methods ()) {
                 if (method_sym.name == ".new") {
@@ -806,13 +806,13 @@ namespace Vls.CompletionEngine {
                 if (gerror_sym != null) {
                     gerror_sym = gerror_sym.scope.lookup ("Error");
                     if (gerror_sym == null)
-                        debug ("GLib.Error not found");
+                        warning ("GLib.Error not found");
                     else
                         add_completions_for_type (lang_serv, project,
                             (Vala.TypeSymbol) gerror_sym, completions, 
                             current_scope, is_instance, in_oce, seen_props);
                 } else
-                    debug ("GLib not found");
+                    warning ("GLib not found");
             }
         } else if (type is Vala.Struct) {
             /**
@@ -849,7 +849,7 @@ namespace Vls.CompletionEngine {
                 }
             }
         } else {
-            debug (@"other type node $(type).\n");
+            warning (@"other type node $(type).\n");
         }
     }
 

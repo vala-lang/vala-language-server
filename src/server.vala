@@ -116,27 +116,27 @@ class Vls.Server : Object {
         pending_requests = new HashSet<Request> (Request.hash, Request.equal);
 
         server.notification.connect ((client, method, @params) => {
-            debug (@"Got notification! $method");
+            // debug (@"Got notification! $method");
             if (!is_initialized) {
-                debug ("Server is not initialized");
+                debug (@"Server is not initialized, ignoring $method");
             } else if (notif_handlers.contains (method))
                 ((NotificationHandler) notif_handlers[method]) (this, client, @params);
             else
-                debug (@"no notification handler for $method");
+                warning (@"no notification handler for $method");
         });
 
         server.handle_call.connect ((client, method, id, @params) => {
-            debug (@"Got call! $method");
+            // debug (@"Got call! $method");
             if (!is_initialized && !(method == "initialize" ||
                                      method == "shutdown" ||
                                      method == "exit")) {
-                debug ("Server is not initialized");
+                debug (@"Server is not initialized, ignoring $method");
                 return false;
             } else if (call_handlers.contains (method)) {
                 ((CallHandler) call_handlers[method]) (this, server, client, method, id, @params);
                 return true;
             } else {
-                debug (@"no call handler for $method");
+                warning (@"no call handler for $method");
                 return false;
             }
         });
@@ -345,10 +345,11 @@ class Vls.Server : Object {
             return;
 
         var req = new Request (id);
-        if (pending_requests.remove (req))
-            debug (@"[cancelRequest] cancelled request $req");
-        else
-            debug (@"[cancelRequest] request $req not found");
+        // if (pending_requests.remove (req))
+        //     debug (@"[cancelRequest] cancelled request $req");
+        // else
+        //     debug (@"[cancelRequest] request $req not found");
+        pending_requests.remove (req);
     }
 
     public static void reply_null (Variant id, Jsonrpc.Client client, string method) {
@@ -512,7 +513,7 @@ class Vls.Server : Object {
         update_context_requests += 1;
         int64 delay_us = int64.min (update_context_delay_inc_us * update_context_requests, update_context_delay_max_us);
         update_context_time_us = get_monotonic_time () + delay_us;
-        debug (@"Context(s) update (re-)scheduled in $((int) (delay_us / 1000)) ms");
+        // debug (@"Context(s) update (re-)scheduled in $((int) (delay_us / 1000)) ms");
     }
 
     /** 
@@ -558,9 +559,9 @@ class Vls.Server : Object {
         else {
             var req = new Request (id);
             if (!pending_requests.add (req))
-                debug (@"Request ($req): request already in pending requests, this should not happen");
-            else
-                debug (@"Request ($req): added request to pending requests");
+                warning (@"Request ($req): request already in pending requests, this should not happen");
+            /* else
+                debug (@"Request ($req): added request to pending requests"); */
             wait_for_context_update_aux (req, (owned) on_context_updated_func);
         }
     }
@@ -572,10 +573,10 @@ class Vls.Server : Object {
         // we've already updated the context
         if (update_context_requests == 0) {
             if (!pending_requests.remove (req)) {
-                debug (@"Request ($req): context updated but request cancelled");
+                // debug (@"Request ($req): context updated but request cancelled");
                 on_context_updated_func (true);
             } else {
-                debug (@"Request ($req): context updated");
+                // debug (@"Request ($req): context updated");
                 on_context_updated_func (false);
             }
         } else {
@@ -583,7 +584,7 @@ class Vls.Server : Object {
                 if (pending_requests.contains (req))
                     wait_for_context_update_aux (req, (owned) on_context_updated_func);
                 else {
-                    debug (@"Request ($req): cancelled before context update");
+                    // debug (@"Request ($req): cancelled before context update");
                     on_context_updated_func (true);
                 }
                 return Source.REMOVE;
@@ -660,7 +661,7 @@ class Vls.Server : Object {
                     ),
                     cancellable);
             } catch (Error e) {
-                debug (@"[publishDiagnostics] failed to notify client: $(e.message)");
+                warning (@"[publishDiagnostics] failed to notify client: $(e.message)");
             }
         }
 
@@ -675,7 +676,7 @@ class Vls.Server : Object {
                     ),
                     cancellable);
             } catch (Error e) {
-                debug (@"[publishDiagnostics] failed to publish empty diags for $(gfile.get_uri ()): $(e.message)");
+                warning (@"[publishDiagnostics] failed to publish empty diags for $(gfile.get_uri ()): $(e.message)");
             }
         }
 
@@ -690,7 +691,7 @@ class Vls.Server : Object {
                 ),
                 cancellable);
         } catch (Error e) {
-            debug (@"[publishDiagnostics] failed to publish diags without source: $(e.message)");
+            warning (@"[publishDiagnostics] failed to publish diags without source: $(e.message)");
         }
     }
 
@@ -1196,7 +1197,7 @@ class Vls.Server : Object {
         } else if (sym is Vala.TypeParameter) {
             return sym.name;
         } else {
-            debug (@"get_symbol_data_type: unsupported symbol $(sym.type_name)");
+            warning (@"get_symbol_data_type: unsupported symbol $(sym.type_name)");
         }
         return null;
     }
@@ -1381,7 +1382,7 @@ class Vls.Server : Object {
             var fs = new FindSymbol (doc, pos, true);
 
             if (fs.result.size == 0) {
-                debug ("[textDocument/hover] no results found");
+                // debug ("[textDocument/hover] no results found");
                 reply_null (id, client, "textDocument/hover");
                 Vala.CodeContext.pop ();
                 return;
@@ -1418,7 +1419,7 @@ class Vls.Server : Object {
                             result = ((Vala.Variable)sym).initializer;
                             continue;   // try again
                         }
-                        debug (@"[$method] could not handle temp variable");
+                        warning (@"[$method] could not handle temp variable for symbol %s @ %s", sym, sym.source_reference.to_string ());
                     }
                     hoverInfo.contents.add (new MarkedString () {
                         language = "vala",
@@ -1463,12 +1464,12 @@ class Vls.Server : Object {
                 break;
             } while (true);
 
-            debug (@"[textDocument/hover] got $result $(result.type_name)");
+            // debug (@"[textDocument/hover] got $result $(result.type_name)");
 
             try {
                 client.reply (id, Util.object_to_variant (hoverInfo), cancellable);
             } catch (Error e) {
-                debug ("[textDocument/hover] failed to reply to client: %s", e.message);
+                warning ("[textDocument/hover] failed to reply to client: %s", e.message);
             }
 
             Vala.CodeContext.pop ();
