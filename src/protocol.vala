@@ -195,6 +195,13 @@ namespace LanguageServer {
         public Position position { get; set; }
     }
 
+    class ReferenceParams : TextDocumentPositionParams {
+        public class ReferenceContext : Object {
+            public bool includeDeclaration { get; set; }
+        }
+        public ReferenceContext? context { get; set; }
+    }
+
     class Location : Object {
         public string uri { get; set; }
         public Range range { get; set; }
