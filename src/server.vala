@@ -1523,16 +1523,25 @@ class Vls.Server : Object {
 
     static void list_references_in_file (Vala.SourceFile file, Vala.Symbol sym, 
                                          bool include_declaration, ArrayList<Vala.CodeNode> references) {
+        var unique_srefs = new HashSet<string> ();
         if (sym is Vala.TypeSymbol) {
             var fs2 = new FindSymbol.with_filter (file, sym,
                 (needle, node) => node == needle ||
                     (node is Vala.DataType && ((Vala.DataType) node).type_symbol == needle), include_declaration);
-            references.add_all (fs2.result);
+            foreach (var node in fs2.result)
+                if (!(node.source_reference.to_string () in unique_srefs)) {
+                    references.add (node);
+                    unique_srefs.add (node.source_reference.to_string ());
+                }
         }
         var fs2 = new FindSymbol.with_filter (file, sym, 
             (needle, node) => node == needle || 
                 (node is Vala.Expression && ((Vala.Expression)node).symbol_reference == needle), include_declaration);
-        references.add_all (fs2.result);
+        foreach (var node in fs2.result)
+            if (!(node.source_reference.to_string () in unique_srefs)) {
+                references.add (node);
+                unique_srefs.add (node.source_reference.to_string ());
+            }
     }
 
     void textDocumentReferences (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
@@ -1610,12 +1619,15 @@ class Vls.Server : Object {
                 var generated_vapis = new HashSet<File> (Util.file_hash, Util.file_equal);
                 foreach (var btarget in selected_project.get_compilations ())
                     generated_vapis.add_all (btarget.output);
+                var shown_files = new HashSet<File> (Util.file_hash, Util.file_equal);
                 foreach (var btarget_w_sym in Server.get_compilations_using_symbol (selected_project, symbol))
-                    foreach (Vala.SourceFile project_file in btarget_w_sym.first.get_project_files ()) {
+                    foreach (Vala.SourceFile project_file in btarget_w_sym.first.code_context.get_source_files ()) {
                         // don't show symbol from generated VAPI
-                        if (File.new_for_commandline_arg (project_file.filename) in generated_vapis)
+                        var file = File.new_for_commandline_arg (project_file.filename);
+                        if (file in generated_vapis || file in shown_files)
                             continue;
                         list_references_in_file (project_file, btarget_w_sym.second, include_declaration, references);
+                        shown_files.add (file);
                     }
             }
             
@@ -1685,6 +1697,8 @@ class Vls.Server : Object {
             }
 
             Vala.CodeNode result = get_best (fs, doc);
+            Vala.Symbol symbol;
+
             var json_array = new Json.Array ();
             var references = new Gee.ArrayList<Vala.CodeNode> ();
 
@@ -1703,37 +1717,41 @@ class Vls.Server : Object {
                 reply_null (id, client, method);
                 Vala.CodeContext.pop ();
                 return;
+            } else {
+                symbol = (Vala.Symbol) result;
             }
 
             // show references in all files
-            foreach (var file in compilation.get_project_files ()) {
-                FindSymbol fs2;
-                if (is_abstract_type) {
-                    fs2 = new FindSymbol.with_filter (file, result,
-                    (needle, node) => {
-                        if (node is Vala.Class) {
-                            foreach (Vala.DataType dt in ((Vala.Class) node).get_base_types ())
-                                if (dt.type_symbol == needle)
-                                    return true;
-                        } else if (node is Vala.Interface) {
-                            foreach (Vala.DataType dt in ((Vala.Interface) node).get_prerequisites ())
-                                if (dt.type_symbol == needle)
-                                    return true;
-                        }
-                        return false;
-                    });
-                } else if (is_abstract_or_virtual_method) {
-                    fs2 = new FindSymbol.with_filter (file, result,
-                    (needle, node) => needle != node && (node is Vala.Method) && 
-                        (((Vala.Method)node).base_method == needle ||
-                         ((Vala.Method)node).base_interface_method == needle));
-                } else {
-                    fs2 = new FindSymbol.with_filter (file, result,
-                    (needle, node) => needle != node && (node is Vala.Property) &&
-                        (((Vala.Property)node).base_property == needle ||
-                         ((Vala.Property)node).base_interface_property == needle));
+            var generated_vapis = new HashSet<File> (Util.file_hash, Util.file_equal);
+            foreach (var btarget in selected_project.get_compilations ())
+                generated_vapis.add_all (btarget.output);
+            var shown_files = new HashSet<File> (Util.file_hash, Util.file_equal);
+            foreach (var btarget_w_sym in Server.get_compilations_using_symbol (selected_project, symbol)) {
+                foreach (var file in btarget_w_sym.first.code_context.get_source_files ()) {
+                    var gfile = File.new_for_commandline_arg (file.filename);
+                    // don't show symbol from generated VAPI
+                    if (gfile in generated_vapis || gfile in shown_files)
+                        continue;
+
+                    FindSymbol fs2;
+                    if (is_abstract_type) {
+                        fs2 = new FindSymbol.with_filter (file, btarget_w_sym.second,
+                        (needle, node) => node is Vala.ObjectTypeSymbol && 
+                            ((Vala.ObjectTypeSymbol)node).is_subtype_of ((Vala.ObjectTypeSymbol) needle), false);
+                    } else if (is_abstract_or_virtual_method) {
+                        fs2 = new FindSymbol.with_filter (file, btarget_w_sym.second,
+                        (needle, node) => needle != node && (node is Vala.Method) && 
+                            (((Vala.Method)node).base_method == needle ||
+                            ((Vala.Method)node).base_interface_method == needle), false);
+                    } else {
+                        fs2 = new FindSymbol.with_filter (file, symbol,
+                        (needle, node) => needle != node && (node is Vala.Property) &&
+                            (((Vala.Property)node).base_property == needle ||
+                            ((Vala.Property)node).base_interface_property == needle), false);
+                    }
+                    references.add_all (fs2.result);
+                    shown_files.add (gfile);
                 }
-                references.add_all (fs2.result);
             }
 
             debug (@"[$method] found $(references.size) reference(s)");
