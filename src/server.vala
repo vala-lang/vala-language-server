@@ -1506,8 +1506,37 @@ class Vls.Server : Object {
         return DocumentHighlightKind.Text;
     }
 
+    /**
+     * It's possible that a symbol can be used across build targets.
+     */
+    static Collection<Pair<Compilation, Vala.Symbol>> get_compilations_using_symbol (Project project, Vala.Symbol sym) {
+        var compilations = new ArrayList<Pair<Compilation, Vala.Symbol>> ();
+
+        foreach (var compilation in project.get_compilations ()) {
+            Vala.Symbol? matching_sym = Util.find_matching_symbol (compilation.code_context, sym);
+            if (matching_sym != null)
+                compilations.add (new Pair<Compilation, Vala.Symbol> (compilation, matching_sym));
+        }
+
+        return compilations;
+    }
+
+    static void list_references_in_file (Vala.SourceFile file, Vala.Symbol sym, 
+                                         bool include_declaration, ArrayList<Vala.CodeNode> references) {
+        if (sym is Vala.TypeSymbol) {
+            var fs2 = new FindSymbol.with_filter (file, sym,
+                (needle, node) => node == needle ||
+                    (node is Vala.DataType && ((Vala.DataType) node).type_symbol == needle), include_declaration);
+            references.add_all (fs2.result);
+        }
+        var fs2 = new FindSymbol.with_filter (file, sym, 
+            (needle, node) => node == needle || 
+                (node is Vala.Expression && ((Vala.Expression)node).symbol_reference == needle), include_declaration);
+        references.add_all (fs2.result);
+    }
+
     void textDocumentReferences (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
+        var p = Util.parse_variant<ReferenceParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {
@@ -1530,6 +1559,7 @@ class Vls.Server : Object {
 
         Position pos = p.position;
         bool is_highlight = method == "textDocument/documentHighlight";
+        bool include_declaration = p.context != null ? p.context.includeDeclaration : true;
         wait_for_context_update (id, request_cancelled => {
             if (request_cancelled) {
                 reply_null (id, client, method);
@@ -1550,6 +1580,7 @@ class Vls.Server : Object {
             }
 
             Vala.CodeNode result = get_best (fs, doc);
+            Vala.Symbol symbol;
             var json_array = new Json.Array ();
             var references = new Gee.ArrayList<Vala.CodeNode> ();
 
@@ -1558,21 +1589,34 @@ class Vls.Server : Object {
             else if (result is Vala.DataType && ((Vala.DataType)result).type_symbol != null)
                 result = ((Vala.DataType) result).type_symbol;
 
+            // ignore lambda expressions and non-symbols
+            if (!(result is Vala.Symbol) ||
+                result is Vala.Method && ((Vala.Method)result).closure) {
+                reply_null (id, client, method);
+                Vala.CodeContext.pop ();
+                return;
+            }
+
+            symbol = (Vala.Symbol) result;
+
             debug (@"[$method] got best: $result ($(result.type_name))");
-            // show references in all files
-            foreach (var file in compilation.get_project_files ()) {
-                if (result is Vala.TypeSymbol) {
-                    var fs2 = new FindSymbol.with_filter (file, result,
-                        (needle, node) => node == needle ||
-                            (node is Vala.DataType && ((Vala.DataType) node).type_symbol == needle));
-                    references.add_all (fs2.result);
-                }
-                if (result is Vala.Symbol) {
-                    var fs2 = new FindSymbol.with_filter (file, result, 
-                        (needle, node) => node == needle || 
-                            (node is Vala.Expression && ((Vala.Expression)node).symbol_reference == needle));
-                    references.add_all (fs2.result);
-                }
+            if (is_highlight || symbol is Vala.LocalVariable) {
+                // if highlight, show references in current file
+                // otherwise, we may also do this if it's a local variable, since
+                // Server.get_compilations_using_symbol() only works for global symbols
+                list_references_in_file (doc, symbol, include_declaration, references);
+            } else {
+                // show references in all files
+                var generated_vapis = new HashSet<File> (Util.file_hash, Util.file_equal);
+                foreach (var btarget in selected_project.get_compilations ())
+                    generated_vapis.add_all (btarget.output);
+                foreach (var btarget_w_sym in Server.get_compilations_using_symbol (selected_project, symbol))
+                    foreach (Vala.SourceFile project_file in btarget_w_sym.first.get_project_files ()) {
+                        // don't show symbol from generated VAPI
+                        if (File.new_for_commandline_arg (project_file.filename) in generated_vapis)
+                            continue;
+                        list_references_in_file (project_file, btarget_w_sym.second, include_declaration, references);
+                    }
             }
             
             debug (@"[$method] found $(references.size) reference(s)");

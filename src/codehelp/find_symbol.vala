@@ -13,6 +13,7 @@ class Vls.FindSymbol : Vala.CodeVisitor {
 
     private Vala.CodeNode? needle;
     private Filter? filter;
+    private bool include_declaration = true;
 
     private bool match (Vala.CodeNode node) {
         var sr = node.source_reference;
@@ -30,8 +31,12 @@ class Vls.FindSymbol : Vala.CodeVisitor {
             return false;
         }
 
-        if (filter != null)
+        if (filter != null) {
+            if (!include_declaration && 
+                (needle == node && !(needle is Vala.LocalVariable) || node.parent_node is Vala.DeclarationStatement))
+                return false;
             return filter (needle, node);
+        }
 
         var range = new Range.from_sourceref (sr);
 
@@ -76,10 +81,12 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         this.visit_source_file (file);
     }
 
-    public FindSymbol.with_filter (Vala.SourceFile file, Vala.CodeNode needle, Filter filter_func) {
+    public FindSymbol.with_filter (Vala.SourceFile file, Vala.CodeNode needle, Filter filter_func, 
+                                   bool include_declaration = true) {
         this.file = file;
         this.needle = needle;
         this.filter = filter_func;
+        this.include_declaration = include_declaration;
         this.visit_source_file (file);
     }
 
