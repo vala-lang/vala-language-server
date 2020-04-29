@@ -240,8 +240,6 @@ class Vls.SymbolExtractor : Object {
     private Queue<FakeExpr> compute_extracted_string (bool allow_parse_as_method_call = true) {
         var queue = new Queue<FakeExpr> ();
 
-        debug ("extracting symbol at %s (char = %c) ...", pos.to_string (), source_file.content[idx]);
-
         skip_whitespace ();
         bool is_member_access = skip_member_access ();
         skip_whitespace ();
@@ -249,7 +247,7 @@ class Vls.SymbolExtractor : Object {
                                                              !is_member_access &&
                                                              allow_parse_as_method_call)) != null; ) {
             queue.push_head (expr);
-            debug ("got fake expression `%s'", expr.to_string ());
+            // debug ("got fake expression `%s'", expr.to_string ());
             skip_whitespace ();
             if (!skip_member_access ())
                 break;
@@ -271,7 +269,6 @@ class Vls.SymbolExtractor : Object {
 
         // check lookup was successful
         if (queue.length == 0) {
-            debug ("could not parse a symbol");
             return;
         }
 
@@ -291,8 +288,7 @@ class Vls.SymbolExtractor : Object {
             if (head_sym == null) {
                 var symtab = current_block.scope.get_symbol_table ();
                 if (symtab != null && symtab.contains (first_part.member_name)) {
-                    debug ("found first part `%s' in symbol table @ %s, but the symbol was null",
-                           first_part.member_name, current_block.source_reference.to_string ());
+                    // found first part in symbol table, but the symbol was null
                     // exit this loop early and go to the other measure
                     might_exist = true;
                     break;
@@ -303,18 +299,15 @@ class Vls.SymbolExtractor : Object {
 
         Vala.Symbol? container = context.root;
         if (head_sym == null) {
-            debug ("performing exhaustive search within %s", (current_block ?? block).to_string ());
+            // perform exhaustive search within current_block or block
             var pair = find_variable_visible_in_block (first_part.member_name, current_block ?? block);
             if (pair != null) {
                 head_sym = pair.first;
                 container = pair.second;
-                debug ("exhaustive search found symbol %s in %s (%s)",
-                head_sym.to_string (), pair.second.to_string (), pair.second.type_name);
             }
         }
 
         if (head_sym == null) {
-            debug ("failed to find symbol for head symbol %s", first_part.member_name);
             // try again
             if (allow_parse_as_method_call)
                 compute_extracted_expression (false);
@@ -340,24 +333,18 @@ class Vls.SymbolExtractor : Object {
         this.method_arguments = first_part.method_arguments;
 #endif
 
-        debug ("current type sym is %s", current_data_type != null ? current_data_type.to_string () : null);
         while (!queue.is_empty ()) {
             FakeExpr expr = queue.pop_head ();
             Vala.Symbol? member = null;
             if (current_data_type != null) {
                 member = Vala.SemanticAnalyzer.symbol_lookup_inherited (current_data_type.type_symbol, expr.member_name);
-                debug ("symbol_lookup_inherited (%s, %s) = %s", 
-                       current_data_type.to_string (), expr.member_name, member != null ? member.to_string () : null);
             } else if (ma.symbol_reference != null) {
                 member = lookup_symbol_member (ma.symbol_reference, expr.member_name);
-                debug ("lookup_symbol_member (%s, %s) = %s",
-                ma.symbol_reference.to_string (), expr.member_name, member != null ? member.to_string () : null);
             }
             ma = new Vala.MemberAccess (ma, expr.member_name);
             ma.symbol_reference = member;
             if (member != null) {
                 current_data_type = get_data_type (member);
-                debug ("current type sym is %s", current_data_type != null ? current_data_type.to_string () : null);
                 ma.value_type = current_data_type;
 
                 if (expr.is_methodcall && member is Vala.Callable) {
