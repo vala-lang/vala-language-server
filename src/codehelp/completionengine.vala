@@ -104,11 +104,17 @@ namespace Vls.CompletionEngine {
             bool in_loop;
             bool showing_override_suggestions = false;
             walk_up_current_scope (lang_serv, doc, pos, out best_scope, out nearest_symbol, out in_loop);
+            string string_at_cursor = (new SymbolExtractor (pos, doc, compilation.code_context)).extracted_string;
             if (nearest_symbol is Vala.Class) {
-                string string_at_cursor = (new SymbolExtractor (pos, doc, compilation.code_context)).extracted_string;
-                var results = gather_missing_prereqs_and_unimplemented_symbols (doc, (Vala.Class) nearest_symbol);
-                list_unimplemented_symbols (lang_serv, project, doc, string_at_cursor, results.second, completions);
+                var results = gather_missing_prereqs_and_unimplemented_symbols ((Vala.Class) nearest_symbol);
+                // TODO: use missing prereqs (results.first)
+                list_implementable_symbols (lang_serv, project, doc, string_at_cursor, results.second, completions);
                 showing_override_suggestions = !completions.is_empty;
+            }
+            if (nearest_symbol is Vala.ObjectTypeSymbol) {
+                list_implementable_symbols (lang_serv, project, doc, string_at_cursor,
+                                            gather_base_virtual_symbols ((Vala.ObjectTypeSymbol) nearest_symbol),
+                                            completions);
             }
             if (!showing_override_suggestions) {
                 list_symbols (lang_serv, project, doc, pos, best_scope, completions);
@@ -324,7 +330,10 @@ namespace Vls.CompletionEngine {
         });
     }
 
-    void list_unimplemented_symbols (Server lang_serv, Project project,
+    /**
+     * List symbols that to implement from base classes and interfaces.
+     */
+    void list_implementable_symbols (Server lang_serv, Project project,
                                      Vala.SourceFile doc, 
                                      string prefix, Gee.List<Vala.Symbol> missing_symbols,
                                      Set<CompletionItem> completions) {
@@ -337,17 +346,29 @@ namespace Vls.CompletionEngine {
             string label = "";
             string insert_text = "";
 
+            bool is_virtual = (sym is Vala.Method) && ((Vala.Method)sym).is_virtual || 
+                                (sym is Vala.Property) && ((Vala.Property)sym).is_virtual;
+
+            string access_str = sym.access.to_string ();
+            string override_str = (sym.parent_symbol is Vala.Interface && !is_virtual) ? "" : "override ";
+            string return_type_str = "";
+
+            if (sym is Vala.Callable)
+                return_type_str = ((Vala.Callable)sym).return_type.to_string ();
+            else if (sym is Vala.Property)
+                return_type_str = ((Vala.Property)sym).property_type.to_string ();
+            
+            // TODO: use prefix to avoid inserting part of the method signature
+            // that has already been typed
+
+            insert_text += access_str + " ";
+            insert_text += override_str;
+            insert_text += return_type_str + " ";
+            insert_text += sym.name;
+
+            label += @"$access_str $override_str$return_type_str $(sym.name)";
             if (sym is Vala.Callable) {
-                string access_str = ((Vala.Callable)sym).access.to_string ();
-                string override_str = (sym.parent_symbol is Vala.Interface) ? "" : "override ";
-                string return_type_str = ((Vala.Callable)sym).return_type.to_string ();
-
-                insert_text += access_str + " ";
-                insert_text += override_str;
-                insert_text += return_type_str + " ";
-                insert_text += sym.name;
-
-                label += @"$access_str $override_str$return_type_str $(sym.name) (";
+                label += " (";
                 insert_text += " (";
                 foreach (Vala.Parameter p in ((Vala.Callable) sym).get_parameters ()) {
                     if (_p_index > 0) {
@@ -360,12 +381,18 @@ namespace Vls.CompletionEngine {
                 insert_text += ")";
                 label += ")";
             } else if (sym is Vala.Property) {
-                // TODO
-                warning ("TODO");
-                continue;
-            } else {
-                warning ("list_unimplemented_symbols: unknown sym type %s", sym.type_name);
-                continue;
+                label += " { get; set; }";
+                insert_text += " {";
+                int count = 1;
+                if (((Vala.Property)sym).get_accessor != null) {
+                    insert_text += " ${" + count.to_string () + ":get;}";
+                    count++;
+                }
+                if (((Vala.Property)sym).set_accessor != null) {
+                    insert_text += " ${" + count.to_string () + ":set;}";
+                    count++;
+                }
+                insert_text += " }";
             }
 
             insert_text += "$0";
@@ -396,13 +423,72 @@ namespace Vls.CompletionEngine {
         }
     }
 
+    Gee.List<Vala.Symbol> get_virtual_symbols (Vala.ObjectTypeSymbol tsym) {
+        var symbols = new ArrayList<Vala.Symbol> ();
+
+        if (tsym is Vala.Class) {
+            foreach (var method in ((Vala.Class)tsym).get_methods ()) {
+                if (method.is_virtual)
+                    symbols.add (method);
+            }
+            foreach (var property in ((Vala.Class)tsym).get_properties ()) {
+                if (property.is_virtual)
+                    symbols.add (property);
+            }
+        } else if (tsym is Vala.Interface) {
+            foreach (var method in ((Vala.Interface)tsym).get_methods ()) {
+                if (method.is_virtual)
+                    symbols.add (method);
+            }
+            foreach (var property in ((Vala.Interface)tsym).get_properties ()) {
+                if (property.is_virtual)
+                    symbols.add (property);
+            }
+        }
+
+        return symbols;
+    }
+
+    /**
+     * Get base virtual/abstract methods and properties.
+     */
+    Gee.List<Vala.Symbol> gather_base_virtual_symbols (Vala.ObjectTypeSymbol tsym) {
+        var implemented_symbols = new ArrayList<Vala.Symbol> ();
+        var virtual_symbols = new ArrayList<Vala.Symbol> ();
+        var base_types = new Vala.ArrayList<Vala.DataType> ();
+
+        if (tsym is Vala.Class) {
+            base_types.add_all (((Vala.Class) tsym).get_base_types ());
+        } else if (tsym is Vala.Interface) {
+            base_types.add_all (((Vala.Interface) tsym).get_prerequisites ());
+        }
+
+        foreach (var method in tsym.get_methods ())
+            if (method.base_method != null && method.base_method != method ||
+                method.base_interface_method != null && method.base_interface_method != method)
+                implemented_symbols.add (method.base_method ?? method.base_interface_method);
+
+        foreach (var property in tsym.get_properties ())
+            if (property.base_property != null && property.base_property != property ||
+                property.base_interface_property != null && property.base_interface_property != property)
+                implemented_symbols.add (property.base_property ?? property.base_interface_property);
+
+        foreach (var type in base_types)
+            if (type.type_symbol is Vala.ObjectTypeSymbol) {
+                foreach (var symbol in get_virtual_symbols ((Vala.ObjectTypeSymbol)type.type_symbol))
+                    if (!(symbol in implemented_symbols))
+                        virtual_symbols.add (symbol);
+            }
+
+        return virtual_symbols;
+    }
+
     /**
      * Taken from `Vala.Class.check ()` in `vala/valaclass.vala`
      * @param doc the current document 
      * @param csym the class symbol
      */
-    Pair<Gee.List<Vala.TypeSymbol>, Gee.List<Vala.Symbol>>? 
-        gather_missing_prereqs_and_unimplemented_symbols (Vala.SourceFile doc, Vala.Class csym) {
+    Pair<Gee.List<Vala.TypeSymbol>, Gee.List<Vala.Symbol>>? gather_missing_prereqs_and_unimplemented_symbols (Vala.Class csym) {
         if (csym.is_compact) {
             // compact classes cannot derive from anything
             return null;
@@ -425,7 +511,7 @@ namespace Vls.CompletionEngine {
 
         var missing_symbols = new ArrayList<Vala.Symbol> ();
         /* VAPI classes don't have to specify overridden methods */
-        if (doc.file_type == Vala.SourceFileType.SOURCE) {
+        if (csym.source_type == Vala.SourceFileType.SOURCE) {
             /* all abstract symbols defined in base types have to be at least defined (or implemented) also in this type */
             foreach (Vala.DataType base_type in csym.get_base_types ()) {
                 if (base_type.type_symbol is Vala.Interface) {
