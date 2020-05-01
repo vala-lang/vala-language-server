@@ -6,24 +6,27 @@ namespace Vls.SignatureHelpEngine {
                          Jsonrpc.Client client, Variant id, string method,
                          Vala.SourceFile doc, Compilation compilation,
                          Position pos) {
-        // long idx = (long) Util.get_string_pos (doc.content, pos.line, pos.character);
+        long idx = (long) Util.get_string_pos (doc.content, pos.line, pos.character);
 
-        // if (idx >= 2 && doc.content[idx-1:idx] == "(") {
-        //     debug ("[textDocument/signatureHelp] possible argument list");
-        // } else if (idx >= 1 && doc.content[idx-1:idx] == ",") {
-        //     debug ("[textDocument/signatureHelp] possible ith argument in list");
-        // }
+        if (idx >= 2 && doc.content[idx-1:idx] == "(") {
+            debug ("[textDocument/signatureHelp] possible argument list");
+        } else if (idx >= 1 && doc.content[idx-1:idx] == ",") {
+            debug ("[textDocument/signatureHelp] possible ith argument in list");
+        }
 
         var signatures = new ArrayList<SignatureInformation> ();
         int active_param = -1;
 
         Vala.CodeContext.push (compilation.code_context);
+        debug ("[%s] extracting expression ...", method);
         var se = new SymbolExtractor (pos, doc, compilation.code_context);
         if (se.extracted_expression != null) {
 #if !VALA_FEATURE_INITIAL_ARGUMENT_COUNT
             active_param = se.method_arguments - 1;
 #endif
             show_help (lang_serv, project, method, se.extracted_expression, signatures, ref active_param);
+        } else {
+            debug ("[%s] could not get extracted expression", method);
         }
         
         if (signatures.is_empty) {
