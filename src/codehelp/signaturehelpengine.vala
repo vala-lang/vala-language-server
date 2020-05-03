@@ -191,7 +191,8 @@ namespace Vls.SignatureHelpEngine {
                 });
                 // debug (@"found parameter $parameter (name = $(parameter.ellipsis ? "..." :parameter.name))");
             }
-            signatures.add (si);
+            if (!si.parameters.is_empty)
+                signatures.add (si);
         }
     }
 
