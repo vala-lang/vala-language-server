@@ -220,7 +220,7 @@ class Vls.Server : Object {
                         triggerCharacters: new Variant.strv (new string[] {".", ">"})
                     ),
                     signatureHelpProvider: buildDict(
-                        triggerCharacters: new Variant.strv (new string[] {"(", ","})
+                        triggerCharacters: new Variant.strv (new string[] {"(", "[", ","})
                     ),
                     hoverProvider: new Variant.boolean (true),
                     referencesProvider: new Variant.boolean (true),
