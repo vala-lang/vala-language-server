@@ -19,12 +19,24 @@ class Vls.DefaultProject : Project {
         Compilation btarget;
         string uri = file.get_uri ();
         string[] sources = {};
+        string[] args = {};
         // glib-2.0.vapi and gobject-2.0.vapi are already added
         if (!uri.has_suffix ("glib-2.0.vapi") && !uri.has_suffix ("gobject-2.0.vapi")) {
             sources += uri;
         }
+        // analyze interpeter line
+        if (content != null && (content.has_prefix ("#!") || content.has_prefix ("//"))) {
+            try {
+                args = Util.get_arguments_from_command_str (content.substring (2, content.index_of_char ('\n')));
+                debug ("parsed %d argument(s) from interpreter line ...", args.length);
+                for (int i = 0; i < args.length; i++)
+                    debug ("[arg %d] %s", i, args[i]);
+            } catch (RegexError rerror) {
+                warning ("failed to parse interpreter line");
+            }
+        }
         btarget = new Compilation (root_path, uri, uri, build_targets.size,
-                                   {"valac"}, {}, sources, {}, content != null ? new string[]{content} : null);
+                                   {"valac"}, args, sources, {}, content != null ? new string[]{content} : null);
         // build it now so that information is available immediately on
         // file open (other projects compile on LSP initialize(), so they don't
         // need to do this)
