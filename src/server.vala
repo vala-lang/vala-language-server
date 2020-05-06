@@ -909,18 +909,6 @@ class Vls.Server : Object {
         });
     }
 
-    public static Range get_best_range (Vala.Symbol sym) {
-        var range = new Range.from_sourceref (sym.source_reference);
-
-        if (sym is Vala.Method) {
-            var m = (Vala.Method) sym;
-            if (m.body != null && m.body.source_reference != null)
-                range = range.union (get_best_range (m.body));
-        }
-        
-        return range;
-    }
-
     public LanguageServer.MarkupContent? get_symbol_documentation (Project project, Vala.Symbol sym) {
         Vala.Symbol real_sym = find_real_sym (project, sym);
         sym = real_sym;

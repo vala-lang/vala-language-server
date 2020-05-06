@@ -59,7 +59,6 @@ class Vls.ListSymbols : Vala.CodeVisitor {
                 existing_sym.name = dsym.name;
                 existing_sym.detail = dsym.detail;
                 existing_sym.kind = dsym.kind;
-                existing_sym.range = dsym.range;
                 return existing_sym;
             } else if (existing_sym.kind == Property && dsym.kind == Field)
                 return existing_sym;
@@ -89,7 +88,6 @@ class Vls.ListSymbols : Vala.CodeVisitor {
             if (current_sym != null) {
                 // debug (@"adding $(dsym.name) to current_sym $(current_sym.name)");
                 current_sym.children.add (dsym);
-                current_sym.range = current_sym.range.union (dsym.range);
             } else {
                 if (sym.parent_symbol is Vala.Namespace 
                     && sym.parent_symbol.to_string () != "(root namespace)") {
@@ -100,7 +98,6 @@ class Vls.ListSymbols : Vala.CodeVisitor {
                         parent_dsym = ns_name_to_dsym [sym.parent_symbol.get_full_name ()];
                     // debug (@"adding $(dsym.name) to $(parent_dsym.name)");
                     parent_dsym.children.add (dsym);
-                    parent_dsym.range = parent_dsym.range.union (dsym.range);
                 } else {
                     // debug (@"adding $(dsym.name) to top_level_syms");
                     top_level_syms.add (dsym);
