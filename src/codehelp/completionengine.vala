@@ -680,6 +680,8 @@ namespace Vls.CompletionEngine {
 
             if (data_type != null && data_type.type_symbol != null)
                 add_completions_for_type (lang_serv, project, data_type, data_type.type_symbol, completions, current_scope, in_oce);
+            else if (symbol is Vala.TypeSymbol && in_oce)
+                add_completions_for_type (lang_serv, project, null, (Vala.TypeSymbol)symbol, completions, current_scope, in_oce);
             else if (symbol is Vala.Signal)
                 add_completions_for_signal (data_type, (Vala.Signal) symbol, current_scope, completions);
             else if (symbol is Vala.Namespace)
