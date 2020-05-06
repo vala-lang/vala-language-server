@@ -921,286 +921,6 @@ class Vls.Server : Object {
         return range;
     }
 
-    public static string get_expr_repr (Vala.Expression expr) {
-        if (expr is Vala.Literal)
-            return expr.to_string ();
-        var sr = expr.source_reference;
-        var file = sr.file;
-        if (file.content == null)
-            file.content = (string) file.get_mapped_contents ();
-        var from = (long) Util.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
-        var to = (long) Util.get_string_pos (file.content, sr.end.line-1, sr.end.column);
-        return file.content [from:to];
-    }
-
-    public delegate bool FindFunc (Vala.CodeNode node);
-    public static Vala.CodeNode? find_ancestor (Vala.CodeNode start_node, FindFunc filter) {
-        for (Vala.CodeNode? current_node = start_node;
-             current_node != null;
-             current_node = current_node.parent_node)
-            if (filter (current_node))
-                return current_node;
-        return null;
-    }
-
-    /**
-     * Return the string representation of a symbol's type. This is used as the detailed
-     * information for a completion item.
-     */
-    public static string? get_symbol_data_type (Vala.Symbol? sym, bool only_type_names = false, 
-        Vala.Symbol? parent = null, bool show_inits = false, string? name_override = null) {
-        if (sym == null) {
-            return null;
-        } else if (sym is Vala.Property) {
-            var prop_sym = sym as Vala.Property;
-            if (prop_sym.property_type == null)
-                return null; 
-            string weak_kw = (prop_sym.property_type.value_owned ||
-                !(prop_sym.property_type is Vala.ReferenceType)) ? "" : "weak ";
-            if (only_type_names)
-                return @"$weak_kw$(prop_sym.property_type)";
-            else {
-                string? parent_str = get_symbol_data_type (parent, only_type_names);
-                if (parent_str != null)
-                    parent_str = @"$(parent_str)::";
-                else
-                    parent_str = "";
-                return @"$weak_kw$(prop_sym.property_type) $parent_str$(name_override ?? prop_sym.name)";
-            }
-        } else if (sym is Vala.Callable) {
-            var method_sym = sym as Vala.Callable;
-            if (method_sym.return_type == null)
-                return null;
-            var creation_method = sym as Vala.CreationMethod;
-            string? ret_type = method_sym.return_type.to_string ();
-            string delg_type = (method_sym is Vala.Delegate) ? "delegate " : "";
-            bool is_async = method_sym is Vala.Method && 
-                ((Vala.Method)method_sym).coroutine && 
-                !((Vala.Method)method_sym).get_async_begin_parameters ().is_empty;
-            string param_string = "";
-            bool at_least_one = false;
-            var parameters = (is_async && name_override == "begin") ? 
-                ((Vala.Method)method_sym).get_async_begin_parameters () : method_sym.get_parameters ();
-            foreach (var p in parameters) {
-                if (at_least_one)
-                    param_string += ", ";
-                param_string += get_symbol_data_type (p, only_type_names, null, show_inits);
-                at_least_one = true;
-            }
-            string type_params = "";
-            if (method_sym is Vala.Method) {
-                var m = (Vala.Method) method_sym;
-                at_least_one = false;
-                foreach (var type_param in m.get_type_parameters ()) {
-                    if (!at_least_one)
-                        type_params += "<";
-                    else
-                        type_params += ",";
-                    type_params += type_param.name;
-                    at_least_one = true;
-                }
-
-                if (at_least_one)
-                    type_params += ">";
-            }
-            string extern_kw = method_sym.is_extern ? "extern " : "";
-            string async_type = is_async ? "async ": "";
-            string signal_type = (method_sym is Vala.Signal) ? "signal " : "";
-            string err_string = "";
-            var error_types = new Vala.ArrayList<Vala.DataType> ();
-            method_sym.get_error_types (error_types);
-            if (!error_types.is_empty) {
-                err_string = " throws ";
-                at_least_one = false;
-                foreach (var dt in error_types) {
-                    if (at_least_one)
-                        err_string += ", ";
-                    err_string += get_symbol_data_type (dt.type_symbol, true);
-                    at_least_one = true;
-                }
-            }
-            string? parent_str = parent != null ? parent.to_string () : null;
-            if (creation_method == null) {
-                if (parent_str != null)
-                    parent_str = @"$parent_str::";
-                else
-                    parent_str = "";
-                return extern_kw + async_type + signal_type + delg_type + 
-                    (ret_type ?? "void") + @" $parent_str$(name_override ?? sym.name)$type_params ($param_string)$err_string";
-            } else {
-                string sym_name = name_override ?? (sym.name == ".new" ? (parent_str ?? creation_method.class_name) : sym.name);
-                string prefix_str = "";
-                if (parent_str != null)
-                    prefix_str = @"$parent_str::";
-                else
-                    prefix_str = @"$(creation_method.class_name)::";
-                return @"$extern_kw$async_type$signal_type$delg_type$prefix_str$sym_name$type_params ($param_string)$err_string";
-            }
-        } else if (sym is Vala.Parameter) {
-            var p = sym as Vala.Parameter;
-            string param_string = "";
-            if (p.ellipsis)
-                param_string = "...";
-            else {
-                if (p.direction == Vala.ParameterDirection.OUT)
-                    param_string = "out ";
-                else if (p.direction == Vala.ParameterDirection.REF)
-                    param_string = "ref ";
-                if (only_type_names) {
-                    if (p.variable_type.type_symbol != null)
-                        param_string += p.variable_type.type_symbol.to_string ();
-                } else {
-                    param_string += p.variable_type.to_string ();
-                    param_string += " " + (name_override ?? p.name);
-                    if (show_inits && p.initializer != null && p.initializer.source_reference != null)
-                        param_string += @" = $(get_expr_repr (p.initializer))";
-                }
-            }
-            return param_string;
-        } else if (sym is Vala.Variable) {
-            // Vala.Parameter is also a variable, so we've already
-            // handled it as a special case
-            var var_sym = sym as Vala.Variable;
-            if (var_sym.variable_type == null)
-                return null;
-            string weak_kw = (var_sym.variable_type.value_owned ||
-                    !(var_sym.variable_type is Vala.ReferenceType)) ? "" : "weak ";
-            if (only_type_names)
-                return @"$weak_kw$(var_sym.variable_type)";
-            else {
-                string? parent_str = get_symbol_data_type (parent, only_type_names);
-                if (parent_str != null)
-                    parent_str = @"$(parent_str)::";
-                else
-                    parent_str = "";
-                string init_str = "";
-                if (show_inits) {
-                    var foreach_stmt = find_ancestor (var_sym, node => node is Vala.ForeachStatement) as Vala.ForeachStatement;
-                    if (foreach_stmt != null && var_sym.name == foreach_stmt.variable_name) {
-                        init_str = @" in $(foreach_stmt.collection)";
-                    } else if (var_sym.initializer != null && var_sym.initializer.source_reference != null) {
-                        init_str = @" = $(get_expr_repr (var_sym.initializer))";
-                    }
-                }
-                return @"$weak_kw$(var_sym.variable_type) $parent_str$(name_override ?? var_sym.name)$init_str";
-            }
-        } else if (sym is Vala.EnumValue) {
-            var ev_sym = sym as Vala.EnumValue;
-            if (ev_sym.value != null) {
-                if (only_type_names)
-                    return ev_sym.value.to_string ();
-                return @"$ev_sym = $(ev_sym.value)";
-            }
-            return ev_sym.to_string ();
-        } else if (sym is Vala.Constant) {
-            var const_sym = sym as Vala.Constant;
-            string type_string = "";
-            if (const_sym.value != null)
-                type_string += const_sym.value.to_string ();
-            if (const_sym.type_reference == null)
-                return type_string;
-            type_string = @"($(const_sym.type_reference)) $type_string";
-            return type_string;
-        } else if (sym is Vala.ObjectTypeSymbol) {
-            var object_sym = sym as Vala.ObjectTypeSymbol;
-            string type_string = object_sym.to_string ();
-            bool at_least_one = false;
-
-            foreach (var type_param in object_sym.get_type_parameters ()) {
-                if (!at_least_one)
-                    type_string += "<";
-                else
-                    type_string += ",";
-                type_string += type_param.name;
-                at_least_one = true;
-            }
-
-            if (at_least_one)
-                type_string += ">";
-
-            at_least_one = false;
-            if (sym is Vala.Class) {
-                var class_sym = sym as Vala.Class;
-                at_least_one = false;
-                foreach (var base_type in class_sym.get_base_types ()) {
-                    if (!at_least_one)
-                        type_string += ": ";
-                    else
-                        type_string += ", ";
-                    type_string += base_type.to_string ();
-                    at_least_one = true;
-                }
-            } else if (sym is Vala.Interface) {
-                var iface_sym = sym as Vala.Interface;
-                foreach (var prereq_type in iface_sym.get_prerequisites ()) {
-                    if (!at_least_one)
-                        type_string += ": ";
-                    else
-                        type_string += ", ";
-                    type_string += prereq_type.to_string ();
-                    at_least_one = true;
-                }
-            }
-            if (object_sym is Vala.Class) {
-                string abstract_kw = ((Vala.Class) object_sym).is_abstract ? "abstract " : "";
-                return (only_type_names ? "" : @"$(abstract_kw)class ") + @"$type_string";
-            } else
-                return (only_type_names ? "" : "interface ") + @"$type_string";
-        } else if (sym is Vala.ErrorCode) {
-            var err_sym = sym as Vala.ErrorCode;
-            if (err_sym.value != null) {
-                if (only_type_names)
-                    return err_sym.value.to_string ();
-                return @"$err_sym = $(err_sym.value)";
-            }
-            return err_sym.to_string ();
-        } else if (sym is Vala.Struct) {
-            var struct_sym = sym as Vala.Struct;
-            string extern_kw = struct_sym.is_extern ? "extern " : "";
-            string type_string = struct_sym.to_string ();
-            bool at_least_one = false;
-
-            foreach (var type_param in struct_sym.get_type_parameters ()) {
-                if (!at_least_one)
-                    type_string += "<";
-                else
-                    type_string += ",";
-                type_string += type_param.name;
-                at_least_one = true;
-            }
-
-            if (at_least_one)
-                type_string += ">";
-
-            if (struct_sym.base_type != null)
-                type_string += ": " + struct_sym.base_type.to_string ();
-
-            return (only_type_names ? "" : @"$(extern_kw)struct ") + @"$type_string";
-        } else if (sym is Vala.ErrorDomain) {
-            // don't do this if LSP ever gets CompletionItemKind.Error
-            var err_sym = sym as Vala.ErrorDomain;
-            if (only_type_names)
-                return err_sym.to_string ();
-            return @"errordomain $err_sym";
-        } else if (sym is Vala.Namespace) {
-            var ns_sym = sym as Vala.Namespace;
-            return @"$ns_sym";
-        } else if (sym is Vala.Enum) {
-            var enum_sym = sym as Vala.Enum;
-            return (only_type_names ? "" : "enum ") + @"$(enum_sym.name)";
-        } else if (sym is Vala.Destructor) {
-            var dtor = sym as Vala.Destructor;
-            string parent_str = parent != null ? parent.name : dtor.this_parameter.variable_type.type_symbol.name;
-            string dtor_name = dtor.name ?? dtor.this_parameter.variable_type.type_symbol.name;
-            return @"$parent_str::~$dtor_name ()";
-        } else if (sym is Vala.TypeParameter) {
-            return sym.name;
-        } else if (!(sym is Vala.Constructor || sym is Vala.PropertyAccessor)) {
-            warning (@"get_symbol_data_type: unsupported symbol $(sym.type_name)");
-        }
-        return null;
-    }
-
     public LanguageServer.MarkupContent? get_symbol_documentation (Project project, Vala.Symbol sym) {
         Vala.Symbol real_sym = find_real_sym (project, sym);
         sym = real_sym;
@@ -1229,64 +949,6 @@ class Vls.Server : Object {
             kind = "markdown",
             value = comment
         };
-    }
-
-    /**
-     * Find the type of a symbol in the code.
-     */
-    public static Vala.TypeSymbol? get_type_symbol (Vala.CodeContext code_context, 
-                                                    Vala.CodeNode symbol, 
-                                                    bool is_pointer, 
-                                                    ref bool is_instance,
-                                                    ref Vala.DataType? data_type) {
-        Vala.TypeSymbol? type_symbol = null;
-        if (symbol is Vala.Variable) {
-            var var_sym = symbol as Vala.Variable;
-            data_type = var_sym.variable_type;
-        } else if (symbol is Vala.Expression) {
-            var expr = symbol as Vala.Expression;
-            data_type = expr.value_type;
-        }
-
-        if (data_type != null) {
-            do {
-                if (data_type.type_symbol == null) {
-                    if (data_type is Vala.ErrorType) {
-                        var err_type = data_type as Vala.ErrorType;
-                        if (err_type.error_code != null)
-                            type_symbol = err_type.error_code;
-                        else if (err_type.error_domain != null)
-                            type_symbol = err_type.error_domain;
-                        else {
-                            // this is a generic error
-                            Vala.Symbol? sym = code_context.root.scope.lookup ("GLib");
-                            if (sym != null)
-                                sym = sym.scope.lookup ("Error");
-                            else
-                                debug ("get_type_symbol(): GLib not found");
-                            if (sym != null)
-                                type_symbol = sym as Vala.TypeSymbol;
-                            else
-                                debug (@"could not get type symbol for $(data_type.type_name)");
-                        }
-                    } else if (data_type is Vala.PointerType && is_pointer) {
-                        var ptype = data_type as Vala.PointerType;
-                        data_type = ptype.base_type;
-                        debug (@"peeled base_type $(data_type.type_name) from pointer type");
-                        continue;       // try again
-                    } else {
-                        debug (@"could not get type symbol from $(data_type.type_name)");
-                    }
-                } else
-                    type_symbol = data_type.type_symbol;
-                break;
-            } while (true);
-        } else if (symbol is Vala.TypeSymbol) {
-            type_symbol = symbol as Vala.TypeSymbol;
-            is_instance = false;
-        }
-
-        return type_symbol;
     }
 
     void textDocumentCompletion (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
@@ -1387,6 +1049,7 @@ class Vls.Server : Object {
                 return;
             }
 
+            Vala.Scope scope = (new FindScope (doc, pos)).best_block.scope;
             Vala.CodeNode result = get_best (fs, doc);
             // don't show lambda expressions on hover
             // don't show property accessors
@@ -1396,78 +1059,69 @@ class Vls.Server : Object {
                 Vala.CodeContext.pop ();
                 return;
             }
-            if (result is Vala.Symbol) {
-                Vala.Symbol real_sym = find_real_sym (selected_project, (Vala.Symbol)result);
-                result = real_sym;
-            }
             var hoverInfo = new Hover () {
                 range = new Range.from_sourceref (result.source_reference)
             };
 
-            if (result is Vala.DataType) {
-                var dt = result as Vala.DataType;
-                if (dt.type_symbol != null)
-                    result = dt.type_symbol;
-                else if (dt.symbol != null)
-                    result = dt.symbol;
+            // the instance's data type, used to resolve the symbol, which may be a member
+            Vala.DataType? data_type = null;
+            Vala.List<Vala.DataType>? method_type_arguments = null;
+            Vala.Symbol? symbol = null;
+
+            if (result is Vala.Expression) {
+                var expr = (Vala.Expression) result;
+                symbol = expr.symbol_reference;
+                data_type = expr.value_type;
+                if (symbol != null && expr is Vala.MemberAccess) {
+                    var ma = (Vala.MemberAccess) expr;
+                    if (ma.inner != null && ma.inner.value_type != null) {
+                        // get inner's data_type, which we can use to resolve expr's generic type
+                        data_type = ma.inner.value_type;
+                    }
+                    method_type_arguments = ma.get_type_arguments ();
+                }
+
+                // if data_type is the same as this variable's type, then this variable is not a member
+                // of the type 
+                // (note: this avoids variable's generic type arguments being resolved to InvalidType)
+                if (symbol is Vala.Variable && data_type != null && data_type.equals (((Vala.Variable)symbol).variable_type))
+                    data_type = null;
+            } else if (result is Vala.Symbol) {
+                symbol = (Vala.Symbol) result;
+            } else if (result is Vala.DataType) {
+                data_type = (Vala.DataType) result;
+                symbol = ((Vala.DataType)result).symbol;
+            } else {
+                warning ("result as %s not matched", result.type_name);
             }
 
-            do {
-                if (result is Vala.Symbol) {
-                    var sym = (Vala.Symbol) result;
-                    if (sym.name != null && sym.name.length > 0 && sym.name[0] == '.') {
-                        if (sym is Vala.Variable && ((Vala.Variable)sym).initializer != null) {
-                            result = ((Vala.Variable)sym).initializer;
-                            continue;   // try again
-                        }
-                        warning (@"[$method] could not handle temp variable for symbol %s @ %s", sym, sym.source_reference.to_string ());
-                    }
-                    hoverInfo.contents.add (new MarkedString () {
-                        language = "vala",
-                        value = get_symbol_data_type (result as Vala.Symbol, false, null, true)
-                    });
-                    var comment = get_symbol_documentation (selected_project, result as Vala.Symbol);
-                    if (comment != null) {
-                        hoverInfo.contents.add (new MarkedString () {
-                            value = comment.value
-                        });
-                    }
-                } else if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null) {
-                    var expr = result as Vala.Expression;
-                    var sym = expr.symbol_reference;
-                    bool is_temp_expr = sym.name.length > 0 && sym.name[0] == '.';
-                    hoverInfo.contents.add (new MarkedString () {
-                        language = "vala",
-                        value = get_symbol_data_type (sym, 
-                            result is Vala.Literal || (is_temp_expr && !(sym is Vala.Callable)), null, true)
-                    });
-                    var comment = get_symbol_documentation (selected_project, sym);
-                    if (comment != null) {
-                        hoverInfo.contents.add (new MarkedString () {
-                            value = comment.value
-                        });
-                    }
-                } else if (result is Vala.CastExpression) {
-                    hoverInfo.contents.add (new MarkedString () {
-                        language = "vala",
-                        value = get_expr_repr ((Vala.CastExpression) result)
-                    });
-                } else {
-                    bool is_instance = true;
-                    Vala.DataType? data_type = null;    // XXX: currently unused
-                    Vala.TypeSymbol? type_sym = Server.get_type_symbol (compilation.code_context,
-                                                                        result, false, ref is_instance,
-                                                                        ref data_type);
-                    hoverInfo.contents.add (new MarkedString () {
-                        language = "vala",
-                        value = type_sym != null ? get_symbol_data_type (type_sym, true, null, true) : 
-                            ((result is Vala.Expression) ? get_expr_repr ((Vala.Expression) result) : result.to_string ())
-                    });
-                }
-                break;
-            } while (true);
+            // don't show temporary variables
+            if (symbol != null && symbol.name != null && symbol.name[0] == '.' && symbol.name[1].isdigit ()) {
+                if (symbol is Vala.Variable && data_type == null)
+                    data_type = ((Vala.Variable)symbol).variable_type;
+                symbol = null;
+            }
 
-            // debug (@"[textDocument/hover] got $result $(result.type_name)");
+            // debug ("(parent) data_type is %s, symbol is %s",
+            //         CodeHelp.get_symbol_representation (data_type, null, scope),
+            //         CodeHelp.get_symbol_representation (null, symbol, scope));
+
+            string? representation = CodeHelp.get_symbol_representation (data_type, symbol, scope, method_type_arguments);
+            if (representation != null) {
+                hoverInfo.contents.add (new MarkedString () {
+                    language = "vala",
+                    value = representation
+                });
+                
+                if (symbol != null) {
+                    var comment = get_symbol_documentation (selected_project, symbol);
+                    if (comment != null) {
+                        hoverInfo.contents.add (new MarkedString () {
+                            value = comment.value
+                        });
+                    }
+                }
+            }
 
             try {
                 client.reply (id, Util.object_to_variant (hoverInfo), cancellable);

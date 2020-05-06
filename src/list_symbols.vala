@@ -43,7 +43,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
             dsym = ns_name_to_dsym [sym_full_name];
             unique = false;
         } else {
-            dsym = new DocumentSymbol.from_vala_symbol (sym, kind);
+            dsym = new DocumentSymbol.from_vala_symbol (null, sym, kind);
         }
 
         // handle conflicts

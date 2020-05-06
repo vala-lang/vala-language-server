@@ -238,9 +238,13 @@ namespace LanguageServer {
         public Range selectionRange { get; set; }
         public Gee.List<DocumentSymbol> children { get; private set; default = new Gee.LinkedList<DocumentSymbol> (); }
 
-        public DocumentSymbol.from_vala_symbol (Vala.Symbol sym, SymbolKind kind) {
+        /**
+         * @param type the data type containing this symbol, if there was one (not available for Namespaces, for example)
+         * @param sym the symbol
+         */
+        public DocumentSymbol.from_vala_symbol (Vala.DataType? type, Vala.Symbol sym, SymbolKind kind) {
             this.name = sym.name;
-            this.detail = Vls.Server.get_symbol_data_type (sym, true, null, true);
+            this.detail = Vls.CodeHelp.get_symbol_representation (type, sym, null);
             this.kind = kind;
             this.range = Vls.Server.get_best_range (sym);
             this.selectionRange = new Range.from_sourceref (sym.source_reference);
@@ -424,7 +428,6 @@ namespace LanguageServer {
         public string? insertText { get; set; }
         public InsertTextFormat insertTextFormat { get; set; }
         private uint _hash;
-        protected string _hash_string;
 
         private CompletionItem () {}
 
@@ -436,18 +439,26 @@ namespace LanguageServer {
                 this.insertTextFormat = InsertTextFormat.Snippet;
             if (documentation != null)
                 this.documentation = new MarkupContent.plaintext(documentation);
-            this._hash_string = @"$label $kind";
-            this._hash = _hash_string.hash ();
+            this._hash = this.label.hash ();
         }
 
-        public CompletionItem.from_symbol (Vala.Symbol sym, CompletionItemKind kind,
-            MarkupContent? documentation, string? label_override = null) {
+        /**
+         * A completion suggestion.
+         * 
+         * @param instance_type the parent data type of data type of the expression where this symbol appears, or null
+         * @param sym the symbol itself
+         * @param scope the scope to display this in
+         * @param kind the kind of completion to display
+         * @param documentation the documentation to display
+         * @param label_override if non-null, override the displayed symbol name with this
+         */
+        public CompletionItem.from_symbol (Vala.DataType? instance_type, Vala.Symbol sym, Vala.Scope? scope,
+            CompletionItemKind kind, MarkupContent? documentation, string? label_override = null) {
             this.label = label_override ?? sym.name;
             this.kind = kind;
-            this.detail = Vls.Server.get_symbol_data_type (sym, false, null, false, label_override);
+            this.detail = Vls.CodeHelp.get_symbol_representation (instance_type, sym, scope, null, null, false);
             this.documentation = documentation;
-            this._hash_string = @"$label $(Vls.Server.get_symbol_data_type (sym, true)) $kind";
-            this._hash = _hash_string.hash ();
+            this._hash = this.label.hash ();
 
             var version = sym.get_attribute ("Version");
             if (version != null && (version.get_bool ("deprecated") || version.get_string ("deprecated_since") != null)) {
@@ -466,8 +477,7 @@ namespace LanguageServer {
             if (insert_text.contains ("$0") || insert_text.contains ("${0"))
                 this.insertTextFormat = InsertTextFormat.Snippet;
             this.documentation = documentation;
-            this._hash_string = @"$label $insert_text $kind";
-            this._hash = _hash_string.hash ();
+            this._hash = this.label.hash ();
         }
 
         public uint hash () {
@@ -475,7 +485,7 @@ namespace LanguageServer {
         }
 
         public bool equal_to (CompletionItem other) {
-            return other._hash_string == this._hash_string;
+            return other.label == this.label && other.kind == this.kind;
         }
 
         public new void Json.Serializable.set_property (ParamSpec pspec, Value value) {

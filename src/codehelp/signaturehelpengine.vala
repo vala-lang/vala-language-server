@@ -6,27 +6,27 @@ namespace Vls.SignatureHelpEngine {
                          Jsonrpc.Client client, Variant id, string method,
                          Vala.SourceFile doc, Compilation compilation,
                          Position pos) {
-        long idx = (long) Util.get_string_pos (doc.content, pos.line, pos.character);
+        // long idx = (long) Util.get_string_pos (doc.content, pos.line, pos.character);
 
-        if (idx >= 2 && doc.content[idx-1:idx] == "(") {
-            debug ("[textDocument/signatureHelp] possible argument list");
-        } else if (idx >= 1 && doc.content[idx-1:idx] == ",") {
-            debug ("[textDocument/signatureHelp] possible ith argument in list");
-        }
+        // if (idx >= 2 && doc.content[idx-1:idx] == "(") {
+        //     debug ("[textDocument/signatureHelp] possible argument list");
+        // } else if (idx >= 1 && doc.content[idx-1:idx] == ",") {
+        //     debug ("[textDocument/signatureHelp] possible ith argument in list");
+        // }
 
         var signatures = new ArrayList<SignatureInformation> ();
         int active_param = -1;
 
         Vala.CodeContext.push (compilation.code_context);
-        debug ("[%s] extracting expression ...", method);
+        // debug ("[%s] extracting expression ...", method);
         var se = new SymbolExtractor (pos, doc, compilation.code_context);
         if (se.extracted_expression != null) {
 #if !VALA_FEATURE_INITIAL_ARGUMENT_COUNT
             active_param = se.method_arguments - 1;
 #endif
-            show_help (lang_serv, project, method, se.extracted_expression, signatures, ref active_param);
+            show_help (lang_serv, project, method, se.extracted_expression, se.block.scope, signatures, ref active_param);
         } else {
-            debug ("[%s] could not get extracted expression", method);
+            // debug ("[%s] could not get extracted expression", method);
         }
         
         if (signatures.is_empty) {
@@ -55,7 +55,7 @@ namespace Vls.SignatureHelpEngine {
     }
 
     void show_help (Server lang_serv, Project project,
-                    string method, Vala.CodeNode result,
+                    string method, Vala.CodeNode result, Vala.Scope scope,
                     Collection<SignatureInformation> signatures,
                     ref int active_param) {
         if (result is Vala.ExpressionStatement) {
@@ -70,10 +70,9 @@ namespace Vls.SignatureHelpEngine {
         // or a method. Could be null if we invoke an array element, 
         // for example.
         Vala.Symbol? explicit_sym = null;
-        // The symbol referenced indirectly
-        Vala.Symbol? type_sym = null;
-        // The parent symbol (useful for creation methods)
-        Vala.Symbol? parent_sym = null;
+        // The data type of the expression
+        Vala.DataType? data_type = null;
+        Vala.List<Vala.DataType>? method_type_arguments = null;
         // either "begin" or "end" or null
         string? coroutine_name = null;
 
@@ -91,19 +90,17 @@ namespace Vls.SignatureHelpEngine {
             // }
 
             // get the method type from the expression
-            Vala.DataType data_type = mc.call.value_type;
+            data_type = mc.call.value_type;
             explicit_sym = mc.call.symbol_reference;
+            if (mc.call is Vala.MemberAccess)
+                method_type_arguments = ((Vala.MemberAccess)mc.call).get_type_arguments ();
 
             if (data_type is Vala.CallableType) {
-                var ct = data_type as Vala.CallableType;
+                var ct = (Vala.CallableType) data_type;
                 param_list = ct.get_parameters ();
     
-                if (ct is Vala.DelegateType) {
-                    var dt = ct as Vala.DelegateType;
-                    type_sym = dt.delegate_symbol;
-                } else if (ct is Vala.MethodType) {
+                if (ct is Vala.MethodType) {
                     var mt = ct as Vala.MethodType;
-                    type_sym = mt.method_symbol;
 
                     // handle special cases for .begin() and .end() in coroutines (async methods)
                     if (mc.call is Vala.MemberAccess && mt.method_symbol.coroutine &&
@@ -115,17 +112,19 @@ namespace Vls.SignatureHelpEngine {
                             param_list = mt.method_symbol.get_async_begin_parameters ();
                         else if (coroutine_name == "end") {
                             param_list = mt.method_symbol.get_async_end_parameters ();
-                            type_sym = mt.method_symbol.get_end_method ();
+                            explicit_sym = mt.method_symbol.get_end_method ();
                             coroutine_name = null;  // .end() is its own method
                         } else if (coroutine_name != null) {
                             debug (@"[$method] coroutine name `$coroutine_name' not handled");
                         }
                     }
-                } else if (ct is Vala.SignalType) {
-                    var st = ct as Vala.SignalType;
-                    type_sym = st.signal_symbol;
                 }
             }
+
+            // now make data_type refer to the parent expression's type (if it exists)
+            data_type = null;
+            if (mc.call is Vala.MemberAccess && ((Vala.MemberAccess)mc.call).inner != null)
+                data_type = ((Vala.MemberAccess)mc.call).inner.value_type;
         } else if (result is Vala.ObjectCreationExpression
 #if VALA_FEATURE_INITIAL_ARGUMENT_COUNT
                     && ((Vala.ObjectCreationExpression)result).initial_argument_count != -1
@@ -144,6 +143,9 @@ namespace Vls.SignatureHelpEngine {
             // }
 
             explicit_sym = oce.symbol_reference;
+            data_type = oce.value_type;
+            if (oce.member_name != null)
+                method_type_arguments = oce.member_name.get_type_arguments ();
 
             if (explicit_sym == null && oce.member_name != null) {
                 explicit_sym = oce.member_name.symbol_reference;
@@ -154,39 +156,24 @@ namespace Vls.SignatureHelpEngine {
                 var callable_sym = explicit_sym as Vala.Callable;
                 param_list = callable_sym.get_parameters ();
             }
-
-            parent_sym = explicit_sym.parent_symbol;
         } else {
             // debug (@"[$method] %s neither a method call nor (complete) object creation expr", result.to_string ());
             return;     // early exit
         } 
 
-        if (explicit_sym == null && type_sym == null) {
-            // debug (@"[$method] could not get explicit_sym and type_sym from $(result.type_name)");
+        if (explicit_sym == null && data_type == null) {
+            // debug (@"[$method] could not get explicit_sym and data_type from $(result.type_name)");
             return;     // early exit
         }
 
-        if (explicit_sym == null) {
-            si.label = Server.get_symbol_data_type (type_sym, false, null, true);
-            si.documentation = lang_serv.get_symbol_documentation (project, type_sym);
-        } else {
-            // TODO: need a function to display symbol names correctly given context
-            if (type_sym != null) {
-                si.label = Server.get_symbol_data_type (type_sym, false, null, true, coroutine_name);
-                si.documentation = lang_serv.get_symbol_documentation (project, type_sym);
-            } else {
-                si.label = Server.get_symbol_data_type (explicit_sym, false, parent_sym, true, coroutine_name);
-            }
-            // try getting the documentation for the explicit symbol
-            // if the type does not have any documentation
-            if (si.documentation == null)
-                si.documentation = lang_serv.get_symbol_documentation (project, explicit_sym);
-        }
+        si.label = CodeHelp.get_symbol_representation (data_type, explicit_sym, scope, method_type_arguments);
+        if (explicit_sym != null)
+            si.documentation = lang_serv.get_symbol_documentation (project, explicit_sym);
 
         if (param_list != null) {
             foreach (var parameter in param_list) {
                 si.parameters.add (new ParameterInformation () {
-                    label = Server.get_symbol_data_type (parameter, false, null, true),
+                    label = CodeHelp.get_symbol_representation (data_type, parameter, scope, method_type_arguments),
                     documentation = lang_serv.get_symbol_documentation (project, parameter)
                 });
                 // debug (@"found parameter $parameter (name = $(parameter.ellipsis ? "..." :parameter.name))");
@@ -233,9 +220,10 @@ namespace Vls.SignatureHelpEngine {
         }
 
         Vala.CodeNode result = Server.get_best (fs, doc);
+        Vala.Scope scope = CodeHelp.get_scope_containing_node (result);
         // debug (@"[$method] got best: $(result.type_name) @ $(result.source_reference)");
 
-        show_help (lang_serv, project, method, result, signatures, ref active_param);
+        show_help (lang_serv, project, method, result, scope, signatures, ref active_param);
     }
 
     void finish (Jsonrpc.Client client, Variant id, Collection<SignatureInformation> signatures, int active_param) {
