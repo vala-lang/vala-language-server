@@ -289,7 +289,12 @@ class Vls.SymbolExtractor : Object {
                 return expr;
             } else {
                 Vala.Expression inner = resolve_typed_expression (fake_ma.inner);
+                Vala.List<Vala.DataType>? method_type_arguments = null;
                 Vala.Symbol? symbol;
+
+                if (inner is Vala.MemberAccess)
+                    method_type_arguments = ((Vala.MemberAccess)inner).get_type_arguments ();
+
                 if (inner.value_type != null) {
                     symbol = Vala.SemanticAnalyzer.get_symbol_for_data_type (inner.value_type);
                     if (symbol == null)
@@ -310,11 +315,16 @@ class Vls.SymbolExtractor : Object {
                     expr.value_type = ((Vala.Property)member).property_type;
                 else if (member is Vala.Callable)
                     expr.value_type = get_callable_type_for_callable ((Vala.Callable)member);
+                if (expr.value_type != null)
+                    expr.value_type = expr.value_type.get_actual_type (inner.value_type, method_type_arguments, expr);
                 return expr;
             }
         } else if (fake_expr is FakeMethodCall) {
             var fake_mc = (FakeMethodCall) fake_expr;
             Vala.Expression call = resolve_typed_expression (fake_mc.inner);
+            Vala.List<Vala.DataType>? method_type_arguments = null;
+            if (call is Vala.MemberAccess)
+                method_type_arguments = ((Vala.MemberAccess)call).get_type_arguments ();
             var expr = new Vala.MethodCall (call);
             Vala.Callable? callable;
             if (call.value_type != null) {
@@ -327,6 +337,11 @@ class Vls.SymbolExtractor : Object {
             }
             if (callable != null)
                 expr.value_type = callable.return_type;
+            if (call is Vala.MemberAccess && ((Vala.MemberAccess)call).inner != null) {
+                var call_inner = ((Vala.MemberAccess)call).inner;
+                if (call_inner.value_type != null)
+                    expr.value_type = expr.value_type.get_actual_type (call_inner.value_type, method_type_arguments, expr);
+            }
 #if VALA_FEATURE_INITIAL_ARGUMENT_COUNT
             expr.initial_argument_count = fake_mc.arguments_count;
 #endif
@@ -349,6 +364,8 @@ class Vls.SymbolExtractor : Object {
                 } else {
                     throw new TypeResolutionError.NTH_EXPRESSION ("OCE: inner expr neither Class nor method");
                 }
+                if (expr.member_name != null && expr.value_type != null)
+                    expr.value_type = expr.value_type.get_actual_type (expr.member_name.value_type, expr.member_name.get_type_arguments (), expr);
 #if VALA_FEATURE_INITIAL_ARGUMENT_COUNT
                 expr.initial_argument_count = ((FakeMethodCall)fake_oce.inner).arguments_count;
 #endif
