@@ -230,11 +230,20 @@ namespace LanguageServer {
     }
 
     class DocumentSymbol : Object, Json.Serializable {
+        private Vala.SourceReference? _source_reference;
         public string name { get; set; }
         public string? detail { get; set; }
         public SymbolKind kind { get; set; }
         public bool deprecated { get; set; }
-        public Range range { get; set; }
+        private Range? _initial_range;
+        public Range range {
+            owned get {
+                if (_initial_range == null)
+                    _initial_range = new Range.from_sourceref (children.first ()._source_reference);
+                
+                return children.fold<Range> ((child, current_range) => current_range.union (child.range), _initial_range);
+            }
+        }
         public Range selectionRange { get; set; }
         public Gee.List<DocumentSymbol> children { get; private set; default = new Gee.LinkedList<DocumentSymbol> (); }
 
@@ -243,10 +252,20 @@ namespace LanguageServer {
          * @param sym the symbol
          */
         public DocumentSymbol.from_vala_symbol (Vala.DataType? type, Vala.Symbol sym, SymbolKind kind) {
+            this._initial_range = new Range.from_sourceref (sym.source_reference);
+            if (sym is Vala.Subroutine) {
+                var sub = (Vala.Subroutine) sym;
+                var body_sref = sub.body != null ? sub.body.source_reference : null;
+                // debug ("subroutine %s found (body @ %s)", sym.get_full_name (),
+                //         body_sref != null ? body_sref.to_string () : null);
+                if (body_sref != null && (body_sref.begin.line < body_sref.end.line ||
+                                          body_sref.begin.line == body_sref.end.line && body_sref.begin.pos <= body_sref.end.pos)) {
+                    this._initial_range = this._initial_range.union (new Range.from_sourceref (body_sref));
+                }
+            }
             this.name = sym.name;
             this.detail = Vls.CodeHelp.get_symbol_representation (type, sym, null);
             this.kind = kind;
-            this.range = Vls.Server.get_best_range (sym);
             this.selectionRange = new Range.from_sourceref (sym.source_reference);
             this.deprecated = sym.version.deprecated;
         }
