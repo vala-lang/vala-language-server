@@ -21,10 +21,12 @@ class Vls.SymbolExtractor : Object {
 
     class FakeMemberAccess : FakeExpr {
         public string member_name { get; private set; }
+        public ArrayList<FakeMemberAccess> type_arguments { get; private set; }
 
-        public FakeMemberAccess (string member_name, FakeExpr? inner = null) {
+        public FakeMemberAccess (string member_name, ArrayList<FakeMemberAccess>? type_arguments = null, FakeExpr? inner = null) {
             base (inner);
             this.member_name = member_name;
+            this.type_arguments = type_arguments ?? new ArrayList<FakeMemberAccess> ();
         }
 
         public override string to_string () {
@@ -244,6 +246,19 @@ class Vls.SymbolExtractor : Object {
         return null;
     }
 
+    static Vala.DataType? get_data_type_for_symbol (Vala.Symbol symbol) {
+        if (symbol is Vala.Variable)
+            return ((Vala.Variable)symbol).variable_type;
+        else if (symbol is Vala.Property)
+            return ((Vala.Property)symbol).property_type;
+        else if (symbol is Vala.Callable)
+            return get_callable_type_for_callable ((Vala.Callable)symbol);
+        var resolved_type = Vala.SemanticAnalyzer.get_data_type_for_symbol (symbol);
+        if (resolved_type is Vala.InvalidType)
+            return null;
+        return resolved_type;
+    }
+
     private Vala.Expression resolve_typed_expression (FakeExpr fake_expr) throws TypeResolutionError {
         if (fake_expr is FakeMemberAccess) {
             var fake_ma = (FakeMemberAccess) fake_expr;
@@ -279,13 +294,14 @@ class Vls.SymbolExtractor : Object {
                 }
 
                 var expr = new Vala.MemberAccess (null, fake_ma.member_name);
+                foreach (var type_argument in fake_ma.type_arguments) {
+                    var resolved_data_type = get_data_type_for_symbol (resolve_typed_expression (type_argument).symbol_reference);
+                    if (resolved_data_type == null)
+                        break;
+                    expr.add_type_argument (resolved_data_type);
+                }
                 expr.symbol_reference = resolved_sym;
-                if (resolved_sym is Vala.Variable)
-                    expr.value_type = ((Vala.Variable)resolved_sym).variable_type;
-                else if (resolved_sym is Vala.Property)
-                    expr.value_type = ((Vala.Property)resolved_sym).property_type;
-                else if (resolved_sym is Vala.Callable)
-                    expr.value_type = get_callable_type_for_callable ((Vala.Callable)resolved_sym);
+                expr.value_type = get_data_type_for_symbol (resolved_sym);
                 return expr;
             } else {
                 Vala.Expression inner = resolve_typed_expression (fake_ma.inner);
@@ -308,6 +324,12 @@ class Vls.SymbolExtractor : Object {
                 if (member == null)
                     throw new TypeResolutionError.NTH_EXPRESSION ("could not resolve member `%s' from inner", fake_ma.member_name);
                 var expr = new Vala.MemberAccess (inner, fake_ma.member_name);
+                foreach (var type_argument in fake_ma.type_arguments) {
+                    var resolved_data_type = resolve_typed_expression (type_argument).value_type;
+                    if (resolved_data_type == null)
+                        break;
+                    expr.add_type_argument (resolved_data_type);
+                }
                 expr.symbol_reference = member;
                 if (member is Vala.Variable)
                     expr.value_type = ((Vala.Variable)member).variable_type;
@@ -606,10 +628,38 @@ class Vls.SymbolExtractor : Object {
         return false;
     }
 
+    private ArrayList<FakeMemberAccess>? parse_fake_type_arguments () {
+        long saved_idx = this.idx;
+
+        if (!skip_char ('>'))
+            return null;
+        skip_whitespace ();
+        
+        var type_arguments = new ArrayList<FakeMemberAccess> ();
+        FakeMemberAccess? ma_expr = null;
+        while ((ma_expr = parse_fake_member_access_expr (false)) != null) {
+            type_arguments.insert (0, ma_expr);
+            skip_whitespace ();
+            if (!skip_char (','))
+                break;
+        }
+        
+        skip_whitespace ();
+        if (!skip_char ('<')) {
+            this.idx = saved_idx;
+            return null;
+        }
+
+        return type_arguments;
+    }
+
     private FakeMemberAccess? parse_fake_member_access_expr (bool allow_inner_exprs = true) {
         FakeMemberAccess? ma_expr = null;
+        ArrayList<FakeMemberAccess>? type_arguments = null;
         string? ident;
+        long saved_idx = this.idx;
 
+        type_arguments = parse_fake_type_arguments ();
         if ((ident = parse_ident ()) != null) {
             FakeExpr? inner = null;
             skip_whitespace ();
@@ -617,7 +667,10 @@ class Vls.SymbolExtractor : Object {
                 skip_whitespace ();
                 inner = allow_inner_exprs ? parse_fake_expr () : parse_fake_member_access_expr ();
             }
-            ma_expr = new FakeMemberAccess (ident, inner);
+            ma_expr = new FakeMemberAccess (ident, type_arguments, inner);
+        } else {
+            // reset
+            this.idx = saved_idx;
         }
 
         return ma_expr;
@@ -654,7 +707,7 @@ class Vls.SymbolExtractor : Object {
                 skip_whitespace ();
                 expr = parse_fake_expr (/* oce_allowed = false */);
                 if (expr != null)
-                    return new FakeMethodCall (method_arguments.size, new FakeMemberAccess ("get", expr));
+                    return new FakeMethodCall (method_arguments.size, new FakeMemberAccess ("get", null, expr));
             }
             return null;
         }
