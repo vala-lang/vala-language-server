@@ -491,8 +491,8 @@ class Vls.SymbolExtractor : Object {
         if (lb_idx == idx || lb_idx < 0)
             return null;
         
-        if (!source_file.content[lb_idx+1].isalpha ())
-            // ident must start with alpha character
+        if (!(source_file.content[lb_idx+1].isalpha () || source_file.content[lb_idx+1] == '_'))
+            // ident must start with alpha or underline character
             return null;
 
         string ident = source_file.content.substring (lb_idx + 1, idx - lb_idx);
