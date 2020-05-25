@@ -230,6 +230,7 @@ namespace Vls.CodeHelp {
                 } else {
                     builder.append (type_parameter.name);
                 }
+                i++;
             }
             builder.append_c ('>');
         }
