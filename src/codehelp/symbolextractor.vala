@@ -253,10 +253,41 @@ class Vls.SymbolExtractor : Object {
             return ((Vala.Property)symbol).property_type;
         else if (symbol is Vala.Callable)
             return get_callable_type_for_callable ((Vala.Callable)symbol);
-        var resolved_type = Vala.SemanticAnalyzer.get_data_type_for_symbol (symbol);
-        if (resolved_type is Vala.InvalidType)
-            return null;
-        return resolved_type;
+        return null;
+    }
+
+    /**
+     * Reinterprets a member access as a data type. For example, if we have `Vala.List<int>`,
+     * this is a member access (`Vala` and then `List`) that is a type symbol with parameter `int`. 
+     * This method handles the type arguments of the member access so that they become the type 
+     * arguments of the data type.
+     *
+     * @return the new data type, or invalid if the member access is not of a type symbol
+     */
+    private Vala.DataType? convert_member_access_to_data_type (Vala.MemberAccess ma_expr) {
+        var data_type = Vala.SemanticAnalyzer.get_data_type_for_symbol (ma_expr.symbol_reference);
+        var data_type_type_arguments = data_type.get_type_arguments ();
+        // add type arguments of this type argument, if there are any
+        // NOTE: we can't get this information through type_expr.value_type; we must get it from the type arguments
+        var type_arguments = ma_expr.get_type_arguments ();
+        if (type_arguments != null) {
+            Vala.List<Vala.TypeParameter>? type_parameters = null;
+            if (ma_expr.symbol_reference is Vala.ObjectTypeSymbol)
+                type_parameters = ((Vala.ObjectTypeSymbol)ma_expr.symbol_reference).get_type_parameters ();
+            else if (ma_expr.symbol_reference is Vala.Struct)
+                type_parameters = ((Vala.Struct)ma_expr.symbol_reference).get_type_parameters ();
+            if (type_parameters != null) {
+                foreach (var type_parameter in type_parameters) {
+                    int idx = ((Vala.TypeSymbol)ma_expr.symbol_reference).get_type_parameter_index (type_parameter.name);
+                    if (idx < type_arguments.size && idx < data_type_type_arguments.size)
+                        data_type.replace_type (data_type_type_arguments[idx], type_arguments[idx]);
+                    else
+                        break;
+                }
+            }
+        }
+        data_type.value_owned = true;
+        return data_type;
     }
 
     private Vala.Expression resolve_typed_expression (FakeExpr fake_expr) throws TypeResolutionError {
@@ -295,10 +326,9 @@ class Vls.SymbolExtractor : Object {
 
                 var expr = new Vala.MemberAccess (null, fake_ma.member_name);
                 foreach (var type_argument in fake_ma.type_arguments) {
-                    var resolved_data_type = get_data_type_for_symbol (resolve_typed_expression (type_argument).symbol_reference);
-                    if (resolved_data_type == null)
-                        break;
-                    expr.add_type_argument (resolved_data_type);
+                    var type_expr = resolve_typed_expression (type_argument);
+                    var data_type = convert_member_access_to_data_type ((Vala.MemberAccess)type_expr);
+                    expr.add_type_argument (data_type);
                 }
                 expr.symbol_reference = resolved_sym;
                 expr.value_type = get_data_type_for_symbol (resolved_sym);
@@ -325,18 +355,12 @@ class Vls.SymbolExtractor : Object {
                     throw new TypeResolutionError.NTH_EXPRESSION ("could not resolve member `%s' from inner", fake_ma.member_name);
                 var expr = new Vala.MemberAccess (inner, fake_ma.member_name);
                 foreach (var type_argument in fake_ma.type_arguments) {
-                    var resolved_data_type = resolve_typed_expression (type_argument).value_type;
-                    if (resolved_data_type == null)
-                        break;
-                    expr.add_type_argument (resolved_data_type);
+                    var type_expr = resolve_typed_expression (type_argument);
+                    var data_type = convert_member_access_to_data_type ((Vala.MemberAccess)type_expr);
+                    expr.add_type_argument (data_type);
                 }
                 expr.symbol_reference = member;
-                if (member is Vala.Variable)
-                    expr.value_type = ((Vala.Variable)member).variable_type;
-                else if (member is Vala.Property)
-                    expr.value_type = ((Vala.Property)member).property_type;
-                else if (member is Vala.Callable)
-                    expr.value_type = get_callable_type_for_callable ((Vala.Callable)member);
+                expr.value_type = get_data_type_for_symbol (member);
                 if (expr.value_type != null)
                     expr.value_type = expr.value_type.get_actual_type (inner.value_type, method_type_arguments, expr);
                 return expr;
@@ -376,18 +400,16 @@ class Vls.SymbolExtractor : Object {
                 var inner_sym = inner_ma.symbol_reference;
                 var expr = new Vala.ObjectCreationExpression (inner_ma);
                 if (inner_sym is Vala.Class) {
-                    expr.value_type = Vala.SemanticAnalyzer.get_data_type_for_symbol (inner_sym);
                     expr.symbol_reference = ((Vala.Class)inner_sym).default_construction_method;
+                    expr.value_type = convert_member_access_to_data_type (inner_ma);
                 } else if (inner_sym is Vala.Method) {
                     if (!(inner_sym is Vala.CreationMethod))
                         throw new TypeResolutionError.NTH_EXPRESSION ("OCE: inner expr not CreationMethod");
-                    expr.value_type = Vala.SemanticAnalyzer.get_data_type_for_symbol (inner_sym.parent_symbol);
                     expr.symbol_reference = inner_sym;
+                    expr.value_type = convert_member_access_to_data_type ((Vala.MemberAccess)inner_ma.inner);
                 } else {
                     throw new TypeResolutionError.NTH_EXPRESSION ("OCE: inner expr neither Class nor method");
                 }
-                if (expr.member_name != null && expr.value_type != null)
-                    expr.value_type = expr.value_type.get_actual_type (expr.member_name.value_type, expr.member_name.get_type_arguments (), expr);
 #if VALA_FEATURE_INITIAL_ARGUMENT_COUNT
                 expr.initial_argument_count = ((FakeMethodCall)fake_oce.inner).arguments_count;
 #endif
@@ -395,7 +417,9 @@ class Vls.SymbolExtractor : Object {
             } else {
                 // inner is Vala.MemberAccess
                 // this is an incomplete MA
-                return new Vala.ObjectCreationExpression ((Vala.MemberAccess) inner);
+                var inner_ma = (Vala.MemberAccess) inner;
+                inner_ma.value_type = convert_member_access_to_data_type (inner_ma);
+                return new Vala.ObjectCreationExpression (inner_ma);
             }
         } else if (fake_expr is FakeLiteral) {
             if (fake_expr is FakeStringLiteral) {
@@ -448,7 +472,7 @@ class Vls.SymbolExtractor : Object {
         
         try {
             _extracted_expression = resolve_typed_expression (expr);
-            // debug ("resolved expression - %s", _extracted_expression.type_name);
+            // debug ("resolved extracted expression as %s", _extracted_expression.type_name);
         } catch (TypeResolutionError e) {
             // debug ("failed to resolve expression - %s", e.message);
         }
