@@ -106,9 +106,9 @@ class Vls.Compilation : BuildTarget {
                 _gresources_dirs.add (arg_value);
             } else if (flag_name == "define") {
                 _defines.add (arg_value);
-            } else if (flag_name == "experimental") {
+            } else if (flag_name == "enable-experimental") {
                 _experimental = true;
-            } else if (flag_name == "experimental-non-null") {
+            } else if (flag_name == "enable-experimental-non-null") {
                 _experimental_non_null = true;
             } else if (flag_name == "fatal-warnings") {
                 _fatal_warnings = true;
