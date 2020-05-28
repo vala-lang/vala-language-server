@@ -6,6 +6,7 @@
 We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudio.com/items?itemName=prince781.vala).
 
 - Arch Linux (via AUR): `yay -S vala-language-server`
+  or `yay -S vala-language-server-git`
 
 - Alpine Linux Edge: `apk add vala-language-server`
 
@@ -46,13 +47,12 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 - [x] code completion
     - [x] basic (member access and scope-visible completion)
     - [ ] advanced (context-sensitive suggestions)
-    - completion support relies heavily on changes made upstream to the Vala parser. See [this MR](https://gitlab.gnome.org/GNOME/vala/-/merge_requests/95) if you want to build VLS with improved completion ability
 - [x] document symbol outline
 - [x] goto definition
 - [x] symbol references
 - [x] goto implementation
 - [x] signature help
-    - active parameter support requires upstream changes in vala and is disabled by default. use `meson -Dactive_parameter=true` to enable. see [this MR](https://gitlab.gnome.org/GNOME/vala/-/merge_requests/95)
+    - active parameter support requires upstream changes in vala and is disabled by default. use `meson -Dactive_parameter=true` to enable. see [this MR](https://gitlab.gnome.org/GNOME/vala/-/merge_requests/95). VLS by default uses a workaround that should satisfy 90% of cases.
 - [x] hover
 - [x] symbol documentation
     - [x] basic (from comments)
@@ -66,10 +66,11 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 - [ ] supported IDEs (see Setup below):
     - [x] vim with `vim-lsp` plugin installed
     - [x] Visual Studio Code
-    - [x] GNOME Builder >= 3.36
+    - [x] GNOME Builder >= 3.36 with custom VLS plugin enabled (see below)
     - [ ] IntelliJ
 - [ ] supported project build systems
     - [x] meson
+    - [x] `compile_commands.json`
     - [ ] autotoools
     - [ ] cmake
 
@@ -78,6 +79,7 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 - `gobject-2.0`
 - `gio-2.0` and either `gio-unix-2.0` or `gio-windows-2.0`
 - `gee-0.8`
+- `json-glib-1.0`
 - `jsonrpc-glib-1.0`
 - `libvala-0.48 / vala-0.48` release
 - you also need the `posix` VAPI, which should come preinstalled
@@ -96,6 +98,25 @@ This will install `vala-language-server` to `$PREFIX/bin`
 ### With Vim
 Once you have VLS installed, you can use it with `vim`.
 
+#### coc.nvim
+1. Make sure [coc.nvim](https://github.com/neoclide/coc.nvim) is installed.
+2. After successful installation, in Vim run `:CocConfig` and add a new custom
+   entry for VLS like below:
+
+```json
+{
+    ...
+
+    "vala": {
+        "command": "vala-language-server",
+        "filetypes": ["vala", "genie"]
+    },
+
+    ...
+}
+```
+
+#### vim-lsp
 1. Make sure [vim-lsp](https://github.com/prabirshrestha/vim-lsp) is installed
 2. Add the following to your `.vimrc`:
 
@@ -104,7 +125,7 @@ if executable('vala-language-server')
   au User lsp_setup call lsp#register_server({
         \ 'name': 'vala-language-server',
         \ 'cmd': {server_info->[&shell, &shellcmdflag, 'vala-language-server']},
-        \ 'whitelist': ['vala'],
+        \ 'whitelist': ['vala', 'genie'],
         \ })
 endif
 ```
