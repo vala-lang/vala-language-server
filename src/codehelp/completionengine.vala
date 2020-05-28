@@ -71,7 +71,7 @@ namespace Vls.CompletionEngine {
 
             var se = new SymbolExtractor (pos, doc);
             if (se.extracted_expression != null)
-                show_members (lang_serv, project, doc, compilation, is_pointer_access, false /* TODO */, 
+                show_members (lang_serv, project, doc, compilation, is_pointer_access, se.extracted_expression is Vala.ObjectCreationExpression, 
                               se.extracted_expression, se.block.scope, completions, false);
 
             if (completions.is_empty) {
