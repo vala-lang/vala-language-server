@@ -24,6 +24,8 @@ class Vls.TextDocument : SourceFile {
             ftype = SourceFileType.NONE;
             warning ("TextDocument: file %s is neither a package nor a source file", uri);
         }
-        base (context, ftype, uri, cont, cmdline);
+        // prefer paths to URIs, unless we don't have a path
+        // (this happens when we have just opened a new file in some editors)
+        base (context, ftype, path ?? uri, cont, cmdline);
     }
 }
