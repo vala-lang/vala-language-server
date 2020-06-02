@@ -158,7 +158,8 @@ class Vls.Compilation : BuildTarget {
             unowned string source = sources[i];
             unowned string? content = sources_content != null ? sources_content[i] : null;
 
-            if (Uri.parse_scheme (source) != null) {
+            string? uri_scheme = Uri.parse_scheme (source);
+            if (uri_scheme != null && uri_scheme.down () != "c") {
                 var file = File.new_for_uri (source);
                 input.add (file);
                 if (content != null)
