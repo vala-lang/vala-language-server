@@ -900,7 +900,9 @@ namespace Vls.CompletionEngine {
             var errdomain_sym = (Vala.ErrorDomain) type_symbol;
 
             foreach (var code_sym in errdomain_sym.get_codes ()) {
-                if (code_sym.is_instance_member () != is_instance)
+                // error codes are treated as non-instance members, but if we're in an OCE they
+                // can also be used as pseudo-creation methods
+                if (code_sym.is_instance_member () != is_instance && !in_oce)
                     continue;
                 completions.add (new CompletionItem.from_symbol (type, code_sym, current_scope, CompletionItemKind.Value, lang_serv.get_symbol_documentation (project, code_sym)));
             }
