@@ -5,6 +5,8 @@
 
 We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudio.com/items?itemName=prince781.vala).
 
+- Guix: `guix install vala-language-server`
+
 - Arch Linux (via AUR): `yay -S vala-language-server`
   or `yay -S vala-language-server-git`
 
@@ -83,6 +85,13 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 - `jsonrpc-glib-1.0`
 - `libvala-0.48 / vala-0.48` release
 - you also need the `posix` VAPI, which should come preinstalled
+
+#### Install dependencies with Guix
+
+To launch a shell with build dependencies satisfied:
+```sh
+guix environment vala-language-server
+```
 
 ## Setup
 
