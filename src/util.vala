@@ -39,7 +39,9 @@ namespace Vls.Util {
         MatchInfo match_info;
         string[] args = {};
 
-        if (/(?(?<=')((\\\\|[^'\\\s]|\\')(\\\\|[^'\\]|\\')*(?='))|((?!')((?!\\ )(\\\\|[^\s;])|\\ ))+)/.match (str, 0, out match_info)) {
+        // XXX: while this regex handles special cases, it can probably still be simplified, or transformed into a more-readable parser
+        if (/(?(?<=')((\\\\|[^'\\\s]|\\')(\\\\|[^'\\]|\\')*(?='))|(?(?<=")((\\\\|[^"\\\s]|\\")(\\\\|[^"\\]|\\["abfnrtv])*(?="))|((?!["'])((?!\\ )(\\\\|[^\s;])|\\ ))+))/
+            .match (str, 0, out match_info)) {
             while (match_info.matches ()) {
                 args += match_info.fetch (0);
                 match_info.next ();
