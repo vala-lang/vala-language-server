@@ -69,6 +69,12 @@ class Vls.Compilation : BuildTarget {
         }
     }
 
+    /**
+     * Maps a symbol's C name to the actual symbol. The documentation engine
+     * uses this to replace references to C symbols with appropriate Vala references.
+     */
+    public HashMap<string, Vala.Symbol> cname_to_sym { get; private set; default = new HashMap<string, Vala.Symbol> (); }
+
     public Compilation (string build_dir, string name, string id, int no,
                         string[] compiler, string[] args, string[] sources, string[] generated_sources,
                         string[]? sources_content = null) throws Error {
@@ -332,6 +338,13 @@ class Vls.Compilation : BuildTarget {
             DirUtils.create_with_parents (Path.get_dirname (_output_internal_vapi), 0755);
             var interface_writer = new Vala.CodeWriter (Vala.CodeWriterType.INTERNAL);
             interface_writer.write_file (code_context, _output_internal_vapi);
+        }
+
+        // update C name map for package files
+        cname_to_sym.clear ();
+        foreach (Vala.SourceFile source_file in code_context.get_source_files ()) {
+            if (source_file.file_type == Vala.SourceFileType.PACKAGE)
+                source_file.accept (new CNameMapper (cname_to_sym));
         }
 
         last_updated = new DateTime.now ();
