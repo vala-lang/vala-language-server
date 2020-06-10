@@ -966,7 +966,7 @@ namespace Vls.CompletionEngine {
                 }
             }
         } else {
-            warning (@"other type node $(type).\n");
+            warning (@"other type symbol $type_symbol.\n");
         }
     }
 
