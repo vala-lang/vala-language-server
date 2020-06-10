@@ -739,18 +739,14 @@ class Vls.Server : Object {
      * that generated the file.
      */
     Vala.Symbol find_real_sym (Project project, Vala.Symbol sym) {
-        Compilation alter_comp;
-        
         if (sym.source_reference == null || sym.source_reference.file == null)
             return sym;
 
+        Compilation alter_comp;
         if (project.lookup_compilation_for_output_file (sym.source_reference.file.filename, out alter_comp)) {
             Vala.Symbol? matching_sym;
-            if (sym is Vala.Symbol) {
-                if ((matching_sym = Util.find_matching_symbol (alter_comp.code_context, (Vala.Symbol)sym)) != null) {
-                    return matching_sym;
-                }
-            }
+            if ((matching_sym = Util.find_matching_symbol (alter_comp.code_context, sym)) != null)
+                return matching_sym;
         }
         return sym;
     }
@@ -910,8 +906,23 @@ class Vls.Server : Object {
     }
 
     public LanguageServer.MarkupContent? get_symbol_documentation (Project project, Vala.Symbol sym) {
+        Compilation compilation = null;
         Vala.Symbol real_sym = find_real_sym (project, sym);
         sym = real_sym;
+        Vala.Symbol root = null;
+        for (var node = sym; node != null; node = node.parent_symbol)
+            root = node;
+        assert (root != null);
+        foreach (var project_compilation in project.get_compilations ()) {
+            if (project_compilation.code_context.root == root) {
+                compilation = project_compilation;
+                break;
+            }
+        }
+
+        if (compilation == null)
+            return null;
+
 #if PARSE_SYSTEM_GIRS
         var gir_sym = documentation.find_gir_symbol (sym);
 #endif
@@ -923,11 +934,16 @@ class Vls.Server : Object {
                 comment = /^\s*\*(.*)/m.replace (comment, comment.length, 0, "\\1");
             } catch (RegexError e) {
                 warning (@"failed to parse comment...\n$comment\n...");
-                comment = "(failed to parse comment)";
+                comment = "(failed to parse Vala comment - `%s`)".printf (e.message);
             }
 #if PARSE_SYSTEM_GIRS
         } else if (gir_sym != null && gir_sym.comment != null) {
-            comment = GirDocumentation.render_comment (gir_sym.comment);
+            try {
+                comment = documentation.render_gtk_doc_comment (gir_sym.comment, compilation);
+            } catch (RegexError e) {
+                warning ("failed to parse GTK-Doc comment...\n%s\n...", comment);
+                comment = "(failed to parse GTK-Doc comment - `%s`)".printf (e.message);
+            }
 #endif
         } else {
             return null;

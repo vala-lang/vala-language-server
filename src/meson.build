@@ -1,4 +1,5 @@
 vls_src = files([
+  'cnamemapper.vala',
   'list_symbols.vala',
   'codehelp/codehelp.vala',
   'codehelp/completionengine.vala',
@@ -16,9 +17,9 @@ vls_src = files([
   'projects/textdocument.vala',
   'projects/types.vala',
   'protocol.vala',
+  'reporter.vala',
   'server.vala',
   'servertypes.vala',
-  'reporter.vala'
 ])
 
 if get_option('parse_system_girs')

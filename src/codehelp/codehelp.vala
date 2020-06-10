@@ -538,4 +538,57 @@ namespace Vls.CodeHelp {
         critical ("uncaught data type with symbol (%s with %s as %s)", data_type.to_string (), sym.name, sym.type_name);
         return null;
     }
+
+    private bool is_snake_case_symbol (Vala.Symbol sym) {
+        return sym is Vala.Method || sym is Vala.Property || sym is Vala.Field ||
+            sym is Vala.EnumValue || sym is Vala.ErrorCode || sym is Vala.Constant;
+    }
+
+    /**
+     * Gets the C name of a symbol.
+     */
+    public string get_symbol_cname (Vala.Symbol sym) {
+        string? cname = null;
+
+        if ((cname = sym.get_attribute_string ("CCode", "cname")) != null)
+            return cname;
+        
+        var cname_sb = new StringBuilder ();
+        bool to_snake_case = is_snake_case_symbol (sym);
+        bool all_caps = sym is Vala.EnumValue || sym is Vala.ErrorCode || sym is Vala.Constant;
+
+        for (var current_sym = sym; current_sym != null && current_sym.name != null; current_sym = current_sym.parent_symbol) {
+            string component = current_sym.name;
+            if (current_sym is Vala.CreationMethod) {
+                if (component == ".new")
+                    component = "new";
+                else
+                    component = "new_" + component;
+            }
+            if (to_snake_case) {
+                string? lower_case_cprefix = null;
+                string? cprefix = current_sym.get_attribute_string ("CCode", "cprefix");
+                if ((lower_case_cprefix = current_sym.get_attribute_string ("CCode", "lower_case_cprefix")) != null ||
+                    cprefix != null && cprefix.contains ("_")) {
+                    component = lower_case_cprefix ?? cprefix;
+                    cname_sb.prepend (all_caps ? component.up () : component);
+                    break;
+                } else if (!is_snake_case_symbol (current_sym)) {
+                    component = Vala.Symbol.camel_case_to_lower_case (component);
+                }
+                if (cname_sb.len > 0)
+                    cname_sb.prepend_c ('_');
+            } else {
+                string? cprefix = null;
+                if ((cprefix = current_sym.get_attribute_string ("CCode", "cprefix")) != null &&
+                    !cprefix.contains ("_")) {
+                    cname_sb.prepend (all_caps ? cprefix.up () : cprefix);
+                    break;
+                }
+            }
+            cname_sb.prepend (all_caps && current_sym != sym ? component.up () : component);
+        }
+
+        return cname_sb.str;
+    }
 }
