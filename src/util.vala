@@ -331,9 +331,17 @@ namespace Vls.Util {
         while (!symbols.is_empty () && matching_sym != null) {
             var symtab = matching_sym.scope.get_symbol_table ();
             if (symtab != null) {
-                matching_sym = symtab[symbols.pop_head ().name];
+                var current_sym = symbols.pop_head ();
+                matching_sym = symtab[current_sym.name];
+                string? gir_name = null;
+                // look for the GIR version of current_sym instead
+                if (matching_sym == null && (gir_name = current_sym.get_attribute_string ("GIR", "name")) != null) {
+                    matching_sym = symtab[gir_name];
+                    if (matching_sym.source_reference.file.file_type != Vala.SourceFileType.PACKAGE)
+                        matching_sym = null;
+                }
             } else {
-                // workaround:
+                // workaround: "GLib" namespace may be empty when dealing with GLib-2.0.gir (instead, "G" namespace will be populated)
                 if (matching_sym.name == "GLib") {
                     matching_sym = context.root.scope.lookup ("G");
                 } else 
