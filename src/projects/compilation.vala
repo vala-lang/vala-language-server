@@ -370,7 +370,7 @@ class Vls.Compilation : BuildTarget {
         string? filename = path != null ? Util.realpath (path) : null;
         string uri = file.get_uri ();
         foreach (var source_file in code_context.get_source_files ()) {
-            if (filename != null && source_file.filename == filename || source_file.filename == uri) {
+            if (filename != null && Util.realpath (source_file.filename) == filename || source_file.filename == uri) {
                 input_source = source_file;
                 return true;
             }
