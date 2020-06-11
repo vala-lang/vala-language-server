@@ -385,7 +385,7 @@ class Vls.Server : Object {
                 break;
             } catch (Error e) {
                 if (!(e is ProjectError.NOT_FOUND))
-                    warning ("[textDocument/didOpen] failed to open %s - %s", uri, e.message);
+                    warning ("[textDocument/didOpen] failed to open %s - %s", Uri.unescape_string (uri), e.message);
             }
         }
 
@@ -396,12 +396,12 @@ class Vls.Server : Object {
                 // show diagnostics for the newly-opened file
                 request_context_update (client);
             } catch (Error e) {
-                warning ("[textDocumnt/didOpen] failed to open %s - %s", uri, e.message);
+                warning ("[textDocumnt/didOpen] failed to open %s - %s", Uri.unescape_string (uri), e.message);
             }
         }
 
         if (doc_w_bt == null) {
-            warning ("[textDocument/didOpen] could not open %s", Uri.escape_string (uri));
+            warning ("[textDocument/didOpen] could not open %s", uri);
             return;
         }
 
@@ -443,7 +443,7 @@ class Vls.Server : Object {
                 }
             } catch (Error e) {
                 if (!(e is ProjectError.NOT_FOUND))
-                    warning ("[textDocument/didClose] failed to close %s - %s", uri, e.message);
+                    warning ("[textDocument/didClose] failed to close %s - %s", Uri.unescape_string (uri), e.message);
             }
         }
     }
@@ -473,7 +473,7 @@ class Vls.Server : Object {
 
                 var source = (TextDocument) source_file;
                 if (source.version >= version) {
-                    warning (@"[textDocument/didChange] rejecting outdated version of $uri");
+                    warning (@"[textDocument/didChange] rejecting outdated version of $(Uri.unescape_string (uri))");
                     return;
                 }
 
@@ -1012,7 +1012,7 @@ class Vls.Server : Object {
             selected_project = default_project;
         }
         if (results.is_empty) {
-            debug (@"file `$(p.textDocument.uri)' not found");
+            debug (@"file `$(Uri.unescape_string (p.textDocument.uri))' not found");
             reply_null (id, client, "textDocument/hover");
             return;
         }
@@ -1203,7 +1203,7 @@ class Vls.Server : Object {
             selected_project = default_project;
         }
         if (results.is_empty) {
-            debug (@"file `$(p.textDocument.uri)' not found");
+            debug (@"file `$(Uri.unescape_string (p.textDocument.uri))' not found");
             reply_null (id, client, method);
             return;
         }
@@ -1313,7 +1313,7 @@ class Vls.Server : Object {
             selected_project = default_project;
         }
         if (results.is_empty) {
-            debug (@"file `$(p.textDocument.uri)' not found");
+            debug (@"file `$(Uri.unescape_string (p.textDocument.uri))' not found");
             reply_null (id, client, method);
             return;
         }
