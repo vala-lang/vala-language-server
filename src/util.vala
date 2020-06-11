@@ -163,7 +163,9 @@ namespace Vls.Util {
     }
 
     /**
-     * Copied from libvala (see Vala.CodeContext.realpath ())
+     * Copied from libvala
+     *
+     * @see Vala.CodeContext.realpath
      */
     public static string realpath (string name, string? cwd = null) {
         string rpath;
@@ -230,8 +232,9 @@ namespace Vls.Util {
             // to avoid problems in #include directives
             string[] components = rpath.split ("\\");
             // casefold drive letters on Windows (c: -> C:)
-            if (components.length > 0)
-                components[0] = components[0].up ();
+            if (components.length > 0 && components[0].length > 1 && components[0].data[1] == ':') {
+                components[0].data[0] = ((char)components[0].data[0]).toupper ();
+            }
             rpath = string.joinv ("/", components);
         }
 
