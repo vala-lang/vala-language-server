@@ -126,7 +126,7 @@ abstract class Vls.Project : Object {
         }
         for (int i = last_idx - 1; i >= 0; i--) {
             bool produces_file_for_target = false;
-            for (int j = last_idx - 1; j > i; j--) {
+            for (int j = last_idx; j > i; j--) {
                 foreach (var file in build_targets[j].input) {
                     if (producer_for.has_key (file) && producer_for[file].equal_to (build_targets[i])) {
                         produces_file_for_target = true;
