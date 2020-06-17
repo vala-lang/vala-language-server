@@ -1008,11 +1008,11 @@ namespace Vls.CompletionEngine {
         var sig_type = new Vala.SignalType (sig);
         completions.add_all_array (new CompletionItem []{
             new CompletionItem.from_symbol (instance_type, sig_type.get_member ("connect"), scope, CompletionItemKind.Method, 
-                new MarkupContent.plaintext ("Connect to signal")),
+                new DocComment ("Connect to signal")),
             new CompletionItem.from_symbol (instance_type, sig_type.get_member ("connect_after"), scope, CompletionItemKind.Method,
-                new MarkupContent.plaintext ("Connect to signal after default handler")),
+                new DocComment ("Connect to signal after default handler")),
             new CompletionItem.from_symbol (instance_type, sig_type.get_member ("disconnect"), scope, CompletionItemKind.Method,
-                new MarkupContent.plaintext ("Disconnect signal"))
+                new DocComment ("Disconnect signal"))
         });
     }
 
@@ -1028,7 +1028,7 @@ namespace Vls.CompletionEngine {
                 scope,
                 CompletionItemKind.Property,
                 (atype.fixed_length && atype.length != null ? 
-                    new MarkupContent.plaintext(@"(= $(CodeHelp.get_expression_representation (atype.length)))") : null)));
+                    new DocComment (@"(= $(CodeHelp.get_expression_representation (atype.length)))") : null)));
         foreach (string method_name in new string[] {"copy", "move", "resize"}) {
             var method = atype.get_member (method_name);
             if (method != null)
@@ -1046,9 +1046,9 @@ namespace Vls.CompletionEngine {
     void add_completions_for_async_method (Vala.DataType? instance_type, Vala.Method m, Vala.Scope scope, Set<CompletionItem> completions) {
         completions.add_all_array(new CompletionItem []{
             new CompletionItem.from_symbol (instance_type, m, scope, CompletionItemKind.Method,
-                new MarkupContent.plaintext ("Begin asynchronous operation"), "begin"),
+                new DocComment ("Begin asynchronous operation"), "begin"),
             new CompletionItem.from_symbol (instance_type, m.get_end_method (), scope, CompletionItemKind.Method,
-	    	new MarkupContent.plaintext ("Get results of asynchronous operation"))
+	    	    new DocComment ("Get results of asynchronous operation"))
         });
     }
 

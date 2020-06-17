@@ -457,7 +457,7 @@ namespace LanguageServer {
             if (insert_text != null && (insert_text.contains ("$0") || insert_text.contains ("${0")))
                 this.insertTextFormat = InsertTextFormat.Snippet;
             if (documentation != null)
-                this.documentation = new MarkupContent.plaintext(documentation);
+                this.documentation = new MarkupContent.from_plaintext (documentation);
             this._hash = this.label.hash ();
         }
 
@@ -472,12 +472,14 @@ namespace LanguageServer {
          * @param label_override if non-null, override the displayed symbol name with this
          */
         public CompletionItem.from_symbol (Vala.DataType? instance_type, Vala.Symbol sym, Vala.Scope? scope,
-            CompletionItemKind kind, MarkupContent? documentation, string? label_override = null) {
+            CompletionItemKind kind, Vls.DocComment? documentation, string? label_override = null) {
             this.label = label_override ?? sym.name;
             this.kind = kind;
             this.detail = Vls.CodeHelp.get_symbol_representation (instance_type, sym, scope, null, null, false);
-            this.documentation = documentation;
             this._hash = this.label.hash ();
+
+            if (documentation != null)
+                this.documentation = new MarkupContent.from_markdown (documentation.body);
 
             var version = sym.get_attribute ("Version");
             if (version != null && (version.get_bool ("deprecated") || version.get_string ("deprecated_since") != null)) {
@@ -489,14 +491,15 @@ namespace LanguageServer {
         public CompletionItem.from_unimplemented_symbol (Vala.Symbol sym, 
                                                          string label, CompletionItemKind kind,
                                                          string insert_text,
-                                                         MarkupContent? documentation) {
+                                                         Vls.DocComment? documentation) {
             this.label = label;
             this.kind = kind;
             this.insertText = insert_text;
             if (insert_text.contains ("$0") || insert_text.contains ("${0"))
                 this.insertTextFormat = InsertTextFormat.Snippet;
-            this.documentation = documentation;
             this._hash = this.label.hash ();
+            if (documentation != null)
+                this.documentation = new MarkupContent.from_markdown (documentation.body);
         }
 
         public uint hash () {
@@ -542,10 +545,24 @@ namespace LanguageServer {
     }
 
     class MarkupContent : Object {
-        public string kind { get; set; default = "plaintext"; }
+        public string kind { get; set; }
         public string value { get; set; }
 
-        public MarkupContent.plaintext (string doc) {
+        private MarkupContent () {}
+
+        /**
+         * Create a MarkupContent with plain text.
+         */
+        public MarkupContent.from_plaintext (string doc) {
+            this.kind = "plaintext";
+            this.value = doc;
+        }
+
+        /**
+         * Create a MarkupContent with markdown text.
+         */
+        public MarkupContent.from_markdown (string doc) {
+            this.kind = "markdown";
             this.value = doc;
         }
     }

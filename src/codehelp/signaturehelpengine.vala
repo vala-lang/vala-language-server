@@ -167,14 +167,22 @@ namespace Vls.SignatureHelpEngine {
         }
 
         si.label = CodeHelp.get_symbol_representation (data_type, explicit_sym, scope, method_type_arguments);
-        if (explicit_sym != null)
-            si.documentation = lang_serv.get_symbol_documentation (project, explicit_sym);
+        DocComment? doc_comment = null;
+        if (explicit_sym != null) {
+            doc_comment = lang_serv.get_symbol_documentation (project, explicit_sym);
+            if (doc_comment != null) {
+                si.documentation = new MarkupContent.from_markdown (doc_comment.body);
+                if (doc_comment.return_body != null)
+                    si.documentation.value += "\n\n---\n**returns** " + doc_comment.return_body;
+            }
+        }
 
         if (param_list != null) {
             foreach (var parameter in param_list) {
+                var param_doc_comment = doc_comment != null ? doc_comment.parameters[parameter.name] : null;
                 si.parameters.add (new ParameterInformation () {
                     label = CodeHelp.get_symbol_representation (data_type, parameter, scope, method_type_arguments),
-                    documentation = lang_serv.get_symbol_documentation (project, parameter)
+                    documentation = param_doc_comment != null ? new MarkupContent.from_markdown (param_doc_comment) : null
                 });
                 // debug (@"found parameter $parameter (name = $(parameter.ellipsis ? "..." :parameter.name))");
             }
