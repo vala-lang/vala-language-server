@@ -905,7 +905,7 @@ class Vls.Server : Object {
         });
     }
 
-    public LanguageServer.MarkupContent? get_symbol_documentation (Project project, Vala.Symbol sym) {
+    public DocComment? get_symbol_documentation (Project project, Vala.Symbol sym) {
         Compilation compilation = null;
         Vala.Symbol real_sym = find_real_sym (project, sym);
         sym = real_sym;
@@ -923,36 +923,39 @@ class Vls.Server : Object {
         if (compilation == null)
             return null;
 
+        Vala.Comment? comment = null;
+        DocComment? doc_comment = null;
 #if PARSE_SYSTEM_GIRS
         var gir_sym = documentation.find_gir_symbol (sym);
+        if (gir_sym != null && gir_sym.comment != null)
+            comment = gir_sym.comment;
+        else
 #endif
-        string? comment = null;
+            comment = sym.comment;
 
-        if (sym.comment != null) {
-            comment = sym.comment.content;
+        if (comment != null) {
             try {
-                comment = /^\s*\*(.*)/m.replace (comment, comment.length, 0, "\\1");
-            } catch (RegexError e) {
-                warning (@"failed to parse comment...\n$comment\n...");
-                comment = "(failed to parse Vala comment - `%s`)".printf (e.message);
-            }
 #if PARSE_SYSTEM_GIRS
-        } else if (gir_sym != null && gir_sym.comment != null) {
-            try {
-                comment = documentation.render_gtk_doc_comment (gir_sym.comment, compilation);
-            } catch (RegexError e) {
-                warning ("failed to parse GTK-Doc comment...\n%s\n...", comment);
-                comment = "(failed to parse GTK-Doc comment - `%s`)".printf (e.message);
-            }
+                if (comment is Vala.GirComment || gir_sym != null)
+                    doc_comment = new DocComment.from_gir_comment (comment, documentation, compilation);
+                else
 #endif
-        } else {
-            return null;
+                    doc_comment = new DocComment.from_valadoc_comment (comment, sym, compilation);
+            } catch (RegexError e) {
+                warning ("failed to render comment - %s", e.message);
+            }
         }
 
-        return new MarkupContent () {
-            kind = "markdown",
-            value = comment
-        };
+        if (doc_comment == null && sym is Vala.Parameter) {
+            var parent_doc = get_symbol_documentation (project, sym.parent_symbol);
+            if (parent_doc != null) {
+                string? doc = parent_doc.parameters[sym.name];
+                if (doc != null)
+                    doc_comment = new DocComment (doc);
+            }
+        }
+
+        return doc_comment;
     }
 
     void textDocumentCompletion (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
@@ -1121,8 +1124,25 @@ class Vls.Server : Object {
                     var comment = get_symbol_documentation (selected_project, symbol);
                     if (comment != null) {
                         hoverInfo.contents.add (new MarkedString () {
-                            value = comment.value
+                            value = comment.body
                         });
+                        // if (symbol is Vala.Callable && ((Vala.Callable)symbol).get_parameters () != null) {
+                        //     var param_list = ((Vala.Callable) symbol).get_parameters ();
+                        //     foreach (var parameter in param_list) {
+                        //         if (parameter.name == null)
+                        //             break;
+                        //         string? param_doc = comment.parameters[parameter.name];
+                        //         if (param_doc == null)
+                        //             continue;
+                        //         hoverInfo.contents.add (new MarkedString () {
+                        //             value = @"`$(parameter.name)` \u2014 $param_doc"
+                        //         });
+                        //     }
+                        // }
+                        // if (comment.return_body != null)
+                        //     hoverInfo.contents.add (new MarkedString () {
+                        //         value = @"**returns** $(comment.return_body)"
+                        //     });
                     }
                 }
             }

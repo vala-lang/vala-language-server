@@ -1,5 +1,4 @@
 vls_src = files([
-  'cnamemapper.vala',
   'list_symbols.vala',
   'codehelp/codehelp.vala',
   'codehelp/completionengine.vala',
@@ -7,6 +6,8 @@ vls_src = files([
   'codehelp/find_symbol.vala',
   'codehelp/signaturehelpengine.vala',
   'codehelp/symbolextractor.vala',
+  'documentation/cnamemapper.vala',
+  'documentation/doccomment.vala',
   'projects/buildtarget.vala',
   'projects/buildtask.vala',
   'projects/ccproject.vala',
@@ -23,7 +24,7 @@ vls_src = files([
 ])
 
 if get_option('parse_system_girs')
-  vls_src += 'girdocumentation.vala'
+  vls_src += 'documentation/girdocumentation.vala'
   add_project_arguments(['--define=PARSE_SYSTEM_GIRS'], language: 'vala')
 endif
 
