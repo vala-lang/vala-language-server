@@ -526,6 +526,9 @@ namespace Vls.CodeHelp {
         if (sym is Vala.Callable)
             return get_callable_representation (data_type, method_type_arguments, (Vala.Callable)sym, scope, show_initializers);
         
+        if (sym is Vala.Parameter && ((Vala.Parameter)sym).ellipsis)
+            return "...";
+
         if (sym is Vala.Variable)
             return get_variable_representation (data_type, method_type_arguments, (Vala.Variable)sym, scope, override_name, show_initializers);
 
