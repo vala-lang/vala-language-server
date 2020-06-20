@@ -44,6 +44,8 @@ namespace Vls.CompletionEngine {
             lb_idx--;
         }
         
+        var completions = new HashSet<CompletionItem> ();
+
         if (idx >= 1 && doc.content[idx-1] == '-' && doc.content[idx] == '>') {
             is_pointer_access = true;
             is_member_access = true;
@@ -53,16 +55,16 @@ namespace Vls.CompletionEngine {
             // pos = pos.translate (0, -1);
             // debug ("[%s] found member access", method);
             is_member_access = true;
-        } else if (completion_context != null) {
-            if (completion_context.triggerKind == CompletionTriggerKind.TriggerCharacter) {
-                // pos = pos.translate (0, -1);
-                is_member_access = true;
-            } /* else if (completion_context.triggerKind == CompletionTriggerKind.Invoked)
-                debug (@"[$method] invoked @ $pos"); */
+        } else {
+            // The editor requested a member access completion from a '>'.
+            // This is a hack since the LSP doesn't allow us to specify a trigger string ("->" in this case)
+            if (completion_context != null && completion_context.triggerKind == CompletionTriggerKind.TriggerCharacter) {
+                // completion conditions are not satisfied
+                finish (client, id, completions);
+                return;
+            }
             // TODO: incomplete completions
         }
-
-        var completions = new HashSet<CompletionItem> ();
 
         Vala.CodeContext.push (compilation.code_context);
         if (is_member_access) {
