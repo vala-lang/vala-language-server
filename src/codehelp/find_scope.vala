@@ -46,8 +46,8 @@ class Vls.FindScope : Vala.CodeVisitor {
         _best_block = smallest_block;
     }
 
-    void add_if_matches (Vala.CodeNode node) {
-        var sr = node.source_reference;
+    void add_if_matches (Vala.Symbol symbol) {
+        var sr = symbol.source_reference;
         if (sr == null) {
             // debug ("node %s has no source reference", node.type_name);
             return;
@@ -58,18 +58,14 @@ class Vls.FindScope : Vala.CodeVisitor {
         }
 
         if (sr.begin.line > sr.end.line) {
-            warning (@"wtf vala: $(node.type_name): $sr");
+            warning (@"wtf vala: $(symbol.type_name): $sr");
             return;
         }
 
-        if (!(node is Vala.Symbol))
-            return;
-        
         var range = new Range.from_sourceref (sr);
 
-        if (node is Vala.TypeSymbol || node is Vala.Namespace) {
-            var sym = (Vala.Symbol) node;
-            var symtab = sym.scope.get_symbol_table ();
+        if (symbol is Vala.TypeSymbol || symbol is Vala.Namespace) {
+            var symtab = symbol.scope.get_symbol_table ();
             if (symtab != null) {
                 foreach (Vala.Symbol member in symtab.get_values ()) {
                     if (member.source_reference != null && member.source_reference.file == sr.file)
@@ -78,13 +74,13 @@ class Vls.FindScope : Vala.CodeVisitor {
             }
         }
 
-        // compare to rang.end.line + 1 if before context update, assuming that
+        // compare to range.end.line + 1 if before context update, assuming that
         // it's possible the user expanded the current scope
         Position new_end = before_context_update ? range.end.translate (2) : range.end;
         bool pos_within_start = range.start.compare_to (pos) <= 0;
         bool pos_within_end = pos.compare_to (range.end) <= 0 || pos.compare_to (new_end) <= 0;
         if (pos_within_start && pos_within_end) {
-            candidate_blocks.add ((Vala.Symbol) node);
+            candidate_blocks.add (symbol);
             // debug ("%s (%s, @ %s / %s) added to candidates for %s",
             //     node.to_string (), node.type_name, node.source_reference.to_string (), range.to_string (), pos.to_string ());
         } else {
@@ -133,6 +129,10 @@ class Vls.FindScope : Vala.CodeVisitor {
         m.accept_children (this);
     }
 
+    public override void visit_declaration_statement (Vala.DeclarationStatement stmt) {
+        stmt.accept_children (this);
+    }
+
     public override void visit_destructor (Vala.Destructor d) {
         add_if_matches (d);
         d.accept_children (this);
@@ -179,6 +179,10 @@ class Vls.FindScope : Vala.CodeVisitor {
         stmt.accept_children (this);
     }
 
+    public override void visit_local_variable (Vala.LocalVariable local) {
+        local.accept_children (this);
+    }
+
     public override void visit_loop (Vala.Loop stmt) {
         stmt.accept_children (this);
     }
@@ -193,7 +197,6 @@ class Vls.FindScope : Vala.CodeVisitor {
     }
 
     public override void visit_method_call (Vala.MethodCall mc) {
-        add_if_matches (mc);
         mc.accept_children (this);
     }
 
