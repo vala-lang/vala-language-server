@@ -784,9 +784,10 @@ class Vls.Server : Object {
             Compilation compilation = results[0].second;
 
             Vala.CodeContext.push (compilation.code_context);
-            var fs = new FindSymbol (file, p.position);
+            var fs = new FindSymbol (file, p.position, true);
 
             if (fs.result.size == 0) {
+                debug ("[%s] find symbol is empty", method);
                 try {
                     client.reply (id, new Variant.maybe (VariantType.VARIANT, null), cancellable);
                 } catch (Error e) {
@@ -812,6 +813,7 @@ class Vls.Server : Object {
                 else if (dt.symbol != null)
                     best = dt.symbol;
             } else {
+                debug ("[%s] best is %s, which we can't handle", method, best != null ? best.type_name : null);
                 try {
                     client.reply (id, new Variant.maybe (VariantType.VARIANT, null), cancellable);
                 } catch (Error e) {
