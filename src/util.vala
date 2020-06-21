@@ -329,7 +329,8 @@ namespace Vls.Util {
 
         matching_sym = context.root.scope.lookup (symbols.pop_head ().name);
         while (!symbols.is_empty () && matching_sym != null) {
-            var symtab = matching_sym.scope.get_symbol_table ();
+            var parent_sym = matching_sym;
+            var symtab = parent_sym.scope.get_symbol_table ();
             if (symtab != null) {
                 var current_sym = symbols.pop_head ();
                 matching_sym = symtab[current_sym.name];
@@ -337,7 +338,7 @@ namespace Vls.Util {
                 // look for the GIR version of current_sym instead
                 if (matching_sym == null && (gir_name = current_sym.get_attribute_string ("GIR", "name")) != null) {
                     matching_sym = symtab[gir_name];
-                    if (matching_sym.source_reference.file.file_type != Vala.SourceFileType.PACKAGE)
+                    if (matching_sym != null && matching_sym.source_reference.file.file_type != Vala.SourceFileType.PACKAGE)
                         matching_sym = null;
                 }
             } else {
