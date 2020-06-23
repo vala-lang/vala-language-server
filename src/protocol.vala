@@ -462,7 +462,7 @@ namespace LanguageServer {
         }
 
         /**
-         * A completion suggestion.
+         * A completion suggestion from an existing Vala symbol.
          * 
          * @param instance_type the parent data type of data type of the expression where this symbol appears, or null
          * @param sym the symbol itself
@@ -486,6 +486,26 @@ namespace LanguageServer {
                 this.tags.add (CompletionItemTag.Deprecated);
                 this.deprecated = true;
             }
+        }
+
+        /**
+         * A completion suggestion from a data type and a synthetic symbol name.
+         *
+         * @param symbol_type       the data type of the symbol
+         * @param symbol_name       the name of the synthetic symbol
+         * @param scope             the scope that this completion item is displayed in, or null
+         * @param kind              the type of completion to display
+         * @param documentation     the documentation for this symbol, or null
+         */
+        public CompletionItem.from_synthetic_symbol (Vala.DataType symbol_type, string symbol_name, Vala.Scope? scope,
+                                                     CompletionItemKind kind, Vls.DocComment? documentation) {
+            this.label = symbol_name;
+            this.kind = kind;
+            this.detail = @"$(Vls.CodeHelp.get_symbol_representation (symbol_type, null, scope, null, null, false)) $symbol_name";
+            this._hash = this.label.hash ();
+
+            if (documentation != null)
+                this.documentation = new MarkupContent.from_markdown (documentation.body);
         }
 
         public CompletionItem.from_unimplemented_symbol (Vala.Symbol sym, 

@@ -92,39 +92,71 @@ namespace Vls.SignatureHelpEngine {
             // get the method type from the expression
             data_type = mc.call.value_type;
             explicit_sym = mc.call.symbol_reference;
-            if (mc.call is Vala.MemberAccess)
+
+            // this is only true if we have a call to a default constructor of `this` or `base`
+            if (data_type is Vala.ObjectType || data_type is Vala.StructValueType) {
+                Vala.CreationMethod? cm = null;
+
+                for (var current_scope = scope; current_scope != null && cm == null; 
+                        current_scope = current_scope.parent_scope)
+                    cm = current_scope.owner as Vala.CreationMethod;
+
+                // Only show signature help for `this` or `base` accesses within a constructor.
+                if (cm == null)
+                    return;
+
+                // If we have a call to a default constructor for either the
+                // current class/struct or a base class/struct, then data_type
+                // will either be an ObjectType or StructValueType instead of a
+                // CallableType, and explicit_sym will refer to the class or
+                // struct. In this case, we want explicit_sym to refer to the default
+                // constructor for the type instead.
+                if (data_type is Vala.ObjectType) {
+                    var ots = ((Vala.ObjectType)data_type).object_type_symbol;
+                    if (ots is Vala.Class)
+                        explicit_sym = ((Vala.Class)ots).default_construction_method;
+                } else {
+                    var ts = ((Vala.StructValueType)data_type).type_symbol;
+                    if (ts is Vala.Struct)
+                        explicit_sym = ((Vala.Struct)ts).default_construction_method;
+                }
+            } else if (mc.call is Vala.MemberAccess)
                 method_type_arguments = ((Vala.MemberAccess)mc.call).get_type_arguments ();
+            
+            if (data_type is Vala.CallableType)
+                param_list = ((Vala.CallableType)data_type).get_parameters ();
+            else if (data_type is Vala.ObjectType)
+                param_list = ((Vala.ObjectType)data_type).get_parameters ();
 
-            if (data_type is Vala.CallableType) {
-                var ct = (Vala.CallableType) data_type;
-                param_list = ct.get_parameters ();
-    
-                if (ct is Vala.MethodType) {
-                    var mt = ct as Vala.MethodType;
+            if (data_type is Vala.MethodType) {
+                var mt = (Vala.MethodType) data_type;
 
-                    // handle special cases for .begin() and .end() in coroutines (async methods)
-                    if (mc.call is Vala.MemberAccess && mt.method_symbol.coroutine &&
-                        (explicit_sym == null || (((Vala.MemberAccess)mc.call).inner).symbol_reference == explicit_sym)) {
-                        coroutine_name = ((Vala.MemberAccess)mc.call).member_name ?? "";
-                        if (coroutine_name[0] == 'S')   // is possible because of incomplete member access
-                            coroutine_name = null;
-                        if (coroutine_name == "begin")
-                            param_list = mt.method_symbol.get_async_begin_parameters ();
-                        else if (coroutine_name == "end") {
-                            param_list = mt.method_symbol.get_async_end_parameters ();
-                            explicit_sym = mt.method_symbol.get_end_method ();
-                            coroutine_name = null;  // .end() is its own method
-                        } else if (coroutine_name != null) {
-                            debug (@"[$method] coroutine name `$coroutine_name' not handled");
-                        }
+                // handle special cases for .begin() and .end() in coroutines (async methods)
+                if (mc.call is Vala.MemberAccess && mt.method_symbol.coroutine &&
+                    (explicit_sym == null || (((Vala.MemberAccess)mc.call).inner).symbol_reference == explicit_sym)) {
+                    coroutine_name = ((Vala.MemberAccess)mc.call).member_name ?? "";
+                    if (coroutine_name[0] == 'S')   // is possible because of incomplete member access
+                        coroutine_name = null;
+                    if (coroutine_name == "begin")
+                        param_list = mt.method_symbol.get_async_begin_parameters ();
+                    else if (coroutine_name == "end") {
+                        param_list = mt.method_symbol.get_async_end_parameters ();
+                        explicit_sym = mt.method_symbol.get_end_method ();
+                        coroutine_name = null;  // .end() is its own method
+                    } else if (coroutine_name != null) {
+                        debug (@"[$method] coroutine name `$coroutine_name' not handled");
                     }
                 }
             }
 
             // now make data_type refer to the parent expression's type (if it exists)
-            data_type = null;
-            if (mc.call is Vala.MemberAccess && ((Vala.MemberAccess)mc.call).inner != null)
-                data_type = ((Vala.MemberAccess)mc.call).inner.value_type;
+            // note: if this is a call like `this(...)` or `base(...)`, then the data_type
+            // will already be the parent type of the implied default constructor
+            if (!(data_type is Vala.ObjectType || data_type is Vala.StructValueType)) {
+                data_type = null;
+                if (mc.call is Vala.MemberAccess && ((Vala.MemberAccess)mc.call).inner != null)
+                    data_type = ((Vala.MemberAccess)mc.call).inner.value_type;
+            }
         } else if (result is Vala.ObjectCreationExpression
 #if VALA_FEATURE_INITIAL_ARGUMENT_COUNT
                     && ((Vala.ObjectCreationExpression)result).initial_argument_count != -1

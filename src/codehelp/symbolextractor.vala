@@ -317,6 +317,30 @@ class Vls.SymbolExtractor : Object {
                     var pair = find_variable_visible_in_block (fake_ma.member_name, current_block ?? block);
                     if (pair != null) {
                         resolved_sym = pair.first;
+                    } else if (fake_ma.member_name == "base") {
+                        Vala.DataType? found_base_type = null;
+                        // attempt to resolve this as a base access
+                        for (var starting_block = current_block ?? block;
+                             starting_block != null && found_base_type == null; 
+                             starting_block = starting_block.parent_symbol) {
+                            if (starting_block is Vala.Class) {
+                                foreach (var base_type in ((Vala.Class)starting_block).get_base_types ()) {
+                                    if (base_type.type_symbol is Vala.Class) {
+                                        found_base_type = base_type;
+                                        break;
+                                    }
+                                }
+                            } else if (starting_block is Vala.Struct) {
+                                found_base_type = ((Vala.Struct) starting_block).base_type;
+                            }
+                        }
+
+                        if (found_base_type != null) {
+                            return new Vala.BaseAccess () {
+                                symbol_reference = found_base_type.symbol,
+                                value_type = found_base_type
+                            };
+                        }
                     }
                 }
 
@@ -375,7 +399,9 @@ class Vls.SymbolExtractor : Object {
             Vala.Callable? callable;
             if (call.value_type != null) {
                 callable = Vala.SemanticAnalyzer.get_symbol_for_data_type (call.value_type) as Vala.Callable;
-                if (callable == null)
+                if (callable == null && !(fake_mc.inner is FakeMemberAccess && 
+                        ((FakeMemberAccess)fake_mc.inner).member_name == "this" ||
+                        ((FakeMemberAccess)fake_mc.inner).member_name == "base"))
                     throw new TypeResolutionError.NTH_EXPRESSION ("could not get callable symbol for inner data type");
             } else {
                 callable = call.symbol_reference as Vala.Callable;
