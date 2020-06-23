@@ -74,17 +74,25 @@ class Vls.DocComment {
         body = /__(.*)__/.replace (body, body.length, 0, "<ins>\\1</ins>");
         // italic
         body = /\/\/(.*?)\/\//.replace (body, body.length, 0, "_\\1_");
-        // block quotes
+        // quotes
         body = /\n?(?<!`)``([^`]+([^`]|`(?!``))*?)``\n{0,2}/s.replace_eval (body, body.length, 0, 0, (match_info, result) => {
             string quote = match_info.fetch (1) ?? "";
 
-            result.append_c ('\n');
-            foreach (string line in quote.split ("\n")) {
-                result.append ("> ");
-                result.append (line);
+            if (quote.index_of_char ('\n') == -1) {
+                // inline quotes
+                result.append_c ('`');
+                result.append (quote);
+                result.append_c ('`');
+            } else {
+                // block quotes
+                result.append_c ('\n');
+                foreach (string line in quote.split ("\n")) {
+                    result.append ("> ");
+                    result.append (line);
+                    result.append_c ('\n');
+                }
                 result.append_c ('\n');
             }
-            result.append_c ('\n');
             return false;
         });
 

@@ -938,7 +938,7 @@ class Vls.Server : Object {
         if (comment != null) {
             try {
 #if PARSE_SYSTEM_GIRS
-                if (comment is Vala.GirComment || gir_sym != null)
+                if (comment is Vala.GirComment || gir_sym != null && gir_sym.comment == comment)
                     doc_comment = new DocComment.from_gir_comment (comment, documentation, compilation);
                 else
 #endif
