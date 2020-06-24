@@ -182,17 +182,40 @@ namespace Vls.CodeHelp {
             builder.append_c (' ');
         }
 
+        if (callable_sym is Vala.Method) {
+            var method = (Vala.Method) callable_sym;
+            if (method.is_abstract && instance_type == null)
+                builder.append ("abstract ");
+            if (method.is_virtual && instance_type == null)
+                builder.append ("virtual ");
+            if (method.is_inline && instance_type == null)
+                builder.append ("inline ");
+            if (method.is_extern && instance_type == null)
+                builder.append ("extern ");
+            if (method.overrides && instance_type == null)
+                builder.append ("override ");
+            if (method.coroutine)
+                builder.append ("async ");
+        }
+
         if (callable_sym is Vala.Delegate)
             builder.append ("delegate ");
-        else if (callable_sym is Vala.Signal)
+        else if (callable_sym is Vala.Signal) {
+            if (((Vala.Signal)callable_sym).is_virtual && instance_type == null)
+                builder.append ("virtual ");
             builder.append ("signal ");
+        }
 
         // some symbols, like constructors, destructors, and other symbols don't have a name
         if (callable_sym is Vala.CreationMethod || callable_sym is Vala.Destructor) {
             if (callable_sym.parent_symbol == null)
                 error ("get_callable_representation(callable_sym as %s): parent symbol is null and callable_sym has no name", 
                        callable_sym.type_name);
-            string parent_symbol_representation = get_symbol_name_representation (callable_sym.parent_symbol, scope);
+            string parent_symbol_representation;
+            if (instance_type != null && instance_type is Vala.ObjectType)
+                parent_symbol_representation = get_data_type_representation (instance_type, scope);
+            else
+                parent_symbol_representation = get_symbol_name_representation (callable_sym.parent_symbol, scope);
             builder.append (parent_symbol_representation);
             builder.append ("::");
             if (callable_sym is Vala.CreationMethod) {
@@ -203,6 +226,8 @@ namespace Vls.CodeHelp {
             }
         } else {
             var actual_return_type = callable_sym.return_type.get_actual_type (instance_type, method_type_arguments, callable_sym);
+            if (actual_return_type.is_weak ())
+                builder.append ("unowned ");
             builder.append (get_data_type_representation (actual_return_type, scope));
             builder.append_c (' ');
             builder.append (override_name ?? callable_sym.name);
@@ -318,10 +343,12 @@ namespace Vls.CodeHelp {
      * Represents a variable symbol
      */
     private string get_variable_representation (Vala.DataType? data_type, Vala.List<Vala.DataType>? method_type_arguments,
-                                                Vala.Variable? variable_sym, Vala.Scope? scope, string? override_name,
+                                                Vala.Variable variable_sym, Vala.Scope? scope, string? override_name,
                                                 bool show_initializer) {
         Vala.DataType? actual_var_type = variable_sym.variable_type.get_actual_type (data_type, method_type_arguments, variable_sym);
         var builder = new StringBuilder ();
+        if (!(variable_sym is Vala.Parameter) && actual_var_type.is_weak ())
+            builder.append ("weak ");
         builder.append (get_data_type_representation (actual_var_type, scope));
         builder.append_c (' ');
         builder.append (override_name ?? variable_sym.name);
@@ -353,7 +380,25 @@ namespace Vls.CodeHelp {
                                                 Vala.Property property_sym,
                                                 Vala.Scope? scope, bool show_initializer) {
         var actual_property_type = property_sym.property_type.get_actual_type (data_type, method_type_arguments, property_sym);
-        var builder = new StringBuilder (get_data_type_representation (actual_property_type, scope));
+        var builder = new StringBuilder ();
+
+        if (data_type == null && !(property_sym.parent_symbol is Vala.Namespace)) {
+            builder.append (property_sym.access.to_string ());
+            builder.append_c (' ');
+        }
+
+        if (property_sym.is_abstract && data_type == null)
+            builder.append ("abstract ");
+        if (property_sym.is_virtual && data_type == null)
+            builder.append ("virtual ");
+        if (property_sym.is_extern && data_type == null)
+            builder.append ("extern ");
+        if (property_sym.overrides && data_type == null)
+            builder.append ("override ");
+
+        if (actual_property_type.is_weak ())
+            builder.append ("weak ");
+        builder.append (get_data_type_representation (actual_property_type, scope));
         builder.append_c (' ');
         builder.append (property_sym.name);
         builder.append (" {");
@@ -362,6 +407,9 @@ namespace Vls.CodeHelp {
                 builder.append_c (' ');
                 builder.append (property_sym.get_accessor.access.to_string ());
             }
+            if (property_sym.get_accessor.value_type is Vala.ReferenceType &&
+                property_sym.get_accessor.value_type.value_owned)
+                builder.append (" owned");
             builder.append (" get;");
         }
         if (property_sym.set_accessor != null) {
@@ -369,7 +417,12 @@ namespace Vls.CodeHelp {
                 builder.append_c (' ');
                 builder.append (property_sym.set_accessor.access.to_string ());
             }
-            builder.append (" set;");
+            if (property_sym.set_accessor.construction)
+                builder.append (" construct");
+            if (property_sym.set_accessor.writable)
+                builder.append (" set;");
+            else
+                builder.append (";");
         }
         if (property_sym.initializer != null && show_initializer) {
             builder.append (" default = ");
@@ -465,6 +518,8 @@ namespace Vls.CodeHelp {
 
                     int type_param_idx = ((Vala.TypeSymbol)sym).get_type_parameter_index (type_parameter.name);
                     if (type_arguments != null && type_param_idx < type_arguments.size) {
+                        if (type_arguments[type_param_idx].is_weak ())
+                            builder.append ("weak ");
                         builder.append (get_data_type_representation (type_arguments[type_param_idx], scope));
                         actual_data_type.add_type_argument (type_arguments[type_param_idx].copy ());
                     } else {
