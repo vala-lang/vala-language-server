@@ -92,6 +92,11 @@ class Vls.FindSymbol : Vala.CodeVisitor {
 
     public override void visit_source_file (Vala.SourceFile file) {
         file.accept_children (this);
+        // also try all using directives that are attached to the source file
+        foreach (var ud in file.current_using_directives) {
+            if (this.match (ud))
+                result.add (ud);
+        }
     }
 
     public override void visit_addressof_expression (Vala.AddressofExpression expr) {
