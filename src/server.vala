@@ -812,6 +812,8 @@ class Vls.Server : Object {
                     best = dt.type_symbol;
                 else if (dt.symbol != null)
                     best = dt.symbol;
+            } else if (best is Vala.UsingDirective) {
+                best = ((Vala.UsingDirective)best).namespace_symbol;
             } else {
                 debug ("[%s] best is %s, which we can't handle", method, best != null ? best.type_name : null);
                 try {
@@ -1100,6 +1102,8 @@ class Vls.Server : Object {
             } else if (result is Vala.DataType) {
                 data_type = (Vala.DataType) result;
                 symbol = ((Vala.DataType)result).symbol;
+            } else if (result is Vala.UsingDirective) {
+                symbol = ((Vala.UsingDirective)result).namespace_symbol;
             } else {
                 warning ("result as %s not matched", result.type_name);
             }
@@ -1216,7 +1220,8 @@ class Vls.Server : Object {
         }
         var fs2 = new FindSymbol.with_filter (file, sym, 
             (needle, node) => node == needle || 
-                (node is Vala.Expression && ((Vala.Expression)node).symbol_reference == needle), include_declaration);
+                (node is Vala.Expression && ((Vala.Expression)node).symbol_reference == needle ||
+                (node is Vala.UsingDirective) && ((Vala.UsingDirective)node).namespace_symbol == needle), include_declaration);
         foreach (var node in fs2.result)
             if (!(node.source_reference.to_string () in unique_srefs)) {
                 references.add (node);
@@ -1277,6 +1282,8 @@ class Vls.Server : Object {
                 result = ((Vala.Expression) result).symbol_reference;
             else if (result is Vala.DataType && ((Vala.DataType)result).type_symbol != null)
                 result = ((Vala.DataType) result).type_symbol;
+            else if (result is Vala.UsingDirective && ((Vala.UsingDirective)result).namespace_symbol != null)
+                result = ((Vala.UsingDirective) result).namespace_symbol;
 
             // ignore lambda expressions and non-symbols
             if (!(result is Vala.Symbol) ||
