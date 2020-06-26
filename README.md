@@ -75,6 +75,7 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
         - this feature may be a bit unstable. If it breaks things, use `meson -Dparse_system_girs=false` to disable
 - [x] search for symbols in workspace
 - [x] highlight active symbol in document
+- [x] rename symbols
 - [ ] snippets
 - [ ] code actions
 - [ ] workspaces

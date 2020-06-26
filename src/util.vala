@@ -314,50 +314,6 @@ namespace Vls.Util {
     }
 
     /**
-     * Find a symbol in `context` matching `sym` or NULL
-     */
-    public Vala.Symbol? find_matching_symbol (Vala.CodeContext context, Vala.Symbol sym) {
-        var symbols = new GLib.Queue<Vala.Symbol> ();
-        Vala.Symbol? matching_sym = null;
-
-        // walk up the symbol hierarchy to the root
-        for (Vala.Symbol? current_sym = sym;
-             current_sym != null && current_sym.name != null && current_sym.to_string () != "(root namespace)";
-             current_sym = current_sym.parent_symbol) {
-            symbols.push_head (current_sym);
-        }
-
-        matching_sym = context.root.scope.lookup (symbols.pop_head ().name);
-        while (!symbols.is_empty () && matching_sym != null) {
-            var parent_sym = matching_sym;
-            var symtab = parent_sym.scope.get_symbol_table ();
-            if (symtab != null) {
-                var current_sym = symbols.pop_head ();
-                matching_sym = symtab[current_sym.name];
-                string? gir_name = null;
-                // look for the GIR version of current_sym instead
-                if (matching_sym == null && (gir_name = current_sym.get_attribute_string ("GIR", "name")) != null) {
-                    matching_sym = symtab[gir_name];
-                    if (matching_sym != null && matching_sym.source_reference.file.file_type != Vala.SourceFileType.PACKAGE)
-                        matching_sym = null;
-                }
-            } else {
-                // workaround: "GLib" namespace may be empty when dealing with GLib-2.0.gir (instead, "G" namespace will be populated)
-                if (matching_sym.name == "GLib") {
-                    matching_sym = context.root.scope.lookup ("G");
-                } else 
-                    matching_sym = null;
-            }
-        }
-
-        if (!symbols.is_empty ())
-            return null;
-
-        return matching_sym;
-    }
-
-
-    /**
      * (stolen from VersionAttribute.cmp_versions in `vala/valaversionattribute.vala`)
      * A simple version comparison function.
      *
@@ -400,5 +356,24 @@ namespace Vls.Util {
         }
 
         return 0;
+    }
+
+    /**
+     * Counts the number of occurrences of @character in @str
+     *
+     * @param str           the string to search
+     * @param character     the character to search for
+     * @param last_char_pos the position of the last occurrence of @character in @str
+     */
+    public uint count_chars_in_string (string str, char character, out int last_char_pos = null) {
+        uint count = 0;
+        last_char_pos = -1;
+        for (int i = 0; i < str.length; i++) {
+            if (str[i] == character) {
+                count++;
+                last_char_pos = i;
+            }
+        }
+        return count;
     }
 }

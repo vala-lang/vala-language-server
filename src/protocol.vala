@@ -95,12 +95,15 @@ namespace LanguageServer {
          */
         public Position end { get; set; }
 
-        public string to_string () { return @"$start -> $end"; }
+        private string filename;
+
+        public string to_string () { return @"$filename: $start -> $end"; }
 
         public Range.from_sourceref (Vala.SourceReference sref) {
             this.start = new Position.from_libvala (sref.begin);
             this.end = new Position.from_libvala (sref.end);
             this.start.character -= 1;
+            this.filename = sref.file.filename;
         }
 
         public uint hash () {
@@ -190,6 +193,20 @@ namespace LanguageServer {
         public string uri { get; set; }
     }
 
+    class VersionedTextDocumentIdentifier : TextDocumentIdentifier {
+        /**
+         * The version number of this document. If a versioned text document identifier
+         * is sent from the server to the client and the file is not open in the editor
+         * (the server has not received an open notification before) the server can send
+         * `null` to indicate that the version is known and the content on disk is the
+         * master (as speced with document content ownership).
+         *
+         * The version number of a document will increase after each change, including
+         * undo/redo. The number doesn't need to be consecutive.
+         */
+        public int version { get; set; default = -1; }
+    }
+
     class TextDocumentPositionParams : Object {
         public TextDocumentIdentifier textDocument { get; set; }
         public Position position { get; set; }
@@ -206,10 +223,13 @@ namespace LanguageServer {
         public string uri { get; set; }
         public Range range { get; set; }
 
-        internal Location () {}
         public Location.from_sourceref (Vala.SourceReference sref) {
-            this.uri = File.new_for_commandline_arg (sref.file.filename).get_uri ();
-            this.range = new Range.from_sourceref (sref);
+            this (sref.file.filename, new Range.from_sourceref (sref));
+        }
+
+        public Location (string filename, Range range) {
+            this.uri = File.new_for_commandline_arg (filename).get_uri ();
+            this.range = range;
         }
     }
 
@@ -309,10 +329,7 @@ namespace LanguageServer {
         public SymbolInformation.from_document_symbol (DocumentSymbol dsym, string uri) {
             this.name = dsym.name;
             this.kind = dsym.kind;
-            this.location = new Location () {
-                uri = uri,
-                range = dsym.range
-            };
+            this.location = new Location (uri, dsym.range);
         }
     }
 
@@ -615,14 +632,32 @@ namespace LanguageServer {
         Operator = 24,
         TypeParameter = 25
     }
-
-    class TextDocumentClientCapabilities : Object {
-        public class DocumentSymbolCapabilities : Object {
-            public bool hierarchicalDocumentSymbolSupport { get; set; }
-        }
-        public DocumentSymbolCapabilities documentSymbol { get; set; default = new DocumentSymbolCapabilities ();}
+    
+    /**
+     * Capabilities of the client/editor for `textDocument/documentSymbol`
+     */
+    class DocumentSymbolCapabilities : Object {
+        public bool hierarchicalDocumentSymbolSupport { get; set; }
     }
 
+    /**
+     * Capabilities of the client/editor for `textDocument/rename`
+     */
+    class RenameClientCapabilities : Object {
+        public bool prepareSupport { get; set; }
+    }
+
+    /**
+     * Capabilities of the client/editor pertaining to language features.
+     */
+    class TextDocumentClientCapabilities : Object {
+        public DocumentSymbolCapabilities documentSymbol { get; set; default = new DocumentSymbolCapabilities ();}
+        public RenameClientCapabilities rename { get; set; default = new RenameClientCapabilities (); }
+    }
+
+    /**
+     * Capabilities of the client/editor.
+     */
     class ClientCapabilities : Object {
         public TextDocumentClientCapabilities textDocument { get; set; default = new TextDocumentClientCapabilities (); }
     }
@@ -736,6 +771,61 @@ namespace LanguageServer {
         }
 
         public bool deserialize_property (string property_name, out Value value, ParamSpec pspec, Json.Node property_node) {
+            error ("deserialization not supported");
+        }
+    }
+
+    /**
+     * A textual edit applicable to a text document.
+     */
+    class TextEdit : Object {
+        /**
+         * The range of the text document to be manipulated. To insert
+         * text into a document create a range where ``start === end``.
+         */
+        public Range range { get; set; }
+
+        /**
+         * The string to be inserted. For delete operations use an
+         * empty string.
+         */
+        public string newText { get; set; }
+    }
+
+    /** 
+     * Describes textual changes on a single text document. The text document is
+     * referred to as a {@link VersionedTextDocumentIdentifier} to allow clients to
+     * check the text document version before an edit is applied. A
+     * {@link TextDocumentEdit} describes all changes on a version ``Si`` and after they are
+     * applied move the document to version ``Si+1``. So the creator of a
+     * {@link TextDocumentEdit} doesn’t need to sort the array of edits or do any kind
+     * of ordering. However the edits must be non overlapping.
+     */
+    class TextDocumentEdit : Object, Json.Serializable {
+        /**
+         * The text document to change.
+         */
+        public VersionedTextDocumentIdentifier textDocument { get; set; }
+
+        /**
+         * The edits to be applied.
+         */
+        public Gee.ArrayList<TextEdit> edits { get; set; default = new Gee.ArrayList<TextEdit> (); }
+
+        public Json.Node serialize_property (string property_name, GLib.Value value, GLib.ParamSpec pspec) {
+            if (property_name != "edits")
+                return default_serialize_property (property_name, value, pspec);
+            
+            var node = new Json.Node (Json.NodeType.ARRAY);
+            node.init_array (new Json.Array ());
+            var array = node.get_array ();
+            foreach (var text_edit in edits) {
+                array.add_element (Json.gobject_serialize (text_edit));
+            }
+            return node;
+        }
+
+        public bool deserialize_property (string property_name, out GLib.Value value, GLib.ParamSpec pspec, Json.Node property_node) {
             error ("deserialization not supported");
         }
     }
