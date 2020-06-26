@@ -45,10 +45,12 @@ namespace Vls.CodeHelp {
         return true;
     }
 
-    public string get_expression_representation (Vala.Expression expr) {
+    public string get_expression_representation (Vala.CodeNode expr) {
         if (expr is Vala.Literal)
             return expr.to_string ();
         var sr = expr.source_reference;
+        if (sr == null)
+            return @"(error - $(expr.type_name) does not have source ref!)";
         var file = sr.file;
         if (file.content == null)
             file.content = (string) file.get_mapped_contents ();
@@ -648,5 +650,31 @@ namespace Vls.CodeHelp {
         }
 
         return cname_sb.str;
+    }
+
+    /**
+     * Checks two namespace {@link Vala.CodeNode}s for equality, since namespaces
+     * can be defined in multiple places and therefore a simple pointer equality
+     * test will not work. This will also return false if any of the arguments
+     * is not a {@link Vala.Namespace}
+     */
+    bool namespaces_equal (Vala.CodeNode node1, Vala.CodeNode node2) {
+        var ns1 = node1 as Vala.Namespace;
+        var ns2 = node2 as Vala.Namespace;
+
+        if (ns1 == null || ns2 == null)
+            return false;
+
+        if (ns1.name == ns2.name) {
+            if ((ns1.parent_symbol == null || ns1.parent_symbol.get_full_name () == null) !=
+                    (ns2.parent_symbol == null || ns2.parent_symbol.get_full_name () == null))
+                return false;
+            if ((ns1.parent_symbol == null || ns1.parent_symbol.get_full_name () == null) &&
+                    (ns2.parent_symbol == null || ns2.parent_symbol.get_full_name () == null))
+                return true;
+            return namespaces_equal (ns1.parent_symbol, ns2.parent_symbol);
+        }
+
+        return false;
     }
 }

@@ -159,6 +159,8 @@ class Vls.Server : Object {
         call_handlers["textDocument/documentHighlight"] = this.textDocumentReferences;
         call_handlers["textDocument/implementation"] = this.textDocumentImplementation;
         call_handlers["workspace/symbol"] = this.workspaceSymbol;
+        call_handlers["textDocument/rename"] = this.textDocumentRename;
+        call_handlers["textDocument/prepareRename"] = this.textDocumentPrepareRename;
         notif_handlers["$/cancelRequest"] = this.cancelRequest;
 
         debug ("Finished constructing");
@@ -226,7 +228,8 @@ class Vls.Server : Object {
                     referencesProvider: new Variant.boolean (true),
                     documentHighlightProvider: new Variant.boolean (true),
                     implementationProvider: new Variant.boolean (true),
-                    workspaceSymbolProvider: new Variant.boolean (true)
+                    workspaceSymbolProvider: new Variant.boolean (true),
+                    renameProvider: buildDict (prepareProvider: new Variant.boolean (true))
                 ),
                 serverInfo: buildDict (
                     name: new Variant.string ("Vala Language Server"),
@@ -731,26 +734,6 @@ class Vls.Server : Object {
         return (!) best;
     }
 
-    /**
-     * Gets the symbol you really want, not something from a generated file.
-     *
-     * If `sym` comes from a generated file (eg. a VAPI), then
-     * it would be more useful to show the file specific to the compilation
-     * that generated the file.
-     */
-    Vala.Symbol find_real_sym (Project project, Vala.Symbol sym) {
-        if (sym.source_reference == null || sym.source_reference.file == null)
-            return sym;
-
-        Compilation alter_comp;
-        if (project.lookup_compilation_for_output_file (sym.source_reference.file.filename, out alter_comp)) {
-            Vala.Symbol? matching_sym;
-            if ((matching_sym = Util.find_matching_symbol (alter_comp.code_context, sym)) != null)
-                return matching_sym;
-        }
-        return sym;
-    }
-
     void textDocumentDefinition (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams> (@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
@@ -826,7 +809,7 @@ class Vls.Server : Object {
             }
 
             if (best is Vala.Symbol)
-                best = find_real_sym (selected_project, (Vala.Symbol) best);
+                best = SymbolReferences.find_real_symbol (selected_project, (Vala.Symbol) best);
 
             var location = new Location.from_sourceref (best.source_reference);
             debug ("[textDocument/definition] found location ... %s", location.uri);
@@ -911,7 +894,7 @@ class Vls.Server : Object {
 
     public DocComment? get_symbol_documentation (Project project, Vala.Symbol sym) {
         Compilation compilation = null;
-        Vala.Symbol real_sym = find_real_sym (project, sym);
+        Vala.Symbol real_sym = SymbolReferences.find_real_symbol (project, sym);
         sym = real_sym;
         Vala.Symbol root = null;
         for (var node = sym; node != null; node = node.parent_symbol)
@@ -1190,45 +1173,6 @@ class Vls.Server : Object {
         return DocumentHighlightKind.Text;
     }
 
-    /**
-     * It's possible that a symbol can be used across build targets.
-     */
-    static Collection<Pair<Compilation, Vala.Symbol>> get_compilations_using_symbol (Project project, Vala.Symbol sym) {
-        var compilations = new ArrayList<Pair<Compilation, Vala.Symbol>> ();
-
-        foreach (var compilation in project.get_compilations ()) {
-            Vala.Symbol? matching_sym = Util.find_matching_symbol (compilation.code_context, sym);
-            if (matching_sym != null)
-                compilations.add (new Pair<Compilation, Vala.Symbol> (compilation, matching_sym));
-        }
-
-        return compilations;
-    }
-
-    static void list_references_in_file (Vala.SourceFile file, Vala.Symbol sym, 
-                                         bool include_declaration, ArrayList<Vala.CodeNode> references) {
-        var unique_srefs = new HashSet<string> ();
-        if (sym is Vala.TypeSymbol) {
-            var fs2 = new FindSymbol.with_filter (file, sym,
-                (needle, node) => node == needle ||
-                    (node is Vala.DataType && ((Vala.DataType) node).type_symbol == needle), include_declaration);
-            foreach (var node in fs2.result)
-                if (!(node.source_reference.to_string () in unique_srefs)) {
-                    references.add (node);
-                    unique_srefs.add (node.source_reference.to_string ());
-                }
-        }
-        var fs2 = new FindSymbol.with_filter (file, sym, 
-            (needle, node) => node == needle || 
-                (node is Vala.Expression && ((Vala.Expression)node).symbol_reference == needle ||
-                (node is Vala.UsingDirective) && ((Vala.UsingDirective)node).namespace_symbol == needle), include_declaration);
-        foreach (var node in fs2.result)
-            if (!(node.source_reference.to_string () in unique_srefs)) {
-                references.add (node);
-                unique_srefs.add (node.source_reference.to_string ());
-            }
-    }
-
     void textDocumentReferences (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<ReferenceParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
@@ -1276,7 +1220,7 @@ class Vls.Server : Object {
             Vala.CodeNode result = get_best (fs, doc);
             Vala.Symbol symbol;
             var json_array = new Json.Array ();
-            var references = new Gee.ArrayList<Vala.CodeNode> ();
+            var references = new Gee.HashMap<Range, Vala.CodeNode> ();
 
             if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null)
                 result = ((Vala.Expression) result).symbol_reference;
@@ -1300,33 +1244,33 @@ class Vls.Server : Object {
                 // if highlight, show references in current file
                 // otherwise, we may also do this if it's a local variable, since
                 // Server.get_compilations_using_symbol() only works for global symbols
-                list_references_in_file (doc, symbol, include_declaration, references);
+                SymbolReferences.list_in_file (doc, symbol, include_declaration, references);
             } else {
                 // show references in all files
                 var generated_vapis = new HashSet<File> (Util.file_hash, Util.file_equal);
                 foreach (var btarget in selected_project.get_compilations ())
                     generated_vapis.add_all (btarget.output);
                 var shown_files = new HashSet<File> (Util.file_hash, Util.file_equal);
-                foreach (var btarget_w_sym in Server.get_compilations_using_symbol (selected_project, symbol))
+                foreach (var btarget_w_sym in SymbolReferences.get_compilations_using_symbol (selected_project, symbol))
                     foreach (Vala.SourceFile project_file in btarget_w_sym.first.code_context.get_source_files ()) {
                         // don't show symbol from generated VAPI
                         var file = File.new_for_commandline_arg (project_file.filename);
                         if (file in generated_vapis || file in shown_files)
                             continue;
-                        list_references_in_file (project_file, btarget_w_sym.second, include_declaration, references);
+                        SymbolReferences.list_in_file (project_file, btarget_w_sym.second, include_declaration, references);
                         shown_files.add (file);
                     }
             }
             
             debug (@"[$method] found $(references.size) reference(s)");
-            foreach (var node in references) {
+            foreach (var entry in references) {
                 if (is_highlight) {
                     json_array.add_element (Json.gobject_serialize (new DocumentHighlight () {
-                        range = new Range.from_sourceref (node.source_reference),
-                        kind = determine_node_highlight_kind (node)
+                        range = entry.key,
+                        kind = determine_node_highlight_kind (entry.value)
                     }));
                 } else {
-                    json_array.add_element (Json.gobject_serialize (new Location.from_sourceref (node.source_reference)));
+                    json_array.add_element (Json.gobject_serialize (new Location (entry.value.source_reference.file.filename, entry.key)));
                 }
             }
 
@@ -1413,7 +1357,7 @@ class Vls.Server : Object {
             foreach (var btarget in selected_project.get_compilations ())
                 generated_vapis.add_all (btarget.output);
             var shown_files = new HashSet<File> (Util.file_hash, Util.file_equal);
-            foreach (var btarget_w_sym in Server.get_compilations_using_symbol (selected_project, symbol)) {
+            foreach (var btarget_w_sym in SymbolReferences.get_compilations_using_symbol (selected_project, symbol)) {
                 foreach (var file in btarget_w_sym.first.code_context.get_source_files ()) {
                     var gfile = File.new_for_commandline_arg (file.filename);
                     // don't show symbol from generated VAPI
@@ -1445,7 +1389,7 @@ class Vls.Server : Object {
             foreach (var node in references) {
                 Vala.CodeNode real_node = node;
                 if (node is Vala.Symbol)
-                    real_node = find_real_sym (selected_project, (Vala.Symbol) node);
+                    real_node = SymbolReferences.find_real_symbol (selected_project, (Vala.Symbol) node);
                 json_array.add_element (Json.gobject_serialize (new Location.from_sourceref (real_node.source_reference)));
             }
 
@@ -1498,6 +1442,280 @@ class Vls.Server : Object {
             } catch (Error e) {
                 debug (@"[$method] failed to reply to client: $(e.message)");
             }
+        });
+    }
+
+    void textDocumentRename (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        string new_name = (string) @params.lookup_value ("newName", VariantType.STRING);
+
+        // before anything, sanity-check the new symbol name
+        if (!/^(?=[^\d])[^\s~`!#%^&*()\-\+={}\[\]|\\\/?.>,<'";:]+$/.match (new_name)) {
+            client.reply_error_async.begin (
+                id, 
+                Jsonrpc.ClientError.INVALID_REQUEST, 
+                "Invalid symbol name. Symbol names cannot start with a number and must not contain any operators.", 
+                cancellable);
+            return;
+        }
+
+        var p = Util.parse_variant<TextDocumentPositionParams> (@params);
+        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
+        Project selected_project = null;
+        foreach (var project in projects.get_keys_as_array ()) {
+            results = project.lookup_compile_input_source_file (p.textDocument.uri);
+            if (!results.is_empty) {
+                selected_project = project;
+                break;
+            }
+        }
+        // fallback to default project
+        if (selected_project == null) {
+            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
+            selected_project = default_project;
+        }
+        if (results.is_empty) {
+            debug (@"file `$(Uri.unescape_string (p.textDocument.uri))' not found");
+            reply_null (id, client, method);
+            return;
+        }
+
+        Position pos = p.position;
+        wait_for_context_update (id, request_cancelled => {
+            if (request_cancelled) {
+                reply_null (id, client, method);
+                return;
+            }
+
+            Vala.SourceFile doc = results[0].first;
+            Compilation compilation = results[0].second;
+            Vala.CodeContext.push (compilation.code_context);
+
+            var fs = new FindSymbol (doc, pos, true);
+
+            if (fs.result.size == 0) {
+                debug (@"[$method] no results found");
+                reply_null (id, client, method);
+                Vala.CodeContext.pop ();
+                return;
+            }
+
+            Vala.CodeNode result = get_best (fs, doc);
+            Vala.Symbol symbol;
+            var references = new Gee.HashMap<Range, Vala.CodeNode> ();
+
+            if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null)
+                result = ((Vala.Expression) result).symbol_reference;
+            else if (result is Vala.DataType && ((Vala.DataType)result).type_symbol != null)
+                result = ((Vala.DataType) result).type_symbol;
+            else if (result is Vala.UsingDirective && ((Vala.UsingDirective)result).namespace_symbol != null)
+                result = ((Vala.UsingDirective) result).namespace_symbol;
+
+            // ignore lambda expressions and non-symbols
+            if (!(result is Vala.Symbol) ||
+                result is Vala.Method && ((Vala.Method)result).closure) {
+                debug ("[%s] result is not a symbol", method);
+                reply_null (id, client, method);
+                Vala.CodeContext.pop ();
+                return;
+            }
+
+            symbol = (Vala.Symbol) result;
+
+            debug ("[%s] got symbol %s @ %s", method, symbol.get_full_name (), symbol.source_reference.to_string ());
+
+            // get references in all files
+            var generated_vapis = new HashSet<File> (Util.file_hash, Util.file_equal);
+            foreach (var btarget in selected_project.get_compilations ())
+                generated_vapis.add_all (btarget.output);
+            var shown_files = new HashSet<File> (Util.file_hash, Util.file_equal);
+            foreach (var btarget_w_sym in SymbolReferences.get_compilations_using_symbol (selected_project, symbol))
+                foreach (Vala.SourceFile project_file in btarget_w_sym.first.code_context.get_source_files ()) {
+                    // don't show symbol from generated VAPI
+                    var file = File.new_for_commandline_arg (project_file.filename);
+                    if (file in generated_vapis || file in shown_files)
+                        continue;
+                    var file_references = new HashMap<Range, Vala.CodeNode> ();
+                    debug ("[%s] looking for references in %s ...", method, file.get_uri ());
+                    SymbolReferences.list_in_file (project_file, btarget_w_sym.second, true, file_references);
+                    if (!(project_file is TextDocument) && file_references.size > 0) {
+                        // This means we have found references in a file that was added automatically,
+                        // which should not be modified.
+                        debug ("[%s] disallowing requested modification of %s", method, project_file.filename);
+                        reply_null (id, client, method);
+                        Vala.CodeContext.pop ();
+                        return;
+                    }
+                    foreach (var entry in file_references)
+                        references[entry.key] = entry.value;
+                    shown_files.add (file);
+                }
+            
+            debug ("[%s] found %d references", method, references.size);
+            
+            // construct the edits for the text documents
+            // map: file URI -> TextEdit[]
+            var edits = new HashMap<string, ArrayList<TextEdit>> ();
+            var source_files = new HashMap<string, Vala.SourceFile> ();
+
+            foreach (var entry in references) {
+                var code_node = entry.value;
+                var source_range = entry.key;
+                debug ("[%s] editing reference %s @ %s ...", 
+                    method, 
+                    CodeHelp.get_expression_representation (code_node), 
+                    code_node.source_reference.to_string ());
+                var file = File.new_for_commandline_arg (code_node.source_reference.file.filename);
+                if (!edits.has_key (file.get_uri ()))
+                    edits[file.get_uri ()] = new ArrayList<TextEdit> ();
+                var file_edits = edits[file.get_uri ()];
+                // if this is a using directive, we want to only replace the part after the 'using' keyword
+                file_edits.add (new TextEdit () {
+                    range = source_range,
+                    newText = new_name
+                });
+                source_files[file.get_uri ()] = code_node.source_reference.file;
+            }
+
+            // TODO: determine support for TextDocumentEdit
+            var text_document_edits_json = new Json.Array ();
+            foreach (var uri in edits.keys) {
+                text_document_edits_json.add_element (Json.gobject_serialize (new TextDocumentEdit () {
+                    textDocument = new VersionedTextDocumentIdentifier () {
+                        version = ((TextDocument) source_files[uri]).version,
+                        uri = uri
+                    },
+                    edits = edits[uri]
+                }));
+            }
+
+            try {
+                Variant changes = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (text_document_edits_json), null);
+                client.reply (
+                    id, 
+                    buildDict (
+                        documentChanges: changes
+                    ),
+                    cancellable);
+            } catch (Error e) {
+                warning ("[%s] failed to reply to client - %s", method, e.message);
+            }
+
+            Vala.CodeContext.pop ();
+        });
+    }
+    
+    void textDocumentPrepareRename (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        var p = Util.parse_variant<TextDocumentPositionParams> (@params);
+        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
+        Project selected_project = null;
+        foreach (var project in projects.get_keys_as_array ()) {
+            results = project.lookup_compile_input_source_file (p.textDocument.uri);
+            if (!results.is_empty) {
+                selected_project = project;
+                break;
+            }
+        }
+        // fallback to default project
+        if (selected_project == null) {
+            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
+            selected_project = default_project;
+        }
+        if (results.is_empty) {
+            debug (@"file `$(Uri.unescape_string (p.textDocument.uri))' not found");
+            reply_null (id, client, method);
+            return;
+        }
+
+        Position pos = p.position;
+        wait_for_context_update (id, request_cancelled => {
+            if (request_cancelled) {
+                reply_null (id, client, method);
+                return;
+            }
+            
+            Vala.SourceFile doc = results[0].first;
+            Compilation compilation = results[0].second;
+            Vala.CodeContext.push (compilation.code_context);
+
+            var fs = new FindSymbol (doc, pos, true);
+
+            if (fs.result.size == 0) {
+                client.reply_error_async.begin (
+                    id,
+                    Jsonrpc.ClientError.INVALID_REQUEST,
+                    "There is no symbol at the cursor.",
+                    cancellable);
+                Vala.CodeContext.pop ();
+                return;
+            }
+
+            Vala.CodeNode initial_result = get_best (fs, doc);
+            Vala.CodeNode result = initial_result;
+            Vala.Symbol symbol;
+
+            if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null)
+                result = ((Vala.Expression) result).symbol_reference;
+            else if (result is Vala.DataType && ((Vala.DataType)result).type_symbol != null)
+                result = ((Vala.DataType) result).type_symbol;
+            else if (result is Vala.UsingDirective && ((Vala.UsingDirective)result).namespace_symbol != null)
+                result = ((Vala.UsingDirective) result).namespace_symbol;
+
+            // ignore lambda expressions and non-symbols
+            if (!(result is Vala.Symbol) ||
+                result is Vala.Method && ((Vala.Method)result).closure) {
+                // TODO: rewrite all code to use async
+                client.reply_error_async.begin (
+                    id, 
+                    Jsonrpc.ClientError.INVALID_REQUEST, 
+                    "There is no symbol at the cursor.", 
+                    cancellable);
+                Vala.CodeContext.pop ();
+                return;
+            }
+
+            symbol = (Vala.Symbol) result;
+
+            var replacement_range = SymbolReferences.get_replacement_range (initial_result, symbol);
+            // If the source_reference is null, then this could be something like a
+            // `this' parameter.
+            if (replacement_range == null || symbol.source_reference == null) {
+                client.reply_error_async.begin (
+                    id,
+                    Jsonrpc.ClientError.INVALID_REQUEST,
+                    "There is no symbol at the cursor.",
+                    cancellable);
+                Vala.CodeContext.pop ();
+                return;
+            }
+
+            foreach (var btarget_w_sym in SymbolReferences.get_compilations_using_symbol (selected_project, symbol)) {
+                if (!(btarget_w_sym.second.source_reference.file is TextDocument)) {
+                    // This means we have found references in a file that was added automatically,
+                    // which should not be modified.
+                    // TODO: rewrite all code to use async
+                    string? pkg = btarget_w_sym.second.source_reference.file.package_name;
+                    client.reply_error_async.begin (
+                        id, 
+                        Jsonrpc.ClientError.INVALID_REQUEST, 
+                        "Cannot rename a symbol defined in a system library" + (pkg != null ? @" ($pkg)." : "."),
+                        cancellable);
+                    Vala.CodeContext.pop ();
+                    return;
+                }
+            }
+
+            try {
+                client.reply (
+                    id,
+                    buildDict (
+                        range: Util.object_to_variant (replacement_range),
+                        placeholder: new Variant.string (symbol.name)
+                    ),
+                    cancellable);
+            } catch (Error e) {
+                warning ("[%s] failed to reply with success - %s", method, e.message);
+            }
+            Vala.CodeContext.pop ();
         });
     }
 

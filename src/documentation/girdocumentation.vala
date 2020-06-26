@@ -345,7 +345,7 @@ class Vls.GirDocumentation {
      * Find the GIR symbol related to @sym
      */
     public Vala.Symbol? find_gir_symbol (Vala.Symbol sym) {
-        var found_sym = Util.find_matching_symbol (context, sym);
+        var found_sym = SymbolReferences.find_matching_symbol (context, sym);
 
         // fallback to C name
         if (found_sym == null) {
