@@ -12,14 +12,27 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 
 - Alpine Linux Edge: `apk add vala-language-server`
 
-- Ubuntu 18.04 and elementary:
+- Ubuntu 18.04, 20.04 and elementaryOS
+
+  In order to install VLS, you need Vala 0.48 or later, which is only available
+  by default on Ubuntu 20.04. You can get an up-to-date version of Vala
+  from the Vala Team's Vala-Next repository. First you need to remove older
+  Vala components:
+
+    ```sh
+    sudo apt-add-repository ppa:vala-team/next
+    # If you have 0.40 and 0.48, there may be random issues popping out
+    sudo apt-get remove valac-0.40-vapi "libvala.*-0.40-0"
+    sudo apt-get install valac-0.48 valac-bin
+    ```
+
+  Now you can install the Vala Language Server:
 
     ```sh
     sudo add-apt-repository ppa:prince781/vala-language-server
     sudo apt-get update
     sudo apt-get install vala-language-server
     ```
-
 - Fedora 32:
 
     ```sh
