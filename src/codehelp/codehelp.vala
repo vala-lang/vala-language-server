@@ -468,7 +468,7 @@ namespace Vls.CodeHelp {
                                               string? override_name = null, bool show_initializers = true) {
         if (data_type == null && sym == null)
             return null;
-        if (data_type == null || sym != null && data_type.symbol == sym) {
+        if (data_type == null || sym != null && SymbolReferences.get_symbol_data_type_refers_to (data_type) == sym) {
             if (sym is Vala.Namespace)
                 return "namespace " + get_symbol_name_representation(sym, scope);
             else if (sym is Vala.Callable) {
@@ -567,6 +567,14 @@ namespace Vls.CodeHelp {
                 builder.append ("::~");
                 builder.append (sym.name ?? sym.parent_symbol.name);
                 builder.append (" ()");
+                return builder.str;
+            } else if (sym is Vala.TypeParameter) {
+                var builder = new StringBuilder ();
+                string parent_symbol_representation = get_symbol_name_representation (sym.parent_symbol, scope);
+                builder.append (sym.name);
+                builder.append (" (type parameter of ");
+                builder.append (parent_symbol_representation);
+                builder.append_c (')');
                 return builder.str;
             }
             warning ("symbol %s unmatched", sym.type_name);
