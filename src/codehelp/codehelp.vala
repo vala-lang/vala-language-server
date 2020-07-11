@@ -595,6 +595,9 @@ namespace Vls.CodeHelp {
         if (sym is Vala.Constant)
             return get_constant_representation (data_type, (Vala.Constant)sym, scope);
 
+        if (sym is Vala.ErrorCode)
+            return get_symbol_name_representation (sym, scope);
+
         critical ("uncaught data type with symbol (%s with %s as %s)", data_type.to_string (), sym.name, sym.type_name);
         return null;
     }
