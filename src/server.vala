@@ -790,9 +790,7 @@ class Vls.Server : Object {
                     debug ("best is now the symbol_referenece => %p (%s)", best, best.to_string ());
                 }
             } else if (best is Vala.DataType) {
-                var dt = (Vala.DataType) best;
-                var et = dt as Vala.ErrorType;
-                best = et != null && et.error_code != null ? et.error_code : dt.symbol;
+                best = SymbolReferences.get_symbol_data_type_refers_to ((Vala.DataType) best);
             } else if (best is Vala.UsingDirective) {
                 best = ((Vala.UsingDirective)best).namespace_symbol;
             } else {
@@ -1082,9 +1080,7 @@ class Vls.Server : Object {
                 symbol = (Vala.Symbol) result;
             } else if (result is Vala.DataType) {
                 data_type = (Vala.DataType) result;
-                // we need to handle ValaErrorTypes with error codes especially
-                var et = result as Vala.ErrorType;
-                symbol = et != null && et.error_code != null ? et.error_code : data_type.symbol;
+                symbol = SymbolReferences.get_symbol_data_type_refers_to (data_type);
             } else if (result is Vala.UsingDirective) {
                 symbol = ((Vala.UsingDirective)result).namespace_symbol;
             } else {
@@ -1224,9 +1220,8 @@ class Vls.Server : Object {
 
             if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null)
                 result = ((Vala.Expression) result).symbol_reference;
-            else if (result is Vala.DataType && ((Vala.DataType)result).symbol != null) {
-                var et = result as Vala.ErrorType;
-                result = et != null && et.error_code != null ? et.error_code : ((Vala.DataType) result).type_symbol;
+            else if (result is Vala.DataType) {
+                result = SymbolReferences.get_symbol_data_type_refers_to ((Vala.DataType) result);
             } else if (result is Vala.UsingDirective && ((Vala.UsingDirective)result).namespace_symbol != null)
                 result = ((Vala.UsingDirective) result).namespace_symbol;
 
@@ -1506,9 +1501,8 @@ class Vls.Server : Object {
 
             if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null)
                 result = ((Vala.Expression) result).symbol_reference;
-            else if (result is Vala.DataType && ((Vala.DataType)result).symbol != null) {
-                var et = result as Vala.ErrorType;
-                result = et != null && et.error_code != null ? et.error_code : ((Vala.DataType) result).symbol;
+            else if (result is Vala.DataType) {
+                result = SymbolReferences.get_symbol_data_type_refers_to ((Vala.DataType) result);
             } else if (result is Vala.UsingDirective && ((Vala.UsingDirective)result).namespace_symbol != null)
                 result = ((Vala.UsingDirective) result).namespace_symbol;
 
@@ -1657,9 +1651,8 @@ class Vls.Server : Object {
 
             if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null)
                 result = ((Vala.Expression) result).symbol_reference;
-            else if (result is Vala.DataType && ((Vala.DataType)result).symbol != null) {
-                var et = result as Vala.ErrorType;
-                result = et != null && et.error_code != null ? et.error_code : ((Vala.DataType) result).symbol;
+            else if (result is Vala.DataType) {
+                result = SymbolReferences.get_symbol_data_type_refers_to ((Vala.DataType) result);
             } else if (result is Vala.UsingDirective && ((Vala.UsingDirective)result).namespace_symbol != null)
                 result = ((Vala.UsingDirective) result).namespace_symbol;
 
