@@ -156,9 +156,13 @@ namespace Vls.SymbolReferences {
         var components = new ArrayQueue<Pair<Vala.Symbol, Range>> ();
         Vala.Symbol? symbol = null;
 
-        if (code_node is Vala.DataType)
-            symbol = ((Vala.DataType)code_node).symbol;
-        else if (code_node is Vala.Symbol)
+        if (code_node is Vala.DataType) {
+            // we need to handle ValaErrorTypes with error codes especially
+            if (code_node is Vala.ErrorType)
+                symbol = ((Vala.ErrorType)code_node).error_code;
+            if (symbol == null)
+                symbol = ((Vala.DataType)code_node).symbol;
+        } else if (code_node is Vala.Symbol)
             symbol = (Vala.Symbol) code_node;
         else if (code_node is Vala.MemberAccess)
             symbol = ((Vala.MemberAccess)code_node).symbol_reference;
@@ -281,11 +285,20 @@ namespace Vls.SymbolReferences {
                 if (node is Vala.Namespace || node is Vala.TypeSymbol)
                     components = get_visible_components_of_code_node (node);
                 else if (node is Vala.DataType) {
+                    var dt = (Vala.DataType) node;
+                    var et = dt as Vala.ErrorType;
+                    Vala.Symbol? current_sym = null;
+
+                    if (et != null)
+                        current_sym = et.error_code;
+
+                    if (current_sym == null)
+                        current_sym = dt.symbol;
+
                     // it's expensive to run get_visible_components_of_code_node() every time we
                     // see a ValaDataType, so only run it if the source reference for the ValaDataType
-                    // could potentially match @symbol_to_find
-                    for (var current_sym = ((Vala.DataType)node).symbol; current_sym != null; 
-                        current_sym = current_sym.parent_symbol) {
+                    // could potentially match @symbol
+                    for (; current_sym != null; current_sym = current_sym.parent_symbol) {
                         if (symbol == current_sym) {
                             components = get_visible_components_of_code_node (node);
                             break;
