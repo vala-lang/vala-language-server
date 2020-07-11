@@ -26,6 +26,11 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
         this.include_declaration = include_declaration;
         this.func = func;
         visit_source_file (file);
+
+        // XXX: sometimes the CodeVisitor does not see a local variable,
+        // especially if it is declared as part of a foreach statement
+        if (symbol is LocalVariable && filter (symbol))
+            func (symbol, symbol, data);
     }
 
     private bool filter (CodeNode node) {

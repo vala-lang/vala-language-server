@@ -90,7 +90,17 @@ namespace Vls.SymbolReferences {
         var range = new Range.from_sourceref (code_node.source_reference);
 
         string representation = CodeHelp.get_expression_representation (code_node);
-        int last_index_of_symbol = representation.last_index_of (symbol.name);
+        int last_index_of_symbol;
+        MatchInfo match_info;
+
+        if (/^\s*foreach\s?\(.+\s+(\S+)\s+in\s+.+\)\s*$/m.match (representation, 0, out match_info)) {
+            int start, end;
+            if (match_info.fetch_pos (1, out start, out end) && match_info.fetch (1) == symbol.name)
+                last_index_of_symbol = start;
+            else
+                last_index_of_symbol = -1;
+        } else
+            last_index_of_symbol = representation.last_index_of (symbol.name);
 
         if (last_index_of_symbol == -1)
             return null;
