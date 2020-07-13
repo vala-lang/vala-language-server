@@ -83,6 +83,23 @@ namespace Vls.CodeHelp {
         return null;
     }
 
+    public Vala.Symbol? lookup_symbol_full_name (string full_name, Vala.Scope scope, out Gee.ArrayList<Vala.Symbol> components = null) {
+        string[] symbol_names = full_name.split (".");
+        Vala.Symbol? current_symbol = lookup_in_scope_and_ancestors (scope, symbol_names[0]);
+        components = new Gee.ArrayList<Vala.Symbol> ();
+
+        if (current_symbol != null)
+            components.add (current_symbol);
+
+        for (int i = 1; i < symbol_names.length && current_symbol != null; i++) {
+            current_symbol = current_symbol.scope.lookup (symbol_names[i]);
+            if (current_symbol != null)
+                components.add (current_symbol);
+        }
+
+        return current_symbol;
+    }
+
     /**
      * Displays a symbol in a format that's contextualized in the current scope.
      */
