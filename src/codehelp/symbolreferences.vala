@@ -113,26 +113,30 @@ namespace Vls.SymbolReferences {
      */
     Range? get_replacement_range (Vala.CodeNode code_node, Vala.Symbol symbol) {
         string representation = CodeHelp.get_expression_representation (code_node);
-        int last_index_of_symbol;
+        int index_of_symbol;
         MatchInfo match_info;
 
         if (/^\s*foreach\s?\(.+\s+(\S+)\s+in\s+.+\)\s*$/m.match (representation, 0, out match_info)) {
             int start, end;
             if (match_info.fetch_pos (1, out start, out end) && match_info.fetch (1) == symbol.name)
-                last_index_of_symbol = start;
+                index_of_symbol = start;
             else
-                last_index_of_symbol = -1;
-        } else
-            last_index_of_symbol = representation.last_index_of (symbol.name);
+                index_of_symbol = -1;
+        } else {
+            if (code_node is Vala.Symbol)
+                index_of_symbol = representation.index_of (symbol.name);
+            else // for more complex expressions
+                index_of_symbol = representation.last_index_of (symbol.name);
+        }
 
-        if (last_index_of_symbol == -1)
+        if (index_of_symbol == -1)
             return null;
         
         return get_narrowed_source_reference (
             code_node.source_reference,
             representation,
-            last_index_of_symbol,
-            last_index_of_symbol + symbol.name.length);
+            index_of_symbol,
+            index_of_symbol + symbol.name.length);
     }
 
     /**
