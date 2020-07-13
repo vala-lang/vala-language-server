@@ -75,20 +75,43 @@ namespace Vls.SymbolReferences {
     }
 
     /**
-     * Gets the range of a symbol name in a code node. For example, 
-     * if we are replacing a method symbol, for each method call where that symbol
-     * appears, we only want to replace the portion of the text that contains the 
-     * symbol. This means we have to narrow the {@link Vala.SourceReference} of
-     * the expression. This same problem exists for data types, where we may wish
-     * to replace ``TypeName`` in every instance of ``Namespace.TypeName``.
+     * @return      a new {@link LanguageServer.Range} narrowed from the source reference
+     */
+    Range get_narrowed_source_reference (Vala.SourceReference source_reference, string representation, int start, int end) {
+        var range = new Range.from_sourceref (source_reference);
+
+        // move the start of the range up [last_index_of_symbol] characters
+        string prefix = representation[0:start];
+        int prefix_last_nl_pos;
+        int prefix_nl_count = (int) Util.count_chars_in_string (prefix, '\n', out prefix_last_nl_pos);
+
+        range.start = range.start.translate (prefix_nl_count, prefix.length - prefix_last_nl_pos - 1);
+
+        // move the end of the range up
+        range.end = range.start.dup ();
+        string text_inside = representation[start:end];
+        int text_inside_last_nl_pos;
+        int text_inside_nl_count = (int) Util.count_chars_in_string (text_inside, '\n', out text_inside_last_nl_pos);
+
+        range.end = range.end.translate (text_inside_nl_count, (end - start) - text_inside_last_nl_pos - 1);
+        return range;
+    }
+
+    /**
+     * Gets the range of a symbol name in a code node that refers to that
+     * symbol. This function is useful in situations where, for example, we are
+     * replacing a method symbol, where for each method call where that symbol
+     * appears, we only want to replace the portion of the text that contains
+     * the symbol. This means we have to narrow the {@link Vala.SourceReference}
+     * of the expression. This same problem exists for data types, where we may
+     * wish to replace ``TypeName`` in every instance of
+     * ``Namespace.TypeName``.
      *
      * @param code_node             A code node in the AST. Its ``source_reference`` must be non-``null``.
      * @param symbol                The symbol to replace inside the code node.
      * @return                      The replacement range, or ``null`` if ``symbol.name`` is not inside it
      */
     Range? get_replacement_range (Vala.CodeNode code_node, Vala.Symbol symbol) {
-        var range = new Range.from_sourceref (code_node.source_reference);
-
         string representation = CodeHelp.get_expression_representation (code_node);
         int last_index_of_symbol;
         MatchInfo match_info;
@@ -105,39 +128,104 @@ namespace Vls.SymbolReferences {
         if (last_index_of_symbol == -1)
             return null;
         
-        // move the start of the range up [last_index_of_symbol] characters
-        string prefix = representation[0:last_index_of_symbol];
-        int last_index_of_newline_in_prefix = prefix.last_index_of_char ('\n');
+        return get_narrowed_source_reference (
+            code_node.source_reference,
+            representation,
+            last_index_of_symbol,
+            last_index_of_symbol + symbol.name.length);
+    }
 
-        if (last_index_of_newline_in_prefix == -1) {
-            range.start = range.start.translate (0, last_index_of_symbol);
-        } else {
-            int newline_count = 0;
+    /**
+     * Gets a list of references to the comment (if it exists) of the symbol @node.
+     * These references are of the form `{@link symbol-name}`, according to the
+     * [[https://valadoc.org/markup.htm|ValaDoc markup specification]].
+     *
+     * @param node      the symbol node with a comment to extract references from
+     * @param symbol    the symbol to search for
+     * @return          a list of references to @symbol in @node's comment
+     */
+    Range[] list_in_comment (Vala.Symbol node, Vala.Symbol symbol) {
+        if (node.comment == null || node.comment.source_reference == null)
+            return {};
 
-            foreach (uint character in prefix.data)
-                if ((char)character == '\n')
-                    newline_count++;
+        MatchInfo match_info;
+        Range[] ranges = {};
 
-            range.start = range.start.translate (newline_count, last_index_of_symbol - last_index_of_newline_in_prefix);
+        if (/{@link\s+(?'link'\w+(\.\w+)*)}|@see\s+(?'see'(?&link))|@throws\s+(?'throws'(?&link))/
+            .match (node.comment.content, 0, out match_info)) {
+            while (match_info.matches ()) {
+                int start, end;
+                string symbol_full_name;
+                string group;
+                string? fetched;
+
+                if ((fetched = match_info.fetch_named (group = "link")) != null && fetched.length > 0)
+                    symbol_full_name = (!) fetched;
+                else if ((fetched = match_info.fetch_named (group = "see")) != null && fetched.length > 0)
+                    symbol_full_name = (!) fetched;
+                else {
+                    symbol_full_name = match_info.fetch_named (group = "throws");
+                }
+
+                if (match_info.fetch_named_pos (group, out start, out end)) {
+                    // FIXME upstream: Vala documentation (block) comments have an
+                    // issue where the start of their computed source reference is 4
+                    // columns ahead. They also have an issue where their source
+                    // reference is zero-width.
+                    start -= 4;
+
+                    ArrayList<Vala.Symbol> components;
+                    if (CodeHelp.lookup_symbol_full_name (symbol_full_name, node.scope, out components) != null) {
+                        foreach (var component in components) {
+                            if (component == symbol || CodeHelp.namespaces_equal (component, symbol)) {
+                                end = start + component.name.length;
+                                ranges += get_narrowed_source_reference (node.comment.source_reference, node.comment.content, start, end);
+                                break;
+                            }
+                            start += component.name.length;
+                            start++;    // for the '.' that comes after
+                        }
+                    }
+                }
+
+                try {
+                    match_info.next ();
+                } catch (Error e) {
+                    warning ("failed to get next match - %s", e.message);
+                    break;
+                }
+            }
         }
 
-        // move the end of the range back [length(symbol_name)] characters
-        string suffix = representation[(last_index_of_symbol+symbol.name.length):representation.length];
-        int last_index_of_newline_in_suffix = suffix.last_index_of_char ('\n');
+        if (symbol is Vala.Parameter && symbol.parent_symbol == node) {
+            // FIXME upstream: see https://gitlab.gnome.org/GNOME/vala/-/issues/19
+            // we cannot have (symbol is Vala.Parameter) test in a conditional statement
+            // with this out-parameter-assigning function
+            if (/@param (\w+)/.match (node.comment.content, 0, out match_info)) {
+                while (match_info.matches ()) {
+                    int start, end;
+                    string param_name = (!) match_info.fetch (1);
 
-        if (last_index_of_newline_in_suffix == -1) {
-            range.end = range.end.translate (0, -(representation.length - (last_index_of_symbol + symbol.name.length)));
-        } else {
-            int newline_count = 0;
+                    if (param_name == symbol.name) {
+                        if (match_info.fetch_pos (1, out start, out end)) {
+                            // see comment early up in this function
+                            start -= 4;
+                            end = start + param_name.length;
+                            ranges += get_narrowed_source_reference (node.comment.source_reference, node.comment.content, start, end);
+                        }
+                    }
 
-            foreach (uint character in suffix.data)
-                if ((char)character == '\n')
-                    newline_count++;
-            
-            range.end = range.end.translate (-newline_count, -(last_index_of_newline_in_suffix - (last_index_of_symbol + symbol.name.length)));
+                    try {
+                        match_info.next ();
+                    } catch (Error e) {
+                        warning ("could not get next match - %s", e.message);
+                        break;
+                    }
+                }
+            }
         }
 
-        return range;
+        return ranges;
     }
 
     /** 
@@ -309,6 +397,12 @@ namespace Vls.SymbolReferences {
                 var result = components.first_match (pair => pair.first == symbol || CodeHelp.namespaces_equal (pair.first, symbol));
                 if (result != null)
                     references[result.second] = node;
+            }
+
+            // get references to symbol in ValaDoc comments
+            if (node is Vala.Symbol) {
+                foreach (var range in list_in_comment ((Vala.Symbol)node, symbol))
+                    references[range] = node;
             }
         });
     }
