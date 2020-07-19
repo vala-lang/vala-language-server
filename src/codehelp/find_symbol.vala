@@ -32,7 +32,7 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         }
 
         if (filter != null) {
-            if (!include_declaration && 
+            if (!include_declaration &&
                 (needle == node && !(needle is Vala.LocalVariable) || node.parent_node is Vala.DeclarationStatement))
                 return false;
             return filter (needle, node);
@@ -71,7 +71,7 @@ class Vls.FindSymbol : Vala.CodeVisitor {
      * TODO: are children of a CodeNode guaranteed to have a source_reference within the parent?
      * if so, this can be much faster
      */
-    public FindSymbol (Vala.SourceFile file, Position pos, 
+    public FindSymbol (Vala.SourceFile file, Position pos,
                        bool search_multiline = false,
                        Position? end_pos = null) {
         this.pos = pos;
@@ -81,7 +81,7 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         this.visit_source_file (file);
     }
 
-    public FindSymbol.with_filter (Vala.SourceFile file, Vala.CodeNode needle, Filter filter_func, 
+    public FindSymbol.with_filter (Vala.SourceFile file, Vala.CodeNode needle, Filter filter_func,
                                    bool include_declaration = true) {
         this.file = file;
         this.needle = needle;
@@ -282,7 +282,7 @@ class Vls.FindSymbol : Vala.CodeVisitor {
             result.add (stmt);
         stmt.accept_children (this);
     }
-    
+
     public override void visit_destructor (Vala.Destructor dtor) {
         if (seen.contains (dtor))
             return;

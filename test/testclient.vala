@@ -35,7 +35,7 @@ class Vls.TestClient : Jsonrpc.Server {
             int p = env.index_of_char ('=');
             if (p == -1)
                 throw new IOError.INVALID_ARGUMENT ("`%s' not of the form VAR=STRING", env);
-            launcher.setenv (env[0:p], env.substring (p+1), true);
+            launcher.setenv (env[0:p], env.substring (p + 1), true);
         }
 
         vls_subprocess = launcher.spawnv ({server_location, server_location});

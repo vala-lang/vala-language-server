@@ -100,7 +100,7 @@ class Vls.SymbolExtractor : Object {
         public FakeRealLiteral (string value) {
             base (value);
         }
-        
+
         public override string to_string () {
             return @"(real) $value";
         }
@@ -321,7 +321,7 @@ class Vls.SymbolExtractor : Object {
                         Vala.DataType? found_base_type = null;
                         // attempt to resolve this as a base access
                         for (var starting_block = current_block ?? block;
-                             starting_block != null && found_base_type == null; 
+                             starting_block != null && found_base_type == null;
                              starting_block = starting_block.parent_symbol) {
                             if (starting_block is Vala.Class) {
                                 foreach (var base_type in ((Vala.Class)starting_block).get_base_types ()) {
@@ -399,7 +399,7 @@ class Vls.SymbolExtractor : Object {
             Vala.Callable? callable;
             if (call.value_type != null) {
                 callable = Vala.SemanticAnalyzer.get_symbol_for_data_type (call.value_type) as Vala.Callable;
-                if (callable == null && !(fake_mc.inner is FakeMemberAccess && 
+                if (callable == null && !(fake_mc.inner is FakeMemberAccess &&
                         ((FakeMemberAccess)fake_mc.inner).member_name == "this" ||
                         ((FakeMemberAccess)fake_mc.inner).member_name == "base"))
                     throw new TypeResolutionError.NTH_EXPRESSION ("could not get callable symbol for inner data type");
@@ -495,7 +495,7 @@ class Vls.SymbolExtractor : Object {
         }
 
         // debug ("extracted expression - %s", expr.to_string ());
-        
+
         try {
             _extracted_expression = resolve_typed_expression (expr);
             // debug ("resolved extracted expression as %s", _extracted_expression.type_name);
@@ -519,7 +519,7 @@ class Vls.SymbolExtractor : Object {
 
     private bool skip_string (string s) {
         if (idx >= s.length && idx + 1 <= source_file.content.length) {
-            if (source_file.content[idx-s.length+1:idx+1] == s) {
+            if (source_file.content[idx - s.length + 1 : idx + 1] == s) {
                 idx -= s.length;
                 return true;
             }
@@ -540,8 +540,8 @@ class Vls.SymbolExtractor : Object {
 
         if (lb_idx == idx || lb_idx < 0)
             return null;
-        
-        if (!(source_file.content[lb_idx+1].isalpha () || source_file.content[lb_idx+1] == '_'))
+
+        if (!(source_file.content[lb_idx + 1].isalpha () || source_file.content[lb_idx + 1] == '_'))
             // ident must start with alpha or underline character
             return null;
 
@@ -556,24 +556,24 @@ class Vls.SymbolExtractor : Object {
 
         if (lb_idx < 0)
             return null;
-        
+
         if (source_file.content[lb_idx] != '"')
             return null;
-        
+
         lb_idx--;
 
-        while (lb_idx >= 0 && (source_file.content[lb_idx] != '"' || lb_idx > 0 && source_file.content[lb_idx-1] == '\\'))
+        while (lb_idx >= 0 && (source_file.content[lb_idx] != '"' || lb_idx > 0 && source_file.content[lb_idx - 1] == '\\'))
             lb_idx--;
-        
+
         if (source_file.content[lb_idx] != '"')
             return null;
-        
+
         // move behind the leftmost quote
         lb_idx--;
-        
+
         if (lb_idx == idx || lb_idx < 0)
             return null;
-        
+
         string str = source_file.content.substring (lb_idx + 2, idx - lb_idx - 1);
         idx = lb_idx;   // update idx
 
@@ -585,10 +585,10 @@ class Vls.SymbolExtractor : Object {
 
         while (lb_idx >= 0 && source_file.content[lb_idx].isdigit ())
             lb_idx--;
-        
+
         if (lb_idx == idx || lb_idx < 0)
             return null;
-        
+
         string str = source_file.content.substring (lb_idx + 1, idx - lb_idx);
         idx = lb_idx;
 
@@ -613,13 +613,13 @@ class Vls.SymbolExtractor : Object {
 
         if (lb_idx >= 2 &&
             source_file.content[lb_idx] == '\'' &&
-            source_file.content[lb_idx-2] == '\'')
+            source_file.content[lb_idx - 2] == '\'')
             lb_idx -= 2;
         else
             return null;
-        
+
         lb_idx--;
-        
+
         string str = source_file.content.substring (lb_idx + 1, idx - lb_idx);
         this.idx = lb_idx;
 
@@ -643,7 +643,7 @@ class Vls.SymbolExtractor : Object {
         return skip_char ('.') || skip_string ("->");
     }
 
-    private bool parse_expr_tuple (bool allow_no_right_paren, ArrayList<FakeExpr> expressions, 
+    private bool parse_expr_tuple (bool allow_no_right_paren, ArrayList<FakeExpr> expressions,
                                    char begin_separator = '(', char end_separator = ')') {
         // allow for incomplete method call if first expression (useful for SignatureHelp)
         long saved_idx = this.idx;
@@ -684,7 +684,7 @@ class Vls.SymbolExtractor : Object {
         if (!skip_char ('>'))
             return null;
         skip_whitespace ();
-        
+
         var type_arguments = new ArrayList<FakeMemberAccess> ();
         FakeMemberAccess? ma_expr = null;
         while ((ma_expr = parse_fake_member_access_expr (false)) != null) {
@@ -693,7 +693,7 @@ class Vls.SymbolExtractor : Object {
             if (!skip_char (','))
                 break;
         }
-        
+
         skip_whitespace ();
         if (!skip_char ('<')) {
             this.idx = saved_idx;
@@ -726,7 +726,7 @@ class Vls.SymbolExtractor : Object {
         return ma_expr;
     }
 
-    private FakeExpr? parse_fake_expr (bool oce_allowed = false, 
+    private FakeExpr? parse_fake_expr (bool oce_allowed = false,
                                        bool accept_incomplete_method_call = false,
                                        bool at_member_access = false) {
         var method_arguments = new ArrayList<FakeExpr> ();
@@ -764,7 +764,7 @@ class Vls.SymbolExtractor : Object {
 
         if (have_tuple)
             expr = new FakeMethodCall (method_arguments.size, (FakeMemberAccess)expr);
-        
+
         if (oce_allowed) {
             skip_whitespace ();
             if (parse_ident () == "new") {

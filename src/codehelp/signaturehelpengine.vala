@@ -28,7 +28,7 @@ namespace Vls.SignatureHelpEngine {
         } else {
             // debug ("[%s] could not get extracted expression", method);
         }
-        
+
         if (signatures.is_empty) {
             lang_serv.wait_for_context_update (id, request_cancelled => {
                 if (request_cancelled) {
@@ -39,9 +39,9 @@ namespace Vls.SignatureHelpEngine {
                 Vala.CodeContext.push (compilation.code_context);
                 show_help_with_updated_context (lang_serv, project,
                                                 method,
-                                                doc, compilation, pos, 
+                                                doc, compilation, pos,
                                                 signatures, ref active_param);
-                
+
                 if (!signatures.is_empty)
                     finish (client, id, signatures, active_param);
                 else
@@ -97,7 +97,7 @@ namespace Vls.SignatureHelpEngine {
             if (data_type is Vala.ObjectType || data_type is Vala.StructValueType) {
                 Vala.CreationMethod? cm = null;
 
-                for (var current_scope = scope; current_scope != null && cm == null; 
+                for (var current_scope = scope; current_scope != null && cm == null;
                         current_scope = current_scope.parent_scope)
                     cm = current_scope.owner as Vala.CreationMethod;
 
@@ -122,7 +122,7 @@ namespace Vls.SignatureHelpEngine {
                 }
             } else if (mc.call is Vala.MemberAccess)
                 method_type_arguments = ((Vala.MemberAccess)mc.call).get_type_arguments ();
-            
+
             if (data_type is Vala.CallableType)
                 param_list = ((Vala.CallableType)data_type).get_parameters ();
             else if (data_type is Vala.ObjectType)
@@ -191,7 +191,7 @@ namespace Vls.SignatureHelpEngine {
         } else {
             // debug (@"[$method] %s neither a method call nor (complete) object creation expr", result.to_string ());
             return;     // early exit
-        } 
+        }
 
         if (explicit_sym == null && data_type == null) {
             // debug (@"[$method] could not get explicit_sym and data_type from $(result.type_name)");

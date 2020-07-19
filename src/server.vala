@@ -216,10 +216,10 @@ class Vls.Server : Object {
                     textDocumentSync: new Variant.int16 (TextDocumentSyncKind.Incremental),
                     definitionProvider: new Variant.boolean (true),
                     documentSymbolProvider: new Variant.boolean (true),
-                    completionProvider: buildDict(
+                    completionProvider: buildDict (
                         triggerCharacters: new Variant.strv (new string[] {".", ">"})
                     ),
-                    signatureHelpProvider: buildDict(
+                    signatureHelpProvider: buildDict (
                         triggerCharacters: new Variant.strv (new string[] {"(", "[", ","})
                     ),
                     hoverProvider: new Variant.boolean (true),
@@ -257,7 +257,7 @@ class Vls.Server : Object {
                 }
             }
         }
-        
+
         // try compile_commands.json if Meson failed
         if (backend_project == null && !cc_files.is_empty) {
             foreach (var cc_file in cc_files) {
@@ -279,9 +279,9 @@ class Vls.Server : Object {
             var autogen_sh = root_dir.get_child ("autogen.sh");
 
             if (cmake_file.query_exists (cancellable))
-                showMessage (client, @"CMake build system is not currently supported. Only Meson is. See https://github.com/benwaffle/vala-language-server/issues/73", MessageType.Warning);
+                showMessage (client, "CMake build system is not currently supported. Only Meson is. See https://github.com/benwaffle/vala-language-server/issues/73", MessageType.Warning);
             if (autogen_sh.query_exists (cancellable))
-                showMessage (client, @"Autotools build system is not currently supported. Consider switching to Meson.", MessageType.Warning);
+                showMessage (client, "Autotools build system is not currently supported. Consider switching to Meson.", MessageType.Warning);
         } else {
             new_projects.add (backend_project);
         }
@@ -363,9 +363,9 @@ class Vls.Server : Object {
     void textDocumentDidOpen (Jsonrpc.Client client, Variant @params) {
         var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
 
-        string? uri         = (string) document.lookup_value ("uri",        VariantType.STRING);
-        string languageId   = (string) document.lookup_value ("languageId", VariantType.STRING);
-        string fileContents = (string) document.lookup_value ("text",       VariantType.STRING);
+        string? uri = (string) document.lookup_value ("uri", VariantType.STRING);
+        string languageId = (string) document.lookup_value ("languageId", VariantType.STRING);
+        string fileContents = (string) document.lookup_value ("text", VariantType.STRING);
 
         if (languageId != "vala" && languageId != "genie") {
             warning (@"[textDocument/didOpen] $languageId file sent to vala language server");
@@ -373,7 +373,7 @@ class Vls.Server : Object {
         }
 
         if (uri == null) {
-            warning (@"[textDocument/didOpen] null URI sent to vala language server");
+            warning ("[textDocument/didOpen] null URI sent to vala language server");
             return;
         }
 
@@ -412,11 +412,11 @@ class Vls.Server : Object {
         if (doc.content == null)
             doc.get_mapped_contents ();
         if (doc is TextDocument) {
-            debug (@"[textDocument/didOpen] opened $(Uri.unescape_string (uri))"); 
+            debug (@"[textDocument/didOpen] opened $(Uri.unescape_string (uri))");
             if (doc.content != fileContents) {
                 doc.content = fileContents;
                 request_context_update (client);
-                debug (@"[textDocument/didOpen] requested context update");
+                debug ("[textDocument/didOpen] requested context update");
             }
         } else {
             debug (@"[textDocument/didOpen] opened read-only $(Uri.unescape_string (uri))");
@@ -425,10 +425,10 @@ class Vls.Server : Object {
 
     void textDocumentDidClose (Jsonrpc.Client client, Variant @params) {
         var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
-        string? uri         = (string) document.lookup_value ("uri",        VariantType.STRING);
+        string? uri = (string) document.lookup_value ("uri", VariantType.STRING);
 
         if (uri == null) {
-            warning (@"[textDocument/didClose] null URI sent to vala language server");
+            warning ("[textDocument/didClose] null URI sent to vala language server");
             return;
         }
 
@@ -439,7 +439,7 @@ class Vls.Server : Object {
             try {
                 if (project.close (uri)) {
                     request_context_update (client);
-                    debug (@"[textDocument/didClose] requested context update");
+                    debug ("[textDocument/didClose] requested context update");
                 }
             } catch (Error e) {
                 if (!(e is ProjectError.NOT_FOUND))
@@ -467,7 +467,7 @@ class Vls.Server : Object {
                 var source_file = pair.first;
 
                 if (!(source_file is TextDocument)) {
-                    warning (@"[textDocument/didChange] Ignoring change to system file");
+                    warning ("[textDocument/didChange] Ignoring change to system file");
                     return;
                 }
 
@@ -478,7 +478,7 @@ class Vls.Server : Object {
                 }
 
                 if (source_file.content == null) {
-                    error (@"[textDocument/didChange] source content is null!");
+                    error ("[textDocument/didChange] source content is null!");
                 }
 
                 // update the document
@@ -791,7 +791,7 @@ class Vls.Server : Object {
                 try {
                     client.reply (id, new Variant.maybe (VariantType.VARIANT, null), cancellable);
                 } catch (Error e) {
-                    debug("[textDocument/definition] failed to reply to client: %s", e.message);
+                    debug ("[textDocument/definition] failed to reply to client: %s", e.message);
                 }
                 Vala.CodeContext.pop ();
                 return;
@@ -817,7 +817,7 @@ class Vls.Server : Object {
                 try {
                     client.reply (id, new Variant.maybe (VariantType.VARIANT, null), cancellable);
                 } catch (Error e) {
-                    debug("[textDocument/definition] failed to reply to client: %s", e.message);
+                    debug ("[textDocument/definition] failed to reply to client: %s", e.message);
                 }
                 Vala.CodeContext.pop ();
                 return;
@@ -831,14 +831,14 @@ class Vls.Server : Object {
             try {
                 client.reply (id, Util.object_to_variant (location), cancellable);
             } catch (Error e) {
-                debug("[textDocument/definition] failed to reply to client: %s", e.message);
+                debug ("[textDocument/definition] failed to reply to client: %s", e.message);
             }
             Vala.CodeContext.pop ();
         });
     }
 
     void textDocumentDocumentSymbol (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
+        var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams> (@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {
@@ -961,7 +961,7 @@ class Vls.Server : Object {
     }
 
     void textDocumentCompletion (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var p = Util.parse_variant<LanguageServer.CompletionParams>(@params);
+        var p = Util.parse_variant<LanguageServer.CompletionParams> (@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {
@@ -989,7 +989,7 @@ class Vls.Server : Object {
     }
 
     void textDocumentSignatureHelp (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
+        var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams> (@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {
@@ -1017,7 +1017,7 @@ class Vls.Server : Object {
     }
 
     void textDocumentHover (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
+        var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams> (@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {
@@ -1121,7 +1121,7 @@ class Vls.Server : Object {
                     language = "vala",
                     value = representation
                 });
-                
+
                 if (symbol != null) {
                     var comment = get_symbol_documentation (selected_project, symbol);
                     if (comment != null) {
@@ -1201,7 +1201,7 @@ class Vls.Server : Object {
         return compilations;
     }
 
-    static void list_references_in_file (Vala.SourceFile file, Vala.Symbol sym, 
+    static void list_references_in_file (Vala.SourceFile file, Vala.Symbol sym,
                                          bool include_declaration, ArrayList<Vala.CodeNode> references) {
         var unique_srefs = new HashSet<string> ();
         if (sym is Vala.TypeSymbol) {
@@ -1214,8 +1214,8 @@ class Vls.Server : Object {
                     unique_srefs.add (node.source_reference.to_string ());
                 }
         }
-        var fs2 = new FindSymbol.with_filter (file, sym, 
-            (needle, node) => node == needle || 
+        var fs2 = new FindSymbol.with_filter (file, sym,
+            (needle, node) => node == needle ||
                 (node is Vala.Expression && ((Vala.Expression)node).symbol_reference == needle), include_declaration);
         foreach (var node in fs2.result)
             if (!(node.source_reference.to_string () in unique_srefs)) {
@@ -1225,7 +1225,7 @@ class Vls.Server : Object {
     }
 
     void textDocumentReferences (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var p = Util.parse_variant<ReferenceParams>(@params);
+        var p = Util.parse_variant<ReferenceParams> (@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {
@@ -1310,7 +1310,7 @@ class Vls.Server : Object {
                         shown_files.add (file);
                     }
             }
-            
+
             debug (@"[$method] found $(references.size) reference(s)");
             foreach (var node in references) {
                 if (is_highlight) {
@@ -1335,7 +1335,7 @@ class Vls.Server : Object {
     }
 
     void textDocumentImplementation (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
+        var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams> (@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {
@@ -1387,7 +1387,7 @@ class Vls.Server : Object {
 
             debug (@"[$method] got best: $result ($(result.type_name))");
             bool is_abstract_type = (result is Vala.Interface) || ((result is Vala.Class) && ((Vala.Class)result).is_abstract);
-            bool is_abstract_or_virtual_method = (result is Vala.Method) && 
+            bool is_abstract_or_virtual_method = (result is Vala.Method) &&
                 (((Vala.Method)result).is_abstract || ((Vala.Method)result).is_virtual);
             bool is_abstract_or_virtual_property = (result is Vala.Property) &&
                 (((Vala.Property)result).is_abstract || ((Vala.Property)result).is_virtual);
@@ -1416,11 +1416,11 @@ class Vls.Server : Object {
                     FindSymbol fs2;
                     if (is_abstract_type) {
                         fs2 = new FindSymbol.with_filter (file, btarget_w_sym.second,
-                        (needle, node) => node is Vala.ObjectTypeSymbol && 
+                        (needle, node) => node is Vala.ObjectTypeSymbol &&
                             ((Vala.ObjectTypeSymbol)node).is_subtype_of ((Vala.ObjectTypeSymbol) needle), false);
                     } else if (is_abstract_or_virtual_method) {
                         fs2 = new FindSymbol.with_filter (file, btarget_w_sym.second,
-                        (needle, node) => needle != node && (node is Vala.Method) && 
+                        (needle, node) => needle != node && (node is Vala.Method) &&
                             (((Vala.Method)node).base_method == needle ||
                             ((Vala.Method)node).base_interface_method == needle), false);
                     } else {
@@ -1475,7 +1475,7 @@ class Vls.Server : Object {
                         // is fixed, this will have to be changed to `dsym.name.match_sting (query, true)`
                         .filter (dsym => query.match_string (dsym.name, true))
                         .foreach (dsym => {
-                            var si = new SymbolInformation.from_document_symbol (dsym, 
+                            var si = new SymbolInformation.from_document_symbol (dsym,
                                 File.new_for_commandline_arg_and_cwd (text_document.filename, project.root_path).get_uri ());
                             json_array.add_element (Json.gobject_serialize (si));
                             return true;

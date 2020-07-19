@@ -142,7 +142,7 @@ class Vls.GirDocumentation {
                 result.append ("```");
                 return false;
             });
-        
+
         string? gtkdoc_dir = null;
 
         if (gtkdoc_dirs.contains (comment.source_reference.file))
@@ -152,7 +152,7 @@ class Vls.GirDocumentation {
             data_dir = (!) data_dir.get_parent ();
             if (data_dir.get_basename () == "gir-1.0")
                 data_dir = (!) data_dir.get_parent ();
-            
+
             var gtkdoc_dir_file = data_dir.get_child ("gtk-doc").get_child ("html");
             string? gir_package_name = comment.source_reference.file.package_name;
 
@@ -200,7 +200,7 @@ class Vls.GirDocumentation {
                 debug ("found new GTK-Doc dir for GIR %s%s: %s", gir_package_name, vapi_pkg_name != null ? @" (VAPI $vapi_pkg_name)" : "", gtkdoc_dir);
             }
         }
-        
+
         if (gtkdoc_dir != null) {
             // substitute image URLs
             // substitute relative paths in GIR comments for absolute paths to GTK-Doc resources
@@ -218,7 +218,7 @@ class Vls.GirDocumentation {
                     result.append_c (')');
                     return false;
                 });
-            
+
             // first, find (and remove) all section headers in the document
             var headers = new Gee.ArrayList<string> ();
 
@@ -228,7 +228,7 @@ class Vls.GirDocumentation {
 
                     if (header != null)
                         headers.add (header);
-                    
+
                     return false;
                 });
 
@@ -312,7 +312,7 @@ class Vls.GirDocumentation {
                 }
                 return false;
             });
-        
+
         // substitute references to struct fields that are C virtual methods
         comment_data = /#(\w+)Class\.(\w+)(\(\))?/
             .replace_eval (comment_data, comment_data.length, 0, 0, (match_info, result) => {
@@ -333,7 +333,7 @@ class Vls.GirDocumentation {
 
                 return false;
             });
-        
+
         // highlight references to parameters
         comment_data = /(?<=\s|^|(?<!\w)\W)@([A-Za-z_]\w*)(?=\s|$|[^a-zA-Z0-9_.]|\.(?!\w))/
             .replace (comment_data, comment_data.length, 0, "`\\1`");

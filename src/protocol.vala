@@ -162,9 +162,9 @@ namespace LanguageServer {
      * the new text is considered to be the full content of the document.
      */
     class TextDocumentContentChangeEvent : Object {
-        public Range? range    { get; set; }
+        public Range? range { get; set; }
         public int rangeLength { get; set; }
-        public string text     { get; set; }
+        public string text { get; set; }
     }
 
     enum MessageType {
@@ -240,7 +240,7 @@ namespace LanguageServer {
             owned get {
                 if (_initial_range == null)
                     _initial_range = new Range.from_sourceref (children.first ()._source_reference);
-                
+
                 return children.fold<Range> ((child, current_range) => current_range.union (child.range), _initial_range);
             }
         }
@@ -355,7 +355,7 @@ namespace LanguageServer {
         }
 
         public new Value Json.Serializable.get_property (ParamSpec pspec) {
-            Value val = Value(pspec.value_type);
+            Value val = Value (pspec.value_type);
             base.get_property (pspec.get_name (), ref val);
             return val;
         }
@@ -384,20 +384,20 @@ namespace LanguageServer {
     [CCode (default_value = "LANGUAGE_SERVER_COMPLETION_TRIGGER_KIND_Invoked")]
     enum CompletionTriggerKind {
         /**
-	     * Completion was triggered by typing an identifier (24x7 code
-	     * complete), manual invocation (e.g Ctrl+Space) or via API.
-	     */
+         * Completion was triggered by typing an identifier (24x7 code
+         * complete), manual invocation (e.g Ctrl+Space) or via API.
+         */
         Invoked = 1,
 
         /**
-	     * Completion was triggered by a trigger character specified by
-	     * the `triggerCharacters` properties of the `CompletionRegistrationOptions`.
-	     */
+         * Completion was triggered by a trigger character specified by
+         * the `triggerCharacters` properties of the `CompletionRegistrationOptions`.
+         */
         TriggerCharacter = 2,
 
         /**
-	     * Completion was re-triggered as the current completion list is incomplete.
-	     */
+         * Completion was re-triggered as the current completion list is incomplete.
+         */
         TriggerForIncompleteCompletions = 3
     }
 
@@ -427,13 +427,13 @@ namespace LanguageServer {
         PlainText = 1,
 
         /**
-    	 * The primary text to be inserted is treated as a snippet.
-    	 *
-    	 * A snippet can define tab stops and placeholders with `$1`, `$2`
-    	 * and `${3:foo}`. `$0` defines the final tab stop, it defaults to
-    	 * the end of the snippet. Placeholders with equal identifiers are linked,
-    	 * that is typing in one will update others too.
-    	 */
+         * The primary text to be inserted is treated as a snippet.
+         *
+         * A snippet can define tab stops and placeholders with `$1`, `$2`
+         * and `${3:foo}`. `$0` defines the final tab stop, it defaults to
+         * the end of the snippet. Placeholders with equal identifiers are linked,
+         * that is typing in one will update others too.
+         */
         Snippet = 2,
     }
 
@@ -508,7 +508,7 @@ namespace LanguageServer {
                 this.documentation = new MarkupContent.from_markdown (documentation.body);
         }
 
-        public CompletionItem.from_unimplemented_symbol (Vala.Symbol sym, 
+        public CompletionItem.from_unimplemented_symbol (Vala.Symbol sym,
                                                          string label, CompletionItemKind kind,
                                                          string insert_text,
                                                          Vls.DocComment? documentation) {
@@ -535,7 +535,7 @@ namespace LanguageServer {
         }
 
         public new Value Json.Serializable.get_property (ParamSpec pspec) {
-            Value val = Value(pspec.value_type);
+            Value val = Value (pspec.value_type);
             base.get_property (pspec.get_name (), ref val);
             return val;
         }
@@ -586,7 +586,7 @@ namespace LanguageServer {
             this.value = doc;
         }
     }
-    
+
     [CCode (default_value = "LANGUAGE_SERVER_COMPLETION_ITEM_KIND_Text")]
     enum CompletionItemKind {
         Text = 1,
@@ -645,7 +645,7 @@ namespace LanguageServer {
         }
 
         public new Value Json.Serializable.get_property (ParamSpec pspec) {
-            Value val = Value(pspec.value_type);
+            Value val = Value (pspec.value_type);
             base.get_property (pspec.get_name (), ref val);
             return val;
         }
@@ -711,7 +711,7 @@ namespace LanguageServer {
         }
 
         public new Value Json.Serializable.get_property (ParamSpec pspec) {
-            Value val = Value(pspec.value_type);
+            Value val = Value (pspec.value_type);
             base.get_property (pspec.get_name (), ref val);
             return val;
         }

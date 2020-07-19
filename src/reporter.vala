@@ -39,7 +39,7 @@ class Vls.Reporter : Vala.Report {
 
         if (source != null && messages_count[message] >= 100) {
             GLib.error ("parser infinite loop detected! (seen \"%s\" @ %s at least %u times)\n"
-                        + "note: please report this bug with the source code that causes this error at https://gitlab.gnome.org/GNOME/vala", 
+                        + "note: please report this bug with the source code that causes this error at https://gitlab.gnome.org/GNOME/vala",
                          message, source.to_string (), messages_count[message]);
         }
         messages.add (new SourceMessage (source, message, severity));

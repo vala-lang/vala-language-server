@@ -11,7 +11,7 @@ namespace Vls.CodeHelp {
             var target_type = (Vala.TypeSymbol) member.parent_symbol;
             bool in_subtype = false;
 
-            for (Vala.Symbol? this_symbol = current_scope.owner; 
+            for (Vala.Symbol? this_symbol = current_scope.owner;
                  this_symbol != null;
                  this_symbol = this_symbol.parent_symbol) {
                 if (this_symbol == target_type) {
@@ -52,8 +52,8 @@ namespace Vls.CodeHelp {
         var file = sr.file;
         if (file.content == null)
             file.content = (string) file.get_mapped_contents ();
-        var from = (long) Util.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
-        var to = (long) Util.get_string_pos (file.content, sr.end.line-1, sr.end.column);
+        var from = (long) Util.get_string_pos (file.content, sr.begin.line - 1, sr.begin.column - 1);
+        var to = (long) Util.get_string_pos (file.content, sr.end.line - 1, sr.end.column);
         if (from > to) {
             warning ("expression %s has bad source reference %s", expr.to_string (), expr.source_reference.to_string ());
             return expr.to_string ();
@@ -370,7 +370,7 @@ namespace Vls.CodeHelp {
                 builder.append (get_expression_representation (variable_sym.initializer));
             }
         }
-        return builder.str;       
+        return builder.str;
     }
 
     /**
@@ -536,7 +536,7 @@ namespace Vls.CodeHelp {
                     base_types = ((Vala.Class)sym).get_base_types ();
                 else if (sym is Vala.Interface)
                     base_types = ((Vala.Interface)sym).get_prerequisites ();
-                
+
                 i = 1;
                 if (!base_types.is_empty)
                     builder.append (": ");
@@ -580,7 +580,7 @@ namespace Vls.CodeHelp {
 
         if (sym is Vala.Callable)
             return get_callable_representation (data_type, method_type_arguments, (Vala.Callable)sym, scope, show_initializers);
-        
+
         if (sym is Vala.Parameter && ((Vala.Parameter)sym).ellipsis)
             return "...";
 
@@ -589,7 +589,7 @@ namespace Vls.CodeHelp {
 
         if (sym is Vala.Property)
             return get_property_representation (data_type, method_type_arguments, (Vala.Property)sym, scope, show_initializers);
-        
+
         if (sym is Vala.Constant)
             return get_constant_representation (data_type, (Vala.Constant)sym, scope);
 
@@ -610,7 +610,7 @@ namespace Vls.CodeHelp {
 
         if ((cname = sym.get_attribute_string ("CCode", "cname")) != null)
             return cname;
-        
+
         var cname_sb = new StringBuilder ();
         bool to_snake_case = is_snake_case_symbol (sym);
         bool all_caps = sym is Vala.EnumValue || sym is Vala.ErrorCode || sym is Vala.Constant;

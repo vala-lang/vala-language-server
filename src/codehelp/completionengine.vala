@@ -21,7 +21,7 @@ namespace Vls.CompletionEngine {
         // next, move back to the first non-space
         while (lb_idx > 0 && doc.content[lb_idx].isspace ())
             lb_idx--;
-        
+
         // now attempt to find a member access
         while (lb_idx >= 0 && !doc.content[lb_idx].isspace ()) {
             // if we're at a member access operator, we're done
@@ -43,7 +43,7 @@ namespace Vls.CompletionEngine {
             }
             lb_idx--;
         }
-        
+
         var completions = new HashSet<CompletionItem> ();
 
         if (idx >= 1 && doc.content[idx-1] == '-' && doc.content[idx] == '>') {
@@ -347,7 +347,7 @@ namespace Vls.CompletionEngine {
 
         if (nearest_symbol == Vala.CodeContext.get ().root)
             completions.add (new CompletionItem.keyword ("using"));
-        
+
         if (in_loop) {
             completions.add_all_array ({
                 new CompletionItem.keyword ("break"),
@@ -374,7 +374,7 @@ namespace Vls.CompletionEngine {
 
             if (sym is Vala.Property)
                 kind = CompletionItemKind.Property;
-            
+
             var label = new StringBuilder ();
             var insert_text = new StringBuilder ();
 
@@ -396,7 +396,7 @@ namespace Vls.CompletionEngine {
                 return_type = ((Vala.Callable)sym).return_type.get_actual_type (instance_type, null, null);
             else if (sym is Vala.Property)
                 return_type = ((Vala.Property)sym).property_type.get_actual_type (instance_type, null, null);
-            
+
             if (return_type != null) {
                 string? return_type_representation = CodeHelp.get_data_type_representation (return_type, scope);
                 label.append (return_type_representation);
@@ -420,7 +420,7 @@ namespace Vls.CompletionEngine {
                     type_parameters = ((Vala.Delegate)sym).get_type_parameters ();
                 else if (sym is Vala.Method)
                     type_parameters = ((Vala.Method)sym).get_type_parameters ();
-                
+
                 if (type_parameters != null && !type_parameters.is_empty) {
                     label.append_c ('<');
                     insert_text.append_c ('<');
@@ -781,7 +781,7 @@ namespace Vls.CompletionEngine {
             Vala.CodeContext.pop ();
             return;
         }
-        
+
         bool in_oce = false;
 
         foreach (var res in fs.result) {
@@ -1042,7 +1042,7 @@ namespace Vls.CompletionEngine {
                 completions.add (new CompletionItem.from_symbol (null, field_sym, scope, CompletionItemKind.Field, lang_serv.get_symbol_documentation (project, field_sym)));
         }
     }
-    
+
     /**
      * Use this to complete members of a signal.
      */
