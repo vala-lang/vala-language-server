@@ -149,6 +149,7 @@ class Vls.Server : Object {
 
         call_handlers["textDocument/definition"] = this.textDocumentDefinition;
         notif_handlers["textDocument/didOpen"] = this.textDocumentDidOpen;
+        notif_handlers["textDocument/didSave"] = this.textDocumentDidSave;
         notif_handlers["textDocument/didClose"] = this.textDocumentDidClose;
         notif_handlers["textDocument/didChange"] = this.textDocumentDidChange;
         call_handlers["textDocument/documentSymbol"] = this.textDocumentDocumentSymbol;
@@ -415,14 +416,44 @@ class Vls.Server : Object {
         if (doc.content == null)
             doc.get_mapped_contents ();
         if (doc is TextDocument) {
+            var tdoc = (TextDocument) doc;
             debug (@"[textDocument/didOpen] opened $(Uri.unescape_string (uri))"); 
-            if (doc.content != fileContents) {
-                doc.content = fileContents;
+            tdoc.last_saved_content = fileContents;
+            if (tdoc.content != fileContents) {
+                tdoc.content = fileContents;
                 request_context_update (client);
                 debug (@"[textDocument/didOpen] requested context update");
             }
         } else {
             debug (@"[textDocument/didOpen] opened read-only $(Uri.unescape_string (uri))");
+        }
+    }
+
+    void textDocumentDidSave (Jsonrpc.Client client, Variant @params) {
+        var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
+
+        string? uri = (string) document.lookup_value ("uri", VariantType.STRING);
+        if (uri == null) {
+            warning (@"[textDocument/didSave] null URI sent to vala language server");
+            return;
+        }
+
+        Project[] all_projects = projects.get_keys_as_array ();
+        all_projects += default_project;
+
+        foreach (var project in all_projects) {
+            foreach (var pair in project.lookup_compile_input_source_file (uri)) {
+                var text_document = pair.first as TextDocument;
+
+                if (text_document == null) {
+                    warning ("[textDocument/didSave] ignoring save to system file");
+                    continue;
+                }
+
+                // make checkpoint
+                text_document.last_saved_content = text_document.content;
+                debug ("[textDocument/didSave] last save of %s is now at version %d", uri, text_document.last_saved_version);
+            }
         }
     }
 
