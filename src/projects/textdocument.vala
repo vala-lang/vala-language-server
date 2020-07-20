@@ -8,6 +8,20 @@ class Vls.TextDocument : SourceFile {
     public DateTime last_updated { get; set; default = new DateTime.now (); }
     public int version { get; set; }
 
+    public int last_saved_version { get; private set; }
+    private string? _last_saved_content = null;
+    public string last_saved_content {
+        get {
+            if (_last_saved_content == null)
+                return this.content;
+            return _last_saved_content;
+        }
+        set {
+            _last_saved_content = value;
+            last_saved_version = version;
+        }
+    }
+
     public TextDocument (CodeContext context, File file, string? content = null, bool cmdline = false) throws FileError {
         string? cont = content;
         string uri = file.get_uri ();

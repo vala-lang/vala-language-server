@@ -263,9 +263,29 @@ abstract class Vls.Project : Object {
 
     /**
      * Close the file. Returns whether a context update is required.
+     * The default implementation of this method is to restore the text document to 
+     * its last save point.
      */
     public virtual bool close (string escaped_uri) throws Error {
-        return false;
+        var results = lookup_compile_input_source_file (escaped_uri);
+        if (results.is_empty)
+            return false;
+        bool modified = false;
+        foreach (var pair in results) {
+            var text_document = pair.first as TextDocument;
+            if (text_document == null)
+                continue;
+            // If we're closing this document, but the last saved version 
+            // is not the same as the current version, then we need to 
+            // restore our last checkpoint.
+            if (text_document.last_saved_version != text_document.version) {
+                text_document.content = text_document.last_saved_content;
+                text_document.version = text_document.last_saved_version;
+                text_document.last_updated = new DateTime.now ();
+                modified = true;
+            }
+        }
+        return modified;
     }
 
 #if PARSE_SYSTEM_GIRS
