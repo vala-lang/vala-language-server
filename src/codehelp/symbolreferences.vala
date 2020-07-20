@@ -108,13 +108,16 @@ namespace Vls.SymbolReferences {
      * ``Namespace.TypeName``.
      *
      * @param code_node             A code node in the AST. Its ``source_reference`` must be non-``null``.
-     * @param symbol                The symbol to replace inside the code node.
+     * @param symbol                The symbol to replace inside the code node. ``symbol.name`` must be non-``null``.
      * @return                      The replacement range, or ``null`` if ``symbol.name`` is not inside it
      */
     Range? get_replacement_range (Vala.CodeNode code_node, Vala.Symbol symbol) {
         string representation = CodeHelp.get_expression_representation (code_node);
         int index_of_symbol;
         MatchInfo match_info;
+
+        if (symbol.name == null)
+            return null;
 
         if (/^\s*foreach\s?\(.+\s+(\S+)\s+in\s+.+\)\s*$/m.match (representation, 0, out match_info)) {
             int start, end;
@@ -369,16 +372,24 @@ namespace Vls.SymbolReferences {
             Collection<Pair<Vala.Symbol, Range>>? components = null;
 
             if (node == symbol || CodeHelp.namespaces_equal (node, symbol)) {
-                references[(!) get_replacement_range (node, (Vala.Symbol)node)] = node;
+                var rrange = get_replacement_range (node, (Vala.Symbol)node);
+                if (rrange != null)
+                    references[rrange] = node;
             } else if (node is Vala.Expression && ((Vala.Expression)node).symbol_reference == symbol) {
                 if (node is Vala.MemberAccess)
                     components = get_visible_components_of_code_node (node);
             } else if (node is Vala.UsingDirective && ((Vala.UsingDirective)node).namespace_symbol == symbol) {
-                references[(!) get_replacement_range (node, symbol)] = node;
+                var rrange = get_replacement_range (node, symbol);
+                if (rrange != null)
+                    references[rrange] = node;
             } else if (node is Vala.CreationMethod && ((Vala.CreationMethod)node).parent_symbol == symbol) {
-                references[(!) get_replacement_range (node, symbol)] = node;
+                var rrange = get_replacement_range (node, symbol);
+                if (rrange != null)
+                    references[rrange] = node;
             } else if (node is Vala.Destructor && ((Vala.Destructor)node).parent_symbol == symbol) {
-                references[(!) get_replacement_range (node, symbol)] = node;
+                var rrange = get_replacement_range (node, symbol);
+                if (rrange != null)
+                    references[rrange] = node;
             } else {
                 if (node is Vala.Namespace || node is Vala.TypeSymbol)
                     components = get_visible_components_of_code_node (node);
