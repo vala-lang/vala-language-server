@@ -1555,6 +1555,10 @@ class Vls.Server : Object {
             foreach (var btarget in selected_project.get_compilations ())
                 generated_vapis.add_all (btarget.output);
             var shown_files = new HashSet<File> (Util.file_hash, Util.file_equal);
+            bool is_abstract_or_virtual = 
+                symbol is Vala.Property && (((Vala.Property)symbol).is_virtual || ((Vala.Property)symbol).is_abstract) ||
+                symbol is Vala.Method && (((Vala.Method)symbol).is_virtual || ((Vala.Method)symbol).is_abstract) ||
+                symbol is Vala.Signal && ((Vala.Signal)symbol).is_virtual;
             foreach (var btarget_w_sym in SymbolReferences.get_compilations_using_symbol (selected_project, symbol))
                 foreach (Vala.SourceFile project_file in btarget_w_sym.first.code_context.get_source_files ()) {
                     // don't show symbol from generated VAPI
@@ -1564,6 +1568,10 @@ class Vls.Server : Object {
                     var file_references = new HashMap<Range, Vala.CodeNode> ();
                     debug ("[%s] looking for references in %s ...", method, file.get_uri ());
                     SymbolReferences.list_in_file (project_file, btarget_w_sym.second, true, file_references);
+                    if (is_abstract_or_virtual) {
+                        debug ("[%s] looking for implementations of abstract/virtual symbol in %s ...", method, file.get_uri ());
+                        SymbolReferences.list_implementations_of_virtual_symbol (project_file, btarget_w_sym.second, file_references);
+                    }
                     if (!(project_file is TextDocument) && file_references.size > 0) {
                         // This means we have found references in a file that was added automatically,
                         // which should not be modified.

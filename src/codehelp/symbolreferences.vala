@@ -422,6 +422,43 @@ namespace Vls.SymbolReferences {
         });
     }
 
+    /**
+     * Finds all implementations of a virtual symbol. 
+     *
+     * @param file          the file to search for implementions of the symbol in
+     * @param symbol        the virtual symbol to compare against implementation symbols
+     * @param references    a collection of references that will be updated
+     */
+    void list_implementations_of_virtual_symbol (Vala.SourceFile file, Vala.Symbol symbol, HashMap<Range, Vala.CodeNode> references) {
+        new SymbolVisitor<HashMap<Range, Vala.CodeNode>> (file, symbol, references, true, (node, symbol, references) => {
+            bool is_implementation = false;
+            if (node is Vala.Property) {
+                var prop_node = (Vala.Property)node;
+                is_implementation = prop_node.base_property == symbol ||
+                    prop_node.base_interface_property == symbol;
+            } else if (node is Vala.Method) {
+                var method_node = (Vala.Method)node;
+                Vala.Symbol method_symbol = symbol;
+                if (symbol is Vala.Signal)
+                    method_symbol = ((Vala.Signal)symbol).default_handler;
+                is_implementation = method_node.base_method == method_symbol ||
+                    method_node.base_interface_method == method_symbol;
+            }
+
+            if (is_implementation && node.source_reference != null) {
+                MatchInfo match_info;
+                string representation = CodeHelp.get_expression_representation (node);
+                if (/.+?([A-Za-z+]\w*)\s*$/.match (representation, 0, out match_info)) {
+                    int begin, end;
+                    if (match_info.fetch_pos (1, out begin, out end)) {
+                        var rrange = get_narrowed_source_reference (node.source_reference, representation, begin, end);
+                        references[rrange] = node;
+                    }
+                }
+            }
+        });
+    }
+
     /** 
      * It's possible that a symbol can be used across build targets within a
      * project. This returns a list of all pairs of ``(compilation, symbol)``
