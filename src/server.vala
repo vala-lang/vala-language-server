@@ -43,6 +43,13 @@ class Vls.Server : Object {
     HashTable<Project, ulong> projects;
     DefaultProject default_project;
 
+    /**
+     * Contains files that have been closed and should no longer be managed
+     * by VLS. This is used to clear the errors/warnings for the files on
+     * the next context update.
+     */
+    ArrayList<string> discarded_files = new ArrayList<string> ();
+
     static construct {
         Process.@signal (ProcessSignal.INT, () => {
             if (!Server.received_signal)
@@ -472,9 +479,11 @@ class Vls.Server : Object {
         foreach (var project in all_projects) {
             try {
                 if (project.close (uri)) {
+                    discarded_files.add (uri);
                     request_context_update (client);
                     debug (@"[textDocument/didClose] requested context update");
                 }
+                debug ("[textDocument/didClose] closed %s", uri);
             } catch (Error e) {
                 if (!(e is ProjectError.NOT_FOUND))
                     warning ("[textDocument/didClose] failed to close %s - %s", Uri.unescape_string (uri), e.message);
@@ -542,6 +551,13 @@ class Vls.Server : Object {
         }
     }
 
+    /** 
+     * Indicate to the server that the code context(s) it is tracking may
+     * need to be refreshed.
+     * 
+     * @param client        the client to eventually send a `publishDiagnostics` 
+     *                      notification to, if the context is refreshed
+     */
     void request_context_update (Jsonrpc.Client client) {
         update_context_client = client;
         update_context_requests += 1;
@@ -713,6 +729,24 @@ class Vls.Server : Object {
                 warning (@"[publishDiagnostics] failed to publish empty diags for $(gfile.get_uri ()): $(e.message)");
             }
         }
+
+        // publish empty diagnostics for discarded files
+        var discarded_files_published = new ArrayList<string> ();
+        foreach (string discarded_uri in discarded_files) {
+            try {
+                client.send_notification (
+                    "textDocument/publishDiagnostics",
+                    buildDict (
+                        uri: new Variant.string (discarded_uri),
+                        diagnostics: new Variant.array (VariantType.VARIANT, {})
+                    )
+                );
+                discarded_files_published.add (discarded_uri);
+            } catch (Error e) {
+                warning ("[publishDiagnostics] failed to publish empty diags for %s: %s", discarded_uri, e.message);
+            }
+        }
+        discarded_files.remove_all (discarded_files_published);
 
         try {
             Variant diags_wo_src_variant_array = Json.gvariant_deserialize (
