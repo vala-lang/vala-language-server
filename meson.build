@@ -12,7 +12,7 @@ if not libvala_version.version_compare('>=0.48' )
   error('libvala needs to be 0.48 or above')
 endif
 
-libvala = dependency('libvala-@0@'.format(libvala_version))
+libvala = dependency('libvala-@0@'.format(libvala_version), version: '>= 0.48.7')
 
 libgobject_dep = dependency('gobject-2.0')
 libjsonrpc_glib_dep = dependency('jsonrpc-glib-1.0', version: '>= 3.28')

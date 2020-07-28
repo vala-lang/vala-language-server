@@ -97,7 +97,7 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 - `gee-0.8`
 - `json-glib-1.0`
 - `jsonrpc-glib-1.0`
-- `libvala-0.48 / vala-0.48` release
+- `libvala-0.48 / vala-0.48` latest bugfix release
 - you also need the `posix` VAPI, which should come preinstalled
 
 #### Install dependencies with Guix
