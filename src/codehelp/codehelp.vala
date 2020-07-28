@@ -227,9 +227,10 @@ namespace Vls.CodeHelp {
 
         // some symbols, like constructors, destructors, and other symbols don't have a name
         if (callable_sym is Vala.CreationMethod || callable_sym is Vala.Destructor) {
-            if (callable_sym.parent_symbol == null)
-                error ("get_callable_representation(callable_sym as %s): parent symbol is null and callable_sym has no name", 
-                       callable_sym.type_name);
+            if (callable_sym.parent_symbol == null) {
+                // this is an error type
+                return "<invalid duplicate symbol>";
+            }
             string parent_symbol_representation;
             if (instance_type != null && instance_type is Vala.ObjectType)
                 parent_symbol_representation = get_data_type_representation (instance_type, scope);
