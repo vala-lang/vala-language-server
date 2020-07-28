@@ -368,6 +368,8 @@ namespace Vls.CodeHelp {
         var builder = new StringBuilder ();
         if (!(variable_sym is Vala.Parameter) && actual_var_type.is_weak ())
             builder.append ("weak ");
+        else if (variable_sym is Vala.Parameter && actual_var_type.value_owned)
+            builder.append ("owned ");
         builder.append (get_data_type_representation (actual_var_type, scope));
         builder.append_c (' ');
         builder.append (override_name ?? variable_sym.name);
