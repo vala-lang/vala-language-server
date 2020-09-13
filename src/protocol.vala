@@ -462,7 +462,7 @@ namespace LanguageServer {
         public bool deprecated { get; set; }
         public Gee.List<CompletionItemTag> tags { get; private set; default = new Gee.ArrayList<CompletionItemTag> (); }
         public string? insertText { get; set; }
-        public InsertTextFormat insertTextFormat { get; set; }
+        public InsertTextFormat? insertTextFormat { get; set; default = null; }
         private uint _hash;
 
         private CompletionItem () {}
