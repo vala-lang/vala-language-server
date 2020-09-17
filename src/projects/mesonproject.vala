@@ -482,17 +482,45 @@ class Vls.MesonProject : Project {
                     // try again: attempt to match ...${meson_target_id}...
                     Compilation? found_comp = null;
                     MatchInfo match_info;
-                    if (/[^\\\/]+(@@[^\\\/]+)?@\w+/.match (cc.output, 0, out match_info)) {
-                        string id = match_info.fetch (0);
+                    string? id = null;
+                    BuildTarget? btarget_found = null;
 
-                        BuildTarget? btarget_found = build_targets.first_match (t => t.id == id);
-                        if (btarget_found != null && (btarget_found is Compilation))
-                            found_comp = (Compilation) btarget_found;
-                        else {
-                            warning ("MesonProject: could not associate CC #%d (meson target-id: %s) with a compilation", nth_cc, id);
-                            continue;
-                        }
+                    if (/([^\\\/]+)\.p/.match (cc.output, 0, out match_info)) {
+                        // Meson 0.55 changed the way target IDs are used in the name of the
+                        // target's build directory:
+                        // In the old way, the target's ID would map exactly to the build
+                        // directory. Usually the ID would be of the form:
+                        //
+                        //   [hexadecimal value]@@[target ID in meson.build]@["exe" or something]
+                        //
+                        // This would be used for the target ID in the introspection info and also
+                        // the name of the build directory in the compile commands.
+                        //
+                        // In the new way, the build directory is of the form
+                        //   [target ID in meson.build]".p"
+                        id = match_info.fetch (1);
+                        btarget_found = build_targets.first_match (t => {
+                            string target_id = t.id;
+                            MatchInfo mi;
+
+                            if (/^\w+@@([^@]+)@[^@]+$/.match(target_id, 0, out mi))
+                                target_id = mi.fetch (1);
+
+                            return target_id == id;
+                        });
+                    } else if (/[^\\\/]+(@@[^\\\/]+)?@\w+/.match (cc.output, 0, out match_info)) {
+                        // for Meson pre-0.55:
+                        id = match_info.fetch (0);
+                        btarget_found = build_targets.first_match (t => t.id == id);
                     }
+
+                    if (btarget_found != null && (btarget_found is Compilation))
+                        found_comp = (Compilation) btarget_found;
+                    else if (id != null) {
+                        warning ("MesonProject: could not associate CC #%d (meson target-id: %s) with a compilation",
+                                 nth_cc, id);
+                    }
+
                     if (found_comp != null)
                         compilation = (!) found_comp;
                     else
