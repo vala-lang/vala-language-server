@@ -123,19 +123,17 @@ Once you have VLS installed, you can use it with `vim`.
 
 #### coc.nvim
 1. Make sure [coc.nvim](https://github.com/neoclide/coc.nvim) is installed.
-2. After successful installation, in Vim run `:CocConfig` and add a new custom
-   entry for VLS like below:
+2. After successful installation, in Vim run `:CocConfig` and add a new entry
+   for VLS to the `languageserver` property like below:
 
 ```json
 {
-    ...
-
-    "vala": {
-        "command": "vala-language-server",
-        "filetypes": ["vala", "genie"]
-    },
-
-    ...
+    "languageserver": {
+        "vala": {
+            "command": "vala-language-server",
+            "filetypes": ["vala", "genie"]
+        }
+    }
 }
 ```
 
