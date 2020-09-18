@@ -155,7 +155,7 @@ class Vls.Compilation : BuildTarget {
                         _generated_sources.add (file_from_arg);
                     input.add (file_from_arg);
                 }
-            } else {
+            } else if (flag_name != "directory") {
                 warning ("Compilation(%s) ignoring argument #%d (%s)", id, arg_i, args[arg_i]);
             }
         }
