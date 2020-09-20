@@ -483,6 +483,7 @@ class Vls.MesonProject : Project {
                     Compilation? found_comp = null;
                     MatchInfo match_info;
                     string? id = null;
+                    string? name = null;
                     BuildTarget? btarget_found = null;
 
                     if (/([^\\\/]+)\.p/.match (cc.output, 0, out match_info)) {
@@ -497,28 +498,29 @@ class Vls.MesonProject : Project {
                         // the name of the build directory in the compile commands.
                         //
                         // In the new way, the build directory is of the form
-                        //   [target ID in meson.build]".p"
-                        id = match_info.fetch (1);
-                        btarget_found = build_targets.first_match (t => {
-                            string target_id = t.id;
-                            MatchInfo mi;
+                        //   "lib"?[target ID in meson.build][extension]?".p"
+                        name = match_info.fetch (1);
 
-                            if (/^\w+@@([^@]+)@[^@]+$/.match(target_id, 0, out mi))
-                                target_id = mi.fetch (1);
+                        MatchInfo lib_match_info;
+                        if (/^lib(.*?)\.(a|lib|so|dll)/.match (name, 0, out lib_match_info)) {
+                            name = lib_match_info.fetch (1);
+                        }
 
-                            return target_id == id;
-                        });
+                        btarget_found = build_targets.first_match (t => t.name == name);
                     } else if (/[^\\\/]+(@@[^\\\/]+)?@\w+/.match (cc.output, 0, out match_info)) {
                         // for Meson pre-0.55:
                         id = match_info.fetch (0);
                         btarget_found = build_targets.first_match (t => t.id == id);
                     }
 
-                    if (btarget_found != null && (btarget_found is Compilation))
+                    if (btarget_found != null && (btarget_found is Compilation)) {
                         found_comp = (Compilation) btarget_found;
-                    else if (id != null) {
+                    } else if (id != null) {
                         warning ("MesonProject: could not associate CC #%d (meson target-id: %s) with a compilation",
                                  nth_cc, id);
+                    } else if (name != null) {
+                        warning ("MesonProject: could not associate CC #%d (meson target-name: %s) with a compilation",
+                                 nth_cc, name);
                     }
 
                     if (found_comp != null)
