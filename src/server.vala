@@ -1812,6 +1812,7 @@ class Vls.Server : Object {
 }
 
 void main () {
+    Environment.set_prgname ("vala-language-server");
     var loop = new MainLoop ();
     new Vls.Server (loop);
     loop.run ();
