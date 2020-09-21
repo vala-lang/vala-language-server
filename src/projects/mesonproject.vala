@@ -271,6 +271,8 @@ class Vls.MesonProject : Project {
         }
         var root_dir = File.new_for_path (root_path);
         int elem_idx = -1;
+        // include paths for internal libraries
+        var internal_lib_c_includes = new HashMap<File, Meson.TargetInfo> (Util.file_hash, Util.file_equal);
         foreach (Json.Node elem_node in tg_json_root.get_array ().get_elements ()) {
             elem_idx++;
             var meson_target_info = Json.gobject_deserialize (typeof (Meson.TargetInfo), elem_node) as Meson.TargetInfo?;
@@ -366,6 +368,43 @@ class Vls.MesonProject : Project {
 
                 // the order of link args tends to be very important, so we cannot use a HashSet
                 var link_args = new ArrayList<string> ();
+
+                // HACK: Guess the internal dependencies of this target based on the include
+                // flags. For example, if this target is a shared library compiled against
+                // another library, we want to make sure that the linker args reflect this.
+                // This would be especially important if this shared library is later processed
+                // by g-ir-scanner, where that would fail if this shared library was not properly
+                // linked.
+                // This is a hack because this information is not specified in either
+                // compile_commands.json or in the Meson targets introspection info.
+                foreach (string arg in first_source.parameters) {
+                    MatchInfo match_info;
+                    if (!/-I(.*)/.match (arg, 0, out match_info))
+                        continue;
+                    File include_dir = File.new_for_path ((!) match_info.fetch (1));
+
+                    // check for other shared library corresponding to include_dir
+                    foreach (var entry in internal_lib_c_includes) {
+                        if (Util.file_equal (entry.key, include_dir) ||
+                            entry.key.get_relative_path (include_dir) != null) {
+                            var libs = new ArrayList<string>.wrap (first_source.sources);
+                            foreach (string lib in entry.value.filename) {
+                                debug ("MesonProject: adding internal link arg `%s' to C target %s", lib, meson_target_info.id);
+                                libs.add (lib);
+                            }
+                            first_source.sources = libs.to_array ();
+                        }
+                    }
+
+                    // now associate include_dir with this library target (if it is one)
+                    if (meson_target_info.target_type == "shared library" && meson_target_info.filename != null) {
+                        foreach (string filename in meson_target_info.filename) {
+                            File file = File.new_for_commandline_arg_and_cwd (filename, target_build_dir);
+                            if (Util.file_equal (include_dir, file) || include_dir.get_relative_path (file) != null)
+                                internal_lib_c_includes[include_dir] = meson_target_info;
+                        }
+                    }
+                }
 
                 // Find all of the dependencies we need based on the compiler
                 // arguments we're using so far. If our target uses all of the include arguments that

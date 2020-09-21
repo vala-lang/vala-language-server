@@ -54,8 +54,12 @@ class Vls.BuildTask : BuildTarget {
             // we don't need to add arg to arguments here since we've probably already substituted
             // the arguments in [compiler] and [args] from the sources, unless this is
             // a C code target
-            if (language == "c")
+            if (language == "c") {
+                if (arguments.length > 0)
+                    exe_name += " ";
+                exe_name += arg;
                 arguments += arg;
+            }
             input.add (File.new_for_commandline_arg_and_cwd (arg, build_dir));
         }
 
@@ -87,9 +91,11 @@ class Vls.BuildTask : BuildTarget {
                 output.add (File.new_for_commandline_arg_and_cwd (@"$library_name.vapi", directory));
             }
         } else if (cmd_basename == "glib-mkenums" || cmd_basename == "g-ir-scanner") {
+            File output_file;
             // just assume the target is well-formed here
             if (target_output_files.length >= 1) {
-                output.add (File.new_for_path (target_output_files[0]));
+                output_file = File.new_for_path (target_output_files[0]);
+                output.add (output_file);
                 if (target_output_files.length > 1)
                     warning ("BuildTask(%s): too many output files for %s target, assuming first file (%s) is output", 
                              id, cmd_basename, target_output_files[0]);
@@ -105,14 +111,10 @@ class Vls.BuildTask : BuildTarget {
                 // for g-ir-scanner, look for --library [library name] and add this to our input
                 string? last_arg = null;
                 string? gir_library_name = null;
-                string? gir_library_dir = null;
-                // TODO: handle g-ir-scanner when it's being used with static libraries
+                File? gir_library_dir = output_file.get_parent ();
                 foreach (string arg in arguments) {
-                    if (last_arg == "--library") {
+                    if (last_arg == "--library")
                         gir_library_name = arg;
-                    } else if (arg.has_prefix ("-L")) { // XXX: will -L be different on Windows, other operating systems?
-                        gir_library_dir = arg.substring (2);
-                    }
                     last_arg = arg;
                 }
 
@@ -123,12 +125,24 @@ class Vls.BuildTask : BuildTarget {
                         bool success = false;
                         File? library_file = null;
                         foreach (string shlib_suffix in new string[]{"so", "dll"}) {
-                            library_file = File.new_for_commandline_arg_and_cwd (@"lib$gir_library_name.$shlib_suffix", gir_library_dir);
+                            library_file = gir_library_dir.get_child (@"lib$gir_library_name.$shlib_suffix");
                             if (library_file.query_exists ()) {
                                 input.add (library_file);
+                                debug ("BuildTask(%s) found input %s", id, library_file.get_path ());
                                 success = true;
                                 break;
                             }
+
+                            // Meson 0.55: try also looking for directory with .p suffix,
+                            // which will indicate where the library file is expected to be.
+                            File libdir = gir_library_dir.get_child (@"lib$gir_library_name.$shlib_suffix.p");
+                            if (libdir.query_exists ()) {
+                                input.add (library_file);
+                                debug ("BuildTask(%s) found input %s", id, library_file.get_path ());
+                                success = true;
+                                break;
+                            }
+
                             tried.add (library_file);
                         }
                         if (!success) {
@@ -146,7 +160,7 @@ class Vls.BuildTask : BuildTarget {
                                 // sometimes there can be symlinks to symlinks,
                                 // such as libthing.so -> libthing.so.0 -> libthing.so.0.0.0
                                 while (info.get_is_symlink ()) {
-                                    real_file = File.new_for_commandline_arg_and_cwd (info.get_symlink_target (), gir_library_dir);
+                                    real_file = gir_library_dir.get_child (info.get_symlink_target ());
                                     try {
                                         info = real_file.query_info ("standard::*", FileQueryInfoFlags.NONE);
                                     } catch (Error e) {
@@ -166,7 +180,7 @@ class Vls.BuildTask : BuildTarget {
                             }
                         }
                     } else {
-                        warning ("BuildTask(%s): g-ir-scanner --library without link dir (-L)", id);
+                        warning ("BuildTask(%s): could not get directory for .gir file", id);
                     }
                 } else {
                     warning ("BuildTask(%s): could not get library for g-ir-scanner task", id);
