@@ -1136,6 +1136,9 @@ class Vls.Server : Object {
                     method_type_arguments = ma.get_type_arguments ();
                 }
 
+                if (expr.parent_node is Vala.ObjectCreationExpression)
+                    data_type = ((Vala.ObjectCreationExpression)expr.parent_node).value_type;
+
                 // if data_type is the same as this variable's type, then this variable is not a member
                 // of the type 
                 // (note: this avoids variable's generic type arguments being resolved to InvalidType)
