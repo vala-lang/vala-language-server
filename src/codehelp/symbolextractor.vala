@@ -156,6 +156,19 @@ class Vls.SymbolExtractor : Object {
         }
     }
 
+    class FakeCastExpr : FakeExpr {
+        public FakeMemberAccess type_expr { get; private set; }
+
+        public FakeCastExpr (FakeExpr expr, FakeMemberAccess type_expr) {
+            base (expr);
+            this.type_expr = type_expr;
+        }
+
+        public override string to_string () {
+            return @"($type_expr) $inner";
+        }
+    }
+
     private long idx;
     private Position pos;
     public Vala.Symbol block { get; private set; }
@@ -280,7 +293,9 @@ class Vls.SymbolExtractor : Object {
      *
      * @return the new data type, or invalid if the member access is not of a type symbol
      */
-    private Vala.DataType? convert_member_access_to_data_type (Vala.MemberAccess ma_expr) {
+    private Vala.DataType convert_member_access_to_data_type (Vala.MemberAccess ma_expr) {
+        if (ma_expr.symbol_reference is Vala.Namespace)
+            return new Vala.InvalidType ();
         var data_type = Vala.SemanticAnalyzer.get_data_type_for_symbol (ma_expr.symbol_reference);
         var data_type_type_arguments = data_type.get_type_arguments ();
         // add type arguments of this type argument, if there are any
@@ -463,6 +478,23 @@ class Vls.SymbolExtractor : Object {
                 inner_ma.value_type = convert_member_access_to_data_type (inner_ma);
                 return new Vala.ObjectCreationExpression (inner_ma);
             }
+        } else if (fake_expr is FakeCastExpr) {
+            var fake_cast = (FakeCastExpr) fake_expr;
+            Vala.Expression access = resolve_typed_expression (fake_cast.type_expr);
+            Vala.Expression inner = resolve_typed_expression ((!) fake_cast.inner);
+
+            if (inner.value_type == null)
+                throw new TypeResolutionError.NTH_EXPRESSION ("cast expression: inner expression does not have a data type");
+
+            if (!(access is Vala.MemberAccess))
+                throw new TypeResolutionError.NTH_EXPRESSION ("cast expression: cast type expression is not a member access");
+
+            var type_reference = convert_member_access_to_data_type ((Vala.MemberAccess) access);
+            var expr = new Vala.CastExpression (inner, type_reference) { value_type = type_reference };
+
+            expr.value_type.value_owned = inner.value_type.value_owned;
+            expr.value_type.floating_reference = inner.value_type.floating_reference;
+            return expr;
         } else if (fake_expr is FakeLiteral) {
             if (fake_expr is FakeStringLiteral) {
                 var fake_str = (FakeStringLiteral) fake_expr;
@@ -663,7 +695,8 @@ class Vls.SymbolExtractor : Object {
                                    char begin_separator = '(', char end_separator = ')') {
         // allow for incomplete method call if first expression (useful for SignatureHelp)
         long saved_idx = this.idx;
-        if (!skip_char (end_separator) && !allow_no_right_paren) {
+        bool has_end_separator = false;
+        if (!(has_end_separator = skip_char (end_separator)) && !allow_no_right_paren) {
             this.idx = saved_idx;
             return false;
         }
@@ -676,7 +709,14 @@ class Vls.SymbolExtractor : Object {
         skip_whitespace ();
         FakeExpr? arg = null;
         while ((arg = parse_fake_expr (true)) != null) {
-            // TODO: parse cast expressions here
+            if (has_end_separator && end_separator == ')') {
+                // parse cast expressions of the form ((type1) (type2) ... (typeN) arg)
+                FakeMemberAccess? cast_type = null;
+                while ((cast_type = parse_fake_cast_type_expr ()) != null) {
+                    arg = new FakeCastExpr (arg, cast_type);
+                    skip_whitespace ();
+                }
+            }
             expressions.insert (0, arg);
             skip_whitespace ();
             if (!(arg is FakeObjectCreationExpr)) {
@@ -717,6 +757,26 @@ class Vls.SymbolExtractor : Object {
         }
 
         return type_arguments;
+    }
+
+    private FakeMemberAccess? parse_fake_cast_type_expr () {
+        FakeMemberAccess? ma_expr = null;
+        long saved_idx = this.idx;
+
+        if (!skip_char (')'))
+            return null;
+        
+        if ((ma_expr = parse_fake_member_access_expr (false)) == null) {
+            this.idx = saved_idx;
+            return null;
+        }
+
+        if (!skip_char ('(')) {
+            this.idx = saved_idx;
+            return null;
+        }
+
+        return ma_expr;
     }
 
     private FakeMemberAccess? parse_fake_member_access_expr (bool allow_inner_exprs = true) {
