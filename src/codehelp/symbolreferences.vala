@@ -479,7 +479,7 @@ namespace Vls.SymbolReferences {
 
         // find_matching_symbol() isn't reliable with local variables, especially those declared
         // in lambdas, which can change names after recompilation.
-        if (symbol is Vala.LocalVariable) {
+        if (compilations.is_empty && (symbol is Vala.LocalVariable || symbol is Vala.Parameter)) {
             project.get_compilations ()
                 .filter (c => symbol.source_reference.file in c.code_context.get_source_files ())
                 .foreach (compilation => {
