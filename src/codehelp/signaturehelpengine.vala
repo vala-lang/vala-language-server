@@ -152,7 +152,7 @@ namespace Vls.SignatureHelpEngine {
             // now make data_type refer to the parent expression's type (if it exists)
             // note: if this is a call like `this(...)` or `base(...)`, then the data_type
             // will already be the parent type of the implied default constructor
-            if (!(data_type is Vala.ObjectType || data_type is Vala.StructValueType)) {
+            if (!(data_type is Vala.ObjectType || data_type is Vala.StructValueType || data_type is Vala.DelegateType)) {
                 data_type = null;
                 if (mc.call is Vala.MemberAccess && ((Vala.MemberAccess)mc.call).inner != null)
                     data_type = ((Vala.MemberAccess)mc.call).inner.value_type;
@@ -267,11 +267,6 @@ namespace Vls.SignatureHelpEngine {
     }
 
     void finish (Jsonrpc.Client client, Variant id, Collection<SignatureInformation> signatures, int active_param) {
-        var json_array = new Json.Array ();
-
-        foreach (var sinfo in signatures)
-            json_array.add_element (Json.gobject_serialize (sinfo));
-
         try {
             // debug ("sending with active_param = %d", active_param);
             client.reply (id, Util.object_to_variant (new SignatureHelp () {

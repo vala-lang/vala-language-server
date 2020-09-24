@@ -38,17 +38,15 @@ class Vls.SymbolExtractor : Object {
 
     class FakeMethodCall : FakeExpr {
         public int arguments_count { get; private set; }
-        public FakeMemberAccess member_access {
-            get { return (FakeMemberAccess) inner; }
-        }
+        public FakeExpr call { get { return inner; } }
 
-        public FakeMethodCall (int arguments_count, FakeMemberAccess member_access) {
-            base (member_access);
+        public FakeMethodCall (int arguments_count, FakeExpr call) {
+            base (call);
             this.arguments_count = arguments_count;
         }
 
         public override string to_string () {
-            return @"$member_access ([$arguments_count arg(s)])";
+            return @"$call ([$arguments_count arg(s)])";
         }
     }
 
@@ -736,34 +734,22 @@ class Vls.SymbolExtractor : Object {
         FakeExpr? expr = parse_fake_member_access_expr ();
         // debug ("after parsing member access, char at idx is %c", source_file.content[idx]);
 
-        if (expr == null && have_tuple) {
-            if (method_arguments.size != 1) {
-                // invalid expression (<expr1>, ...)
-                // debug ("invalid expression (<expr1>, ...)");
-                return null;
-            }
-            if (!(method_arguments.first () is FakeEmptyExpr))
-                // expression wrapped in parentheses
-                return method_arguments.first ();
-        }
-
-        if (expr == null && (expr = parse_literal ()) != null)
+        if (!have_tuple && expr == null && (expr = parse_literal ()) != null)
             return expr;
 
-        if (expr == null) {
-            // debug ("expr is null and have_tuple = %s", have_tuple.to_string ());
-            // try parsing array access
-            if (parse_expr_tuple (!at_member_access && accept_incomplete_method_call, method_arguments, '[', ']')) {
-                skip_whitespace ();
-                expr = parse_fake_expr (/* oce_allowed = false */);
-                if (expr != null)
-                    return new FakeMethodCall (method_arguments.size, new FakeMemberAccess ("get", null, expr));
+        // try parsing array access
+        var array_arguments = new ArrayList<FakeExpr> ();
+        if (expr == null && parse_expr_tuple (!at_member_access && accept_incomplete_method_call, array_arguments, '[', ']')) {
+            skip_whitespace ();
+            var array_expr = parse_fake_expr (/* oce_allowed = false */);
+            if (array_expr != null) {
+                expr = new FakeMethodCall (array_arguments.size, new FakeMemberAccess ("get", null, array_expr));
+                oce_allowed = false;
             }
-            return null;
         }
 
-        if (have_tuple)
-            expr = new FakeMethodCall (method_arguments.size, (FakeMemberAccess)expr);
+        if (have_tuple && expr != null)
+            expr = new FakeMethodCall (method_arguments.size, expr);
         
         if (oce_allowed) {
             skip_whitespace ();
@@ -774,6 +760,10 @@ class Vls.SymbolExtractor : Object {
                     expr = new FakeObjectCreationExpr.with_member_access ((FakeMemberAccess)expr);
             }
         }
+
+        if (expr == null && have_tuple && method_arguments.size == 1 && !(method_arguments.first () is FakeEmptyExpr))
+            // expression wrapped in parentheses
+            return method_arguments.first ();
 
         return expr;
     }

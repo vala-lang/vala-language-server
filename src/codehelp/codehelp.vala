@@ -217,9 +217,10 @@ namespace Vls.CodeHelp {
                 builder.append ("async ");
         }
 
-        if (callable_sym is Vala.Delegate)
-            builder.append ("delegate ");
-        else if (callable_sym is Vala.Signal) {
+        if (callable_sym is Vala.Delegate) {
+            if (override_name == null)
+                builder.append ("delegate ");
+        } else if (callable_sym is Vala.Signal) {
             if (((Vala.Signal)callable_sym).is_virtual && instance_type == null)
                 builder.append ("virtual ");
             builder.append ("signal ");
@@ -261,6 +262,13 @@ namespace Vls.CodeHelp {
             type_parameters = ((Vala.Method)callable_sym).get_type_parameters ();
 
         if (type_parameters != null && !type_parameters.is_empty) {
+            Vala.List<Vala.DataType>? delegate_type_arguments = null;
+            if (instance_type is Vala.DelegateType) {
+                var delegate_type = (Vala.DelegateType) instance_type;
+                if (delegate_type.delegate_symbol == callable_sym)
+                    delegate_type_arguments = delegate_type.get_type_arguments ();
+            }
+
             int i = 1;
             builder.append_c ('<');
             foreach (var type_parameter in type_parameters) {
@@ -272,6 +280,8 @@ namespace Vls.CodeHelp {
                             ((Vala.Method)callable_sym).get_type_parameter_index (type_parameter.name);
                 if (method_type_arguments != null && idx < method_type_arguments.size) {
                     builder.append (get_data_type_representation (method_type_arguments[idx], scope));
+                } else if (delegate_type_arguments != null && idx < delegate_type_arguments.size) {
+                    builder.append (get_data_type_representation (delegate_type_arguments[idx], scope));
                 } else {
                     builder.append (type_parameter.name);
                 }
@@ -603,6 +613,9 @@ namespace Vls.CodeHelp {
 
         // just a datatype
         if (sym == null) {
+            if (data_type is Vala.DelegateType)
+                return get_callable_representation (data_type, method_type_arguments,
+                    ((Vala.DelegateType)data_type).delegate_symbol, scope, true);
             return get_data_type_representation (data_type, scope);
         }
 
@@ -614,8 +627,13 @@ namespace Vls.CodeHelp {
         if (sym is Vala.Parameter && ((Vala.Parameter)sym).ellipsis)
             return "...";
 
-        if (sym is Vala.Variable)
+        if (sym is Vala.Variable) {
+            if (data_type is Vala.DelegateType && ((Vala.Variable)sym).variable_type.equals (data_type)) {
+                return get_callable_representation (data_type, method_type_arguments,
+                    ((Vala.DelegateType)data_type).delegate_symbol, scope, true, sym.name);
+            }
             return get_variable_representation (data_type, method_type_arguments, (Vala.Variable)sym, scope, override_name, show_initializers);
+        }
 
         if (sym is Vala.Property)
             return get_property_representation (data_type, method_type_arguments, (Vala.Property)sym, scope, show_initializers);
