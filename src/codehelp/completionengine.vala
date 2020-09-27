@@ -795,6 +795,38 @@ namespace Vls.CompletionEngine {
     }
 
     /**
+     * Determines whether the completion engine should suggest a particular
+     * method when the expression is a {@link Vala.ObjectTypeSymbol} or
+     * {@link Vala.Struct}.
+     */
+    bool should_show_method_for_object_or_struct (Vala.TypeSymbol type_symbol,
+                                                  Vala.Method method_sym, Vala.Scope current_scope,
+                                                  bool is_instance, bool in_oce,
+                                                  bool is_cm_this_or_base_access) {
+        if (method_sym.name == ".new") {
+            return false;
+        } else if (is_instance && !in_oce) {
+            // for instance symbols, show only instance members
+            // except for creation methods, which are treated as instance members
+            if (!method_sym.is_instance_member () || method_sym is Vala.CreationMethod && !is_cm_this_or_base_access)
+                return false;
+        } else if (in_oce) {
+            // only show creation methods for non-instance symbols within an OCE
+            if (!(method_sym is Vala.CreationMethod))
+                return false;
+        } else /* if (!is_instance) */ {
+            // for non-instance object symbols, only show static methods
+            // for non-instance struct symbols, show static methods and creation methods
+            if (!(type_symbol is Vala.Struct && method_sym is Vala.CreationMethod) && method_sym.is_instance_member ())
+                return false;
+        }
+        // check whether the symbol is accessible
+        if (!CodeHelp.is_symbol_accessible (method_sym, current_scope))
+            return false;
+        return true;
+    }
+
+    /**
      * List all relevant members of a type. This is where completion options are generated.
      *
      * @param is_cm_this_or_base_access     Whether we are accessing `this` or `base` within a creation method.
@@ -818,24 +850,12 @@ namespace Vls.CompletionEngine {
             // debug (@"type symbol is object $(object_sym.name) (is_instance = $is_instance, in_oce = $in_oce)");
 
             foreach (var method_sym in object_sym.get_methods ()) {
-                if (method_sym.name == ".new") {
-                    continue;
-                } else if (is_instance && !in_oce) {
-                    // for instance symbols, show only instance members
-                    // except for creation methods, which are treated as instance members
-                    if (!method_sym.is_instance_member () || method_sym is Vala.CreationMethod && !is_cm_this_or_base_access)
-                        continue;
-                } else if (in_oce) {
-                    // only show creation methods for non-instance symbols within an OCE
-                    if (!(method_sym is Vala.CreationMethod))
-                        continue;
-                } else {
-                    // only show static methods for non-instance symbols
-                    if (method_sym.is_instance_member ())
-                        continue;
-                }
-                // check whether the symbol is accessible
-                if (!CodeHelp.is_symbol_accessible (method_sym, current_scope))
+                if (!should_show_method_for_object_or_struct (type_symbol,
+                        method_sym,
+                        current_scope,
+                        is_instance,
+                        in_oce,
+                        is_cm_this_or_base_access))
                     continue;
                 completions.add (new CompletionItem.from_symbol (type, method_sym, current_scope,
                     (method_sym is Vala.CreationMethod) ? CompletionItemKind.Constructor : CompletionItemKind.Method, 
@@ -987,8 +1007,12 @@ namespace Vls.CompletionEngine {
             }
 
             foreach (var method_sym in struct_sym.get_methods ()) {
-                if (method_sym.is_instance_member () != is_instance
-                    || !CodeHelp.is_symbol_accessible (method_sym, current_scope))
+                if (!should_show_method_for_object_or_struct (type_symbol,
+                        method_sym,
+                        current_scope,
+                        is_instance,
+                        in_oce,
+                        is_cm_this_or_base_access))
                     continue;
                 completions.add (new CompletionItem.from_symbol (type, method_sym, current_scope, CompletionItemKind.Method, lang_serv.get_symbol_documentation (project, method_sym)));
             }
