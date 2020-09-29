@@ -203,6 +203,8 @@ namespace Vls.CodeHelp {
 
         if (callable_sym is Vala.Method) {
             var method = (Vala.Method) callable_sym;
+            if (method.binding == Vala.MemberBinding.CLASS)
+                builder.append ("class ");
             if (method.is_abstract && instance_type == null)
                 builder.append ("abstract ");
             if (method.is_virtual && instance_type == null)
@@ -377,9 +379,12 @@ namespace Vls.CodeHelp {
                                                 bool show_initializer) {
         Vala.DataType? actual_var_type = variable_sym.variable_type.get_actual_type (data_type, method_type_arguments, variable_sym);
         var builder = new StringBuilder ();
-        if (!(variable_sym is Vala.Parameter) && actual_var_type.is_weak ())
-            builder.append ("weak ");
-        else if (variable_sym is Vala.Parameter) {
+        if (!(variable_sym is Vala.Parameter)) {
+            if (variable_sym is Vala.Field && ((Vala.Field)variable_sym).binding == Vala.MemberBinding.CLASS)
+                builder.append ("class ");
+            if (actual_var_type.is_weak ())
+                builder.append ((variable_sym is Vala.Field) ? "weak " : "unowned ");
+        } else if (variable_sym is Vala.Parameter) {
             var param = (Vala.Parameter) variable_sym;
             if (param.direction == Vala.ParameterDirection.OUT)
                 builder.append ("out ");
@@ -426,6 +431,8 @@ namespace Vls.CodeHelp {
             builder.append_c (' ');
         }
 
+        if (property_sym.binding == Vala.MemberBinding.CLASS)
+            builder.append ("class ");
         if (property_sym.is_abstract && data_type == null)
             builder.append ("abstract ");
         if (property_sym.is_virtual && data_type == null)

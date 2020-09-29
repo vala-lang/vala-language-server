@@ -71,9 +71,19 @@ class Vls.ListSymbols : Vala.CodeVisitor {
                 if (dsym.name == ".new")
                     dsym.name = current_sym.name;
                 else {
-                    if (dsym.name == null)
-                        dsym.name = @"$(current_sym.name) (construct block)";
-                    else
+                    if (dsym.name == null) {
+                        var name_builder = new StringBuilder (current_sym.name);
+                        name_builder.append (" (");
+                        if (sym is Vala.Constructor) {
+                            var ctor = (Vala.Constructor)sym;
+                            if (ctor.binding == Vala.MemberBinding.CLASS)
+                                name_builder.append ("class ");
+                            else if (ctor.binding == Vala.MemberBinding.STATIC)
+                                name_builder.append ("static ");
+                        }
+                        name_builder.append ("construct block)");
+                        dsym.name = name_builder.str;
+                    } else
                         dsym.name = @"$(current_sym.name).$(dsym.name)";
                 }
             }
