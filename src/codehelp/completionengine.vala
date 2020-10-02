@@ -198,6 +198,7 @@ namespace Vls.CompletionEngine {
                        Set<CompletionItem> completions) {
         string method = "textDocument/completion";
         bool in_instance = false;
+        bool inside_static_or_class_construct_block = false;
         var seen_props = new HashSet<string> ();
 
         // if (best_scope.owner.source_reference != null)
@@ -256,28 +257,37 @@ namespace Vls.CompletionEngine {
                     }
                 }
                 var symtab = current_scope.get_symbol_table ();
-                if (symtab == null)
-                    continue;
-                foreach (Vala.Symbol sym in symtab.get_values ()) {
-                    if (sym.name == null || sym.name[0] == '.')
-                        continue;
-                    var sr = sym.source_reference;
-                    if (sr == null)
-                        continue;
-                    var sr_begin = new Position.from_libvala (sr.begin);
+                if (symtab != null) {
+                    foreach (Vala.Symbol sym in symtab.get_values ()) {
+                        if (sym.name == null || sym.name[0] == '.')
+                            continue;
+                        var sr = sym.source_reference;
+                        if (sr == null)
+                            continue;
+                        var sr_begin = new Position.from_libvala (sr.begin);
 
-                    // don't show local variables that are declared ahead of the cursor
-                    if (sr_begin.compare_to (pos) > 0)
-                        continue;
-                    completions.add (new CompletionItem.from_symbol (null, sym, current_scope,
-                        (sym is Vala.Constant) ? CompletionItemKind.Constant : CompletionItemKind.Variable,
-                        lang_serv.get_symbol_documentation (project, sym)));
+                        // don't show local variables that are declared ahead of the cursor
+                        if (sr_begin.compare_to (pos) > 0)
+                            continue;
+                        completions.add (new CompletionItem.from_symbol (null, sym, current_scope,
+                            (sym is Vala.Constant) ? CompletionItemKind.Constant : CompletionItemKind.Variable,
+                            lang_serv.get_symbol_documentation (project, sym)));
+                    }
                 }
+
+                // Show `class` methods for static/class constructor blocks.
+                // These members should only be referenced implicitly from the
+                // subclass, or from an explicit class access expression.
+                if (owner is Vala.Constructor && ((Vala.Constructor)owner).binding != Vala.MemberBinding.INSTANCE)
+                    inside_static_or_class_construct_block = true;
             } else if (owner is Vala.TypeSymbol) {
                 if (in_instance)
                     add_completions_for_type (lang_serv, project, Vala.SemanticAnalyzer.get_data_type_for_symbol (owner), (Vala.TypeSymbol) owner, completions, best_scope, false, false, seen_props);
                 // always show static members
                 add_completions_for_type (lang_serv, project, null, (Vala.TypeSymbol) owner, completions, best_scope, false, false, seen_props);
+                // suggest class members to implicitly access
+                if ((in_instance || inside_static_or_class_construct_block) && owner is Vala.Class)
+                    add_completions_for_class_access (lang_serv, project, (Vala.Class) owner, best_scope, completions);
                 // once we leave a type symbol, we're no longer in an instance
                 in_instance = false;
             } else if (owner is Vala.Namespace) {
@@ -835,7 +845,7 @@ namespace Vls.CompletionEngine {
         } else /* if (!is_instance) */ {
             // for non-instance object symbols, only show static methods
             // for non-instance struct symbols, show static methods and creation methods
-            if (!(type_symbol is Vala.Struct && method_sym is Vala.CreationMethod) && method_sym.is_instance_member ())
+            if (!(type_symbol is Vala.Struct && method_sym is Vala.CreationMethod) && method_sym.binding != Vala.MemberBinding.STATIC)
                 return false;
         }
         // check whether the symbol is accessible
@@ -1134,6 +1144,43 @@ namespace Vls.CompletionEngine {
             new CompletionItem.from_symbol (instance_type, m.get_end_method (), scope, CompletionItemKind.Method,
 	    	    new DocComment ("Get results of asynchronous operation"))
         });
+    }
+
+    void add_completions_for_class_access (Server lang_serv, Project project,
+                                           Vala.Class class_sym, Vala.Scope current_scope,
+                                           Set<CompletionItem> completions) {
+        var klasses = new GLib.Queue<Vala.Class> ();
+        klasses.push_tail (class_sym);
+
+        while (!klasses.is_empty ()) {
+            var ks = klasses.pop_head ();
+            foreach (var method_sym in ks.get_methods ()) {
+                if (!(method_sym is Vala.CreationMethod) && method_sym.is_class_member ())
+                    completions.add (new CompletionItem.from_symbol (null,
+                                                                     method_sym, current_scope,
+                                                                     CompletionItemKind.Method,
+                                                                     lang_serv.get_symbol_documentation (project, method_sym)));
+            }
+            foreach (var field_sym in ks.get_fields ()) {
+                if (field_sym.is_class_member ())
+                    completions.add (new CompletionItem.from_symbol (null,
+                                                                     field_sym, current_scope,
+                                                                     CompletionItemKind.Field,
+                                                                     lang_serv.get_symbol_documentation (project, field_sym)));
+            }
+            foreach (var prop_sym in ks.get_properties ()) {
+                if (prop_sym.is_class_member ())
+                    completions.add (new CompletionItem.from_symbol (null,
+                                                                     prop_sym, current_scope,
+                                                                     CompletionItemKind.Property,
+                                                                     lang_serv.get_symbol_documentation (project, prop_sym)));
+            }
+            // look at base types
+            foreach (var base_type in ks.get_base_types ()) {
+                if (base_type.type_symbol is Vala.Class)
+                    klasses.push_tail ((Vala.Class) base_type.type_symbol);
+            }
+        }
     }
 
     Vala.Scope get_topmost_scope (Vala.Scope topmost) {
