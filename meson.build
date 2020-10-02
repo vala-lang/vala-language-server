@@ -62,6 +62,7 @@ else
     deps += dependency('gio-unix-2.0')
 endif
 
+subdir('data')
 subdir('plugins/gnome-builder')
 subdir('src')
 subdir('test')

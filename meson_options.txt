@@ -2,3 +2,4 @@ option('parse_system_girs', type: 'boolean', value: true, description: 'Parse sy
 option('active_parameter', type: 'boolean', value: false, description: 'Support activeParameter in signatureHelp')
 option('debug_mem', type: 'boolean', value: false, description: 'Debug memory usage')
 option('builder_abi', type: 'string', value: '3.36', description: 'Builder ABI version')
+option('man_pages', type: 'feature', value: 'auto', description: 'Generate and install man pages.')
