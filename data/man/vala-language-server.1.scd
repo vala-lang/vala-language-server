@@ -2,7 +2,7 @@ vala-language-server(1)
 
 # NAME
 
-vala-language-server - Code Intelligence for Vala
+vala-language-server - Code Intelligence for Vala and Genie.
 
 # SYNOPSIS
 
@@ -10,9 +10,10 @@ vala-language-server - Code Intelligence for Vala
 
 # DESCRIPTION
 
-vala-language-server is a language server protocol implementation for Vala.
-It enables features like auto complete, go to defition or documentation
-on hover for IDEs and text editors for the Vala programming language.
+vala-language-server is a language server protocol implementation for Vala
+and Genie. It enables features like auto-complete, go-to-definition,
+hover, symbol documentation, and more for editors/plugins supporting Vala
+and the Language Server Protocol.
 
 # ENVIRONMENT
 
