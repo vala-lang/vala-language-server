@@ -12,6 +12,7 @@ if not libvala_version.version_compare('>=0.48' )
   error('libvala needs to be 0.48 or above')
 endif
 
+# TODO: change libvala version requirement for ValaClassAccess below
 libvala = dependency('libvala-@0@'.format(libvala_version), version: '>= 0.48.7')
 
 libgobject_dep = dependency('gobject-2.0')

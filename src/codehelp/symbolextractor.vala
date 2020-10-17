@@ -357,6 +357,33 @@ class Vls.SymbolExtractor : Object {
                                 value_type = found_base_type
                             };
                         }
+                    } else if (fake_ma.member_name == "class") {
+                        // resolve Vala.ClassAccess
+                        Vala.DataType? found_class_type = null;
+
+                        for (var starting_block = current_block ?? block;
+                             starting_block != null && found_class_type == null;
+                             starting_block = starting_block.parent_symbol) {
+                            // class access should be invalid inside static methods
+                            if (starting_block.parent_symbol is Vala.Method &&
+                                ((Vala.Method)starting_block.parent_symbol).binding == Vala.MemberBinding.STATIC) {
+                                break;
+                            }
+                            if (starting_block.parent_symbol is Vala.Signal &&
+                                ((Vala.Signal)starting_block.parent_symbol).emitter != null &&
+                                ((Vala.Signal)starting_block.parent_symbol).emitter.binding == Vala.MemberBinding.STATIC) {
+                                break;
+                            }
+                            if (starting_block is Vala.Class)
+                                found_class_type = Vala.SemanticAnalyzer.get_data_type_for_symbol (starting_block);
+                        }
+
+                        if (found_class_type != null) {
+                            return new Vala.ClassAccess () {
+                                symbol_reference = found_class_type.symbol,
+                                value_type = found_class_type
+                            };
+                        }
                     }
                 }
 

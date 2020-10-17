@@ -286,7 +286,7 @@ namespace Vls.CompletionEngine {
                 // always show static members
                 add_completions_for_type (lang_serv, project, null, (Vala.TypeSymbol) owner, completions, best_scope, false, false, seen_props);
                 // suggest class members to implicitly access
-                if ((in_instance || inside_static_or_class_construct_block) && owner is Vala.Class)
+                if (inside_static_or_class_construct_block && owner is Vala.Class)
                     add_completions_for_class_access (lang_serv, project, (Vala.Class) owner, best_scope, completions);
                 // once we leave a type symbol, we're no longer in an instance
                 in_instance = false;
@@ -729,7 +729,11 @@ namespace Vls.CompletionEngine {
         bool is_cm_this_or_base_access = false;
 
         do {
-            if (result is Vala.Expression) {
+            if (result is Vala.ClassAccess) {
+                var value_type = ((Vala.Expression)result).value_type;
+                if (value_type != null)
+                    symbol = value_type.type_symbol;
+            } else if (result is Vala.Expression) {
                 data_type = ((Vala.Expression)result).value_type;
                 symbol = ((Vala.Expression)result).symbol_reference;
                 // walk up scopes, looking for a creation method
@@ -755,6 +759,8 @@ namespace Vls.CompletionEngine {
                 add_completions_for_async_method (data_type, (Vala.Method) symbol, current_scope, completions);
             else if (data_type is Vala.ArrayType)
                 add_completions_for_array_type ((Vala.ArrayType) data_type, current_scope, completions);
+            else if (result is Vala.ClassAccess)
+                add_completions_for_class_access (lang_serv, project, (Vala.Class) symbol, current_scope, completions);
             else if (symbol is Vala.TypeSymbol)
                 add_completions_for_type (lang_serv, project, null, (Vala.TypeSymbol)symbol, completions, current_scope, in_oce, is_cm_this_or_base_access);
             else {
