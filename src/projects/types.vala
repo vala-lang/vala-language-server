@@ -54,7 +54,9 @@ namespace Vls {
                 val = Value (typeof (string[]));
                 string[] command_array = {};
                 try {
-                    command_array = Util.get_arguments_from_command_str (property_node.get_string ());
+                    string? command_str = property_node.get_string ();
+                    if (command_str != null)
+                        command_array = Util.get_arguments_from_command_str (property_node.get_string ());
                 } catch (RegexError e) {
                     warning ("failed to parse `%s': %s", property_node.get_string (), e.message);
                 }

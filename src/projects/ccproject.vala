@@ -62,7 +62,12 @@ class Vls.CcProject : Project {
             if (cc == null)
                 throw new ProjectError.INTROSPECTION (@"JSON node is null. Bailing out!");
 
-            if (cc.command.length > 0 && cc.command[0].contains ("valac"))
+            if (cc.command.length == 0) {
+                warning ("CC#%d has empty command list", i);
+                continue;
+            }
+
+            if (cc.command[0].contains ("valac"))
                 build_targets.add (new Compilation (cc.directory, cc.file ?? @"CC#$i", @"CC#$i", i,
                                                     cc.command[0:1], cc.command[1:cc.command.length],
                                                     new string[]{}, new string[]{}));
