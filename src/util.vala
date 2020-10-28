@@ -440,4 +440,8 @@ namespace Vls.Util {
         parser.parse (gresources_xml);
         return parser.files;
     }
+
+    public bool is_newline (char character) {
+        return character == '\n' || character == '\r';
+    }
 }

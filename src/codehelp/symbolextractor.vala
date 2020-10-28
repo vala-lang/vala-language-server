@@ -156,6 +156,16 @@ class Vls.SymbolExtractor : Object {
         }
     }
 
+    class FakeRegexLiteral : FakeLiteral {
+        public FakeRegexLiteral (string value) {
+            base (value);
+        }
+
+        public override string to_string () {
+            return value;
+        }
+    }
+
     class FakeCastExpr : FakeExpr {
         public FakeMemberAccess type_expr { get; private set; }
 
@@ -521,6 +531,11 @@ class Vls.SymbolExtractor : Object {
                 var expr = new Vala.CharacterLiteral (fake_char.value);
                 expr.value_type = context.analyzer.char_type;
                 return expr;
+            } else if (fake_expr is FakeRegexLiteral) {
+                var fake_regex = (FakeRegexLiteral) fake_expr;
+                var expr = new Vala.RegexLiteral (fake_regex.value);
+                expr.value_type = context.analyzer.regex_type;
+                return expr;
             }
             assert_not_reached ();
         }
@@ -610,7 +625,7 @@ class Vls.SymbolExtractor : Object {
         
         lb_idx--;
 
-        while (lb_idx >= 0 && (source_file.content[lb_idx] != '"' || lb_idx > 0 && source_file.content[lb_idx-1] == '\\'))
+        while (lb_idx > 0 && (source_file.content[lb_idx] != '"' || lb_idx > 0 && source_file.content[lb_idx-1] == '\\'))
             lb_idx--;
         
         if (source_file.content[lb_idx] != '"')
@@ -628,10 +643,34 @@ class Vls.SymbolExtractor : Object {
         return str;
     }
 
+    private string? parse_regex_literal () {
+        long lb_idx = idx;
+
+        while (lb_idx > 0 && "ismx".index_of_char (source_file.content[lb_idx]) != -1)
+            lb_idx--;
+        
+        if (source_file.content[lb_idx] != '/')
+            return null;
+        
+        lb_idx--;
+
+        while (lb_idx > 0 && !Util.is_newline (source_file.content[lb_idx]) &&
+               (source_file.content[lb_idx] != '/' || source_file.content[lb_idx-1] == '\\'))
+            lb_idx--;
+
+        if (source_file.content[lb_idx] != '/')
+            return null;
+        
+        string str = source_file.content.substring (lb_idx, idx - lb_idx);
+        idx = lb_idx;   // update idx
+
+        return str;
+    }
+
     private string? parse_integer () {
         long lb_idx = idx;
 
-        while (lb_idx >= 0 && source_file.content[lb_idx].isdigit ())
+        while (lb_idx > 0 && source_file.content[lb_idx].isdigit ())
             lb_idx--;
         
         if (lb_idx == idx || lb_idx < 0)
@@ -675,9 +714,11 @@ class Vls.SymbolExtractor : Object {
     }
 
     private FakeLiteral? parse_literal () {
-        string? str = parse_string_literal ();
-        if (str != null)
+        string? str = null;
+        if ((str = parse_string_literal ()) != null)
             return new FakeStringLiteral (str);
+        if ((str = parse_regex_literal ()) != null)
+            return new FakeRegexLiteral (str);
         if ((str = parse_real ()) != null)
             return new FakeRealLiteral (str);
         if ((str = parse_integer ()) != null)
@@ -805,11 +846,16 @@ class Vls.SymbolExtractor : Object {
     private FakeExpr? parse_fake_expr (bool oce_allowed = false, 
                                        bool accept_incomplete_method_call = false,
                                        bool at_member_access = false) {
+        // because a regex literal may end with a modifier, attempt to parse literals first
+        FakeExpr? expr = null;
+        if ((expr = parse_literal ()) != null)
+            return expr;
+
         var method_arguments = new ArrayList<FakeExpr> ();
         bool have_tuple = parse_expr_tuple (!at_member_access && accept_incomplete_method_call, method_arguments);
         // debug ("after parsing tuple, char at idx is %c", source_file.content[idx]);
         skip_whitespace ();
-        FakeExpr? expr = parse_fake_member_access_expr ();
+        expr = parse_fake_member_access_expr ();
         // debug ("after parsing member access, char at idx is %c", source_file.content[idx]);
 
         if (!have_tuple && expr == null && (expr = parse_literal ()) != null)
