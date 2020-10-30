@@ -213,7 +213,7 @@ namespace Vls.CodeHelp {
     private string get_callable_representation (Vala.DataType? instance_type, Vala.List<Vala.DataType>? method_type_arguments,
                                                 Vala.Callable callable_sym, Vala.Scope? scope, bool show_initializers,
                                                 bool allow_show_parent_member,
-                                                string? override_name = null) {
+                                                string? override_name = null, Vala.List<Vala.Parameter>? ellipsis_overrides = null) {
         // see `to_prototype_string()` in `valacallabletype.vala`
         var builder = new StringBuilder ();
         if (instance_type == null && !(callable_sym.parent_symbol is Vala.Namespace)) {
@@ -334,14 +334,29 @@ namespace Vls.CodeHelp {
                 i++;
             }
         }
+
         foreach (Vala.Parameter param in callable_sym.get_parameters ()) {
-            if (i > 1) {
-                builder.append (", ");
+            if (param.ellipsis) {
+                if (ellipsis_overrides == null) {
+                    if (i > 1) {
+                        builder.append (", ");
+                    }
+                    builder.append ("...");
+                } else {
+                    foreach (var synthetic_param in ellipsis_overrides) {
+                        if (i > 1) {
+                            builder.append (", ");
+                        }
+                        var eo = CodeHelp.get_symbol_representation (null, synthetic_param, scope, false);
+                        builder.append (eo);
+                        i++;
+                    }
+                }
+                continue;
             }
 
-            if (param.ellipsis) {
-                builder.append ("...");
-                continue;
+            if (i > 1) {
+                builder.append (", ");
             }
 
             if (param.params_array) {
@@ -564,14 +579,15 @@ namespace Vls.CodeHelp {
                                               bool allow_show_parent_member,
                                               Vala.List<Vala.DataType>? method_type_arguments = null,
                                               string? override_name = null, bool show_initializers = true,
-                                              bool is_parent_symbol = false) {
+                                              bool is_parent_symbol = false,
+                                              Vala.List<Vala.Parameter>? ellipsis_overrides = null) {
         if (data_type == null && sym == null)
             return null;
         if (data_type == null || sym != null && SymbolReferences.get_symbol_data_type_refers_to (data_type) == sym) {
             if (sym is Vala.Namespace)
                 return (!is_parent_symbol ? "namespace " : "") + get_symbol_name_representation(sym, scope);
             else if (sym is Vala.Callable) {
-                return get_callable_representation (data_type, method_type_arguments, (Vala.Callable) sym, scope, show_initializers, allow_show_parent_member);
+                return get_callable_representation (data_type, method_type_arguments, (Vala.Callable) sym, scope, show_initializers, allow_show_parent_member, null, ellipsis_overrides);
             } else if (sym is Vala.Variable) {
                 if (sym is Vala.Parameter && ((Vala.Parameter)sym).ellipsis)
                     return "...";
@@ -692,14 +708,14 @@ namespace Vls.CodeHelp {
         if (sym == null) {
             if (data_type is Vala.DelegateType)
                 return get_callable_representation (data_type, method_type_arguments,
-                    ((Vala.DelegateType)data_type).delegate_symbol, scope, true, allow_show_parent_member);
+                    ((Vala.DelegateType)data_type).delegate_symbol, scope, true, allow_show_parent_member, null, ellipsis_overrides);
             return get_data_type_representation (data_type, scope);
         }
 
         // we have a data type with a symbol
 
         if (sym is Vala.Callable)
-            return get_callable_representation (data_type, method_type_arguments, (Vala.Callable)sym, scope, show_initializers, allow_show_parent_member);
+            return get_callable_representation (data_type, method_type_arguments, (Vala.Callable)sym, scope, show_initializers, allow_show_parent_member, null, ellipsis_overrides);
         
         if (sym is Vala.Parameter && ((Vala.Parameter)sym).ellipsis)
             return "...";
@@ -707,7 +723,7 @@ namespace Vls.CodeHelp {
         if (sym is Vala.Variable) {
             if (data_type is Vala.DelegateType && ((Vala.Variable)sym).variable_type.equals (data_type)) {
                 return get_callable_representation (data_type, method_type_arguments,
-                    ((Vala.DelegateType)data_type).delegate_symbol, scope, true, allow_show_parent_member, sym.name);
+                    ((Vala.DelegateType)data_type).delegate_symbol, scope, true, allow_show_parent_member, sym.name, ellipsis_overrides);
             }
             return get_variable_representation (data_type, method_type_arguments, (Vala.Variable)sym, scope, override_name, show_initializers, allow_show_parent_member);
         }

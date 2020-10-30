@@ -42,7 +42,10 @@ namespace Vls.SignatureHelpEngine {
 #if !VALA_FEATURE_INITIAL_ARGUMENT_COUNT
             active_param = se.method_arguments - 1;
 #endif
-            show_help (lang_serv, project, method, se.extracted_expression, se.block.scope, signatures, ref active_param);
+            show_help (lang_serv,
+                       project,
+                       method, se.extracted_expression, se.block.scope, compilation,
+                       signatures, ref active_param);
         } else {
             // debug ("[%s] could not get extracted expression", method);
         }
@@ -74,6 +77,7 @@ namespace Vls.SignatureHelpEngine {
 
     void show_help (Server lang_serv, Project project,
                     string method, Vala.CodeNode result, Vala.Scope scope,
+                    Compilation compilation,
                     Collection<SignatureInformation> signatures,
                     ref int active_param) {
         if (result is Vala.ExpressionStatement) {
@@ -93,10 +97,10 @@ namespace Vls.SignatureHelpEngine {
         Vala.List<Vala.DataType>? method_type_arguments = null;
         // either "begin" or "end" or null
         string? coroutine_name = null;
+        Vala.List<Vala.Parameter>? ellipsis_override_params = null;
 
         if (result is Vala.MethodCall) {
             var mc = result as Vala.MethodCall;
-            // var arg_list = mc.get_argument_list ();
             // TODO: NamedArgument's, whenever they become supported in upstream
 #if VALA_FEATURE_INITIAL_ARGUMENT_COUNT
             active_param = mc.initial_argument_count - 1;
@@ -149,20 +153,38 @@ namespace Vls.SignatureHelpEngine {
             if (data_type is Vala.MethodType) {
                 var mt = (Vala.MethodType) data_type;
 
-                // handle special cases for .begin() and .end() in coroutines (async methods)
-                if (mc.call is Vala.MemberAccess && mt.method_symbol.coroutine &&
-                    (explicit_sym == null || (((Vala.MemberAccess)mc.call).inner).symbol_reference == explicit_sym)) {
-                    coroutine_name = ((Vala.MemberAccess)mc.call).member_name ?? "";
-                    if (coroutine_name[0] == 'S')   // is possible because of incomplete member access
-                        coroutine_name = null;
-                    if (coroutine_name == "begin")
-                        param_list = mt.method_symbol.get_async_begin_parameters ();
-                    else if (coroutine_name == "end") {
-                        param_list = mt.method_symbol.get_async_end_parameters ();
-                        explicit_sym = mt.method_symbol.get_end_method ();
-                        coroutine_name = null;  // .end() is its own method
-                    } else if (coroutine_name != null) {
-                        debug (@"[$method] coroutine name `$coroutine_name' not handled");
+                if (mt.method_symbol.printf_format || mt.method_symbol.scanf_format) {
+                    ellipsis_override_params = generate_parameters_for_printf_method (mt.method_symbol, mc, compilation.code_context,
+                                                                                      param_list != null ? param_list.size - 1 : 0);
+                    if (ellipsis_override_params != null) {
+                        var new_param_list = new Vala.ArrayList<Vala.Parameter> ();
+                        // replace '...' with generated params
+                        if (param_list != null) {
+                            foreach (var parameter in param_list) {
+                                if (parameter.ellipsis)
+                                    break;
+                                new_param_list.add (parameter);
+                            }
+                        }
+                        new_param_list.add_all (ellipsis_override_params);
+                        param_list = new_param_list;
+                    }
+                } else {
+                    // handle special cases for .begin() and .end() in coroutines (async methods)
+                    if (mc.call is Vala.MemberAccess && mt.method_symbol.coroutine &&
+                        (explicit_sym == null || (((Vala.MemberAccess)mc.call).inner).symbol_reference == explicit_sym)) {
+                        coroutine_name = ((Vala.MemberAccess)mc.call).member_name ?? "";
+                        if (coroutine_name[0] == 'S')   // is possible because of incomplete member access
+                            coroutine_name = null;
+                        if (coroutine_name == "begin")
+                            param_list = mt.method_symbol.get_async_begin_parameters ();
+                        else if (coroutine_name == "end") {
+                            param_list = mt.method_symbol.get_async_end_parameters ();
+                            explicit_sym = mt.method_symbol.get_end_method ();
+                            coroutine_name = null;  // .end() is its own method
+                        } else if (coroutine_name != null) {
+                            debug (@"[$method] coroutine name `$coroutine_name' not handled");
+                        }
                     }
                 }
             }
@@ -216,7 +238,8 @@ namespace Vls.SignatureHelpEngine {
             return;     // early exit
         }
 
-        si.label = CodeHelp.get_symbol_representation (data_type, explicit_sym, scope, true, method_type_arguments);
+        si.label = CodeHelp.get_symbol_representation (data_type, explicit_sym, scope, true, method_type_arguments,
+                                                       null, true, false, ellipsis_override_params);
         DocComment? doc_comment = null;
         if (explicit_sym != null) {
             doc_comment = lang_serv.get_symbol_documentation (project, explicit_sym);
@@ -234,7 +257,6 @@ namespace Vls.SignatureHelpEngine {
                     label = CodeHelp.get_symbol_representation (data_type, parameter, scope, false, method_type_arguments),
                     documentation = param_doc_comment != null ? new MarkupContent.from_markdown (param_doc_comment) : null
                 });
-                // debug (@"found parameter $parameter (name = $(parameter.ellipsis ? "..." :parameter.name))");
             }
             if (!si.parameters.is_empty)
                 signatures.add (si);
@@ -281,7 +303,7 @@ namespace Vls.SignatureHelpEngine {
         Vala.Scope scope = CodeHelp.get_scope_containing_node (result);
         // debug (@"[$method] got best: $(result.type_name) @ $(result.source_reference)");
 
-        show_help (lang_serv, project, method, result, scope, signatures, ref active_param);
+        show_help (lang_serv, project, method, result, scope, compilation, signatures, ref active_param);
     }
 
     void finish (Jsonrpc.Client client, Variant id, Collection<SignatureInformation> signatures, int active_param) {
@@ -294,5 +316,145 @@ namespace Vls.SignatureHelpEngine {
         } catch (Error e) {
             warning (@"[textDocument/signatureHelp] failed to reply to client: $(e.message)");
         }
+    }
+
+    Vala.List<Vala.Parameter>? generate_parameters_for_printf_method (Vala.Method method,
+                                                                      Vala.MethodCall mc,
+                                                                      Vala.CodeContext context,
+                                                                      int initial_arg_count) {
+        debug ("generating printf-style arguments for %s", CodeHelp.get_symbol_name_representation (method, null));
+
+        var format_literal = mc.get_format_literal ();
+
+        // if a format literal wasn't found, try to hack our way to a solution
+        if (format_literal == null && (method.printf_format || method.scanf_format)) {
+            // first handle the case <string literal>.printf ()
+            if (mc.call is Vala.MemberAccess)
+                format_literal = ((Vala.MemberAccess)mc.call).inner as Vala.StringLiteral;
+
+            // if that fails, try to get the first argument as the string literal
+            if (format_literal == null && !mc.get_argument_list ().is_empty)
+                format_literal = mc.get_argument_list ().first () as Vala.StringLiteral;
+        }
+
+        if (format_literal == null) {
+            // debug ("could not get format literal");
+            return null;
+        }
+
+
+        string format = format_literal.eval ();
+        unowned string format_it = format;
+        unichar format_char = format_it.get_char ();
+
+        // debug ("iterating through format literal `%s` ...", format);
+
+        var generated_params = new Vala.ArrayList<Vala.Parameter> ();
+
+        while (format_char != '\0') {
+            if (format_char != '%') {
+                format_it = format_it.next_char ();
+                format_char = format_it.get_char ();
+                continue;
+            }
+
+            format_it = format_it.next_char ();
+            format_char = format_it.get_char ();
+
+            // flags
+            while (format_char == '#' || format_char == '0' || format_char == '-' || format_char == ' ' || format_char == '+') {
+                format_it = format_it.next_char ();
+                format_char = format_it.get_char ();
+            }
+            // field width
+            while (format_char >= '0' && format_char <= '9') {
+                format_it = format_it.next_char ();
+                format_char = format_it.get_char ();
+            }
+            // precision
+            if (format_char == '.') {
+                format_it = format_it.next_char ();
+                format_char = format_it.get_char ();
+                while (format_char >= '0' && format_char <= '9') {
+                    format_it = format_it.next_char ();
+                    format_char = format_it.get_char ();
+                }
+            }
+            // length modifier
+            int length = 0;
+            if (format_char == 'h') {
+                length = -1;
+                format_it = format_it.next_char ();
+                format_char = format_it.get_char ();
+                if (format_char == 'h') {
+                    length = -2;
+                    format_it = format_it.next_char ();
+                    format_char = format_it.get_char ();
+                }
+            } else if (format_char == 'l') {
+                length = 1;
+                format_it = format_it.next_char ();
+                format_char = format_it.get_char ();
+            } else if (format_char == 'z') {
+                length = 2;
+                format_it = format_it.next_char ();
+                format_char = format_it.get_char ();
+            }
+            // conversion specifier
+            Vala.DataType? param_type = null;
+            if (format_char == 'd' || format_char == 'i' || format_char == 'c') {
+                // integer
+                if (length == -2) {
+                    param_type = context.analyzer.int8_type;
+                } else if (length == -1) {
+                    param_type = context.analyzer.short_type;
+                } else if (length == 0) {
+                    param_type = context.analyzer.int_type;
+                } else if (length == 1) {
+                    param_type = context.analyzer.long_type;
+                } else if (length == 2) {
+                    param_type = context.analyzer.ssize_t_type;
+                }
+            } else if (format_char == 'o' || format_char == 'u' || format_char == 'x' || format_char == 'X') {
+                // unsigned integer
+                if (length == -2) {
+                    param_type = context.analyzer.uchar_type;
+                } else if (length == -1) {
+                    param_type = context.analyzer.ushort_type;
+                } else if (length == 0) {
+                    param_type = context.analyzer.uint_type;
+                } else if (length == 1) {
+                    param_type = context.analyzer.ulong_type;
+                } else if (length == 2) {
+                    param_type = context.analyzer.size_t_type;
+                }
+            } else if (format_char == 'e' || format_char == 'E' || format_char == 'f' || format_char == 'F'
+                       || format_char == 'g' || format_char == 'G' || format_char == 'a' || format_char == 'A') {
+                // double
+                param_type = context.analyzer.double_type;
+            } else if (format_char == 's') {
+                // string
+                param_type = context.analyzer.string_type;
+            } else if (format_char == 'p') {
+                // pointer
+                param_type = new Vala.PointerType (new Vala.VoidType ());
+            } else if (format_char == '%') {
+                // literal %
+            } else {
+                break;
+            }
+            if (param_type == null)
+                param_type = new Vala.InvalidType ();
+            var parameter = new Vala.Parameter ("arg%d".printf (initial_arg_count + generated_params.size), param_type);
+            if (method.scanf_format && !(param_type is Vala.ReferenceType))
+                parameter.direction = Vala.ParameterDirection.OUT;
+            generated_params.add (parameter);
+            if (format_char != '\0') {
+                format_it = format_it.next_char ();
+                format_char = format_it.get_char ();
+            }
+        }
+
+        return generated_params;
     }
 }
