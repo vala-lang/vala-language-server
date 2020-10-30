@@ -211,7 +211,7 @@ namespace Vls.CodeHelp {
      */
     private string get_callable_representation (Vala.DataType? instance_type, Vala.List<Vala.DataType>? method_type_arguments,
                                                 Vala.Callable callable_sym, Vala.Scope? scope, bool show_initializers,
-                                                string? override_name = null) {
+                                                string? override_name = null, List<Vala.Parameter>? ellipsis_override = null) {
         // see `to_prototype_string()` in `valacallabletype.vala`
         var builder = new StringBuilder ();
         if (instance_type == null && !(callable_sym.parent_symbol is Vala.Namespace)) {
@@ -328,8 +328,15 @@ namespace Vls.CodeHelp {
             }
 
             if (param.ellipsis) {
-                builder.append ("...");
-                continue;
+                if (ellipsis_override == null) {
+                    builder.append ("...");
+                    continue;
+                } else {
+                    foreach (var ov in ellipsis_override) {
+                        builder.append (ov.to_string ());
+                    }
+                    continue;
+                }
             }
 
             if (param.params_array) {

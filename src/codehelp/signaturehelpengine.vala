@@ -96,7 +96,6 @@ namespace Vls.SignatureHelpEngine {
 
         if (result is Vala.MethodCall) {
             var mc = result as Vala.MethodCall;
-            // var arg_list = mc.get_argument_list ();
             // TODO: NamedArgument's, whenever they become supported in upstream
 #if VALA_FEATURE_INITIAL_ARGUMENT_COUNT
             active_param = mc.initial_argument_count - 1;
@@ -148,21 +147,139 @@ namespace Vls.SignatureHelpEngine {
 
             if (data_type is Vala.MethodType) {
                 var mt = (Vala.MethodType) data_type;
+                var context = Vala.CodeContext.get ();
 
-                // handle special cases for .begin() and .end() in coroutines (async methods)
-                if (mc.call is Vala.MemberAccess && mt.method_symbol.coroutine &&
-                    (explicit_sym == null || (((Vala.MemberAccess)mc.call).inner).symbol_reference == explicit_sym)) {
-                    coroutine_name = ((Vala.MemberAccess)mc.call).member_name ?? "";
-                    if (coroutine_name[0] == 'S')   // is possible because of incomplete member access
-                        coroutine_name = null;
-                    if (coroutine_name == "begin")
-                        param_list = mt.method_symbol.get_async_begin_parameters ();
-                    else if (coroutine_name == "end") {
-                        param_list = mt.method_symbol.get_async_end_parameters ();
-                        explicit_sym = mt.method_symbol.get_end_method ();
-                        coroutine_name = null;  // .end() is its own method
-                    } else if (coroutine_name != null) {
-                        debug (@"[$method] coroutine name `$coroutine_name' not handled");
+                if (mt.method_symbol.printf_format) {
+                    var arg_list = mc.get_argument_list ();
+                    if (!arg_list.is_empty) {
+                        var last_arg = arg_list.last ();
+                        var arg_it = arg_list.iterator ();
+                        if (!(last_arg is Vala.NullLiteral)) {
+                            var format_string = Vala.StringLiteral.get_format_literal (last_arg).eval ();
+                            var format_char = format_string.get_char ();
+                            while (format_char != '\0') {
+                                if (format_char != '%') {
+                                    format_string = format_string.next_char ();
+                                    format_char = format_string.get_char ();
+                                    continue;
+                                }
+
+                                format_string = format_string.next_char ();
+                                format_string.get_char ();
+                                // flags
+                                while (format_char == '#' || format_char == '0' || format_char == '-' || format_char == ' ' || format_char == '+') {
+                                    format_string = format_string.next_char ();
+                                    format_char = format_string.get_char ();
+                                }
+                                // field width
+                                while (format_char >= '0' && format_char <= '9') {
+                                    format_string = format_string.next_char ();
+                                    format_char = format_string.get_char ();
+                                }
+                                // precision
+                                if (format_char == '.') {
+                                    format_string = format_string.next_char ();
+                                    format_char = format_string.get_char ();
+                                    while (format_char >= '0' && format_char <= '9') {
+                                        format_string = format_string.next_char ();
+                                        format_char = format_string.get_char ();
+                                    }
+                                }
+                                // length modifier
+                                int length = 0;
+                                if (format_char == 'h') {
+                                    length = -1;
+                                    format_string = format_string.next_char ();
+                                    format_char = format_string.get_char ();
+                                    if (format_char == 'h') {
+                                        length = -2;
+                                        format_string = format_string.next_char ();
+                                        format_char = format_string.get_char ();
+                                    }
+                                } else if (format_char == 'l') {
+                                    length = 1;
+                                    format_string = format_string.next_char ();
+                                    format_char = format_string.get_char ();
+                                } else if (format_char == 'z') {
+                                    length = 2;
+                                    format_string = format_string.next_char ();
+                                    format_char = format_string.get_char ();
+                                }
+                                // conversion specifier
+                                Vala.DataType param_type = null;
+                                if (format_char == 'd' || format_char == 'i' || format_char == 'c') {
+                                    // integer
+                                    if (length == -2) {
+                                        param_type = context.analyzer.int8_type;
+                                    } else if (length == -1) {
+                                        param_type = context.analyzer.short_type;
+                                    } else if (length == 0) {
+                                        param_type = context.analyzer.int_type;
+                                    } else if (length == 1) {
+                                        param_type = context.analyzer.long_type;
+                                    } else if (length == 2) {
+                                        param_type = context.analyzer.ssize_t_type;
+                                    }
+                                } else if (format_char == 'o' || format_char == 'u' || format_char == 'x' || format_char == 'X') {
+                                    // unsigned integer
+                                    if (length == -2) {
+                                        param_type = context.analyzer.uchar_type;
+                                    } else if (length == -1) {
+                                        param_type = context.analyzer.ushort_type;
+                                    } else if (length == 0) {
+                                        param_type = context.analyzer.uint_type;
+                                    } else if (length == 1) {
+                                        param_type = context.analyzer.ulong_type;
+                                    } else if (length == 2) {
+                                        param_type = context.analyzer.size_t_type;
+                                    }
+                                } else if (format_char == 'e' || format_char == 'E' || format_char == 'f' || format_char == 'F'
+                                        || format_char == 'g' || format_char == 'G' || format_char == 'a' || format_char == 'A') {
+                                    // double
+                                    param_type = context.analyzer.double_type;
+                                } else if (format_char == 's') {
+                                    // string
+                                    param_type = context.analyzer.string_type;
+                                } else if (format_char == 'p') {
+                                    // pointer
+                                    param_type = new Vala.PointerType (new Vala.VoidType ());
+                                } else if (format_char == '%') {
+                                    // literal %
+                                } else {
+                                    break;
+                                }
+                                if (format_char != '\0') {
+                                    format_string = format_string.next_char ();
+                                    format_char = format_string.get_char ();
+                                }
+                                if (param_type != null) {
+                                    if (arg_it.next ()) {
+                                        param_list.add (new Vala.Parameter ("format", param_type));
+                                    } else {
+                                        warning ("Failed to compute printf format");
+                                        param_list = null;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // handle special cases for .begin() and .end() in coroutines (async methods)
+                    if (mc.call is Vala.MemberAccess && mt.method_symbol.coroutine &&
+                        (explicit_sym == null || (((Vala.MemberAccess)mc.call).inner).symbol_reference == explicit_sym)) {
+                        coroutine_name = ((Vala.MemberAccess)mc.call).member_name ?? "";
+                        if (coroutine_name[0] == 'S')   // is possible because of incomplete member access
+                            coroutine_name = null;
+                        if (coroutine_name == "begin")
+                            param_list = mt.method_symbol.get_async_begin_parameters ();
+                        else if (coroutine_name == "end") {
+                            param_list = mt.method_symbol.get_async_end_parameters ();
+                            explicit_sym = mt.method_symbol.get_end_method ();
+                            coroutine_name = null;  // .end() is its own method
+                        } else if (coroutine_name != null) {
+                            debug (@"[$method] coroutine name `$coroutine_name' not handled");
+                        }
                     }
                 }
             }

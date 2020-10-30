@@ -55,12 +55,17 @@ class Vls.SymbolExtractor : Object {
     }
 
     class FakeMethodCall : FakeExpr {
-        public int arguments_count { get; private set; }
+        public int arguments_count {
+            get {
+                return this.arguments.size;
+            }
+        }
         public FakeExpr call { get { return inner; } }
+        public Gee.ArrayList<FakeExpr> arguments { get; private set; }
 
-        public FakeMethodCall (int arguments_count, FakeExpr call) {
+        public FakeMethodCall (Gee.ArrayList<FakeExpr> arguments, FakeExpr call) {
             base (call);
-            this.arguments_count = arguments_count;
+            this.arguments = arguments;
         }
 
         public override string to_string () {
@@ -430,6 +435,10 @@ class Vls.SymbolExtractor : Object {
                 if (call_inner.value_type != null)
                     expr.value_type = expr.value_type.get_actual_type (call_inner.value_type, method_type_arguments, expr);
             }
+            foreach (var fake_arg in fake_mc.arguments) {
+                var e = new Vala.Expression ();
+                expr.add_argument (resolve_typed_expression (fake_arg));
+            }
 #if VALA_FEATURE_INITIAL_ARGUMENT_COUNT
             expr.initial_argument_count = fake_mc.arguments_count;
 #endif
@@ -761,13 +770,13 @@ class Vls.SymbolExtractor : Object {
             skip_whitespace ();
             var array_expr = parse_fake_expr (/* oce_allowed = false */);
             if (array_expr != null) {
-                expr = new FakeMethodCall (array_arguments.size, new FakeMemberAccess ("get", null, array_expr));
+                expr = new FakeMethodCall (array_arguments, new FakeMemberAccess ("get", null, array_expr));
                 oce_allowed = false;
             }
         }
 
         if (have_tuple && expr != null)
-            expr = new FakeMethodCall (method_arguments.size, expr);
+            expr = new FakeMethodCall (method_arguments, expr);
         
         if (oce_allowed) {
             skip_whitespace ();
