@@ -200,11 +200,11 @@ class Vls.FindScope : Vala.CodeVisitor {
     public override void visit_local_variable (Vala.LocalVariable local) {
         local.accept_children (this);
     }
-    #if VALA_0_52
+#if VALA_0_52
     public override void visit_loop_statement (Vala.LoopStatement stmt) {
-    #else
+#else
     public override void visit_loop (Vala.Loop stmt) {
-    #endif
+#endif
         stmt.accept_children (this);
     }
 

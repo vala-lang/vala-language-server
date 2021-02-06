@@ -499,11 +499,11 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         stmt.accept_children (this);
     }
 
-    #if VALA_0_52
+#if VALA_0_52
     public override void visit_loop_statement (Vala.LoopStatement stmt) {
-    #else
+#else
     public override void visit_loop (Vala.Loop stmt) {
-    #endif
+#endif
         if (seen.contains (stmt))
             return;
         seen.add (stmt);
