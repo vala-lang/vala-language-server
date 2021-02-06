@@ -384,7 +384,7 @@ class Vls.ListSymbols : Vala.CodeVisitor {
         stmt.accept_children (this);
     }
 
-    public override void visit_loop (Vala.Loop stmt) {
+    public override void visit_loop_statement (Vala.LoopStatement stmt) {
         if (stmt.source_reference != null && stmt.source_reference.file != file) return;
         stmt.accept_children (this);
     }
