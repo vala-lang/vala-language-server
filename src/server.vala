@@ -344,7 +344,7 @@ class Vls.Server : Object {
                 project.build_if_stale ();
                 debug ("Publishing diagnostics ...");
                 foreach (var compilation in project.get_compilations ())
-                    publishDiagnostics (compilation, client);
+                    publishDiagnostics (project, compilation, client);
             } catch (Error e) {
                 showMessage (client, @"Failed to build project - $(e.message)", MessageType.Error);
             }
@@ -606,7 +606,7 @@ class Vls.Server : Object {
                         * one of our JSON-RPC callbacks through g_main_context_iteration (),
                         * if we get a new message while sending the textDocument/publishDiagnostics
                         * notifications. */
-                        publishDiagnostics (compilation, update_context_client);
+                        publishDiagnostics (project, compilation, update_context_client);
                 } catch (Error e) {
                     warning ("Failed to rebuild and/or reconfigure project: %s", e.message);
                 }
@@ -661,7 +661,7 @@ class Vls.Server : Object {
         }
     }
 
-    void publishDiagnostics (Compilation target, Jsonrpc.Client client) {
+    void publishDiagnostics (Project project, Compilation target, Jsonrpc.Client client) {
         var files_not_published = new HashSet<Vala.SourceFile> (Util.source_file_hash, Util.source_file_equal);
         var diags_without_source = new Json.Array ();
 
@@ -675,6 +675,16 @@ class Vls.Server : Object {
         target.reporter.messages.foreach (err => {
             if (err.loc == null) {
                 diags_without_source.add_element (Json.gobject_serialize (new Diagnostic () {
+                    range = new Range () {
+                        start = new Position () {
+                            line = 1,
+                            character = 1
+                        },
+                        end = new Position () {
+                            line = 1,
+                            character = 1
+                        }
+                    },
                     severity = err.severity,
                     message = err.message
                 }));
@@ -774,6 +784,8 @@ class Vls.Server : Object {
             client.send_notification (
                 "textDocument/publishDiagnostics",
                 buildDict (
+                    // use the project root as the URI if the diagnostic is not associated with a file
+                    uri: new Variant.string (File.new_for_path(project.root_path).get_uri ()),
                     diagnostics: diags_wo_src_variant_array
                 ),
                 cancellable);
