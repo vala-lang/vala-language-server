@@ -35,57 +35,28 @@ class Vls.MesonProject : Project {
         var substituted_args = new LinkedList<string> ();
         for (int i = 0; i < args.length; i++) {
             MatchInfo match_info;
-            if (/^@([A-Za-z]+)(\d+)?@$/.match (args[i], 0, out match_info)) {
+            if (/^@([A-Za-z0-9_]+)@$/.match (args[i], 0, out match_info)) {
                 string special_arg_name = match_info.fetch (1);
-                string? arg_num_str = match_info.fetch (2);
-                int arg_num;
-                bool has_arg_num = int.try_parse (arg_num_str == null ? "" : arg_num_str, out arg_num);
                 if (special_arg_name == "INPUT") {
                     string substitute = "";
-
-                    if (has_arg_num) {
-                        if (arg_num < target_source.sources.length) {
-                            substitute = target_source.sources[arg_num];
-                            substituted_args.add (substitute);
-                            debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) for %s",
-                                   meson_target_info.id, i, args[i], substitute);
-                        } else {
-                            warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'", 
-                                     meson_target_info.id, args[i]);
-                        }
-                    } else {
-                        foreach (string input_arg in target_source.sources) {
-                            substituted_args.add(input_arg);
-                            if (substitute != "")
-                                substitute += " ";
-                            substitute += input_arg;
-                        }
-                        debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) for %s",
-                               meson_target_info.id, i, args[i], substitute);
+                    foreach (string input_arg in target_source.sources) {
+                        substituted_args.add(input_arg);
+                        if (substitute != "")
+                            substitute += " ";
+                        substitute += input_arg;
                     }
+                    debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) for %s",
+                           meson_target_info.id, i, args[i], substitute);
                 } else if (special_arg_name == "OUTPUT") {
                     string substitute = "";
-
-                    if (has_arg_num) {
-                        if (arg_num < meson_target_info.filename.length) {
-                            substitute = meson_target_info.filename[arg_num];
-                            substituted_args.add (substitute);
-                            debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) for %s",
-                                   meson_target_info.id, i, args[i], substitute);
-                        } else {
-                            warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'", 
-                                     meson_target_info.id, args[i]);
-                        }
-                    } else {
-                        foreach (string output_arg in meson_target_info.filename) {
-                            substituted_args.add (output_arg);
-                            if (substitute != "")
-                                substitute += " ";
-                            substitute += output_arg;
-                        }
-                        debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) for %s",
-                               meson_target_info.id, i, args[i], substitute);
+                    foreach (string output_arg in meson_target_info.filename) {
+                        substituted_args.add (output_arg);
+                        if (substitute != "")
+                            substitute += " ";
+                        substitute += output_arg;
                     }
+                    debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) for %s",
+                           meson_target_info.id, i, args[i], substitute);
                 } else {
                     warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'", 
                              meson_target_info.id, special_arg_name);
@@ -113,14 +84,62 @@ class Vls.MesonProject : Project {
 
                     return false;
                 });
-                var regex2 = /@\w+@/;
+                var regex2 = /@([A-Za-z0-9_]+)(\d+)?@/;
                 substitute = regex2.replace_eval (substitute, substitute.length, 0, 0, (match, result) => {
-                    if (match.fetch (0) == "@BUILD_ROOT@") {
+                    string special_arg_name = match.fetch (1);
+                    string? arg_num_str = match.fetch (2);
+                    int arg_num = 0;
+                    bool has_arg_num = arg_num_str == null ? false : int.try_parse (arg_num_str, out arg_num);
+                    if (special_arg_name == "BUILD_ROOT") {
                         result.append (build_dir);
                         replaced = true;
-                    } else if (match.fetch (0) == "@SOURCE_ROOT@") {
+                    } else if (special_arg_name == "SOURCE_ROOT") {
                         result.append (root_path);
                         replaced = true;
+                    } else if (special_arg_name == "INPUT") {
+                        if (has_arg_num) {
+                            if (arg_num < target_source.sources.length) {
+                                result.append (target_source.sources[arg_num]);
+                                replaced = true;
+                            } else {
+                                warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'",
+                                         meson_target_info.id, match.fetch (0));
+                                result.append (match.fetch (0));
+                                return true;
+                            }
+                        } else {
+                            if (target_source.sources.length == 1) {
+                                result.append (target_source.sources[0]);
+                                replaced = true;
+                            } else {
+                                warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s' with multiple sources",
+                                         meson_target_info.id, match.fetch (0));
+                                result.append (match.fetch (0));
+                                return true;
+                            }
+                        }
+                    } else if (special_arg_name == "OUTPUT") {
+                        if (has_arg_num) {
+                            if (arg_num < meson_target_info.filename.length) {
+                                result.append (meson_target_info.filename[arg_num]);
+                                replaced = true;
+                            } else {
+                                warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'",
+                                         meson_target_info.id, match.fetch (0));
+                                result.append (match.fetch (0));
+                                return true;
+                            }
+                        } else {
+                            if (meson_target_info.filename.length == 1) {
+                                result.append (meson_target_info.filename[0]);
+                                replaced = true;
+                            } else {
+                                warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s' with multiple sources",
+                                         meson_target_info.id, match.fetch (0));
+                                result.append (match.fetch (0));
+                                return true;
+                            }
+                        }
                     } else {
                         warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'", 
                                  meson_target_info.id, match.fetch (0));
