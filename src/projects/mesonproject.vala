@@ -500,12 +500,23 @@ class Vls.MesonProject : Project {
                 BuildTarget? previous_target = null;
                 if (swap_with_previous_target)
                     previous_target = build_targets.remove_at (build_targets.size - 1);
+                string? cmd_basename = first_source.compiler.length > 0 ? Path.get_basename (first_source.compiler[0]) : null;
+                string[] compiler;
+                string[] parameters;
+                if (cmd_basename == "vapigen" || cmd_basename == "glib-mkenums" || cmd_basename == "g-ir-scanner") {
+                    compiler = first_source.compiler;
+                    parameters = first_source.parameters;
+                } else {
+                    target_build_dir = build_dir;
+                    compiler = {"meson", "compile", meson_target_info.name};
+                    parameters = {};
+                }
                 build_targets.add (new BuildTask (target_build_dir,
                                                   meson_target_info.name, 
                                                   meson_target_info.id, 
                                                   elem_idx + (swap_with_previous_target ? -1 : 0),
-                                                  first_source.compiler, 
-                                                  first_source.parameters, 
+                                                  compiler, 
+                                                  parameters, 
                                                   first_source.sources,
                                                   first_source.generated_sources,
                                                   meson_target_info.filename,
