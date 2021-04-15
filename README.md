@@ -12,33 +12,53 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 
 - Alpine Linux Edge: `apk add vala-language-server`
 
-- Ubuntu 18.04, 20.04 and elementaryOS
+- Ubuntu 20.04, 20.10, Fedora 33, and Debian
 
-  In order to install VLS, you need Vala 0.48 or later, which is only available
-  by default on Ubuntu 20.04. You can get an up-to-date version of Vala
-  from the Vala Team's Vala-Next repository. First you need to remove older
-  Vala components:
+  **The Ubuntu PPA and Fedora Copr are now deprecated.** We have moved to an
+  automated build and packaging system--Open Build System, at
+  [here](https://software.opensuse.org//download.html?project=home%3APrince781&package=vala-language-server).
+  You can find details about how to install VLS for your distribution
+  at that link.
 
-    ```sh
-    sudo apt-add-repository ppa:vala-team/next
-    # If you have 0.40 and 0.48, there may be random issues popping out
-    sudo apt-get remove valac-0.40-vapi "libvala.*-0.40-0"
-    sudo apt-get install valac-0.48 valac-bin
-    ```
+  For example, to install VLS on **Ubuntu 21.04**, first add the repository:
 
-  Now you can install the Vala Language Server:
+  ```
+  echo 'deb http://download.opensuse.org/repositories/home:/Prince781/xUbuntu_21.04/ /' | sudo tee /etc/apt/sources.list.d/home:Prince781.list
+  curl -fsSL https://download.opensuse.org/repositories/home:Prince781/xUbuntu_21.04/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_Prince781.gpg > /dev/null
+  ```
 
-    ```sh
-    sudo add-apt-repository ppa:prince781/vala-language-server
-    sudo apt-get update
-    sudo apt-get install vala-language-server
-    ```
-- Fedora 32:
+  And then update and install VLS:
 
-    ```sh
-    sudo dnf copr enable prince781/vala-language-server
-    sudo dnf -y install vala-language-server
-    ```
+  ```
+  sudo apt update
+  sudo apt install vala-language-server
+  ```
+
+  For **Fedora 33**, add the repository like this:
+
+  ```
+  dnf config-manager --add-repo https://download.opensuse.org/repositories/home:Prince781/Fedora_33/home:Prince781.repo
+  ```
+
+  And then install:
+
+  ```
+  dnf install vala-language-server
+  ```
+
+  For **Debian**, add the repository like this:
+
+  ```
+  echo 'deb http://download.opensuse.org/repositories/home:/Prince781/Debian_Testing/ /' | sudo tee /etc/apt/sources.list.d/home:Prince781.list
+  curl -fsSL https://download.opensuse.org/repositories/home:Prince781/Debian_Testing/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_Prince781.gpg > /dev/null
+  ```
+
+  And then install:
+
+  ```
+  sudo apt update
+  sudo apt install vala-language-server
+  ```
 
 ![vls-vscode](images/vls-vscode.png)
 ![vls-vim](images/vls-vim.png)
