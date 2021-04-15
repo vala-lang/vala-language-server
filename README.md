@@ -12,7 +12,7 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 
 - Alpine Linux Edge: `apk add vala-language-server`
 
-- Ubuntu 20.04, 20.10, Fedora 33, and Debian
+- Ubuntu 20.04, 20.10, 21.04, Fedora 33, and Debian
 
   **The Ubuntu PPA and Fedora Copr are now deprecated.** We have moved to an
   automated build and packaging system--Open Build System, at
@@ -60,9 +60,9 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
   sudo apt install vala-language-server
   ```
 
-![vls-vscode](images/vls-vscode.png)
-![vls-vim](images/vls-vim.png)
-![vls-gb](images/vls-gb.png)
+![VLS with VSCode](images/vls-vscode.png)
+![VLS with Vim with coc.nvim and vista plugins](images/vls-vim.png)
+![VLS with GNOME Builder](images/vls-gb.png)
 
 ## Table of Contents
 - [Vala Language Server](#vala-language-server)
@@ -117,7 +117,7 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 - `gee-0.8`
 - `json-glib-1.0`
 - `jsonrpc-glib-1.0`
-- `libvala-0.48 / vala-0.48` latest bugfix release
+- `libvala >= 0.48` latest bugfix release
 - you also need the `posix` VAPI, which should come preinstalled
 
 #### Install dependencies with Guix
@@ -139,7 +139,7 @@ sudo ninja -C build install
 This will install `vala-language-server` to `$PREFIX/bin`
 
 ### With Vim
-Once you have VLS installed, you can use it with `vim`.
+Once you have VLS installed, you can use it with `vim` (or `nvim`).
 
 #### coc.nvim
 1. Make sure [coc.nvim](https://github.com/neoclide/coc.nvim) is installed.
