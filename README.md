@@ -12,10 +12,10 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 
 - Alpine Linux Edge: `apk add vala-language-server`
 
-- Ubuntu 20.04, 20.10, 21.04, Fedora 33, and Debian
+- Ubuntu 20.04, 20.10, 21.04, Fedora 33, Debian, openSUSE, and Mageia
 
   **The Ubuntu PPA and Fedora Copr are now deprecated.** We have moved to an
-  automated build and packaging system--Open Build System, at
+  automated build and packaging system, Open Build System, at
   [here](https://software.opensuse.org//download.html?project=home%3APrince781&package=vala-language-server).
   You can find details about how to install VLS for your distribution
   at that link.
@@ -45,6 +45,9 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
   ```
   dnf install vala-language-server
   ```
+
+  For Fedora and other RPM-based distributions (openSUSE, Mageia), you can also
+  install `vala-languageserver-gb-plugin` for the **GNOME Builder plugin**.
 
   For **Debian**, add the repository like this:
 
