@@ -57,8 +57,8 @@ class Vls.BuildTask : BuildTarget {
 
         foreach (string arg in arguments) {
             if (Util.arg_is_vala_file (arg)) {
-                used_files.add (File.new_for_commandline_arg_and_cwd (arg, build_dir));
-                debug ("BuildTask(%s): uses Vala file %s", id, arg);
+                var file = File.new_for_commandline_arg_and_cwd (arg, build_dir);
+                used_files.add (file);
             }
         }
 
@@ -204,26 +204,12 @@ class Vls.BuildTask : BuildTarget {
                     warning ("BuildTask(%s): could not get library for g-ir-scanner task", id);
                 }
             }
-        }
-
-        var temp_outputs = new ArrayList<File> (Util.file_equal);
-        foreach (string? output_filename in target_output_files) {
-            if (output_filename != null)
-                temp_outputs.add (File.new_for_commandline_arg_and_cwd (output_filename, build_dir));
-        }
-
-        if (language == "c") {
-            output.add_all (temp_outputs);
         } else {
-            // other kinds of targets may transform *.in files to their outputs, so
-            // we look for all files in target_output_files that correspond to these inputs
-            foreach (File input_file in input) {
-                string input_path = (!) input_file.get_path ();
-                if (input_path.has_suffix (".in")) {
-                    foreach (File output_file in temp_outputs) {
-                        if (input_path == output_file.get_path () + ".in")
-                            output.add (output_file);
-                    }
+            // add all outputs for the target otherwise
+            foreach (string? output_filename in target_output_files) {
+                if (output_filename != null) {
+                    output.add (File.new_for_commandline_arg_and_cwd (output_filename, build_dir));
+                    debug ("BuildTask(%s): outputs %s", id, output_filename);
                 }
             }
         }

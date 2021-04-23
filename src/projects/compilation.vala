@@ -55,7 +55,7 @@ class Vls.Compilation : BuildTarget {
     /**
      * The output directory.
      */
-    private string _directory;
+    public string directory { get; private set; }
     private Vala.Profile _profile;
     private string? _entry_point_name;
     private bool _fatal_warnings;
@@ -97,7 +97,7 @@ class Vls.Compilation : BuildTarget {
                         string[] compiler, string[] args, string[] sources, string[] generated_sources,
                         string[]? sources_content = null) throws Error {
         base (build_dir, name, id, no);
-        _directory = build_dir;
+        directory = build_dir;
 
         // parse arguments
         var build_dir_file = File.new_for_path (build_dir);
@@ -112,7 +112,7 @@ class Vls.Compilation : BuildTarget {
                     warning ("Compilation(%s) null --directory", id);
                     continue;
                 }
-                _directory = Util.realpath (arg_value, build_dir);
+                directory = Util.realpath (arg_value, build_dir);
                 set_directory = true;
             }
         }
@@ -153,9 +153,9 @@ class Vls.Compilation : BuildTarget {
                     continue;
                 }
 
-                string path = Util.realpath (arg_value, _directory);
+                string path = Util.realpath (arg_value, directory);
                 if (!set_directory)
-                    warning ("Compilation(%s) no --directory given, assuming %s", id, _directory);
+                    warning ("Compilation(%s) no --directory given, assuming %s", id, directory);
                 if (flag_name == "vapi")
                     _output_vapi = path;
                 else if (flag_name == "gir")
@@ -174,7 +174,7 @@ class Vls.Compilation : BuildTarget {
                     input.add (file_from_arg);
                 }
             } else if (flag_name != "directory") {
-                warning ("Compilation(%s) ignoring argument #%d (%s)", id, arg_i, args[arg_i]);
+                debug ("Compilation(%s) ignoring argument #%d (%s)", id, arg_i, args[arg_i]);
             }
         }
 
@@ -217,7 +217,7 @@ class Vls.Compilation : BuildTarget {
             experimental = _experimental,
             experimental_non_null = _experimental_non_null,
             abi_stability = _abi_stability,
-            directory = _directory,
+            directory = directory,
             vapi_directories = _vapi_dirs.to_array (),
             gir_directories = _gir_dirs.to_array (),
             metadata_directories = _metadata_dirs.to_array (),
@@ -318,13 +318,15 @@ class Vls.Compilation : BuildTarget {
             // generated files are also part of the project, so we use TextDocument intead of Vala.SourceFile
             try {
                 if (!generated_file.query_exists ())
-                    throw new FileError.NOENT (@"file $(generated_file.get_uri ()) does not exist");
+                    throw new FileError.NOENT (@"file does not exist");
                 code_context.add_source_file (new TextDocument (code_context, generated_file));
+                debug ("Compilation(%s): added generated source file %s", id, generated_file.get_uri ());
             } catch (Error e) {
+                warning ("Compilation(%s): could not add file %s - %s", id, generated_file.get_uri (), e.message);
+
                 // Vala.CodeContext.pop ();
                 // TODO: fix Meson introspection bugs (see buildtask.vala)
                 //       first before enabling the following line
-
                 // throw e;        // rethrow
             }
         }

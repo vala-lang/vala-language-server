@@ -27,69 +27,45 @@ class Vls.MesonProject : Project {
     private string build_dir;
     private bool configured_once;
 
-    public const string OUTDIR = "meson-out";
-
+    /**
+     * Substitute special arguments like `@INPUT@` and `@OUTPUT@` as they
+     * appear in Meson targets.
+     */
     private string[] substitute_target_args (Meson.TargetInfo meson_target_info, 
                                              Meson.TargetSourceInfo target_source, 
-                                             string[] args) throws RegexError {
+                                             string[] args, string? src_relative_path) throws RegexError {
         var substituted_args = new LinkedList<string> ();
         for (int i = 0; i < args.length; i++) {
             MatchInfo match_info;
-            if (/^@([A-Za-z]+)(\d+)?@$/.match (args[i], 0, out match_info)) {
+            if (/^@([A-Za-z_]+)@$/.match (args[i], 0, out match_info)) {
+                // substitute multiple args
                 string special_arg_name = match_info.fetch (1);
-                string? arg_num_str = match_info.fetch (2);
-                int arg_num;
-                bool has_arg_num = int.try_parse (arg_num_str == null ? "" : arg_num_str, out arg_num);
+
                 if (special_arg_name == "INPUT") {
                     string substitute = "";
-
-                    if (has_arg_num) {
-                        if (arg_num < target_source.sources.length) {
-                            substitute = target_source.sources[arg_num];
-                            substituted_args.add (substitute);
-                            debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) for %s",
-                                   meson_target_info.id, i, args[i], substitute);
-                        } else {
-                            warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'", 
-                                     meson_target_info.id, args[i]);
-                        }
-                    } else {
-                        foreach (string input_arg in target_source.sources) {
-                            substituted_args.add(input_arg);
-                            if (substitute != "")
-                                substitute += " ";
-                            substitute += input_arg;
-                        }
-                        debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) for %s",
-                               meson_target_info.id, i, args[i], substitute);
+                    foreach (string input_arg in target_source.sources) {
+                        substituted_args.add (input_arg);
+                        if (substitute != "")
+                            substitute += " ";
+                        substitute += input_arg;
                     }
+
+                    debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) with %s",
+                           meson_target_info.id, i, args[i], substitute);
                 } else if (special_arg_name == "OUTPUT") {
                     string substitute = "";
-
-                    if (has_arg_num) {
-                        if (arg_num < meson_target_info.filename.length) {
-                            substitute = meson_target_info.filename[arg_num];
-                            substituted_args.add (substitute);
-                            debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) for %s",
-                                   meson_target_info.id, i, args[i], substitute);
-                        } else {
-                            warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'", 
-                                     meson_target_info.id, args[i]);
-                        }
-                    } else {
-                        foreach (string output_arg in meson_target_info.filename) {
-                            substituted_args.add (output_arg);
-                            if (substitute != "")
-                                substitute += " ";
-                            substitute += output_arg;
-                        }
-                        debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) for %s",
-                               meson_target_info.id, i, args[i], substitute);
+                    foreach (string output_arg in meson_target_info.filename) {
+                        substituted_args.add (output_arg);
+                        if (substitute != "")
+                            substitute += " ";
+                        substitute += output_arg;
                     }
+
+                    debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) with %s",
+                           meson_target_info.id, i, args[i], substitute);
                 } else {
                     warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'", 
                              meson_target_info.id, special_arg_name);
-                    substituted_args.add (args[i]);
                 }
             } else {
                 string substitute = args[i];
@@ -113,13 +89,71 @@ class Vls.MesonProject : Project {
 
                     return false;
                 });
-                var regex2 = /@\w+@/;
+                var regex2 = /@([A-Za-z0-9_]+?)(\d+)?@/;
                 substitute = regex2.replace_eval (substitute, substitute.length, 0, 0, (match, result) => {
-                    if (match.fetch (0) == "@BUILD_ROOT@") {
+                    string special_arg_name = match.fetch (1);
+                    string? arg_num_str = match.fetch (2);
+                    int arg_num = 0;
+                    bool has_arg_num = arg_num_str == null ? false : int.try_parse (arg_num_str, out arg_num);
+
+                    if (special_arg_name == "BUILD_ROOT") {
                         result.append (build_dir);
                         replaced = true;
-                    } else if (match.fetch (0) == "@SOURCE_ROOT@") {
+                    } else if (special_arg_name == "SOURCE_ROOT") {
                         result.append (root_path);
+                        replaced = true;
+                    } else if (special_arg_name == "INPUT") {
+                        if (has_arg_num) {
+                            if (arg_num < target_source.sources.length) {
+                                result.append (target_source.sources[arg_num]);
+                                replaced = true;
+                            } else {
+                                warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'",
+                                         meson_target_info.id, match.fetch (0));
+                                result.append (match.fetch (0));
+                                return true;
+                            }
+                        } else {
+                            if (target_source.sources.length == 1) {
+                                result.append (target_source.sources[0]);
+                                replaced = true;
+                            } else {
+                                warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s' with multiple sources",
+                                         meson_target_info.id, match.fetch (0));
+                                result.append (match.fetch (0));
+                                return true;
+                            }
+                        }
+                    } else if (special_arg_name == "OUTPUT") {
+                        if (has_arg_num) {
+                            if (arg_num < meson_target_info.filename.length) {
+                                result.append (meson_target_info.filename[arg_num]);
+                                replaced = true;
+                            } else {
+                                warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'",
+                                         meson_target_info.id, match.fetch (0));
+                                result.append (match.fetch (0));
+                                return true;
+                            }
+                        } else {
+                            if (meson_target_info.filename.length == 1) {
+                                result.append (meson_target_info.filename[0]);
+                                replaced = true;
+                            } else {
+                                warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s' with multiple sources",
+                                         meson_target_info.id, match.fetch (0));
+                                result.append (match.fetch (0));
+                                return true;
+                            }
+                        }
+                    } else if (special_arg_name == "OUTDIR") {
+                        if (src_relative_path == null) {
+                            warning ("MesonProject: for target %s, source #0, could not substitute special arg with null source relative dir", 
+                                     meson_target_info.id);
+                            result.append (match.fetch (0));
+                            return true;
+                        }
+                        result.append (Path.build_filename (build_dir, src_relative_path));
                         replaced = true;
                     } else {
                         warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'", 
@@ -130,8 +164,8 @@ class Vls.MesonProject : Project {
                     return false;
                 });
                 if (replaced) {
-                    debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) for %s",
-                           meson_target_info.id, i, args[i], substitute);
+                    debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) with %s",
+                    meson_target_info.id, i, args[i], substitute);
                 }
                 substituted_args.add (substitute);
             }
@@ -328,21 +362,27 @@ class Vls.MesonProject : Project {
             bool swap_with_previous_target = false;
             // second, fix sources
             var fixed_sources = new ArrayList<string> ();
+            string? compiler_name = first_source.compiler.length > 0 ? Path.get_basename (first_source.compiler[0]) : null;
 
-            if (first_source.compiler.length > 0 && Path.get_basename (first_source.compiler[0]) == "glib-mkenums") {
-                // hack for bug in Meson introspection with gnome.mkenums() targets, where source
-                // files defined in the meson.build file for this target show up as
-                // source files in the project root directory, regardless of where they
-                // actually are
+            if (compiler_name != null) {
+                // hack for bug in Meson introspection with certain targets
+                // (glib.mkenums(), gnome.compile_resources(), etc), where
+                // source files defined in the meson.build file for this target
+                // show up as source files in the project root directory,
+                // regardless of where they actually are
                 foreach (string source in first_source.sources) {
                     var input_file = File.new_for_commandline_arg_and_cwd (source, target_build_dir);
-                    if (root_dir.get_relative_path (input_file) == input_file.get_basename ())
+                    if (root_dir.get_relative_path (input_file) == input_file.get_basename () &&
+                        !input_file.query_exists (cancellable)) {
                         input_file = File.new_build_filename (root_path, src_relative_path, input_file.get_basename ());
-                    debug ("MesonProject: fixed glib-mkenums source: from %s --> %s", source, input_file.get_path ());
+                        debug ("MesonProject: fixed %s source: from %s --> %s", compiler_name, source, input_file.get_path ());
+                    }
                     fixed_sources.add (input_file.get_path ());
                 }
+            }
 
-                // also, add --output argument if it doesn't exist, since glib-mkenums
+            if (compiler_name == "glib-mkenums") {
+                // add --output argument if it doesn't exist, since glib-mkenums
                 // outputs to stdout by default
                 var compiler_args = new ArrayList<string> ();
                 compiler_args.add_all_array (first_source.compiler);
@@ -356,7 +396,7 @@ class Vls.MesonProject : Project {
                 }
                 first_source.compiler = compiler_args.to_array ();
 
-                // Finally, another hack: a gnome.mkenums() target may show up in introspection
+                // hack: a gnome.mkenums() target may show up in introspection
                 // as two targets, with the outputted C header file coming right AFTER the target for
                 // the outputted C file. This violates the topological ordering, so swap the two if
                 // our current target is applicable.
@@ -366,18 +406,19 @@ class Vls.MesonProject : Project {
                     && meson_target_info.name.substring (0, meson_target_info.name.length - 2) 
                         == build_targets[build_targets.size - 1].name.substring (0, build_targets[build_targets.size - 1].name.length - 2))
                     swap_with_previous_target = true;
-            } else {
-                fixed_sources.add_all_array (first_source.sources);
             }
+
             first_source.sources = fixed_sources.to_array ();
 
             // third, substitute special arguments
             first_source.parameters = substitute_target_args (meson_target_info, 
                                                               first_source, 
-                                                              first_source.parameters);
+                                                              first_source.parameters,
+                                                              src_relative_path);
             first_source.compiler = substitute_target_args (meson_target_info,
                                                             first_source,
-                                                            first_source.compiler);
+                                                            first_source.compiler,
+                                                            src_relative_path);
 
             // fourth, add additional link arguments for C targets
             if (first_source.language == "c") {
@@ -543,7 +584,7 @@ class Vls.MesonProject : Project {
                     string? name = null;
                     BuildTarget? btarget_found = null;
 
-                    if (/([^\\\/]+)\.p/.match (cc.output, 0, out match_info)) {
+                    if (/.*?([^\\\/]+)\.p/.match (cc.output, 0, out match_info)) {
                         // Meson 0.55 changed the way target IDs are used in the name of the
                         // target's build directory:
                         // In the old way, the target's ID would map exactly to the build
@@ -556,14 +597,30 @@ class Vls.MesonProject : Project {
                         //
                         // In the new way, the build directory is of the form
                         //   "lib"?[target ID in meson.build][extension]?".p"
-                        name = match_info.fetch (1);
+                        var directory = File.new_for_commandline_arg_and_cwd (match_info.fetch (0), build_dir);
+                        string filename = match_info.fetch (1);
+                        name = filename;
 
+                        bool is_shlib = false;
+                        bool is_stlib = false;
                         MatchInfo lib_match_info;
-                        if (/^lib(.*?)\.(a|lib|so|dll)/.match (name, 0, out lib_match_info)) {
+                        if (/^lib(.*?)\.(a|lib|so|dll)/.match (filename, 0, out lib_match_info)) {
                             name = lib_match_info.fetch (1);
+                            string lib_suffix = lib_match_info.fetch (2);
+                            if (lib_suffix == "a" || lib_suffix == "lib")
+                                is_stlib = true;
+                            else if (lib_suffix == "so" || lib_suffix == "dll")
+                                is_shlib = true;
                         }
 
-                        btarget_found = build_targets.first_match (t => t.name == name);
+                        btarget_found = build_targets
+                            .filter (t => t is Compilation)
+                            .map<Compilation> (t => t as Compilation)
+                            .first_match (t => t.name == name &&
+                                          (is_stlib ? t.id.has_suffix ("@sta") :
+                                           is_shlib ? t.id.has_suffix ("@sha") :
+                                           t.id.has_suffix ("@exe")) &&
+                                          directory.get_path () == t.directory);
                     } else if (/[^\\\/]+(@@[^\\\/]+)?@\w+/.match (cc.output, 0, out match_info)) {
                         // for Meson pre-0.55:
                         id = match_info.fetch (0);
@@ -594,14 +651,12 @@ class Vls.MesonProject : Project {
                     if (!arg_value.has_suffix (".vapi")/* && TODO: .gir */)
                         continue;
                     var vapi_file = File.new_for_path (Util.realpath (arg_value, cc.directory));
-                    if (!compilation.input.contains (vapi_file))
-                        debug ("MesonProject: discovered extra VAPI file %s used by compilation %s", 
+                    if (!compilation.input.contains (vapi_file)) {
+                        debug ("MesonProject: discovered VAPI file %s used by compilation %s", 
                                vapi_file.get_path (), compilation.id);
-                    else
-                        debug ("MesonProject: found VAPI %s for compilation %s", vapi_file.get_path (), compilation.id);
-                    // Add vapi_file to the list of input files. If it is
-                    // already present, then nothing happens.
-                    compilation.input.add (vapi_file);
+                        // Add vapi_file to the list of input files
+                        compilation.input.add (vapi_file);
+                    }
                 }
             }
         }
