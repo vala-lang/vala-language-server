@@ -26,6 +26,7 @@ class Vls.MesonProject : Project {
     private HashMap<File, FileMonitor> meson_build_files = new HashMap<File, FileMonitor> (Util.file_hash, Util.file_equal);
     private string build_dir;
     private bool configured_once;
+    private bool requires_general_build;
 
     /**
      * Substitute special arguments like `@INPUT@` and `@OUTPUT@` as they
@@ -50,7 +51,7 @@ class Vls.MesonProject : Project {
                         substitute += input_arg;
                     }
 
-                    debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) with %s",
+                    debug ("for target %s, source #0, subtituted arg #%d (%s) with %s",
                            meson_target_info.id, i, args[i], substitute);
                 } else if (special_arg_name == "OUTPUT") {
                     string substitute = "";
@@ -61,10 +62,10 @@ class Vls.MesonProject : Project {
                         substitute += output_arg;
                     }
 
-                    debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) with %s",
+                    debug ("for target %s, source #0, subtituted arg #%d (%s) with %s",
                            meson_target_info.id, i, args[i], substitute);
                 } else {
-                    warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'", 
+                    warning ("for target %s, source #0, could not substitute special arg `%s'", 
                              meson_target_info.id, special_arg_name);
                 }
             } else {
@@ -82,7 +83,7 @@ class Vls.MesonProject : Project {
                         if (found != null) {
                             result.append (found.build_dir);
                         } else {
-                            warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s' (could not find build target with ID %s)", 
+                            warning ("for target %s, source #0, could not substitute special arg `%s' (could not find build target with ID %s)", 
                                      meson_target_info.id, match.get_string (), build_id);
                         }
                     }
@@ -108,7 +109,7 @@ class Vls.MesonProject : Project {
                                 result.append (target_source.sources[arg_num]);
                                 replaced = true;
                             } else {
-                                warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'",
+                                warning ("for target %s, source #0, could not substitute special arg `%s'",
                                          meson_target_info.id, match.fetch (0));
                                 result.append (match.fetch (0));
                                 return true;
@@ -118,7 +119,7 @@ class Vls.MesonProject : Project {
                                 result.append (target_source.sources[0]);
                                 replaced = true;
                             } else {
-                                warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s' with multiple sources",
+                                warning ("for target %s, source #0, could not substitute special arg `%s' with multiple sources",
                                          meson_target_info.id, match.fetch (0));
                                 result.append (match.fetch (0));
                                 return true;
@@ -130,7 +131,7 @@ class Vls.MesonProject : Project {
                                 result.append (meson_target_info.filename[arg_num]);
                                 replaced = true;
                             } else {
-                                warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'",
+                                warning ("for target %s, source #0, could not substitute special arg `%s'",
                                          meson_target_info.id, match.fetch (0));
                                 result.append (match.fetch (0));
                                 return true;
@@ -140,7 +141,7 @@ class Vls.MesonProject : Project {
                                 result.append (meson_target_info.filename[0]);
                                 replaced = true;
                             } else {
-                                warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s' with multiple sources",
+                                warning ("for target %s, source #0, could not substitute special arg `%s' with multiple sources",
                                          meson_target_info.id, match.fetch (0));
                                 result.append (match.fetch (0));
                                 return true;
@@ -148,7 +149,7 @@ class Vls.MesonProject : Project {
                         }
                     } else if (special_arg_name == "OUTDIR") {
                         if (src_relative_path == null) {
-                            warning ("MesonProject: for target %s, source #0, could not substitute special arg with null source relative dir", 
+                            warning ("for target %s, source #0, could not substitute special arg with null source relative dir", 
                                      meson_target_info.id);
                             result.append (match.fetch (0));
                             return true;
@@ -156,7 +157,7 @@ class Vls.MesonProject : Project {
                         result.append (Path.build_filename (build_dir, src_relative_path));
                         replaced = true;
                     } else {
-                        warning ("MesonProject: for target %s, source #0, could not substitute special arg `%s'", 
+                        warning ("for target %s, source #0, could not substitute special arg `%s'", 
                                  meson_target_info.id, match.fetch (0));
                         result.append (match.fetch (0));
                         return true;
@@ -164,7 +165,7 @@ class Vls.MesonProject : Project {
                     return false;
                 });
                 if (replaced) {
-                    debug ("MesonProject: for target %s, source #0, subtituted arg #%d (%s) with %s",
+                    debug ("for target %s, source #0, subtituted arg #%d (%s) with %s",
                     meson_target_info.id, i, args[i], substitute);
                 }
                 substituted_args.add (substitute);
@@ -178,7 +179,7 @@ class Vls.MesonProject : Project {
         // first, try to load the file in ${build_dir}/meson-info/intro-${command}.json
         try {
             var input_file = File.new_build_filename (build_dir, "meson-info", @"intro-$command.json");
-            debug ("MesonProject: loading file %s ...", input_file.get_path ());
+            debug ("loading file %s ...", input_file.get_path ());
             parser.load_from_stream (input_file.read (cancellable), cancellable);
         } catch (IOError e) {
             if (e is IOError.NOT_FOUND) {
@@ -195,7 +196,7 @@ class Vls.MesonProject : Project {
                     command_str += part;
                 }
 
-                debug ("MesonProject: file does not exist, fallback to %s", command_str);
+                debug ("file does not exist, fallback to %s", command_str);
 
                 Process.spawn_sync (
                     build_dir,
@@ -208,7 +209,7 @@ class Vls.MesonProject : Project {
                     out proc_status);
 
                 if (proc_status != 0) {
-                    warning ("MesonProject: command `%s' in %s failed with exit code %d\n----stdout:\n%s\n----stderr:\n%s", 
+                    warning ("command `%s' in %s failed with exit code %d\n----stdout:\n%s\n----stderr:\n%s", 
                              command_str, build_dir, proc_status, proc_stdout, proc_stderr);
                     throw new ProjectError.INTROSPECTION (@"meson command `$command_str' failed with exit code $proc_status");
                 }
@@ -244,7 +245,7 @@ class Vls.MesonProject : Project {
             out meson_version_proc_status);
 
         if (meson_version_proc_status != 0) {
-            warning ("MesonProject: failed to get version, exit code %d\n----stdout:\n%s\n----stderr:\n%s", 
+            warning ("failed to get version, exit code %d\n----stdout:\n%s\n----stderr:\n%s", 
                      meson_version_proc_status, meson_version_proc_stdout, meson_version_proc_stderr);
             throw new ProjectError.CONFIGURATION (@"meson --version failed with exit code $meson_version_proc_status");
         }
@@ -252,14 +253,14 @@ class Vls.MesonProject : Project {
         meson_version_proc_stdout = meson_version_proc_stdout.strip ();
 
         if (Util.compare_versions (meson_version_proc_stdout, "0.50.0") < 0) {
-            warning ("MesonProject: meson < 0.50.0 not supported (version was '%s')", meson_version_proc_stdout);
+            warning ("meson < 0.50.0 not supported (version was '%s')", meson_version_proc_stdout);
             throw new ProjectError.VERSION_UNSUPPORTED (@"meson < 0.50.0 not supported");
         }
 
         // 1. configure new build directory
         var root_meson_build = File.new_build_filename (root_path, "meson.build");
         if (!meson_build_files.has_key (root_meson_build)) {
-            debug ("MesonProject: obtaining a new file monitor for %s ...", root_meson_build.get_path ());
+            debug ("obtaining a new file monitor for %s ...", root_meson_build.get_path ());
             FileMonitor file_monitor = root_meson_build.monitor_file (FileMonitorFlags.NONE, cancellable);
             file_monitor.changed.connect (file_changed_event);
             meson_build_files[root_meson_build] = file_monitor;
@@ -268,7 +269,7 @@ class Vls.MesonProject : Project {
         string[] spawn_args = {"meson", "setup", ".", root_path};
         string proc_stdout, proc_stderr;
         int proc_status;
-        debug ("MesonProject: %sconfiguring build dir %s ...", configured_once ? "re" : "", build_dir);
+        debug ("%sconfiguring build dir %s ...", configured_once ? "re" : "", build_dir);
         if (configured_once)
             spawn_args += "--reconfigure";
         Process.spawn_sync (
@@ -282,7 +283,7 @@ class Vls.MesonProject : Project {
             out proc_status);
 
         if (proc_status != 0) {
-            warning ("MesonProject: configuration failed with exit code %d\n----stdout:\n%s\n----stderr:\n%s", 
+            warning ("configuration failed with exit code %d\n----stdout:\n%s\n----stderr:\n%s", 
                      proc_status, proc_stdout, proc_stderr);
             throw new ProjectError.CONFIGURATION (@"meson configuration failed with exit code $proc_status");
         }
@@ -293,16 +294,16 @@ class Vls.MesonProject : Project {
         load_introspection_json (dependencies_parser, build_dir, "dependencies", cancellable);
         Json.Node? rd_json_root = dependencies_parser.get_root ();
         if (rd_json_root == null) {
-            warning ("MesonProject: JSON root is null! C code targets may fail to build.");
+            warning ("JSON root is null! C code targets may fail to build.");
         } else if (rd_json_root.get_node_type () != Json.NodeType.ARRAY) {
-            warning ("MesonProject: JSON root is not an array! C code targets may fail to build.");
+            warning ("JSON root is not an array! C code targets may fail to build.");
         } else {
             int elem_idx = -1;
             foreach (Json.Node elem_node in rd_json_root.get_array ().get_elements ()) {
                 elem_idx++;
                 var raw_dependency = Json.gobject_deserialize (typeof (Meson.Dependency), elem_node) as Meson.Dependency?;
                 if (raw_dependency == null) {
-                    warning ("MesonProject: could not deserialize raw dependency/element #%d", elem_idx);
+                    warning ("could not deserialize raw dependency/element #%d", elem_idx);
                     continue;
                 }
                 raw_dependencies.add (raw_dependency);
@@ -315,24 +316,26 @@ class Vls.MesonProject : Project {
         load_introspection_json(targets_parser, build_dir, "targets", cancellable);
         Json.Node? tg_json_root = targets_parser.get_root ();
         if (tg_json_root == null) {
-            warning ("MesonProject: JSON root is null! Bailing out");
+            warning ("JSON root is null! Bailing out");
             throw new ProjectError.INTROSPECTION (@"Meson targets: JSON root is null!");
         } else if (tg_json_root.get_node_type () != Json.NodeType.ARRAY) {
-            warning ("MesonProject: JSON root is not an array! Bailing out");
+            warning ("JSON root is not an array! Bailing out");
             throw new ProjectError.INTROSPECTION (@"Meson targets: JSON root is not an array!");
         }
         var root_dir = File.new_for_path (root_path);
         int elem_idx = -1;
         // include paths for internal libraries
         var internal_lib_c_includes = new HashMap<File, Meson.TargetInfo> (Util.file_hash, Util.file_equal);
+        // targets that execute programs that are generated by another target
+        var targets_executing_generated_programs = new HashMap<BuildTarget, File> ();
         foreach (Json.Node elem_node in tg_json_root.get_array ().get_elements ()) {
             elem_idx++;
             var meson_target_info = Json.gobject_deserialize (typeof (Meson.TargetInfo), elem_node) as Meson.TargetInfo?;
             if (meson_target_info == null) {
-                warning ("MesonProject: could not deserialize target/element #%d", elem_idx);
+                warning ("could not deserialize target/element #%d", elem_idx);
                 continue;
             } else if (meson_target_info.target_sources.is_empty) {
-                warning ("MesonProject: target #%d has no target sources", elem_idx);
+                warning ("target #%d has no target sources", elem_idx);
                 continue;
             }
 
@@ -375,7 +378,7 @@ class Vls.MesonProject : Project {
                     if (root_dir.get_relative_path (input_file) == input_file.get_basename () &&
                         !input_file.query_exists (cancellable)) {
                         input_file = File.new_build_filename (root_path, src_relative_path, input_file.get_basename ());
-                        debug ("MesonProject: fixed %s source: from %s --> %s", compiler_name, source, input_file.get_path ());
+                        debug ("fixed %s source: from %s --> %s", compiler_name, source, input_file.get_path ());
                     }
                     fixed_sources.add (input_file.get_path ());
                 }
@@ -391,7 +394,7 @@ class Vls.MesonProject : Project {
                         compiler_args.add ("--output");
                         compiler_args.add (meson_target_info.filename[0]);
                     } else {
-                        throw new ProjectError.INTROSPECTION (@"MesonProject: expected at least one filename for glib-mkenums target $(meson_target_info.id)");
+                        throw new ProjectError.INTROSPECTION (@" expected at least one filename for glib-mkenums target $(meson_target_info.id)");
                     }
                 }
                 first_source.compiler = compiler_args.to_array ();
@@ -448,7 +451,7 @@ class Vls.MesonProject : Project {
                             entry.key.get_relative_path (include_dir) != null) {
                             var libs = new ArrayList<string>.wrap (first_source.sources);
                             foreach (string lib in entry.value.filename) {
-                                debug ("MesonProject: adding internal link arg `%s' to C target %s", lib, meson_target_info.id);
+                                debug ("adding internal link arg `%s' to C target %s", lib, meson_target_info.id);
                                 libs.add (lib);
                             }
                             first_source.sources = libs.to_array ();
@@ -482,7 +485,7 @@ class Vls.MesonProject : Project {
                         foreach (string link_arg in raw_dep.link_args) {
                             if (!(link_arg in link_args)) {
                                 link_args.add (link_arg);
-                                debug ("MesonProject: adding link arg `%s' to C target %s", link_arg, meson_target_info.id);
+                                debug ("adding link arg `%s' to C target %s", link_arg, meson_target_info.id);
                             }
                         }
                     }
@@ -500,7 +503,7 @@ class Vls.MesonProject : Project {
                             fixed_parameters.add ("-o");
                             fixed_parameters.add (meson_target_info.filename[0]);
                         } else {
-                            throw new ProjectError.INTROSPECTION (@"MesonProject: expected at least one filename for C shared-library target $(meson_target_info.id)");
+                            throw new ProjectError.INTROSPECTION (@" expected at least one filename for C shared-library target $(meson_target_info.id)");
                         }
                     }
                 }
@@ -517,32 +520,57 @@ class Vls.MesonProject : Project {
                                                     first_source.compiler, 
                                                     first_source.parameters, 
                                                     first_source.sources,
-                                                    first_source.generated_sources));
+                                                    first_source.generated_sources,
+                                                    meson_target_info.filename));
             else {
                 BuildTarget? previous_target = null;
                 if (swap_with_previous_target)
                     previous_target = build_targets.remove_at (build_targets.size - 1);
-                build_targets.add (new BuildTask (target_build_dir,
-                                                  meson_target_info.name, 
-                                                  meson_target_info.id, 
-                                                  elem_idx + (swap_with_previous_target ? -1 : 0),
-                                                  first_source.compiler, 
-                                                  first_source.parameters, 
-                                                  first_source.sources,
-                                                  first_source.generated_sources,
-                                                  meson_target_info.filename,
-                                                  first_source.language));
+
+                // guess whether this target executes a file generated by another target.
+                // for meson custom targets, usually the compiler argv[0] is
+                // absolute unless it's a program that's generated by another target.
+                bool executes_generated_program = false;
+                File? compiler_exe = null;
+                if (meson_target_info.target_type == "custom" &&
+                    first_source.compiler.length > 0 && !Path.is_absolute (first_source.compiler[0])) {
+                    compiler_exe = File.new_for_commandline_arg_and_cwd (first_source.compiler[0], build_dir);
+                    first_source.compiler[0] = compiler_exe.get_path ();
+                    // we still don't know if the entire project requires a
+                    // general build because it could turn out in the end that
+                    // this target is unnecessary to build if it does not
+                    // appear in the dependency chain of a Vala compilation
+                    // target
+                    executes_generated_program = true;
+                }
+
+                var added_task = new BuildTask (build_dir,
+                                                meson_target_info.name,
+                                                meson_target_info.id,
+                                                elem_idx + (swap_with_previous_target ? -1 : 0),
+                                                first_source.compiler,
+                                                first_source.parameters,
+                                                first_source.sources,
+                                                first_source.generated_sources,
+                                                meson_target_info.filename,
+                                                first_source.language);
+                build_targets.add (added_task);
                 if (previous_target != null) {
                     previous_target.no = elem_idx;
                     build_targets.add (previous_target);
-                    debug ("MesonTarget: swapping previous target %s after target %s", previous_target.id, meson_target_info.id);
+                    debug ("swapping previous target %s after target %s", previous_target.id, meson_target_info.id);
+                }
+
+                if (executes_generated_program) {
+                    targets_executing_generated_programs[added_task] = compiler_exe;
+                    added_task.input.insert (0, compiler_exe);
                 }
             }
 
             // finally, monitor the file that this build target was defined in
             var defined_in = File.new_for_path (meson_target_info.defined_in);
             if (!meson_build_files.has_key (defined_in)) {
-                debug ("MesonProject: obtaining a new file monitor for %s ...", defined_in.get_path ());
+                debug ("obtaining a new file monitor for %s ...", defined_in.get_path ());
                 FileMonitor file_monitor = defined_in.monitor_file (FileMonitorFlags.NONE, cancellable);
                 file_monitor.changed.connect (file_changed_event);
                 meson_build_files[defined_in] = file_monitor;
@@ -553,21 +581,21 @@ class Vls.MesonProject : Project {
         //    about target inputs and outputs
         var ccs_parser = new Json.Parser.immutable_new ();
         var ccs_file = File.new_build_filename (build_dir, "compile_commands.json");
-        debug ("MesonProject: loading file %s ...", ccs_file.get_path ());
+        debug ("loading file %s ...", ccs_file.get_path ());
         ccs_parser.load_from_stream (ccs_file.read (cancellable), cancellable);
         Json.Node? ccs_json_root = ccs_parser.get_root ();
         // don't fail hard if we can't read compile_commands.json
         if (ccs_json_root == null)
-            warning ("MesonProject: JSON root is null! Bailing out");
+            warning ("JSON root is null! Bailing out");
         else if (ccs_json_root.get_node_type () != Json.NodeType.ARRAY)
-            warning ("MesonProject: JSON root is not an array! Bailing out");
+            warning ("JSON root is not an array! Bailing out");
         else {
             int nth_cc = -1;
             foreach (Json.Node elem_node in ccs_json_root.get_array ().get_elements ()) {
                 nth_cc++;
                 var cc = Json.gobject_deserialize (typeof (CompileCommand), elem_node) as CompileCommand;
                 if (cc == null) {
-                    warning ("MesonProject: could not deserialize compile command #%d", nth_cc);
+                    warning ("could not deserialize compile command #%d", nth_cc);
                     continue;
                 }
                 // attempt to match cc["file"] to a build target
@@ -630,10 +658,10 @@ class Vls.MesonProject : Project {
                     if (btarget_found != null && (btarget_found is Compilation)) {
                         found_comp = (Compilation) btarget_found;
                     } else if (id != null) {
-                        warning ("MesonProject: could not associate CC #%d (meson target-id: %s) with a compilation",
+                        warning ("could not associate CC #%d (meson target-id: %s) with a compilation",
                                  nth_cc, id);
                     } else if (name != null) {
-                        warning ("MesonProject: could not associate CC #%d (meson target-name: %s) with a compilation",
+                        warning ("could not associate CC #%d (meson target-name: %s) with a compilation",
                                  nth_cc, name);
                     }
 
@@ -652,7 +680,7 @@ class Vls.MesonProject : Project {
                         continue;
                     var vapi_file = File.new_for_path (Util.realpath (arg_value, cc.directory));
                     if (!compilation.input.contains (vapi_file)) {
-                        debug ("MesonProject: discovered VAPI file %s used by compilation %s", 
+                        debug ("discovered VAPI file %s used by compilation %s", 
                                vapi_file.get_path (), compilation.id);
                         // Add vapi_file to the list of input files
                         compilation.input.add (vapi_file);
@@ -677,27 +705,59 @@ class Vls.MesonProject : Project {
                 if (path != null && (path.has_suffix ("meson.build") || path.has_suffix ("meson_options.txt"))) {
                     var build_file = File.new_for_path ((!) path);
                     if (!meson_build_files.has_key (build_file)) {
-                        debug ("MesonProject: obtaining a new file monitor for %s ...", build_file.get_path ());
+                        debug ("obtaining a new file monitor for %s ...", build_file.get_path ());
                         try {
                             FileMonitor file_monitor = build_file.monitor_file (FileMonitorFlags.NONE, cancellable);
                             file_monitor.changed.connect (file_changed_event);
                             meson_build_files[build_file] = file_monitor;
                         } catch (Error e) {
-                            warning ("MesonProject: ... failed - %s", e.message);
+                            warning ("... failed - %s", e.message);
                         }
                     }
                 }
             }
         } catch (Error e) {
-            warning ("MesonProject: ... failed to load file - %s", e.message);
+            warning ("... failed to load file - %s", e.message);
         }
 
         // 6. perform final analysis and sanity checking
         analyze_build_targets (cancellable);
+        foreach (var target in build_targets) {
+            if (targets_executing_generated_programs.has_key (target)) {
+                var generated_exe = targets_executing_generated_programs[target];
+                requires_general_build = true;
+                debug ("requires general build because target %s executes a file (%s) generated by another target %s",
+                        target.id, generated_exe.get_path (), target.dependencies[generated_exe].id);
+            }
+        }
 
         configured_once = true;
 
         return true;
+    }
+
+    public override void build_if_stale (GLib.Cancellable? cancellable = null) throws Error {
+        if (requires_general_build) {
+            int proc_status;
+            string proc_stdout, proc_stderr;
+
+            Process.spawn_sync (build_dir,
+                                {"meson", "compile"},
+                                null,
+                                SpawnFlags.SEARCH_PATH,
+                                null,
+                                out proc_stdout,
+                                out proc_stderr,
+                                out proc_status);
+
+            if (proc_status != 0) {
+                warning ("`meson compile' in %s failed with exit code %d\n----stdout:\n%s\n----stderr:\n%s", 
+                         build_dir, proc_status, proc_stdout, proc_stderr);
+                throw new ProjectError.INTROSPECTION (@"`meson compile' failed with exit code $proc_status");
+            }
+        }
+
+        base.build_if_stale (cancellable);
     }
 
     public MesonProject (string root_path, Cancellable? cancellable = null) throws Error {
@@ -712,17 +772,17 @@ class Vls.MesonProject : Project {
 
     private void file_changed_event (File src, File? dest, FileMonitorEvent event_type) {
         if (FileMonitorEvent.ATTRIBUTE_CHANGED in event_type) {
-            debug ("MesonProject: watched file %s had an attribute changed", src.get_path ());
+            debug ("watched file %s had an attribute changed", src.get_path ());
             build_files_have_changed = true;
             changed ();
         }
         if (FileMonitorEvent.CHANGED in event_type) {
-            debug ("MesonProject: watched file %s was changed", src.get_path ());
+            debug ("watched file %s was changed", src.get_path ());
             build_files_have_changed = true;
             changed ();
         }
         if (FileMonitorEvent.DELETED in event_type) {
-            debug ("MesonProject: watched file %s was deleted", src.get_path ());
+            debug ("watched file %s was deleted", src.get_path ());
             // remove this file monitor since the file was deleted
             FileMonitor file_monitor;
             if (meson_build_files.unset (src, out file_monitor)) {

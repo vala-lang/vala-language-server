@@ -95,6 +95,7 @@ class Vls.Compilation : BuildTarget {
 
     public Compilation (string build_dir, string name, string id, int no,
                         string[] compiler, string[] args, string[] sources, string[] generated_sources,
+                        string?[] target_output_files,
                         string[]? sources_content = null) throws Error {
         base (build_dir, name, id, no);
         directory = build_dir;
@@ -197,6 +198,14 @@ class Vls.Compilation : BuildTarget {
             var generated_source_file = File.new_for_path (Util.realpath (generated_source, build_dir));
             _generated_sources.add (generated_source_file);
             input.add (generated_source_file);
+        }
+
+        // add the rest of these target output files
+        foreach (string? output_file in target_output_files) {
+            if (output_file != null) {
+                if (output.add (File.new_for_commandline_arg_and_cwd (output_file, build_dir)))
+                    debug ("Compilation(%s): also outputs %s", id, output_file);
+            }
         }
 
         // finally, add these very important packages
@@ -320,7 +329,6 @@ class Vls.Compilation : BuildTarget {
                 if (!generated_file.query_exists ())
                     throw new FileError.NOENT (@"file does not exist");
                 code_context.add_source_file (new TextDocument (code_context, generated_file));
-                debug ("Compilation(%s): added generated source file %s", id, generated_file.get_uri ());
             } catch (Error e) {
                 warning ("Compilation(%s): could not add file %s - %s", id, generated_file.get_uri (), e.message);
 

@@ -252,7 +252,7 @@ abstract class Vls.Project : Object {
     /**
      * Build those elements of the project that need to be rebuilt.
      */
-    public void build_if_stale (Cancellable? cancellable = null) throws Error {
+    public virtual void build_if_stale (Cancellable? cancellable = null) throws Error {
         // this iteration should be in topological order
         foreach (var btarget in build_targets)
             btarget.build_if_stale (cancellable);

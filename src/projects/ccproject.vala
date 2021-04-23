@@ -70,7 +70,7 @@ class Vls.CcProject : Project {
             if (cc.command[0].contains ("valac"))
                 build_targets.add (new Compilation (cc.directory, cc.file ?? @"CC#$i", @"CC#$i", i,
                                                     cc.command[0:1], cc.command[1:cc.command.length],
-                                                    new string[]{}, new string[]{}));
+                                                    new string[]{}, new string[]{}, new string[]{}));
             else
                 build_targets.add (new BuildTask (cc.directory, cc.file ?? @"CC#$i", @"CC#$i", i,
                                                   cc.command[0:1], cc.command[1:cc.command.length], 
