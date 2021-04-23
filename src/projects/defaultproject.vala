@@ -54,7 +54,7 @@ class Vls.DefaultProject : Project {
             }
         }
         btarget = new Compilation (root_path, uri, uri, build_targets.size,
-                                   {"valac"}, args, sources, {}, content != null ? new string[]{content} : null);
+                                   {"valac"}, args, sources, {}, {}, content != null ? new string[]{content} : null);
         // build it now so that information is available immediately on
         // file open (other projects compile on LSP initialize(), so they don't
         // need to do this)
