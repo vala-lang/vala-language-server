@@ -54,8 +54,9 @@ abstract class Vls.Project : Object {
 
         // there may be multiple consumers of a file
         var consumers_of = new HashMap<File, HashSet<BuildTarget>> (Util.file_hash, Util.file_equal);
-        // there can only be one producer for a file
-        var producer_for = new HashMap<File, BuildTarget> (Util.file_hash, Util.file_equal); 
+        // there can only be one primary producer of a file, while there can be
+        // many secondary producers that modify the file
+        var producers_for = new HashMap<File, HashSet<BuildTarget>> (Util.file_hash, Util.file_equal); 
         var neither = new ArrayList<BuildTask> ();
 
         // 1. Find producers + consumers
@@ -70,17 +71,15 @@ abstract class Vls.Project : Object {
                 debug ("\t- %s consumes %s", btarget.id, file_consumed.get_path ());
             }
             foreach (var file_produced in btarget.output) {
-                if (producer_for.has_key (file_produced)) {
-                    BuildTarget conflict = producer_for[file_produced];
-                    throw new ProjectError.CONFIGURATION (@"There are two build targets that produce the same file! Both $(btarget.id) and $(conflict.id) produce $(file_produced.get_path ())");
-                }
-                producer_for[file_produced] = btarget;
+                if (!producers_for.has_key (file_produced))
+                    producers_for[file_produced] = new HashSet<BuildTarget> ();
+                producers_for[file_produced].add (btarget);
                 is_consumer_or_producer = true;
                 debug ("\t- %s produces %s", btarget.id, file_produced.get_path ());
             }
             if (!is_consumer_or_producer) {
                 if (!(btarget is BuildTask))
-                    throw new ProjectError.CONFIGURATION (@"Only build tasks can be initially neither producers nor consumers, yet $(btarget.get_class ().get_name ()) is neither!");
+                    throw new ProjectError.CONFIGURATION (@"Only build tasks can be initially neither producers nor consumers, not $(btarget.get_class ().get_name ())!");
                 debug ("\t- %s neither produces nor consumes any files (for now)", btarget.id);
             }
             // add btarget to neither anyway, if it is a build task
@@ -97,11 +96,14 @@ abstract class Vls.Project : Object {
         foreach (var btask in neither) {
             var files_categorized = new HashSet<File> (Util.file_hash, Util.file_equal);
             foreach (var file in btask.used_files) {
-                if (file in btask.input || file in btask.output) {
+                if (file in btask.input) {
+                    // if it's an input file, whether it's an output file will
+                    // most likely already have been determined by looking at
+                    // the meson target info
                     files_categorized.add (file);
                     continue;
                 }
-                if (producer_for.has_key (file)) {
+                if (producers_for.has_key (file)) {
                     if (!consumers_of.has_key (file))
                         consumers_of[file] = new HashSet<BuildTarget> ();
                     consumers_of[file].add (btask);
@@ -109,7 +111,9 @@ abstract class Vls.Project : Object {
                     files_categorized.add (file);
                     debug ("\t- %s consumes %s", btask.id, file.get_path ());
                 } else if (consumers_of.has_key (file)) {
-                    producer_for[file] = btask;
+                    if (!producers_for.has_key (file))
+                        producers_for[file] = new HashSet<BuildTarget> ();
+                    producers_for[file].add (btask);
                     btask.output.add (file);
                     files_categorized.add (file);
                     debug ("\t- %s produces %s", btask.id, file.get_path ());
@@ -118,20 +122,37 @@ abstract class Vls.Project : Object {
             btask.used_files.remove_all (files_categorized);
             // assume all files not categorized are outputs to the next target(s)
             foreach (var uncategorized_file in btask.used_files) {
-                if (producer_for.has_key (uncategorized_file)) {
-                    BuildTarget conflict = producer_for[uncategorized_file];
-                    warning ("Project: build target %s already produces file (%s) produced by %s.", 
-                             conflict.id, uncategorized_file.get_path (), btask.id);
+                if (producers_for.has_key (uncategorized_file)) {
+                    producers_for[uncategorized_file].foreach (conflict => {
+                        warning ("Project: build target %s already produces file (%s) produced by %s.", 
+                                 conflict.id, uncategorized_file.get_path (), btask.id);
+                        return true;
+                    });
                     continue;
+                } else {
+                    producers_for[uncategorized_file] = new HashSet<BuildTarget> ();
                 }
-                producer_for[uncategorized_file] = btask;
+                producers_for[uncategorized_file].add (btask);
                 btask.output.add (uncategorized_file);
                 debug ("\t- %s produces %s", btask.id, uncategorized_file.get_path ());
             }
             btask.used_files.clear ();
         }
 
-        // 3. Analyze dependencies. Only keep build targets that are Compilations 
+        // 3. Now check for two or more primary producers of the same file, which is not allowed.
+        foreach (var entry in producers_for) {
+            var file_produced = entry.key;
+            var producers = entry.value;
+            foreach (var btarget in producers) {
+                if (!(file_produced in btarget.input) &&
+                    producers.any_match (other => !other.equal_to (btarget) && !(file_produced in other.input))) {
+                    var conflict = producers.first_match (other => !other.equal_to (btarget) && !(file_produced in other.input));
+                    throw new ProjectError.CONFIGURATION (@"There are two build targets that only produce the same file! Both $(btarget.id) and $(conflict.id) produce $(file_produced.get_path ())");
+                }
+            }
+        }
+
+        // 4. Analyze dependencies. Only keep build targets that are Compilations 
         //    or are in a dependency chain for a Compilation
         var targets_to_keep = new LinkedList<BuildTarget> ();
         int last_idx = build_targets.size - 1;
@@ -143,18 +164,21 @@ abstract class Vls.Project : Object {
             }
         }
         for (int i = last_idx - 1; i >= 0; i--) {
-            bool produces_file_for_target = false;
+            bool needed_by_vala_compilation = false;
+            // build_targets[i] is the producer 
+            // build_targets[j] is the consumer
             for (int j = last_idx; j > i; j--) {
                 foreach (var file in build_targets[j].input) {
-                    if (producer_for.has_key (file) && producer_for[file].equal_to (build_targets[i])) {
-                        produces_file_for_target = true;
+                    if (producers_for.has_key (file) &&
+                        producers_for[file].any_match (t => t.equal_to (build_targets [i]))) {
+                        needed_by_vala_compilation = true;
                         build_targets[j].dependencies[file] = build_targets[i];
                         debug ("Project: found dependency: %s --(%s)--> %s", 
                                build_targets[i].id, file.get_path (), build_targets[j].id);
                     }
                 }
             }
-            if (produces_file_for_target || build_targets[i] is Compilation)
+            if (needed_by_vala_compilation || build_targets[i] is Compilation)
                 targets_to_keep.offer_head (build_targets[i]);
             else
                 debug ("Project: target #%d (%s) will be removed", i, build_targets[i].id);
@@ -162,14 +186,14 @@ abstract class Vls.Project : Object {
         build_targets.clear ();
         build_targets.add_all (targets_to_keep);
 
-        // 4. sanity check: the targets should all be in the order they are defined
+        // 5. sanity check: the targets should all be in the order they are defined
         //    (this is probably unnecessary)
         for (int i = 1; i < build_targets.size; i++) {
             if (build_targets[i].no < build_targets[i-1].no)
                 throw new ProjectError.CONFIGURATION (@"Project: build target #$(build_targets[i].no) ($(build_targets[i].id)) comes after build target #$(build_targets[i-1].no) ($(build_targets[i-1].id))");
         }
 
-        // 5. monitor source directories of non-Vala build targets
+        // 6. monitor source directories of non-Vala build targets
         foreach (BuildTarget btarget in build_targets) {
             if (btarget is Compilation)
                 continue;
