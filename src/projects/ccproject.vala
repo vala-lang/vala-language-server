@@ -72,7 +72,7 @@ class Vls.CcProject : Project {
                                                     cc.command[0:1], cc.command[1:cc.command.length],
                                                     new string[]{}, new string[]{}, new string[]{}));
             else
-                build_targets.add (new BuildTask (cc.directory, cc.file ?? @"CC#$i", @"CC#$i", i,
+                build_targets.add (new BuildTask (cc.directory, cc.directory, cc.file ?? @"CC#$i", @"CC#$i", i,
                                                   cc.command[0:1], cc.command[1:cc.command.length], 
                                                   new string[]{}, new string[]{},
                                                   new string[]{}, "unknown"));

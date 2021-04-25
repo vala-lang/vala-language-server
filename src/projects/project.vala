@@ -57,7 +57,7 @@ abstract class Vls.Project : Object {
         // there can only be one primary producer of a file, while there can be
         // many secondary producers that modify the file
         var producers_for = new HashMap<File, HashSet<BuildTarget>> (Util.file_hash, Util.file_equal); 
-        var neither = new ArrayList<BuildTask> ();
+        var unknown = new ArrayList<BuildTask> ();
 
         // 1. Find producers + consumers
         debug ("Project: analyzing build targets - producers and consumers ...");
@@ -84,16 +84,16 @@ abstract class Vls.Project : Object {
             }
             // add btarget to neither anyway, if it is a build task
             if (btarget is BuildTask)
-                neither.add ((BuildTask) btarget);
+                unknown.add ((BuildTask) btarget);
         }
 
-        // 2. For those in the 'neither' category, attempt to guess whether
+        // 2. For those in the 'unknown' category, attempt to guess whether
         //    they are producers or consumers. For each file of each target,
         //    if the file already has a producer, then the target probably 
         //    consumes that file. If the file has only consumers, then the target
         //    probably produces that file.
         //    Note: this strategy assumes topological ordering of the targets.
-        foreach (var btask in neither) {
+        foreach (var btask in unknown) {
             var files_categorized = new HashSet<File> (Util.file_hash, Util.file_equal);
             foreach (var file in btask.used_files) {
                 if (file in btask.input) {
@@ -120,8 +120,14 @@ abstract class Vls.Project : Object {
                 }
             }
             btask.used_files.remove_all (files_categorized);
-            // assume all files not categorized are outputs to the next target(s)
             foreach (var uncategorized_file in btask.used_files) {
+                // candidate inputs are files that would only be inputs to this
+                // target if they exist at least at the time this target is
+                // built
+                if (uncategorized_file in btask.candidate_inputs)
+                    continue;
+                // assume all files not categorized and not input candidates
+                // are outputs to the next target(s)
                 if (producers_for.has_key (uncategorized_file)) {
                     producers_for[uncategorized_file].foreach (conflict => {
                         warning ("Project: build target %s already produces file (%s) produced by %s.", 
@@ -180,9 +186,10 @@ abstract class Vls.Project : Object {
             }
             if (needed_by_vala_compilation || build_targets[i] is Compilation)
                 targets_to_keep.offer_head (build_targets[i]);
-            else
-                debug ("Project: target #%d (%s) will be removed", i, build_targets[i].id);
         }
+        foreach (var target in build_targets)
+            if (!(target in targets_to_keep))
+                debug ("target %s will be removed", target.id);
         build_targets.clear ();
         build_targets.add_all (targets_to_keep);
 

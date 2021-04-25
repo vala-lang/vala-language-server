@@ -93,15 +93,15 @@ class Vls.Compilation : BuildTarget {
      */
     public HashMap<string, Vala.Symbol> cname_to_sym { get; private set; default = new HashMap<string, Vala.Symbol> (); }
 
-    public Compilation (string build_dir, string name, string id, int no,
+    public Compilation (string output_dir, string name, string id, int no,
                         string[] compiler, string[] args, string[] sources, string[] generated_sources,
                         string?[] target_output_files,
                         string[]? sources_content = null) throws Error {
-        base (build_dir, name, id, no);
-        directory = build_dir;
+        base (output_dir, name, id, no);
+        directory = output_dir;
 
         // parse arguments
-        var build_dir_file = File.new_for_path (build_dir);
+        var output_dir_file = File.new_for_path (output_dir);
         bool set_directory = false;
         string? flag_name, arg_value;           // --<flag_name>[=<arg_value>]
 
@@ -113,7 +113,7 @@ class Vls.Compilation : BuildTarget {
                     warning ("Compilation(%s) null --directory", id);
                     continue;
                 }
-                directory = Util.realpath (arg_value, build_dir);
+                directory = Util.realpath (arg_value, output_dir);
                 set_directory = true;
             }
         }
@@ -169,8 +169,8 @@ class Vls.Compilation : BuildTarget {
                 if (arg_value == null) {
                     warning ("Compilation(%s) failed to parse argument #%d (%s)", id, arg_i, args[arg_i]);
                 } else if (Util.arg_is_vala_file (arg_value)) {
-                    var file_from_arg = File.new_for_path (Util.realpath (arg_value, build_dir));
-                    if (build_dir_file.get_relative_path (file_from_arg) != null)
+                    var file_from_arg = File.new_for_path (Util.realpath (arg_value, output_dir));
+                    if (output_dir_file.get_relative_path (file_from_arg) != null)
                         _generated_sources.add (file_from_arg);
                     input.add (file_from_arg);
                 }
@@ -190,12 +190,12 @@ class Vls.Compilation : BuildTarget {
                 if (content != null)
                     _sources_initial_content[file] = content;
             } else {
-                input.add (File.new_for_path (Util.realpath (source, build_dir)));
+                input.add (File.new_for_path (Util.realpath (source, output_dir)));
             }
         }
 
         foreach (string generated_source in generated_sources) {
-            var generated_source_file = File.new_for_path (Util.realpath (generated_source, build_dir));
+            var generated_source_file = File.new_for_path (Util.realpath (generated_source, output_dir));
             _generated_sources.add (generated_source_file);
             input.add (generated_source_file);
         }
@@ -203,7 +203,7 @@ class Vls.Compilation : BuildTarget {
         // add the rest of these target output files
         foreach (string? output_file in target_output_files) {
             if (output_file != null) {
-                if (output.add (File.new_for_commandline_arg_and_cwd (output_file, build_dir)))
+                if (output.add (File.new_for_commandline_arg_and_cwd (output_file, output_dir)))
                     debug ("Compilation(%s): also outputs %s", id, output_file);
             }
         }

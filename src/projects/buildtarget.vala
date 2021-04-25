@@ -19,7 +19,7 @@
 using Gee;
 
 abstract class Vls.BuildTarget : Object, Hashable<BuildTarget> {
-    public string build_dir { get; construct; }
+    public string output_dir { get; construct; }
     public string name { get; construct; }
     public string id { get; construct; }
     public int no { get; construct set; }
@@ -41,9 +41,9 @@ abstract class Vls.BuildTarget : Object, Hashable<BuildTarget> {
      */
     public DateTime last_updated { get; protected set; default = new DateTime.from_unix_utc (0); }
 
-    protected BuildTarget (string build_dir, string name, string id, int no) {
-        Object (build_dir: build_dir, name: name, id: id, no: no);
-        DirUtils.create_with_parents (build_dir, 0755);
+    protected BuildTarget (string output_dir, string name, string id, int no) {
+        Object (output_dir: output_dir, name: name, id: id, no: no);
+        DirUtils.create_with_parents (output_dir, 0755);
     }
 
     /**
@@ -54,10 +54,10 @@ abstract class Vls.BuildTarget : Object, Hashable<BuildTarget> {
     public abstract void build_if_stale (Cancellable? cancellable = null) throws Error;
 
     public bool equal_to (BuildTarget other) {
-        return build_dir == other.build_dir && name == other.name && id == other.id;
+        return output_dir == other.output_dir && name == other.name && id == other.id;
     }
 
     public uint hash () {
-        return @"$build_dir::$name::$id".hash ();
+        return @"$output_dir::$name::$id".hash ();
     }
 }
