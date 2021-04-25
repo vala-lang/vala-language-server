@@ -394,4 +394,50 @@ namespace Vls.Util {
         }
         return count;
     }
+
+    private class GresourceParser {
+        private const MarkupParser parser = {
+            null,
+            null,
+            visit_text
+        };
+
+        private MarkupParseContext context;
+
+        private File[] source_dirs = {};
+        public File[] files = {};
+
+        private void visit_text (MarkupParseContext context, string text, size_t text_len) throws MarkupError {
+            if (context.get_element () == "file") {
+                foreach (var dir in source_dirs) {
+                    var child = dir.get_child (text);
+                    files += child;
+                }
+            }
+        }
+
+        public GresourceParser (File[] source_dirs) {
+            this.source_dirs = source_dirs;
+            context = new MarkupParseContext (parser, 0, this, null);
+        }
+
+        public void parse (string content) throws MarkupError {
+            context.parse (content, -1);
+        }
+    }
+
+    /**
+     * Discover all {@link GLib.Resource}s that `glib-compile-resources` will
+     * lookup when parsing `gresources_xml`. This includes files that may not
+     * exist.
+     *
+     * @param gresources_xml    Well-formed XML that would be parsed by `glib-compile-resources`.
+     * @param source_dirs       A list of source dirs to search in. If empty, the return array is guaranteed to be empty.
+     * @return A list of files pointing to searched resources.
+     */
+    public File[] discover_gresources_xml_input_files (string gresources_xml, File[] source_dirs) throws MarkupError {
+        var parser = new GresourceParser (source_dirs);
+        parser.parse (gresources_xml);
+        return parser.files;
+    }
 }

@@ -24,6 +24,7 @@ using Gee;
 class Vls.BuildTask : BuildTarget {
     private string[] arguments = {};
     private string exe_name = "";
+    private string build_dir;
     private SubprocessLauncher launcher;
 
     /**
@@ -32,12 +33,20 @@ class Vls.BuildTask : BuildTarget {
      */
     public ArrayList<File> used_files { get; private set; default = new ArrayList<File> (); }
 
-    public BuildTask (string build_dir, string name, string id, int no,
+    /**
+     * Candidate inputs are files that _may_ be inputs (and only inputs) to
+     * this task but that we cannot determine yet. They may not exist now, but
+     * they are expected to exist at the time this target is built.
+     */
+    public ArrayList<File> candidate_inputs { get; private set; default = new ArrayList<File> (); }
+
+    public BuildTask (string build_dir, string output_dir, string name, string id, int no,
                       string[] compiler, string[] args, string[] sources, string[] generated_sources,
                       string[] target_output_files,
                       string language) throws Error {
-        base (build_dir, name, id, no);
+        base (output_dir, name, id, no);
         // don't pipe stderr since we want to print that if something goes wrong
+        this.build_dir = build_dir;
         launcher = new SubprocessLauncher (SubprocessFlags.STDOUT_PIPE);
         launcher.set_cwd (build_dir);
 
@@ -57,7 +66,7 @@ class Vls.BuildTask : BuildTarget {
 
         foreach (string arg in arguments) {
             if (Util.arg_is_vala_file (arg)) {
-                var file = File.new_for_commandline_arg_and_cwd (arg, build_dir);
+                var file = File.new_for_commandline_arg_and_cwd (arg, output_dir);
                 used_files.add (file);
             }
         }
@@ -78,12 +87,12 @@ class Vls.BuildTask : BuildTarget {
                 exe_name += arg;
                 arguments += arg;
             }
-            input.add (File.new_for_commandline_arg_and_cwd (arg, build_dir));
+            input.add (File.new_for_commandline_arg_and_cwd (arg, output_dir));
         }
 
         foreach (string arg in generated_sources) {
             arguments += arg;
-            input.add (File.new_for_commandline_arg_and_cwd (arg, build_dir));
+            input.add (File.new_for_commandline_arg_and_cwd (arg, output_dir));
         }
 
         string? cmd_basename = compiler.length > 0 ? Path.get_basename (compiler[0]) : null;
@@ -103,20 +112,28 @@ class Vls.BuildTask : BuildTarget {
 
             if (library_name != null) {
                 if (directory == null) {
-                    warning ("BuildTask(%s): no --directory for vapigen, assuming %s", id, build_dir);
-                    directory = build_dir;
+                    warning ("BuildTask(%s): no --directory for vapigen, assuming %s", id, output_dir);
+                    directory = output_dir;
                 }
                 output.add (File.new_for_commandline_arg_and_cwd (@"$library_name.vapi", directory));
             }
-        } else if (cmd_basename == "glib-mkenums" || cmd_basename == "g-ir-scanner") {
+        } else {
+            // add all outputs for the target otherwise
+            foreach (string? output_filename in target_output_files) {
+                if (output_filename != null) {
+                    output.add (File.new_for_commandline_arg_and_cwd (output_filename, output_dir));
+                    debug ("BuildTask(%s): outputs %s", id, output_filename);
+                }
+            }
+        }
+
+        if (cmd_basename == "glib-mkenums" ||
+            cmd_basename == "g-ir-scanner" ||
+            cmd_basename == "glib-compile-resources") {
             File output_file;
             // just assume the target is well-formed here
             if (target_output_files.length >= 1) {
                 output_file = File.new_for_path (target_output_files[0]);
-                output.add (output_file);
-                if (target_output_files.length > 1)
-                    warning ("BuildTask(%s): too many output files for %s target, assuming first file (%s) is output", 
-                             id, cmd_basename, target_output_files[0]);
                 // If this glib-mkenums target outputs a C file, it might be paired with a
                 // glib-mkenums target that outputs a C header. 
                 if (cmd_basename == "glib-mkenums" && target_output_files[0].has_suffix (".c"))
@@ -203,13 +220,25 @@ class Vls.BuildTask : BuildTarget {
                 } else {
                     warning ("BuildTask(%s): could not get library for g-ir-scanner task", id);
                 }
-            }
-        } else {
-            // add all outputs for the target otherwise
-            foreach (string? output_filename in target_output_files) {
-                if (output_filename != null) {
-                    output.add (File.new_for_commandline_arg_and_cwd (output_filename, build_dir));
-                    debug ("BuildTask(%s): outputs %s", id, output_filename);
+            } else if (cmd_basename == "glib-compile-resources") {
+                File[] source_dirs = {};
+                string? last_arg = null;
+
+                foreach (string arg in arguments) {
+                    if (last_arg == "--sourcedir")
+                        source_dirs += File.new_for_commandline_arg_and_cwd (arg, output_dir);
+                    last_arg = arg;
+                }
+
+                foreach (var input_file in input) {
+                    if (!input_file.get_path ().has_suffix (".gresources.xml"))
+                        break;
+
+                    string gresources_xml;
+                    FileUtils.get_contents (input_file.get_path (), out gresources_xml);
+                    var potential_gresources = Util.discover_gresources_xml_input_files (gresources_xml, source_dirs);
+                    candidate_inputs.add_all_array (potential_gresources);
+                    used_files.add_all_array (potential_gresources);
                 }
             }
         }
@@ -262,6 +291,15 @@ class Vls.BuildTask : BuildTarget {
             // throw new ProjectError.TASK_FAILED (failed_msg);
             warning (failed_msg);
         } else {
+            if (output.size == 1 && !output[0].query_exists (cancellable)) {
+                // write contents of stdout to the output file if it was not created
+                var output_file = output[0];
+                var process_output_istream = process.get_stdout_pipe ();
+                if (process_output_istream != null) {
+                    var outfile_ostream = output_file.replace (null, false, FileCreateFlags.NONE, cancellable);
+                    outfile_ostream.splice (process_output_istream, OutputStreamSpliceFlags.NONE, cancellable);
+                }
+            }
             last_updated = new DateTime.now ();
         }
     }

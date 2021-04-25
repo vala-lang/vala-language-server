@@ -67,6 +67,7 @@ class Vls.MesonProject : Project {
                 } else {
                     warning ("for target %s, source #0, could not substitute special arg `%s'", 
                              meson_target_info.id, special_arg_name);
+                    substituted_args.add (match_info.fetch (0));
                 }
             } else {
                 string substitute = args[i];
@@ -81,7 +82,7 @@ class Vls.MesonProject : Project {
                     } else {
                         BuildTarget? found = build_targets.first_match (t => t.id == build_id);
                         if (found != null) {
-                            result.append (found.build_dir);
+                            result.append (found.output_dir);
                         } else {
                             warning ("for target %s, source #0, could not substitute special arg `%s' (could not find build target with ID %s)", 
                                      meson_target_info.id, match.get_string (), build_id);
@@ -335,15 +336,15 @@ class Vls.MesonProject : Project {
                 warning ("could not deserialize target/element #%d", elem_idx);
                 continue;
             } else if (meson_target_info.target_sources.is_empty) {
-                warning ("target #%d has no target sources", elem_idx);
+                warning ("target #%d (%s) has no target sources", elem_idx, meson_target_info.id);
                 continue;
             }
 
             // ignore additional sources in target
             Meson.TargetSourceInfo first_source = meson_target_info.target_sources[0];
 
-            // first, compute target's build directory
-            string target_build_dir;
+            // first, compute target's private build output directory
+            string target_private_output_dir;
             string? src_relative_path = root_dir.get_relative_path (File.new_for_path (meson_target_info.defined_in));
 
             if (src_relative_path != null) {
@@ -351,9 +352,9 @@ class Vls.MesonProject : Project {
                 // for some reason, the arguments passed to Vala targets are relative to
                 // the root build dir
                 if (first_source.language != "vala")
-                    target_build_dir = build_dir + Path.DIR_SEPARATOR_S + src_relative_path;
+                    target_private_output_dir = build_dir + Path.DIR_SEPARATOR_S + src_relative_path;
                 else
-                    target_build_dir = build_dir;
+                    target_private_output_dir = build_dir;
                 // if (meson_target_info.target_type == "executable"
                 //     || meson_target_info.target_type == "shared library"
                 //     || meson_target_info.target_type == "static library")
@@ -364,7 +365,6 @@ class Vls.MesonProject : Project {
 
             bool swap_with_previous_target = false;
             // second, fix sources
-            var fixed_sources = new ArrayList<string> ();
             string? compiler_name = first_source.compiler.length > 0 ? Path.get_basename (first_source.compiler[0]) : null;
 
             if (compiler_name != null) {
@@ -373,8 +373,9 @@ class Vls.MesonProject : Project {
                 // source files defined in the meson.build file for this target
                 // show up as source files in the project root directory,
                 // regardless of where they actually are
+                var fixed_sources = new ArrayList<string> ();
                 foreach (string source in first_source.sources) {
-                    var input_file = File.new_for_commandline_arg_and_cwd (source, target_build_dir);
+                    var input_file = File.new_for_commandline_arg_and_cwd (source, target_private_output_dir);
                     if (root_dir.get_relative_path (input_file) == input_file.get_basename () &&
                         !input_file.query_exists (cancellable)) {
                         input_file = File.new_build_filename (root_path, src_relative_path, input_file.get_basename ());
@@ -382,23 +383,10 @@ class Vls.MesonProject : Project {
                     }
                     fixed_sources.add (input_file.get_path ());
                 }
+                first_source.sources = fixed_sources.to_array ();
             }
 
             if (compiler_name == "glib-mkenums") {
-                // add --output argument if it doesn't exist, since glib-mkenums
-                // outputs to stdout by default
-                var compiler_args = new ArrayList<string> ();
-                compiler_args.add_all_array (first_source.compiler);
-                if (!compiler_args.any_match (compiler_arg => compiler_arg == "--output")) {
-                    if (meson_target_info.filename.length > 0) {
-                        compiler_args.add ("--output");
-                        compiler_args.add (meson_target_info.filename[0]);
-                    } else {
-                        throw new ProjectError.INTROSPECTION (@" expected at least one filename for glib-mkenums target $(meson_target_info.id)");
-                    }
-                }
-                first_source.compiler = compiler_args.to_array ();
-
                 // hack: a gnome.mkenums() target may show up in introspection
                 // as two targets, with the outputted C header file coming right AFTER the target for
                 // the outputted C file. This violates the topological ordering, so swap the two if
@@ -410,8 +398,6 @@ class Vls.MesonProject : Project {
                         == build_targets[build_targets.size - 1].name.substring (0, build_targets[build_targets.size - 1].name.length - 2))
                     swap_with_previous_target = true;
             }
-
-            first_source.sources = fixed_sources.to_array ();
 
             // third, substitute special arguments
             first_source.parameters = substitute_target_args (meson_target_info, 
@@ -447,11 +433,11 @@ class Vls.MesonProject : Project {
 
                     // check for other shared library corresponding to include_dir
                     foreach (var entry in internal_lib_c_includes) {
-                        if (Util.file_equal (entry.key, include_dir) ||
-                            entry.key.get_relative_path (include_dir) != null) {
+                        if (Util.file_equal (entry.key, include_dir)) {
                             var libs = new ArrayList<string>.wrap (first_source.sources);
                             foreach (string lib in entry.value.filename) {
-                                debug ("adding internal link arg `%s' to C target %s", lib, meson_target_info.id);
+                                debug ("adding internal link arg `%s' to C target %s for include dir %s",
+                                       lib, meson_target_info.id, entry.key.get_path ());
                                 libs.add (lib);
                             }
                             first_source.sources = libs.to_array ();
@@ -461,9 +447,12 @@ class Vls.MesonProject : Project {
                     // now associate include_dir with this library target (if it is one)
                     if (meson_target_info.target_type == "shared library" && meson_target_info.filename != null) {
                         foreach (string filename in meson_target_info.filename) {
-                            File file = File.new_for_commandline_arg_and_cwd (filename, target_build_dir);
-                            if (Util.file_equal (include_dir, file) || include_dir.get_relative_path (file) != null)
+                            File file = File.new_for_commandline_arg_and_cwd (filename, target_private_output_dir);
+                            if (Util.file_equal (include_dir, file) || include_dir.get_relative_path (file) != null) {
                                 internal_lib_c_includes[include_dir] = meson_target_info;
+                                debug ("associating include dir %s with meson target %s",
+                                       include_dir.get_path (), meson_target_info.id);
+                            }
                         }
                     }
                 }
@@ -513,7 +502,7 @@ class Vls.MesonProject : Project {
 
             // finally, construct the build target
             if (first_source.language == "vala")
-                build_targets.add (new Compilation (target_build_dir,
+                build_targets.add (new Compilation (target_private_output_dir,
                                                     meson_target_info.name, 
                                                     meson_target_info.id, 
                                                     elem_idx,
@@ -545,6 +534,7 @@ class Vls.MesonProject : Project {
                 }
 
                 var added_task = new BuildTask (build_dir,
+                                                target_private_output_dir,
                                                 meson_target_info.name,
                                                 meson_target_info.id,
                                                 elem_idx + (swap_with_previous_target ? -1 : 0),
@@ -658,10 +648,10 @@ class Vls.MesonProject : Project {
                     if (btarget_found != null && (btarget_found is Compilation)) {
                         found_comp = (Compilation) btarget_found;
                     } else if (id != null) {
-                        warning ("could not associate CC #%d (meson target-id: %s) with a compilation",
+                        debug ("could not associate CC #%d (meson target-id: %s) with a Vala compilation",
                                  nth_cc, id);
                     } else if (name != null) {
-                        warning ("could not associate CC #%d (meson target-name: %s) with a compilation",
+                        debug ("could not associate CC #%d (meson target-name: %s) with a Vala compilation",
                                  nth_cc, name);
                     }
 
