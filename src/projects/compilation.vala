@@ -231,6 +231,14 @@ class Vls.Compilation : BuildTarget {
         code_context.set_target_profile (_profile, false);
 #else
         code_context.profile = _profile;
+        switch (_profile) {
+            case Vala.Profile.POSIX:
+                code_context.add_define ("POSIX");
+                break;
+            case Vala.Profile.GOBJECT:
+                code_context.add_define ("GOBJECT");
+                break;
+        }
 #endif
 
         // Vala compiler bug requires us to initialize things this way instead of
@@ -241,15 +249,6 @@ class Vls.Compilation : BuildTarget {
         if (_target_glib != null)
             code_context.set_target_glib_version (_target_glib);
         Vala.CodeContext.push (code_context);
-
-        switch (_profile) {
-            case Vala.Profile.POSIX:
-                code_context.add_define ("POSIX");
-                break;
-            case Vala.Profile.GOBJECT:
-                code_context.add_define ("GOBJECT");
-                break;
-        }
 
         foreach (string define in _defines)
             code_context.add_define (define);
