@@ -48,7 +48,6 @@ class Vls.DocComment {
         body = markdown_doc;
     }
 
-#if PARSE_SYSTEM_GIRS
     /**
      * Render a GTK-Doc-formatted comment into Markdown.
      *
@@ -68,7 +67,6 @@ class Vls.DocComment {
                 return_body = documentation.render_gtk_doc_comment (gir_comment.return_content, compilation);
         }
     }
-#endif
 
     /**
      * Render a ValaDoc-formatted comment into Markdown.
