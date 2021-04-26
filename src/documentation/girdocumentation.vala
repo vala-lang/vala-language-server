@@ -43,14 +43,20 @@ class Vls.GirDocumentation {
         if (girpath != null) {
             context.add_source_file (new Vala.SourceFile (context, Vala.SourceFileType.PACKAGE, girpath));
             added[gir_package] = vapi_package;
+            debug ("adding GIR %s for package %s", gir_package, vapi_package);
         }
     }
 
     /**
      * Create a new holder for GIR docs by adding all GIRs found in
-     * `/usr/share/gir-1.0` and `/usr/local/share/gir-1.0`
+     * `/usr/share/gir-1.0` and `/usr/local/share/gir-1.0`, as well as
+     * additional directories in `custom_gir_dirs`.
+     *
+     * @param vala_packages     set of VAPIs to find matching GIRs for
+     * @param custom_gir_dirs   set of directories to search for additional GIRs in
      */
-    public GirDocumentation (Gee.Collection<Vala.SourceFile> packages) {
+    public GirDocumentation (Gee.Collection<Vala.SourceFile> vala_packages,
+                             Gee.Collection<File> custom_gir_dirs) {
         context = new Vala.CodeContext ();
         context.report = new Sink ();
         Vala.CodeContext.push (context);
@@ -61,41 +67,23 @@ class Vls.GirDocumentation {
         context.add_define ("GOBJECT");
 #endif
 
+        // add additional dirs
+        string[] gir_directories = context.gir_directories;
+        foreach (var additional_gir_dir in custom_gir_dirs)
+            gir_directories += additional_gir_dir.get_path ();
+        context.gir_directories = gir_directories;
+
         // add packages
         add_gir ("GLib-2.0", "glib-2.0");
         add_gir ("GObject-2.0", "gobject-2.0");
 
-        foreach (string data_dir in Environment.get_system_data_dirs ()) {
-            File dir = File.new_for_path (Path.build_filename (data_dir, "gir-1.0"));
-            if (!dir.query_exists ())
-                continue;
-            try {
-                var enumerator = dir.enumerate_children (
-                    "standard::*",
-                    FileQueryInfoFlags.NONE);
-                FileInfo? file_info;
-                while ((file_info = enumerator.next_file ()) != null) {
-                    if ((file_info.get_file_type () != FileType.REGULAR &&
-                        file_info.get_file_type () != FileType.SYMBOLIC_LINK) ||
-                        file_info.get_is_backup () || file_info.get_is_hidden () ||
-                        !file_info.get_name ().has_suffix (".gir"))
-                        continue;
-                    string gir_pkg = Path.get_basename (file_info.get_name ());
-                    gir_pkg = gir_pkg.substring (0, gir_pkg.length - ".gir".length);
-                    Vala.SourceFile? vapi_pkg_match = packages.first_match (
-                        pkg => pkg.gir_version != null && @"$(pkg.gir_namespace)-$(pkg.gir_version)" == gir_pkg);
-                    if (!added.has_key (gir_pkg) && vapi_pkg_match != null) {
-                        debug (@"adding GIR $gir_pkg for package $(vapi_pkg_match.package_name)");
-                        add_gir (gir_pkg, vapi_pkg_match.package_name);
-                    }
-                }
-            } catch (Error e) {
-                debug (@"could not enumerate $(dir.get_uri ()): $(e.message)");
-            }
+        foreach (var vapi_pkg in vala_packages) {
+            if (vapi_pkg.gir_namespace != null && vapi_pkg.gir_version != null)
+                add_gir (@"$(vapi_pkg.gir_namespace)-$(vapi_pkg.gir_version)", vapi_pkg.package_name);
         }
 
         string missed = "";
-        packages.filter (pkg => !added.keys.any_match (pkg_name => pkg.gir_version != null && pkg_name == @"$(pkg.gir_namespace)-$(pkg.gir_version)"))
+        vala_packages.filter (pkg => !added.keys.any_match (pkg_name => pkg.gir_version != null && pkg_name == @"$(pkg.gir_namespace)-$(pkg.gir_version)"))
             .foreach (vapi_pkg => {
                 if (missed.length > 0)
                     missed += ", ";

@@ -10,6 +10,7 @@ vls_src = files([
   'codehelp/symbolvisitor.vala',
   'documentation/cnamemapper.vala',
   'documentation/doccomment.vala',
+  'documentation/girdocumentation.vala',
   'projects/buildtarget.vala',
   'projects/buildtask.vala',
   'projects/ccproject.vala',
@@ -24,11 +25,6 @@ vls_src = files([
   'server.vala',
   'servertypes.vala',
 ])
-
-if get_option('parse_system_girs')
-  vls_src += 'documentation/girdocumentation.vala'
-  add_project_arguments(['--define=PARSE_SYSTEM_GIRS'], language: 'vala')
-endif
 
 if get_option('active_parameter')
   add_project_arguments(['--define=VALA_FEATURE_INITIAL_ARGUMENT_COUNT'], language: 'vala')

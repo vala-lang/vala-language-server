@@ -34,12 +34,11 @@ class Vls.Server : Object {
     const int64 update_context_delay_max_us = 1000 * 1000;
     const uint wait_for_context_update_delay_ms = 200;
 
-#if PARSE_SYSTEM_GIRS
     /**
      * Contains documentation from found GIR files.
      */
     GirDocumentation documentation;
-#endif
+
     HashSet<Request> pending_requests;
 
     bool shutting_down = false;
@@ -329,13 +328,14 @@ class Vls.Server : Object {
             }
         }
 
-#if PARSE_SYSTEM_GIRS
         // create documentation (compiles GIR files too)
         var packages = new HashSet<Vala.SourceFile> ();
-        foreach (var project in new_projects)
+        var custom_gir_dirs = new HashSet<File> (Util.file_hash, Util.file_equal);
+        foreach (var project in new_projects) {
             packages.add_all (project.get_packages ());
-        documentation = new GirDocumentation (packages);
-#endif
+            custom_gir_dirs.add_all (project.get_custom_gir_dirs ());
+        }
+        documentation = new GirDocumentation (packages, custom_gir_dirs);
 
         // build and publish diagnostics
         foreach (var project in new_projects) {
@@ -1004,21 +1004,17 @@ class Vls.Server : Object {
 
         Vala.Comment? comment = null;
         DocComment? doc_comment = null;
-#if PARSE_SYSTEM_GIRS
         var gir_sym = documentation.find_gir_symbol (sym);
         if (gir_sym != null && gir_sym.comment != null)
             comment = gir_sym.comment;
         else
-#endif
             comment = sym.comment;
 
         if (comment != null) {
             try {
-#if PARSE_SYSTEM_GIRS
                 if (comment is Vala.GirComment || gir_sym != null && gir_sym.comment == comment)
                     doc_comment = new DocComment.from_gir_comment (comment, documentation, compilation);
                 else
-#endif
                     doc_comment = new DocComment.from_valadoc_comment (comment, sym, compilation);
             } catch (RegexError e) {
                 warning ("failed to render comment - %s", e.message);
