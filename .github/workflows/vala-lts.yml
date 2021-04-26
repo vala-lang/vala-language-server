@@ -7,9 +7,9 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
-    - run: sudo add-apt-repository ppa:vala-team/daily
+    - run: sudo add-apt-repository ppa:vala-team
     - run: sudo apt-get update
-    - run: sudo apt-get install python3-setuptools valac libvala-0.54-dev libgee-0.8-dev libjsonrpc-glib-1.0-dev gobject-introspection libgirepository1.0-dev ninja-build
+    - run: sudo apt-get install python3-setuptools valac libvala-0.48-dev libgee-0.8-dev libjsonrpc-glib-1.0-dev gobject-introspection libgirepository1.0-dev ninja-build
     - run: sudo pip3 install meson
     - run: meson build
     - run: ninja -C build
