@@ -304,7 +304,7 @@ namespace LanguageServer {
                 }
             }
             this.name = sym.name;
-            this.detail = Vls.CodeHelp.get_symbol_representation (type, sym, null);
+            this.detail = Vls.CodeHelp.get_symbol_representation (type, sym, null, false);
             this.kind = kind;
             this.selectionRange = new Range.from_sourceref (sym.source_reference);
             this.deprecated = sym.version.deprecated;
@@ -512,7 +512,7 @@ namespace LanguageServer {
             CompletionItemKind kind, Vls.DocComment? documentation, string? label_override = null) {
             this.label = label_override ?? sym.name;
             this.kind = kind;
-            this.detail = Vls.CodeHelp.get_symbol_representation (instance_type, sym, scope, null, null, false);
+            this.detail = Vls.CodeHelp.get_symbol_representation (instance_type, sym, scope, true, null, null, false);
             this._hash = this.label.hash ();
 
             if (documentation != null)
@@ -538,7 +538,7 @@ namespace LanguageServer {
                                                      CompletionItemKind kind, Vls.DocComment? documentation) {
             this.label = symbol_name;
             this.kind = kind;
-            this.detail = @"$(Vls.CodeHelp.get_symbol_representation (symbol_type, null, scope, null, null, false)) $symbol_name";
+            this.detail = @"$(Vls.CodeHelp.get_symbol_representation (symbol_type, null, scope, true, null, null, false)) $symbol_name";
             this._hash = this.label.hash ();
 
             if (documentation != null)

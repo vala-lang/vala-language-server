@@ -216,7 +216,7 @@ namespace Vls.SignatureHelpEngine {
             return;     // early exit
         }
 
-        si.label = CodeHelp.get_symbol_representation (data_type, explicit_sym, scope, method_type_arguments);
+        si.label = CodeHelp.get_symbol_representation (data_type, explicit_sym, scope, true, method_type_arguments);
         DocComment? doc_comment = null;
         if (explicit_sym != null) {
             doc_comment = lang_serv.get_symbol_documentation (project, explicit_sym);
@@ -231,7 +231,7 @@ namespace Vls.SignatureHelpEngine {
             foreach (var parameter in param_list) {
                 var param_doc_comment = doc_comment != null ? doc_comment.parameters[parameter.name] : null;
                 si.parameters.add (new ParameterInformation () {
-                    label = CodeHelp.get_symbol_representation (data_type, parameter, scope, method_type_arguments),
+                    label = CodeHelp.get_symbol_representation (data_type, parameter, scope, false, method_type_arguments),
                     documentation = param_doc_comment != null ? new MarkupContent.from_markdown (param_doc_comment) : null
                 });
                 // debug (@"found parameter $parameter (name = $(parameter.ellipsis ? "..." :parameter.name))");

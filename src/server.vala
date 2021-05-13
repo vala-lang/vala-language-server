@@ -1193,7 +1193,7 @@ class Vls.Server : Object {
             //         CodeHelp.get_symbol_representation (data_type, null, scope),
             //         CodeHelp.get_symbol_representation (null, symbol, scope));
 
-            string? representation = CodeHelp.get_symbol_representation (data_type, symbol, scope, method_type_arguments);
+            string? representation = CodeHelp.get_symbol_representation (data_type, symbol, scope, true, method_type_arguments);
             if (representation != null) {
                 hoverInfo.contents.add (new MarkedString () {
                     language = "vala",

@@ -473,8 +473,8 @@ namespace Vls.CompletionEngine {
                         insert_text.append (", ");
                         label.append (", ");
                     }
-                    insert_text.append (CodeHelp.get_symbol_representation (instance_type, param, scope, null, "${" + @"$i:$(param.name)}"));
-                    label.append (CodeHelp.get_symbol_representation (instance_type, param, scope));
+                    insert_text.append (CodeHelp.get_symbol_representation (instance_type, param, scope, false, null, "${" + @"$i:$(param.name)}"));
+                    label.append (CodeHelp.get_symbol_representation (instance_type, param, scope, false));
                     i++;
                 }
                 insert_text.append_c(')');
