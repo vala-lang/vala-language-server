@@ -31,6 +31,8 @@ class Vls.GirDocumentation {
 
     private HashTable<Vala.SourceFile, string> gtkdoc_dirs = new HashTable<Vala.SourceFile, string> (source_file_hash, source_file_equal);
 
+    private bool requires_rebuild;
+
     private class Sink : Vala.Report {
         public override void depr (Vala.SourceReference? sr, string message) { /* do nothing */ }
         public override void err (Vala.SourceReference? sr, string message) { /* do nothing */ }
@@ -38,13 +40,54 @@ class Vls.GirDocumentation {
         public override void note (Vala.SourceReference? sr, string message) { /* do nothing */ }
     }
 
-    private void add_gir (string gir_package, string? vapi_package) {
+    private bool add_gir (string gir_package, string? vapi_package) {
         string? girpath = context.get_gir_path (gir_package);
-        if (girpath != null) {
+        if (girpath != null && !added.has (gir_package, vapi_package)) {
+            Vala.CodeContext.push (context);
             context.add_source_file (new Vala.SourceFile (context, Vala.SourceFileType.PACKAGE, girpath));
+            Vala.CodeContext.pop ();
             added[gir_package] = vapi_package;
             debug ("adding GIR %s for package %s", gir_package, vapi_package);
+            return true;
         }
+        return false;
+    }
+
+    private void create_context () {
+        context = new Vala.CodeContext ();
+        context.report = new Sink ();
+        Vala.CodeContext.push (context);
+#if VALA_0_50
+        context.set_target_profile (Vala.Profile.GOBJECT, false);
+#else
+        context.profile = Vala.Profile.GOBJECT;
+        context.add_define ("GOBJECT");
+#endif
+        Vala.CodeContext.pop ();
+    }
+
+    private void add_types () {
+        // add some types manually
+        Vala.SourceFile? sr_file = null;
+        foreach (var source_file in context.get_source_files ()) {
+            if (source_file.filename.has_suffix ("GLib-2.0.gir"))
+                sr_file = source_file;
+        }
+        var sr_begin = Vala.SourceLocation (null, 1, 1);
+        var sr_end = sr_begin;
+
+        // ... add string
+        var string_class = new Vala.Class ("string", new Vala.SourceReference (sr_file, sr_begin, sr_end));
+        context.root.add_class (string_class);
+
+        // ... add bool
+        var bool_type = new Vala.Struct ("bool", new Vala.SourceReference (sr_file, sr_begin, sr_end));
+        bool_type.add_method (new Vala.Method ("to_string", new Vala.ClassType (string_class)));
+        context.root.add_struct (bool_type);
+
+        // ... add GLib namespace
+        var glib_ns = new Vala.Namespace ("GLib", new Vala.SourceReference (sr_file, sr_begin, sr_end));
+        context.root.add_namespace (glib_ns);
     }
 
     /**
@@ -57,15 +100,8 @@ class Vls.GirDocumentation {
      */
     public GirDocumentation (Gee.Collection<Vala.SourceFile> vala_packages,
                              Gee.Collection<File> custom_gir_dirs) {
-        context = new Vala.CodeContext ();
-        context.report = new Sink ();
+        create_context ();
         Vala.CodeContext.push (context);
-#if VALA_0_50
-        context.set_target_profile (Vala.Profile.GOBJECT, false);
-#else
-        context.profile = Vala.Profile.GOBJECT;
-        context.add_define ("GOBJECT");
-#endif
 
         // add additional dirs
         string[] gir_directories = context.gir_directories;
@@ -93,34 +129,61 @@ class Vls.GirDocumentation {
         if (missed.length > 0)
             debug (@"did not add GIRs for these packages: $missed");
 
-        // add some types manually
-        Vala.SourceFile? sr_file = null;
-        foreach (var source_file in context.get_source_files ()) {
-            if (source_file.filename.has_suffix ("GLib-2.0.gir"))
-                sr_file = source_file;
-        }
-        var sr_begin = Vala.SourceLocation (null, 1, 1);
-        var sr_end = sr_begin;
+        add_types ();
 
-        // ... add string
-        var string_class = new Vala.Class ("string", new Vala.SourceReference (sr_file, sr_begin, sr_end));
-        context.root.add_class (string_class);
-
-        // ... add bool
-        var bool_type = new Vala.Struct ("bool", new Vala.SourceReference (sr_file, sr_begin, sr_end));
-        bool_type.add_method (new Vala.Method ("to_string", new Vala.ClassType (string_class)));
-        context.root.add_struct (bool_type);
-
-        // ... add GLib namespace
-        var glib_ns = new Vala.Namespace ("GLib", new Vala.SourceReference (sr_file, sr_begin, sr_end));
-        context.root.add_namespace (glib_ns);
-
-        // compile once
-        var parser = new Vala.Parser ();
-        parser.parse (context);
+        // parse once
         var gir_parser = new Vala.GirParser ();
         gir_parser.parse (context);
-        // context.check ();
+
+        // build a cache of all CodeNodes with a C name
+        context.accept (new CNameMapper (cname_to_sym));
+
+        Vala.CodeContext.pop ();
+    }
+
+    /**
+     * If `vapi_pkg` is a VAPI with an associated GIR that has not yet been
+     * added, adds the GIR. Otherwise this does nothing.
+     * {@link GirDocumentation.rebuild_context} must be called after adding a
+     * new package.
+     */
+    public void add_package_from_source_file (Vala.SourceFile vapi_pkg) {
+        if (vapi_pkg.gir_namespace != null && vapi_pkg.gir_version != null) {
+            if (add_gir (@"$(vapi_pkg.gir_namespace)-$(vapi_pkg.gir_version)", vapi_pkg.package_name))
+                requires_rebuild = true;
+        }
+    }
+
+    /**
+     * Rebuilds (parses) all of the packages in the context if necessary.
+     * Otherwise, will do nothing.
+     */
+    public void rebuild_if_stale () {
+        if (!requires_rebuild)
+            return;
+
+        requires_rebuild = false;
+        // start rebuilding the context
+        debug ("rebuilding context ...");
+
+        // save custom GIR dirs
+        string[] gir_directories = context.gir_directories;
+        // save added
+        var old_added = this.added;
+        this.added = new Gee.HashMap<string, string?> ();
+
+        create_context ();
+        Vala.CodeContext.push (context);
+        context.gir_directories = gir_directories;
+
+        foreach (var entry in old_added)
+            add_gir (entry.key, entry.value);
+
+        add_types ();
+
+        // parse once
+        var gir_parser = new Vala.GirParser ();
+        gir_parser.parse (context);
 
         // build a cache of all CodeNodes with a C name
         context.accept (new CNameMapper (cname_to_sym));

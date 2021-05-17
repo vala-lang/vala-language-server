@@ -423,6 +423,10 @@ class Vls.Server : Object {
         if (doc_w_bt == null) {
             try {
                 doc_w_bt = default_project.open (uri, fileContents, cancellable).first ();
+                // it's possible that we opened a Vala script and have to
+                // include additional packages for documentation
+                foreach (var pkg in default_project.get_packages ())
+                    documentation.add_package_from_source_file (pkg);
                 // show diagnostics for the newly-opened file
                 request_context_update (client);
             } catch (Error e) {
@@ -587,7 +591,7 @@ class Vls.Server : Object {
 
     /** 
      * Reconfigure the project if needed, and check whether we need to rebuild
-     * the project if we have context update requests.
+     * the project and documentation engine if we have context update requests.
      */
     void check_update_context () {
         if (update_context_requests > 0 && get_monotonic_time () >= update_context_time_us) {
@@ -611,6 +615,7 @@ class Vls.Server : Object {
                     warning ("Failed to rebuild and/or reconfigure project: %s", e.message);
                 }
             }
+            documentation.rebuild_if_stale ();
         }
     }
 
