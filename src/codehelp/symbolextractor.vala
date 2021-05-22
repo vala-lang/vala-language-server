@@ -39,18 +39,37 @@ class Vls.SymbolExtractor : Object {
 
     class FakeMemberAccess : FakeExpr {
         public string member_name { get; private set; }
-        public ArrayList<FakeMemberAccess> type_arguments { get; private set; }
+        public ArrayList<FakeDataType> type_arguments { get; private set; }
 
-        public FakeMemberAccess (string member_name, ArrayList<FakeMemberAccess>? type_arguments = null, FakeExpr? inner = null) {
+        public FakeMemberAccess (string member_name, ArrayList<FakeDataType>? type_arguments = null, FakeExpr? inner = null) {
             base (inner);
             this.member_name = member_name;
-            this.type_arguments = type_arguments ?? new ArrayList<FakeMemberAccess> ();
+            this.type_arguments = type_arguments ?? new ArrayList<FakeDataType> ();
         }
 
         public override string to_string () {
-            if (inner != null)
-                return @"$inner.$member_name";
-            return member_name;
+            var builder = new StringBuilder ();
+            if (inner != null) {
+                builder.append (inner.to_string ());
+                builder.append_c ('.');
+                builder.append (member_name);
+            } else {
+                builder.append (member_name);
+            }
+
+            if (!type_arguments.is_empty) {
+                builder.append_c ('<');
+                uint i = 0;
+                foreach (var data_type in type_arguments) {
+                    builder.append (data_type.to_string ());
+                    if (i > 0)
+                        builder.append_c (',');
+                    i++;
+                }
+                builder.append_c ('>');
+            }
+
+            return builder.str;
         }
     }
 
@@ -166,16 +185,60 @@ class Vls.SymbolExtractor : Object {
         }
     }
 
-    class FakeCastExpr : FakeExpr {
-        public FakeMemberAccess type_expr { get; private set; }
+    abstract class FakeDataType {
+        public bool is_owned { get; private set; }
 
-        public FakeCastExpr (FakeExpr expr, FakeMemberAccess type_expr) {
-            base (expr);
-            this.type_expr = type_expr;
+        protected FakeDataType (bool is_owned) {
+            this.is_owned = is_owned;
+        }
+
+        public abstract string to_string ();
+    }
+
+    /**
+     * We use this when we unambiguously know that a member access corresponds
+     * to a type symbol.
+     */
+    class FakeSymbolDataType : FakeDataType {
+        public FakeMemberAccess type_symbol { get; private set; }
+
+        public FakeSymbolDataType (FakeMemberAccess type_symbol, bool is_owned) {
+            base (is_owned);
+            this.type_symbol = type_symbol;
         }
 
         public override string to_string () {
-            return @"($type_expr) $inner";
+            return (is_owned ? "" : "unowned ") + type_symbol.to_string ();
+        }
+    }
+
+    class FakeArrayType : FakeDataType {
+        public FakeDataType element_type { get; private set; }
+        public int rank { get; private set; }
+
+        public FakeArrayType (FakeDataType element_type, int rank, bool is_owned) {
+            base (is_owned);
+            this.element_type = element_type;
+            this.rank = rank;
+        }
+
+        public override string to_string () {
+            if (!element_type.is_owned)
+                return (is_owned ? "" : "unowned ") + @"($element_type)[]";
+            return (is_owned ? "" : "unowned ") + element_type.to_string () + "[]";
+        }
+    }
+
+    class FakeCastExpr : FakeExpr {
+        public FakeDataType type_reference { get; private set; }
+
+        public FakeCastExpr (FakeExpr expr, FakeDataType type_reference) {
+            base (expr);
+            this.type_reference = type_reference;
+        }
+
+        public override string to_string () {
+            return @"($type_reference) $inner";
         }
     }
 
@@ -331,6 +394,23 @@ class Vls.SymbolExtractor : Object {
         return data_type;
     }
 
+    private Vala.DataType resolve_fake_data_type (FakeDataType fake_type) throws TypeResolutionError {
+        if (fake_type is FakeArrayType) {
+            var fake_at = (FakeArrayType) fake_type;
+            return new Vala.ArrayType (resolve_fake_data_type (fake_at.element_type), fake_at.rank) {
+                value_owned = fake_at.is_owned,
+                length_type = context.analyzer.int_type.copy ()
+            };
+        } else if (fake_type is FakeSymbolDataType) {
+            var fake_st = (FakeSymbolDataType) fake_type;
+            var data_type = convert_member_access_to_data_type ((Vala.MemberAccess) resolve_typed_expression (fake_st.type_symbol));
+            data_type.value_owned = fake_st.is_owned;
+            return data_type;
+        } else {
+            assert_not_reached ();
+        }
+    }
+
     private Vala.Expression resolve_typed_expression (FakeExpr fake_expr) throws TypeResolutionError {
         if (fake_expr is FakeMemberAccess) {
             var fake_ma = (FakeMemberAccess) fake_expr;
@@ -391,8 +471,7 @@ class Vls.SymbolExtractor : Object {
 
                 var expr = new Vala.MemberAccess (null, fake_ma.member_name);
                 foreach (var type_argument in fake_ma.type_arguments) {
-                    var type_expr = resolve_typed_expression (type_argument);
-                    var data_type = convert_member_access_to_data_type ((Vala.MemberAccess)type_expr);
+                    var data_type = resolve_fake_data_type (type_argument);
                     expr.add_type_argument (data_type);
                 }
                 expr.symbol_reference = resolved_sym;
@@ -420,8 +499,7 @@ class Vls.SymbolExtractor : Object {
                     throw new TypeResolutionError.NTH_EXPRESSION ("could not resolve member `%s' from inner", fake_ma.member_name);
                 var expr = new Vala.MemberAccess (inner, fake_ma.member_name);
                 foreach (var type_argument in fake_ma.type_arguments) {
-                    var type_expr = resolve_typed_expression (type_argument);
-                    var data_type = convert_member_access_to_data_type ((Vala.MemberAccess)type_expr);
+                    var data_type = resolve_fake_data_type (type_argument);
                     expr.add_type_argument (data_type);
                 }
                 expr.symbol_reference = member;
@@ -490,16 +568,12 @@ class Vls.SymbolExtractor : Object {
             }
         } else if (fake_expr is FakeCastExpr) {
             var fake_cast = (FakeCastExpr) fake_expr;
-            Vala.Expression access = resolve_typed_expression (fake_cast.type_expr);
+            Vala.DataType type_reference = resolve_fake_data_type (fake_cast.type_reference);
             Vala.Expression inner = resolve_typed_expression ((!) fake_cast.inner);
 
             if (inner.value_type == null)
                 throw new TypeResolutionError.NTH_EXPRESSION ("cast expression: inner expression does not have a data type");
 
-            if (!(access is Vala.MemberAccess))
-                throw new TypeResolutionError.NTH_EXPRESSION ("cast expression: cast type expression is not a member access");
-
-            var type_reference = convert_member_access_to_data_type ((Vala.MemberAccess) access);
             var expr = new Vala.CastExpression (inner, type_reference) { value_type = type_reference };
 
             expr.value_type.value_owned = inner.value_type.value_owned;
@@ -752,7 +826,7 @@ class Vls.SymbolExtractor : Object {
         while ((arg = parse_fake_expr (true)) != null) {
             if (has_end_separator && end_separator == ')') {
                 // parse cast expressions of the form ((type1) (type2) ... (typeN) arg)
-                FakeMemberAccess? cast_type = null;
+                FakeDataType? cast_type = null;
                 while ((cast_type = parse_fake_cast_type_expr ()) != null) {
                     arg = new FakeCastExpr (arg, cast_type);
                     skip_whitespace ();
@@ -775,17 +849,100 @@ class Vls.SymbolExtractor : Object {
         return false;
     }
 
-    private ArrayList<FakeMemberAccess>? parse_fake_type_arguments () {
+    /**
+     * Skips modifiers like `weak`, `unowned`, and `owned` or returns true if
+     * we're not allowed to parse those in the current context.
+     */
+    private bool skip_ownage_modifiers (bool can_parse_modifiers = true) {
+        bool is_owned;
+
+        if (!can_parse_modifiers) {
+            is_owned = true;
+        } else {
+            if (skip_string ("unowned") || skip_string ("weak")) {
+                is_owned = false;
+            } else {
+                // types are owned by default
+                skip_string ("owned");
+                is_owned = true;
+            }
+        }
+
+        return is_owned;
+    }
+
+    private int skip_array_type_rank () {
+        var saved_idx = this.idx;
+        int rank = 0;
+
+        if (skip_char (']')) {
+            rank++;
+            skip_whitespace ();
+            while (skip_char (',')) {
+                rank++;
+                skip_whitespace();
+            }
+            skip_whitespace ();
+            if (!skip_char ('[')) {
+                this.idx = saved_idx;
+                return 0;
+            }
+        }
+        return rank;
+    }
+
+    private FakeDataType? parse_fake_data_type (bool can_parse_modifiers = true) {
+        var saved_idx = this.idx;
+        int array_rank = skip_array_type_rank ();
+
+        skip_whitespace ();
+
+        if (array_rank > 0) {
+            bool has_parens = skip_char (')');
+
+            // parse (<element-type>) [] or <element-type>[]
+            var element_type = parse_fake_data_type (has_parens);
+
+            skip_whitespace ();
+            if (element_type == null || has_parens && !skip_char ('(')) {
+                this.idx = saved_idx;
+                return null;
+            }
+
+            skip_whitespace ();
+
+            // we could have an 'owned' or 'unowned' modifier for the array
+            // type, like `unowned string[]` for example.
+            // this modifier cannot be parsed when parsing the inner element
+            // type (unless it's surrounded by parentheses)
+
+            return new FakeArrayType (element_type, array_rank, skip_ownage_modifiers (can_parse_modifiers));
+        }
+
+        // parse normal symbol access
+        var type_symbol = parse_fake_member_access_expr (false);
+
+        if (type_symbol == null) {
+            this.idx = saved_idx;
+            return null;
+        }
+
+        skip_whitespace ();
+
+        return new FakeSymbolDataType (type_symbol, skip_ownage_modifiers (can_parse_modifiers));
+    }
+
+    private ArrayList<FakeDataType>? parse_fake_type_arguments () {
         long saved_idx = this.idx;
 
         if (!skip_char ('>'))
             return null;
         skip_whitespace ();
         
-        var type_arguments = new ArrayList<FakeMemberAccess> ();
-        FakeMemberAccess? ma_expr = null;
-        while ((ma_expr = parse_fake_member_access_expr (false)) != null) {
-            type_arguments.insert (0, ma_expr);
+        var type_arguments = new ArrayList<FakeDataType> ();
+        FakeDataType? data_type = null;
+        while ((data_type = parse_fake_data_type ()) != null) {
+            type_arguments.insert (0, data_type);
             skip_whitespace ();
             if (!skip_char (','))
                 break;
@@ -800,14 +957,14 @@ class Vls.SymbolExtractor : Object {
         return type_arguments;
     }
 
-    private FakeMemberAccess? parse_fake_cast_type_expr () {
-        FakeMemberAccess? ma_expr = null;
+    private FakeDataType? parse_fake_cast_type_expr () {
+        FakeDataType? data_type = null;
         long saved_idx = this.idx;
 
         if (!skip_char (')'))
             return null;
         
-        if ((ma_expr = parse_fake_member_access_expr (false)) == null) {
+        if ((data_type = parse_fake_data_type ()) == null) {
             this.idx = saved_idx;
             return null;
         }
@@ -817,12 +974,12 @@ class Vls.SymbolExtractor : Object {
             return null;
         }
 
-        return ma_expr;
+        return data_type;
     }
 
     private FakeMemberAccess? parse_fake_member_access_expr (bool allow_inner_exprs = true) {
         FakeMemberAccess? ma_expr = null;
-        ArrayList<FakeMemberAccess>? type_arguments = null;
+        ArrayList<FakeDataType>? type_arguments = null;
         string? ident;
         long saved_idx = this.idx;
 
