@@ -688,6 +688,14 @@ class Vls.SymbolExtractor : Object {
         return ident.length == 0 ? null : ident;
     }
 
+    private bool skip_ident (string ident) {
+        var saved_idx = this.idx;
+        if (parse_ident () == ident)
+            return true;
+        this.idx = saved_idx;
+        return false;
+    }
+
     private string? parse_string_literal () {
         long lb_idx = idx;
 
@@ -859,11 +867,11 @@ class Vls.SymbolExtractor : Object {
         if (!can_parse_modifiers) {
             is_owned = true;
         } else {
-            if (skip_string ("unowned") || skip_string ("weak")) {
+            if (skip_ident ("unowned") || skip_ident ("weak")) {
                 is_owned = false;
             } else {
                 // types are owned by default
-                skip_string ("owned");
+                skip_ident ("owned");
                 is_owned = true;
             }
         }
@@ -1034,7 +1042,7 @@ class Vls.SymbolExtractor : Object {
         
         if (oce_allowed) {
             skip_whitespace ();
-            if (parse_ident () == "new") {
+            if (skip_ident ("new")) {
                 if (have_tuple)
                     expr = new FakeObjectCreationExpr.with_method_call ((FakeMethodCall)expr);
                 else
