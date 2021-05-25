@@ -1,6 +1,7 @@
 vls_src = files([
   'list_symbols.vala',
   'codehelp/codehelp.vala',
+  'codehelp/codelensengine.vala',
   'codehelp/completionengine.vala',
   'codehelp/find_scope.vala',
   'codehelp/find_symbol.vala',

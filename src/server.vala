@@ -187,6 +187,7 @@ class Vls.Server : Object {
         call_handlers["workspace/symbol"] = this.workspaceSymbol;
         call_handlers["textDocument/rename"] = this.textDocumentRename;
         call_handlers["textDocument/prepareRename"] = this.textDocumentPrepareRename;
+        call_handlers["textDocument/codeLens"] = this.handle_code_lens_request;
         notif_handlers["$/cancelRequest"] = this.cancelRequest;
 
         debug ("Finished constructing");
@@ -255,7 +256,8 @@ class Vls.Server : Object {
                     documentHighlightProvider: new Variant.boolean (true),
                     implementationProvider: new Variant.boolean (true),
                     workspaceSymbolProvider: new Variant.boolean (true),
-                    renameProvider: buildDict (prepareProvider: new Variant.boolean (true))
+                    renameProvider: buildDict (prepareProvider: new Variant.boolean (true)),
+                    codeLensProvider: buildDict (resolveProvider: new Variant.boolean (false))
                 ),
                 serverInfo: buildDict (
                     name: new Variant.string ("Vala Language Server"),
@@ -1847,6 +1849,44 @@ class Vls.Server : Object {
             }
             Vala.CodeContext.pop ();
         });
+    }
+
+    /**
+     * handle an incoming `textDocument/codeLens` request
+     */
+    void handle_code_lens_request (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
+        string? uri = document != null ? (string?) document.lookup_value ("uri", VariantType.STRING) : null;
+
+        if (document == null || uri == null) {
+            warning ("[%s] `textDocument` or `uri` not provided as expected", method);
+            reply_null (id, client, method);
+            return;
+        }
+
+        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
+        Project selected_project = null;
+        foreach (var project in projects.get_keys_as_array ()) {
+            results = project.lookup_compile_input_source_file (uri);
+            if (!results.is_empty) {
+                selected_project = project;
+                break;
+            }
+        }
+        // fallback to default project
+        if (selected_project == null) {
+            results = default_project.lookup_compile_input_source_file (uri);
+            selected_project = default_project;
+        }
+        if (results.is_empty) {
+            debug (@"file `$(Uri.unescape_string (uri))' not found");
+            reply_null (id, client, method);
+            return;
+        }
+
+        CodeLensEngine.begin_response (this, selected_project,
+                                       client, id, method,
+                                       results[0].first, results[0].second);
     }
 
     void shutdown (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {

@@ -849,4 +849,94 @@ namespace Lsp {
             error ("deserialization not supported");
         }
     }
+
+    abstract class CommandLike : Object, Json.Serializable {
+        /**
+         * The identifier of the actual command handler.
+         */
+        public string command { get; set; }
+
+        /**
+         * Arguments that the command handler should be invoked with.
+         */
+        public Array<Variant>? arguments { get; set; }
+
+        public Json.Node serialize_property (string property_name, GLib.Value value, GLib.ParamSpec pspec) {
+            if (property_name != "arguments" || arguments == null)
+                return default_serialize_property (property_name, value, pspec);
+
+            var array = new Json.Array ();
+            for (int i = 0; i < arguments.length; i++)
+                array.add_element (Json.gvariant_serialize (arguments.index (i)));
+
+            var node = new Json.Node (Json.NodeType.ARRAY);
+            node.set_array (array);
+            return node;
+        }
+
+        public bool deserialize_property (string property_name, out GLib.Value value, GLib.ParamSpec pspec, Json.Node property_node) {
+            if (property_name != "arguments")
+                return default_deserialize_property (property_name, out value, pspec, property_node);
+
+            value = Value (typeof (Array));
+            if (property_node.get_node_type () != Json.NodeType.ARRAY) {
+                warning ("unexpected property node type for 'arguments' %s", property_node.get_node_type ().to_string ());
+                return false;
+            }
+
+            var arguments = new Array<Variant> ();
+
+            property_node.get_array ().foreach_element ((array, index, element) => {
+                try {
+                    arguments.append_val (Json.gvariant_deserialize (element, null));
+                } catch (Error e) {
+                    warning ("argument %u to command could not be deserialized: %s", index, e.message);
+                }
+            });
+
+            value.set_boxed (arguments);
+
+            return true;
+        }
+    }
+
+    class ExecuteCommandParams : CommandLike {
+    }
+
+    /**
+     * Represents a reference to a command. Provides a title which will be used
+     * to represent a command in the UI. Commands are identified by a string
+     * identifier. The recommended way to handle commands is to implement their
+     * execution on the server side if the client and server provides the
+     * corresponding capabilities. Alternatively the tool extension code could
+     * handle the command. The protocol currently doesn’t specify a set of
+     * well-known commands.
+     */
+    class Command : CommandLike {
+        /**
+         * The title of the command, like `save`.
+         */
+        public string title { get; set; }
+    }
+
+    /**
+     * A code lens represents a command that should be shown along with
+     * source text, like the number of references, a way to run tests, etc.
+     *
+     * A code lens is _unresolved_ when no command is associated to it. For
+     * performance reasons the creation of a code lens and resolving should be done
+     * in two stages.
+     */
+    class CodeLens : Object {
+        /**
+         * The range in which this code lens is valid. Should only span a single
+         * line.
+         */
+        public Range range { get; set; }
+
+        /**
+         * The command this code lens represents.
+         */
+        public Command? command { get; set; }
+    }
 }
