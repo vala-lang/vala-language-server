@@ -1062,8 +1062,19 @@ class Vls.SymbolExtractor : Object {
         bool have_tuple = parse_expr_tuple (!at_member_access && accept_incomplete_method_call, method_arguments);
         // debug ("after parsing tuple, char at idx is %c", source_file.content[idx]);
         skip_whitespace ();
-        expr = parse_fake_member_access_expr ();
+        var member_symbol = parse_fake_member_access_expr ();
         // debug ("after parsing member access, char at idx is %c", source_file.content[idx]);
+
+        // don't treat certain keywords as function names if we have a tuple,
+        // since this prevents us from recognizing the tuple as an expression on
+        // its own.
+        // a case where this occurs:
+        // foreach (var thing in ((<data type>)<expr>).
+        //                       ^^^^^^^^^^^^^^^^^^^^^^
+        //                       we want to recognize this as a cast expression, not as an argument to the function `in ()`
+        if (!have_tuple || member_symbol == null ||
+            !(member_symbol.inner == null && member_symbol.member_name in new string[]{"in"}))
+            expr = member_symbol;
 
         if (!have_tuple && expr == null && (expr = parse_literal ()) != null)
             return expr;
