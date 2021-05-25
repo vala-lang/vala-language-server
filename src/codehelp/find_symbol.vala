@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using LanguageServer;
+using Lsp;
 
 class Vls.FindSymbol : Vala.CodeVisitor {
     public Position? pos { get; private set; }

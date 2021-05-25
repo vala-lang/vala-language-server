@@ -17,7 +17,7 @@
  */
 
 using Gee;
-using LanguageServer;
+using Lsp;
 
 namespace Vls.SignatureHelpEngine {
     void begin_response (Server lang_serv, Project project,

@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using LanguageServer;
+using Lsp;
 using Gee;
 
 class Vls.Server : Object {
@@ -836,7 +836,7 @@ class Vls.Server : Object {
     }
 
     void textDocumentDefinition (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams> (@params);
+        var p = Util.parse_variant<Lsp.TextDocumentPositionParams> (@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {
@@ -920,7 +920,7 @@ class Vls.Server : Object {
     }
 
     void textDocumentDocumentSymbol (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
+        var p = Util.parse_variant<Lsp.TextDocumentPositionParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {
@@ -1039,7 +1039,7 @@ class Vls.Server : Object {
     }
 
     void textDocumentCompletion (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var p = Util.parse_variant<LanguageServer.CompletionParams>(@params);
+        var p = Util.parse_variant<Lsp.CompletionParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {
@@ -1067,7 +1067,7 @@ class Vls.Server : Object {
     }
 
     void textDocumentSignatureHelp (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
+        var p = Util.parse_variant<Lsp.TextDocumentPositionParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {
@@ -1095,7 +1095,7 @@ class Vls.Server : Object {
     }
 
     void textDocumentHover (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
+        var p = Util.parse_variant<Lsp.TextDocumentPositionParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {
@@ -1382,7 +1382,7 @@ class Vls.Server : Object {
     }
 
     void textDocumentImplementation (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var p = Util.parse_variant<LanguageServer.TextDocumentPositionParams>(@params);
+        var p = Util.parse_variant<Lsp.TextDocumentPositionParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {

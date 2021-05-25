@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using LanguageServer;
+using Lsp;
 using Gee;
 
 /** 
@@ -93,7 +93,7 @@ namespace Vls.SymbolReferences {
     }
 
     /**
-     * @return      a new {@link LanguageServer.Range} narrowed from the source reference
+     * @return      a new {@link Lsp.Range} narrowed from the source reference
      */
     Range get_narrowed_source_reference (Vala.SourceReference source_reference, string representation, int start, int end) {
         var range = new Range.from_sourceref (source_reference);

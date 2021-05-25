@@ -18,11 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace LanguageServer {
+namespace Lsp {
     /**
      * Defines how the host (editor) should sync document changes to the language server.
      */
-    [CCode (default_value = "LANGUAGE_SERVER_TEXT_DOCUMENT_SYNC_KIND_Unset")]
+    [CCode (default_value = "LSP_TEXT_DOCUMENT_SYNC_KIND_Unset")]
     enum TextDocumentSyncKind {
         Unset = -1,
         /**
@@ -253,7 +253,7 @@ namespace LanguageServer {
         }
     }
 
-    [CCode (default_value = "LANGUAGE_SERVER_DOCUMENT_HIGHLIGHT_KIND_Text")]
+    [CCode (default_value = "LSP_DOCUMENT_HIGHLIGHT_KIND_Text")]
     enum DocumentHighlightKind {
         Text = 1,
         Read = 2,
@@ -353,7 +353,7 @@ namespace LanguageServer {
         }
     }
 
-    [CCode (default_value = "LANGUAGE_SERVER_SYMBOL_KIND_Variable")]
+    [CCode (default_value = "LSP_SYMBOL_KIND_Variable")]
     enum SymbolKind {
         File = 1,
         Module = 2,
@@ -418,7 +418,7 @@ namespace LanguageServer {
 
     }
 
-    [CCode (default_value = "LANGUAGE_SERVER_COMPLETION_TRIGGER_KIND_Invoked")]
+    [CCode (default_value = "LSP_COMPLETION_TRIGGER_KIND_Invoked")]
     enum CompletionTriggerKind {
         /**
 	     * Completion was triggered by typing an identifier (24x7 code
@@ -456,7 +456,7 @@ namespace LanguageServer {
         Deprecated = 1,
     }
 
-    [CCode (default_value = "LANGUAGE_SERVER_INSERT_TEXT_FORMAT_PlainText")]
+    [CCode (default_value = "LSP_INSERT_TEXT_FORMAT_PlainText")]
     enum InsertTextFormat {
         /**
          * The primary text to be inserted is treated as a plain string.
@@ -624,7 +624,7 @@ namespace LanguageServer {
         }
     }
     
-    [CCode (default_value = "LANGUAGE_SERVER_COMPLETION_ITEM_KIND_Text")]
+    [CCode (default_value = "LSP_COMPLETION_ITEM_KIND_Text")]
     enum CompletionItemKind {
         Text = 1,
         Method = 2,

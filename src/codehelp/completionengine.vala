@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using LanguageServer;
+using Lsp;
 using Gee;
 
 namespace Vls.CompletionEngine {
