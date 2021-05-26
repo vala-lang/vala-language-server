@@ -594,16 +594,12 @@ namespace Vls.CompletionEngine {
      * @param doc the current document 
      * @param csym the class symbol
      */
-    Pair<Gee.List<Vala.TypeSymbol>, Gee.List<Pair<Vala.DataType?,Vala.Symbol>>>? gather_missing_prereqs_and_unimplemented_symbols (Vala.Class csym) {
-        if (csym.is_compact) {
-            // compact classes cannot derive from anything
-            return null;
-        }
-
+    Pair<Gee.List<Vala.TypeSymbol>, Gee.List<Pair<Vala.DataType?,Vala.Symbol>>> gather_missing_prereqs_and_unimplemented_symbols (Vala.Class csym) {
         /* gather all prerequisites */
         var prerequisites = new ArrayList<Vala.TypeSymbol> ();
         foreach (Vala.DataType base_type in csym.get_base_types ()) {
-            if (base_type.type_symbol is Vala.Interface) {
+            // compact classes cannot implement interfaces
+            if (base_type.type_symbol is Vala.Interface && !csym.is_compact) {
                 get_all_prerequisites ((Vala.Interface) base_type.type_symbol, prerequisites);
             }
         }
@@ -620,7 +616,7 @@ namespace Vls.CompletionEngine {
         if (csym.source_type == Vala.SourceFileType.SOURCE) {
             /* all abstract symbols defined in base types have to be at least defined (or implemented) also in this type */
             foreach (Vala.DataType base_type in csym.get_base_types ()) {
-                if (base_type.type_symbol is Vala.Interface) {
+                if (base_type.type_symbol is Vala.Interface && !csym.is_compact) {
                     unowned Vala.Interface iface = (Vala.Interface) base_type.type_symbol;
 
                     if (csym.base_class != null && csym.base_class.is_subtype_of (iface)) {
