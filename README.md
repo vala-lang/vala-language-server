@@ -1,67 +1,19 @@
 # Vala Language Server
-[![Gitter](https://badges.gitter.im/vala-language-server/community.svg)](https://gitter.im/vala-language-server/community)
 
-### Installation
+This is a language server for the [Vala programming language](https://vala-project.org).
+
+## Installation
 
 We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudio.com/items?itemName=prince781.vala).
-
-- Guix: `guix install vala-language-server`
 
 - Arch Linux (via AUR): `yay -S vala-language-server`
   or `yay -S vala-language-server-git`
 
-- Alpine Linux Edge: `apk add vala-language-server`
+- Ubuntu, Fedora, Debian, openSUSE, and Mageia: install from [the OBS repo](https://software.opensuse.org//download.html?project=home%3APrince781&package=vala-language-server)
 
-- Ubuntu 20.04, 20.10, 21.04, Fedora 33, Debian, openSUSE, and Mageia
+- Alpine Linux: `apk add vala-language-server`
 
-  **The Ubuntu PPA and Fedora Copr are now deprecated.** We have moved to an
-  automated build and packaging system, Open Build System, at
-  [here](https://software.opensuse.org//download.html?project=home%3APrince781&package=vala-language-server).
-  You can find details about how to install VLS for your distribution
-  at that link.
-
-  For example, to install VLS on **Ubuntu 21.04**, first add the repository:
-
-  ```
-  echo 'deb http://download.opensuse.org/repositories/home:/Prince781/xUbuntu_21.04/ /' | sudo tee /etc/apt/sources.list.d/home:Prince781.list
-  curl -fsSL https://download.opensuse.org/repositories/home:Prince781/xUbuntu_21.04/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_Prince781.gpg > /dev/null
-  ```
-
-  And then update and install VLS:
-
-  ```
-  sudo apt update
-  sudo apt install vala-language-server
-  ```
-
-  For **Fedora 33**, add the repository like this:
-
-  ```
-  dnf config-manager --add-repo https://download.opensuse.org/repositories/home:Prince781/Fedora_33/home:Prince781.repo
-  ```
-
-  And then install:
-
-  ```
-  dnf install vala-language-server
-  ```
-
-  For Fedora and other RPM-based distributions (openSUSE, Mageia), you can also
-  install `vala-languageserver-gb-plugin` for the **GNOME Builder plugin**.
-
-  For **Debian**, add the repository like this:
-
-  ```
-  echo 'deb http://download.opensuse.org/repositories/home:/Prince781/Debian_Testing/ /' | sudo tee /etc/apt/sources.list.d/home:Prince781.list
-  curl -fsSL https://download.opensuse.org/repositories/home:Prince781/Debian_Testing/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_Prince781.gpg > /dev/null
-  ```
-
-  And then install:
-
-  ```
-  sudo apt update
-  sudo apt install vala-language-server
-  ```
+- Guix: `guix install vala-language-server`
 
 ![VLS with VSCode](images/vls-vscode.png)
 ![VLS with Vim with coc.nvim and vista plugins](images/vls-vim.png)
@@ -72,46 +24,45 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Dependencies](#dependencies)
-  - [Setup](#setup)
-    - [Installation](#installation)
-    - [Building from Source](#building-from-source)
-    - [With Vim](#with-vim)
-    - [With Visual Studio Code](#with-visual-studio-code)
-    - [With GNOME Builder](#with-gnome-builder)
+  - [Building from Source](#building-from-source)
+  - [Editors](#editors)
+    - [Vim and Neovim](#vim-and-neovim)
+    - [Visual Studio Code](#visual-studio-code)
+    - [GNOME Builder](#gnome-builder)
+    - [Kate](#kate)
+    - [Emacs](#emacs)
   - [Contributing](#contributing)
 
 ## Features
 - [x] diagnostics
 - [x] code completion
-    - [x] basic (member access and scope-visible completion)
-    - [ ] advanced (context-sensitive suggestions)
-- [x] document symbol outline
+    - [x] member access and scope-visible completion
+    - [x] context-sensitive suggestions
+        - completions for abstract methods/properties to implement
+- [x] symbol outline
 - [x] goto definition
 - [x] symbol references
 - [x] goto implementation
 - [x] signature help
-    - active parameter support requires upstream changes in vala and is disabled by default. use `meson -Dactive_parameter=true` to enable. see [this MR](https://gitlab.gnome.org/GNOME/vala/-/merge_requests/95). VLS by default uses a workaround that should satisfy 90% of cases.
 - [x] hover
 - [x] symbol documentation
-    - [x] basic (from comments)
-    - [x] advanced (from GIR and VAPI files)
-        - this feature may be a bit unstable. If it breaks things, use `meson -Dparse_system_girs=false` to disable
+    - [x] from comments in source code
+    - [x] from GIR and VAPI files
 - [x] search for symbols in workspace
 - [x] highlight active symbol in document
-- [x] rename symbols
-- [ ] snippets
+- [x] rename
+- [x] snippets
+    - for implementing abstract methods/properties
+- [x] code lenses
 - [ ] code actions
+- [ ] code formatting
 - [ ] workspaces
-- [ ] supported IDEs (see Setup below):
-    - [x] vim with `vim-lsp` plugin installed
-    - [x] Visual Studio Code
-    - [x] GNOME Builder >= 3.36 with custom VLS plugin enabled (see below)
-    - [ ] IntelliJ
-- [ ] supported project build systems
+- [ ] supported projects
     - [x] meson
     - [x] `compile_commands.json`
-    - [ ] autotoools
+    - [x] Vala script (file beginning with `#!/usr/bin/env -S vala` shebang)
     - [ ] cmake
+    - [ ] autotools
 
 ## Dependencies
 - `glib-2.0`
@@ -119,30 +70,31 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 - `gio-2.0` and either `gio-unix-2.0` or `gio-windows-2.0`
 - `gee-0.8`
 - `json-glib-1.0`
-- `jsonrpc-glib-1.0`
-- `libvala >= 0.48` latest bugfix release
+- `jsonrpc-glib-1.0 >= 3.28`
+- `libvala >= 0.48.12`
 - you also need the `posix` VAPI, which should come preinstalled
 
 #### Install dependencies with Guix
 
-To launch a shell with build dependencies satisfied:
+If you're using Guix, to launch a shell with build dependencies satisfied:
 ```sh
 guix environment vala-language-server
 ```
 
-## Setup
-
-### Building from Source
+## Building from Source
 ```sh
-meson -Dprefix=$PREFIX build
+meson -Dprefix=/usr/bin build
 ninja -C build
 sudo ninja -C build install
 ```
 
-This will install `vala-language-server` to `$PREFIX/bin`
+This will install `vala-language-server` to `/usr/bin`
 
-### With Vim
-Once you have VLS installed, you can use it with `vim` (or `nvim`).
+## Editors
+
+**An important note**: VLS cannot know what arguments are used for the file you are editing unless it can locate a build script, compile commands list, or shebang to analyze. (This is generally true for most language servers of compiled languages.) Before making an issue, check whether you have a build script or shebang for your file.
+
+### vim and neovim
 
 #### coc.nvim
 1. Make sure [coc.nvim](https://github.com/neoclide/coc.nvim) is installed.
@@ -174,20 +126,25 @@ if executable('vala-language-server')
 endif
 ```
 
-### With Visual Studio Code
-- Install the Vala plugin (https://marketplace.visualstudio.com/items?itemName=prince781.vala)
+### Visual Studio Code
+- [Official Vala plugin](https://marketplace.visualstudio.com/items?itemName=prince781.vala)
 
-### With GNOME Builder
-- Support is currently available with Builder 3.35 and up
-- Running `ninja -C build install` should install the plugin to `$PREFIX/lib/gnome-builder/plugins`. Make sure you disable the GVLS plugin.
+### GNOME Builder
+- requires GNOME Builder >= 3.35
+- Running `ninja -C build install` should install the third-party plugin to `$PREFIX/lib/gnome-builder/plugins`. Enable `Vala` and disable `GNOME Vala Language Server`.
+
+### Kate
+- officially supported since Kate 21.07.70
+
+### Emacs
+- supported with the [lsp-mode](https://github.com/emacs-lsp/lsp-mode) plugin
 
 ## Contributing
 Want to help out? Here are some helpful resources:
 
-- If you're a newcomer, check out https://github.com/benwaffle/vala-language-server/issues?q=is%3Aissue+is%3Aopen+label%3Anewcomers
-- Gitter room is for project discussions: https://gitter.im/vala-language-server/community
-- `#vala` on gimpnet/IRC is for general discussions about Vala and collaboration with upstream
+- [Help is wanted on these issues](https://github.com/Prince781/vala-language-server/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
+- [`#vala` on gimpnet/IRC](irc://irc.gnome.org/vala) is for general discussions about Vala and collaboration with upstream
+- [Discord server](https://discord.gg/YFAzjSVHt7) is for general discussions about Vala, discussions about this project, and support
+- Gitter room is also for project discussions and support, but is less active: https://gitter.im/vala-language-server/community
 - Vala wiki: https://wiki.gnome.org/Projects/Vala/
-- libvala documentation:
-    - https://benwaffle.github.io/vala-language-server/index.html
-    - https://gnome.pages.gitlab.gnome.org/vala/docs/index.html
+- libvala documentation: https://gnome.pages.gitlab.gnome.org/vala/docs/index.html
