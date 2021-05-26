@@ -406,15 +406,13 @@ namespace Vls.CompletionEngine {
             var label = new StringBuilder ();
             var insert_text = new StringBuilder ();
 
-            bool is_virtual = (sym is Vala.Method) && ((Vala.Method)sym).is_virtual || 
-                                (sym is Vala.Property) && ((Vala.Property)sym).is_virtual;
-
             label.append (sym.access.to_string ());
             label.append_c (' ');
             insert_text.append (sym.access.to_string ());
             insert_text.append_c (' ');
 
-            if (sym.parent_symbol is Vala.Interface && !is_virtual) {
+            if (sym is Vala.Method && CodeHelp.base_method_requires_override ((Vala.Method)sym) ||
+                sym is Vala.Property && CodeHelp.base_property_requires_override ((Vala.Property)sym)) {
                 label.append ("override ");
                 insert_text.append ("override ");
             }

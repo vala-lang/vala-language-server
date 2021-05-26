@@ -819,4 +819,12 @@ namespace Vls.CodeHelp {
 
         return false;
     }
+
+    static bool base_method_requires_override (Vala.Method m) {
+        return m.is_virtual || m.is_abstract && m.parent_symbol is Vala.Class && ((Vala.Class)m.parent_symbol).is_abstract;
+    }
+
+    static bool base_property_requires_override (Vala.Property p) {
+        return p.is_virtual || p.is_abstract && p.parent_symbol is Vala.Class && ((Vala.Class)p.parent_symbol).is_abstract;
+    }
 }
