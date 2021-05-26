@@ -213,39 +213,43 @@ namespace Vls.CodeHelp {
     private string get_callable_representation (Vala.DataType? instance_type, Vala.List<Vala.DataType>? method_type_arguments,
                                                 Vala.Callable callable_sym, Vala.Scope? scope, bool show_initializers,
                                                 bool allow_show_parent_member,
-                                                string? override_name = null, Vala.List<Vala.Parameter>? ellipsis_overrides = null) {
+                                                string? override_name = null, bool is_parent_symbol = false,
+                                                Vala.List<Vala.Parameter>? ellipsis_overrides = null) {
         // see `to_prototype_string()` in `valacallabletype.vala`
         var builder = new StringBuilder ();
-        if (instance_type == null && !(callable_sym.parent_symbol is Vala.Namespace)) {
-            builder.append (callable_sym.access.to_string ());
-            builder.append_c (' ');
-        }
 
-        if (callable_sym is Vala.Method) {
-            var method = (Vala.Method) callable_sym;
-            if (method.binding == Vala.MemberBinding.CLASS)
-                builder.append ("class ");
-            if (method.is_abstract && instance_type == null)
-                builder.append ("abstract ");
-            if (method.is_virtual && instance_type == null)
-                builder.append ("virtual ");
-            if (method.is_inline && instance_type == null)
-                builder.append ("inline ");
-            if (method.is_extern && instance_type == null)
-                builder.append ("extern ");
-            if (method.overrides && instance_type == null)
-                builder.append ("override ");
-            if (method.coroutine)
-                builder.append ("async ");
-        }
+        if (!is_parent_symbol) {
+            if (instance_type == null && !(callable_sym.parent_symbol is Vala.Namespace)) {
+                builder.append (callable_sym.access.to_string ());
+                builder.append_c (' ');
+            }
 
-        if (callable_sym is Vala.Delegate) {
-            if (override_name == null)
-                builder.append ("delegate ");
-        } else if (callable_sym is Vala.Signal) {
-            if (((Vala.Signal)callable_sym).is_virtual && instance_type == null)
-                builder.append ("virtual ");
-            builder.append ("signal ");
+            if (callable_sym is Vala.Method) {
+                var method = (Vala.Method) callable_sym;
+                if (method.binding == Vala.MemberBinding.CLASS)
+                    builder.append ("class ");
+                if (method.is_abstract && instance_type == null)
+                    builder.append ("abstract ");
+                if (method.is_virtual && instance_type == null)
+                    builder.append ("virtual ");
+                if (method.is_inline && instance_type == null)
+                    builder.append ("inline ");
+                if (method.is_extern && instance_type == null)
+                    builder.append ("extern ");
+                if (method.overrides && instance_type == null)
+                    builder.append ("override ");
+                if (method.coroutine)
+                    builder.append ("async ");
+            }
+
+            if (callable_sym is Vala.Delegate) {
+                if (override_name == null)
+                    builder.append ("delegate ");
+            } else if (callable_sym is Vala.Signal) {
+                if (((Vala.Signal)callable_sym).is_virtual && instance_type == null)
+                    builder.append ("virtual ");
+                builder.append ("signal ");
+            }
         }
 
         // some symbols, like constructors, destructors, and other symbols don't have a name
@@ -268,11 +272,13 @@ namespace Vls.CodeHelp {
                     builder.append (callable_sym.name);
             }
         } else {
-            var actual_return_type = callable_sym.return_type.get_actual_type (instance_type, method_type_arguments, callable_sym);
-            if (actual_return_type.is_weak ())
-                builder.append ("unowned ");
-            builder.append (get_data_type_representation (actual_return_type, scope));
-            builder.append_c (' ');
+            if (!is_parent_symbol) {
+                var actual_return_type = callable_sym.return_type.get_actual_type (instance_type, method_type_arguments, callable_sym);
+                if (actual_return_type.is_weak ())
+                    builder.append ("unowned ");
+                builder.append (get_data_type_representation (actual_return_type, scope));
+                builder.append_c (' ');
+            }
             // print parent symbol
             if (allow_show_parent_member && callable_sym.parent_symbol != null && callable_sym.parent_symbol.name != "(root namespace)") {
                 Vala.List<Vala.DataType>? parent_type_arguments = null;
@@ -322,94 +328,98 @@ namespace Vls.CodeHelp {
             builder.append_c ('>');
         }
 
-        builder.append (" (");
-        // print parameters
-        int i = 1;
-        // add sender parameter for internal signal-delegates
-        if (callable_sym is Vala.Delegate) {
-            var delegate_symbol = (Vala.Delegate) callable_sym;
-            if (delegate_symbol.parent_symbol is Vala.Signal && delegate_symbol.sender_type != null) {
-                var actual_sender_type = delegate_symbol.sender_type.get_actual_type (instance_type, method_type_arguments, callable_sym);
-                builder.append (get_data_type_representation (actual_sender_type, scope));
-                i++;
+        // don't print signature if this is a parent symbol
+        // (signals may be parents of .connect() functions)
+        if (!is_parent_symbol) {
+            builder.append (" (");
+            // print parameters
+            int i = 1;
+            // add sender parameter for internal signal-delegates
+            if (callable_sym is Vala.Delegate) {
+                var delegate_symbol = (Vala.Delegate) callable_sym;
+                if (delegate_symbol.parent_symbol is Vala.Signal && delegate_symbol.sender_type != null) {
+                    var actual_sender_type = delegate_symbol.sender_type.get_actual_type (instance_type, method_type_arguments, callable_sym);
+                    builder.append (get_data_type_representation (actual_sender_type, scope));
+                    i++;
+                }
             }
-        }
 
-        foreach (Vala.Parameter param in callable_sym.get_parameters ()) {
-            if (param.ellipsis) {
-                if (ellipsis_overrides == null) {
-                    if (i > 1) {
-                        builder.append (", ");
-                    }
-                    builder.append ("...");
-                } else {
-                    foreach (var synthetic_param in ellipsis_overrides) {
+            foreach (Vala.Parameter param in callable_sym.get_parameters ()) {
+                if (param.ellipsis) {
+                    if (ellipsis_overrides == null) {
                         if (i > 1) {
                             builder.append (", ");
                         }
-                        var eo = CodeHelp.get_symbol_representation (null, synthetic_param, scope, false);
-                        builder.append (eo);
-                        i++;
+                        builder.append ("...");
+                    } else {
+                        foreach (var synthetic_param in ellipsis_overrides) {
+                            if (i > 1) {
+                                builder.append (", ");
+                            }
+                            var eo = CodeHelp.get_symbol_representation (null, synthetic_param, scope, false);
+                            builder.append (eo);
+                            i++;
+                        }
+                    }
+                    continue;
+                }
+
+                if (i > 1) {
+                    builder.append (", ");
+                }
+
+                if (param.params_array) {
+                    builder.append ("params ");
+                }
+
+                var actual_var_type = param.variable_type.get_actual_type (instance_type, method_type_arguments, callable_sym);
+
+                if (param.direction == Vala.ParameterDirection.IN) {
+                    if (actual_var_type.value_owned) {
+                        builder.append ("owned ");
+                    }
+                } else {
+                    if (param.direction == Vala.ParameterDirection.REF) {
+                        builder.append ("ref ");
+                    } else if (param.direction == Vala.ParameterDirection.OUT) {
+                        builder.append ("out ");
+                    }
+                    if (!actual_var_type.value_owned && actual_var_type is Vala.ReferenceType) {
+                        builder.append ("weak ");
                     }
                 }
-                continue;
-            }
 
-            if (i > 1) {
-                builder.append (", ");
-            }
+                builder.append (get_data_type_representation (actual_var_type, scope));
+                // print parameter name
+                builder.append_c (' ');
+                builder.append (param.name);
 
-            if (param.params_array) {
-                builder.append ("params ");
-            }
-
-            var actual_var_type = param.variable_type.get_actual_type (instance_type, method_type_arguments, callable_sym);
-
-            if (param.direction == Vala.ParameterDirection.IN) {
-                if (actual_var_type.value_owned) {
-                    builder.append ("owned ");
-                }
-            } else {
-                if (param.direction == Vala.ParameterDirection.REF) {
-                    builder.append ("ref ");
-                } else if (param.direction == Vala.ParameterDirection.OUT) {
-                    builder.append ("out ");
-                }
-                if (!actual_var_type.value_owned && actual_var_type is Vala.ReferenceType) {
-                    builder.append ("weak ");
-                }
-            }
-
-            builder.append (get_data_type_representation (actual_var_type, scope));
-            // print parameter name
-            builder.append_c (' ');
-            builder.append (param.name);
-
-            if (param.initializer != null && show_initializers) {
-                builder.append (" = ");
-                builder.append (get_expression_representation (param.initializer));
-            }
-
-            i++;
-        }
-
-        builder.append_c (')');
-
-        // Append error-types
-        var error_types = new Vala.ArrayList<Vala.DataType> ();
-        callable_sym.get_error_types (error_types);
-        if (error_types.size > 0) {
-            builder.append (" throws ");
-
-            bool first = true;
-            foreach (Vala.DataType type in error_types) {
-                if (!first) {
-                    builder.append (", ");
-                } else {
-                    first = false;
+                if (param.initializer != null && show_initializers) {
+                    builder.append (" = ");
+                    builder.append (get_expression_representation (param.initializer));
                 }
 
-                builder.append (get_data_type_representation (type, scope));
+                i++;
+            }
+
+            builder.append_c (')');
+
+            // Append error-types
+            var error_types = new Vala.ArrayList<Vala.DataType> ();
+            callable_sym.get_error_types (error_types);
+            if (error_types.size > 0) {
+                builder.append (" throws ");
+
+                bool first = true;
+                foreach (Vala.DataType type in error_types) {
+                    if (!first) {
+                        builder.append (", ");
+                    } else {
+                        first = false;
+                    }
+
+                    builder.append (get_data_type_representation (type, scope));
+                }
             }
         }
 
@@ -587,7 +597,7 @@ namespace Vls.CodeHelp {
             if (sym is Vala.Namespace)
                 return (!is_parent_symbol ? "namespace " : "") + get_symbol_name_representation(sym, scope);
             else if (sym is Vala.Callable) {
-                return get_callable_representation (data_type, method_type_arguments, (Vala.Callable) sym, scope, show_initializers, allow_show_parent_member, null, ellipsis_overrides);
+                return get_callable_representation (data_type, method_type_arguments, (Vala.Callable) sym, scope, show_initializers, allow_show_parent_member, null, is_parent_symbol, ellipsis_overrides);
             } else if (sym is Vala.Variable) {
                 if (sym is Vala.Parameter && ((Vala.Parameter)sym).ellipsis)
                     return "...";
@@ -708,14 +718,14 @@ namespace Vls.CodeHelp {
         if (sym == null) {
             if (data_type is Vala.DelegateType)
                 return get_callable_representation (data_type, method_type_arguments,
-                    ((Vala.DelegateType)data_type).delegate_symbol, scope, true, allow_show_parent_member, null, ellipsis_overrides);
+                    ((Vala.DelegateType)data_type).delegate_symbol, scope, true, allow_show_parent_member, null, is_parent_symbol, ellipsis_overrides);
             return get_data_type_representation (data_type, scope);
         }
 
         // we have a data type with a symbol
 
         if (sym is Vala.Callable)
-            return get_callable_representation (data_type, method_type_arguments, (Vala.Callable)sym, scope, show_initializers, allow_show_parent_member, null, ellipsis_overrides);
+            return get_callable_representation (data_type, method_type_arguments, (Vala.Callable)sym, scope, show_initializers, allow_show_parent_member, null, is_parent_symbol, ellipsis_overrides);
         
         if (sym is Vala.Parameter && ((Vala.Parameter)sym).ellipsis)
             return "...";
@@ -723,7 +733,7 @@ namespace Vls.CodeHelp {
         if (sym is Vala.Variable) {
             if (data_type is Vala.DelegateType && ((Vala.Variable)sym).variable_type.equals (data_type)) {
                 return get_callable_representation (data_type, method_type_arguments,
-                    ((Vala.DelegateType)data_type).delegate_symbol, scope, true, allow_show_parent_member, sym.name, ellipsis_overrides);
+                    ((Vala.DelegateType)data_type).delegate_symbol, scope, true, allow_show_parent_member, sym.name, is_parent_symbol, ellipsis_overrides);
             }
             return get_variable_representation (data_type, method_type_arguments, (Vala.Variable)sym, scope, override_name, show_initializers, allow_show_parent_member);
         }
