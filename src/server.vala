@@ -1146,9 +1146,6 @@ class Vls.Server : Object {
                 Vala.CodeContext.pop ();
                 return;
             }
-            var hoverInfo = new Hover () {
-                range = new Range.from_sourceref (result.source_reference)
-            };
 
             // the instance's data type, used to resolve the symbol, which may be a member
             Vala.DataType? data_type = null;
@@ -1195,8 +1192,37 @@ class Vls.Server : Object {
             }
 
             // debug ("(parent) data_type is %s, symbol is %s",
-            //         CodeHelp.get_symbol_representation (data_type, null, scope),
-            //         CodeHelp.get_symbol_representation (null, symbol, scope));
+            //         CodeHelp.get_symbol_representation (data_type, null, scope, false),
+            //         CodeHelp.get_symbol_representation (null, symbol, scope, false));
+
+            var hoverInfo = new Hover ();
+
+            Range? symbol_range = null;
+            if (symbol != null) {
+                symbol_range = SymbolReferences.get_replacement_range (result, symbol);
+                if (symbol_range != null) {
+                    // if the symbol range does not include the cursor, then try
+                    // to get the hidden symbol at the cursor first
+                    bool found_component = false;
+                    if (!symbol_range.contains (pos)) {
+                        foreach (var component in SymbolReferences.get_visible_components_of_code_node (result)) {
+                            if (component.second.contains (pos)) {
+                                hoverInfo.range = component.second;
+                                symbol = component.first;
+                                data_type = null;
+                                method_type_arguments = null;
+                                found_component = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!found_component)
+                        hoverInfo.range = symbol_range;
+                }
+            }
+
+            if (symbol_range == null)
+                hoverInfo.range = new Range.from_sourceref (result.source_reference);
 
             string? representation = CodeHelp.get_symbol_representation (data_type, symbol, scope, true, method_type_arguments);
             if (representation != null) {
