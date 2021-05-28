@@ -20,6 +20,23 @@ using LanguageServer;
 using Gee;
 
 /**
+ * This is needed because there is no {@link Vala.InvalidExpression} in libvala 0.48
+ */
+class Vls.InvalidExpression : Vala.Expression {
+    public InvalidExpression () {
+        error = true;
+    }
+
+    public override bool is_pure () {
+        return false;
+    }
+
+    public override bool check (Vala.CodeContext context) {
+        return false;
+    }
+}
+
+/**
  * A backwards parser that makes extraordinary attempts to find the current
  * symbol at the cursor. This is less accurate than the Vala parser.
  */
@@ -621,7 +638,7 @@ class Vls.SymbolExtractor : Object {
             }
             assert_not_reached ();
         } else if (fake_expr is FakeEmptyExpr) {
-            return new Vala.InvalidExpression ();
+            return new InvalidExpression ();
         }
         assert_not_reached ();
     }
