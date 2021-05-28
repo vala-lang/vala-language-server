@@ -795,6 +795,19 @@ class Vls.SymbolExtractor : Object {
         return str;
     }
 
+    private string? parse_boolean_literal () {
+        string ident;
+
+        if (skip_ident ("true"))
+            ident = "true";
+        else if (skip_ident ("false"))
+            ident = "false";
+        else
+            return null;
+
+        return ident;
+    }
+
     private FakeLiteral? parse_literal () {
         string? str = null;
         if ((str = parse_string_literal ()) != null)
@@ -807,6 +820,8 @@ class Vls.SymbolExtractor : Object {
             return new FakeIntegerLiteral (str);
         if ((str = parse_char_literal ()) != null)
             return new FakeCharacterLiteral (str);
+        if ((str = parse_boolean_literal ()) != null)
+            return new FakeBooleanLiteral (str);
         return null;
     }
 
