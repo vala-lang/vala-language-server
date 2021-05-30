@@ -204,6 +204,30 @@ namespace Vls.CodeHelp {
         return (!) best;
     }
 
+    private Vala.List<Vala.DataType>? get_actual_type_arguments_for_parent_symbol (Vala.DataType instance_type, Vala.TypeSymbol parent_symbol) {
+        var search = new Queue<Vala.DataType> ();
+        search.push_tail (instance_type);
+
+        while (!search.is_empty ()) {
+            var candidate_type = search.pop_head ();
+
+            if (candidate_type.type_symbol == parent_symbol)
+                return candidate_type.get_type_arguments ();
+
+            if (candidate_type.type_symbol is Vala.Class) {
+                foreach (var base_type in ((Vala.Class)candidate_type.type_symbol).get_base_types ())
+                    search.push_tail (base_type.get_actual_type (candidate_type, null, null));
+            } else if (candidate_type.type_symbol is Vala.Interface) {
+                foreach (var prereq_type in ((Vala.Interface)candidate_type.type_symbol).get_prerequisites ())
+                    search.push_tail (prereq_type.get_actual_type (candidate_type, null, null));
+            } else if (candidate_type.type_symbol is Vala.Struct) {
+                search.push_tail (((Vala.Struct)candidate_type.type_symbol).base_type.get_actual_type (candidate_type, null, null));
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Represents a callable symbol
      * @param instance_type the type of the instance this method belongs to, or null
@@ -280,10 +304,10 @@ namespace Vls.CodeHelp {
                 builder.append_c (' ');
             }
             // print parent symbol
-            if (allow_show_parent_member && callable_sym.parent_symbol != null && callable_sym.parent_symbol.name != "(root namespace)") {
+            if (allow_show_parent_member && callable_sym.parent_symbol is Vala.TypeSymbol) {
                 Vala.List<Vala.DataType>? parent_type_arguments = null;
                 if (instance_type != null)
-                    parent_type_arguments = instance_type.get_type_arguments ();
+                    parent_type_arguments = get_actual_type_arguments_for_parent_symbol (instance_type, (Vala.TypeSymbol)callable_sym.parent_symbol);
                 string? parent_symbol_representation =
                     get_symbol_representation (null, callable_sym.parent_symbol, scope, allow_show_parent_member, parent_type_arguments, null, false, true);
                 builder.append (parent_symbol_representation);
@@ -452,12 +476,10 @@ namespace Vls.CodeHelp {
         builder.append (get_data_type_representation (actual_var_type, scope));
         builder.append_c (' ');
         // print parent symbol
-        if (allow_show_parent_member && !(variable_sym is Vala.LocalVariable || variable_sym is Vala.Parameter) &&
-            variable_sym.parent_symbol != null && variable_sym.parent_symbol.name != "(root namespace)" &&
-            !(variable_sym.parent_symbol is Vala.Block)) {
+        if (allow_show_parent_member && variable_sym.parent_symbol is Vala.TypeSymbol) {
             Vala.List<Vala.DataType>? parent_type_arguments = null;
             if (data_type != null)
-                parent_type_arguments = data_type.get_type_arguments ();
+                parent_type_arguments = get_actual_type_arguments_for_parent_symbol (data_type, (Vala.TypeSymbol)variable_sym.parent_symbol);
             string? parent_symbol_representation =
                 get_symbol_representation (null, variable_sym.parent_symbol, scope, allow_show_parent_member, parent_type_arguments, null, false, true);
             builder.append (parent_symbol_representation);
@@ -515,10 +537,10 @@ namespace Vls.CodeHelp {
         builder.append (get_data_type_representation (actual_property_type, scope));
         builder.append_c (' ');
         // print parent symbol
-        if (allow_show_parent_member && property_sym.parent_symbol != null && property_sym.parent_symbol.name != "(root namespace)") {
+        if (allow_show_parent_member && property_sym.parent_symbol is Vala.TypeSymbol) {
             Vala.List<Vala.DataType>? parent_type_arguments = null;
             if (data_type != null)
-                parent_type_arguments = data_type.get_type_arguments ();
+                parent_type_arguments = get_actual_type_arguments_for_parent_symbol (data_type, (Vala.TypeSymbol)property_sym.parent_symbol);
             string? parent_symbol_representation =
                 get_symbol_representation (null, property_sym.parent_symbol, scope, allow_show_parent_member, parent_type_arguments, null, false, true);
             builder.append (parent_symbol_representation);
