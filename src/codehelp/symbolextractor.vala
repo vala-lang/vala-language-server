@@ -440,10 +440,36 @@ class Vls.SymbolExtractor : Object {
                 // attempt to resolve first expression
                 Vala.Symbol? current_block = block;
                 Vala.Symbol? resolved_sym = null;
+#if VALA_0_50
+                Vala.List<Vala.DataType>? method_type_arguments = null;     // for with-expression
+                Vala.Expression? inner_with = null;                         // inner with expression
+#endif
 
                 while (current_block != null &&
                         current_block.scope != null &&
                         resolved_sym == null) {
+#if VALA_0_50
+                    if (current_block is Vala.WithStatement) {
+                        inner_with = ((Vala.WithStatement)current_block).expression;
+                        Vala.Symbol? with_symbol;
+
+                        if (inner_with is Vala.MemberAccess)
+                            method_type_arguments = ((Vala.MemberAccess)inner_with).get_type_arguments ();
+
+                        if (inner_with.value_type != null) {
+                            with_symbol = Vala.SemanticAnalyzer.get_symbol_for_data_type (inner_with.value_type);
+                        } else {
+                            with_symbol = inner_with.symbol_reference;
+                        }
+
+                        if (with_symbol != null) {
+                            resolved_sym = Vala.SemanticAnalyzer.symbol_lookup_inherited (with_symbol, fake_ma.member_name);
+
+                            if (resolved_sym != null)
+                                break;
+                        }
+                    }
+#endif
                     resolved_sym = current_block.scope.lookup (fake_ma.member_name);
                     if (resolved_sym == null) {
                         var symtab = current_block.scope.get_symbol_table ();
@@ -498,6 +524,10 @@ class Vls.SymbolExtractor : Object {
                 }
                 expr.symbol_reference = resolved_sym;
                 expr.value_type = get_data_type_for_symbol (resolved_sym);
+#if VALA_0_50
+                if (expr.value_type != null && inner_with != null && inner_with.value_type != null)
+                    expr.value_type = expr.value_type.get_actual_type (inner_with.value_type, method_type_arguments, expr);
+#endif
                 return expr;
             } else {
                 Vala.Expression inner = resolve_typed_expression (fake_ma.inner);

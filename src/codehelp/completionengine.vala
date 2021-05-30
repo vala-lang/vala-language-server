@@ -117,9 +117,16 @@ namespace Vls.CompletionEngine {
         } else {
             Vala.Scope best_scope;
             Vala.Symbol nearest_symbol;
+            /**
+             * The expression inside a Vala `with(<expr>) { ... }` statement.
+             */
+            Vala.Expression? nearest_with_expression;
             bool in_loop;
             bool showing_override_suggestions = false;
-            walk_up_current_scope (lang_serv, doc, pos, out best_scope, out nearest_symbol, out in_loop);
+            walk_up_current_scope (lang_serv, doc, pos, out best_scope, out nearest_symbol, out nearest_with_expression, out in_loop);
+            if (nearest_with_expression != null) {
+                show_members (lang_serv, project, doc, compilation, false, false, nearest_with_expression, best_scope, completions);
+            }
             if (nearest_symbol is Vala.Class) {
                 var results = gather_missing_prereqs_and_unimplemented_symbols ((Vala.Class) nearest_symbol);
                 // TODO: use missing prereqs (results.first)
@@ -155,10 +162,13 @@ namespace Vls.CompletionEngine {
 
     void walk_up_current_scope (Server lang_serv, 
                                 Vala.SourceFile doc, Position pos, 
-                                out Vala.Scope best_scope, out Vala.Symbol nearest_symbol, out bool in_loop) {
+                                out Vala.Scope best_scope, out Vala.Symbol nearest_symbol,
+                                out Vala.Expression? nearest_with_expression,
+                                out bool in_loop) {
         best_scope = new FindScope (doc, pos).best_block.scope;
         in_loop = false;
         nearest_symbol = null;
+        nearest_with_expression = null;
         for (Vala.Scope? scope = best_scope; 
              scope != null; 
              scope = scope.parent_scope) {
@@ -169,6 +179,10 @@ namespace Vls.CompletionEngine {
                 owner.parent_node is Vala.DoStatement ||
                 owner.parent_node is Vala.Loop)
                 in_loop = true;
+#if VALA_0_50
+            if (nearest_with_expression == null && owner.parent_node is Vala.WithStatement)
+                nearest_with_expression = ((Vala.WithStatement)owner.parent_node).expression;
+#endif
 
             if (owner is Vala.Callable || owner is Vala.Statement || owner is Vala.Block || 
                 owner is Vala.Subroutine) {
