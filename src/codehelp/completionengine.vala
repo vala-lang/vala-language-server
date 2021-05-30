@@ -383,6 +383,9 @@ namespace Vls.CompletionEngine {
                 new CompletionItem.keyword ("try", "try {$1} catch ($2) {$3}$0"),
                 new CompletionItem.keyword ("var"),
                 new CompletionItem.keyword ("while", "while (${1:<condition>})$0"),
+#if VALA_0_50
+                new CompletionItem.keyword ("with", "with (${1:<expression>}) {$0}"),
+#endif
                 new CompletionItem.keyword ("yield"),
             });
         }
