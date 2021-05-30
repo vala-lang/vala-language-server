@@ -751,4 +751,15 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             func (stmt, symbol, data);
         stmt.accept_children (this);
     }
+
+#if VALA_0_50
+    public override void visit_with_statement (Vala.WithStatement stmt) {
+        if (seen.contains (stmt))
+            return;
+        seen.add (stmt);
+        if (filter (stmt))
+            func (stmt, symbol, data);
+        stmt.accept_children (this);
+    }
+#endif
 }

@@ -282,6 +282,12 @@ class Vls.FindScope : Vala.CodeVisitor {
         stmt.accept_children (this);
     }
 
+#if VALA_0_50
+    public override void visit_with_statement (Vala.WithStatement stmt) {
+        stmt.accept_children (this);
+    }
+#endif
+
     public override void visit_yield_statement (Vala.YieldStatement stmt) {
         stmt.accept_children (this);
     }

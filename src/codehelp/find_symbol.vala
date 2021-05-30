@@ -787,6 +787,17 @@ class Vls.FindSymbol : Vala.CodeVisitor {
         ud.accept_children (this);
     }
 
+#if VALA_0_50
+    public override void visit_with_statement (Vala.WithStatement stmt) {
+        if (seen.contains (stmt))
+            return;
+        seen.add (stmt);
+        if (this.match (stmt))
+            result.add (stmt);
+        stmt.accept_children (this);
+    }
+#endif
+
     public override void visit_yield_statement (Vala.YieldStatement stmt) {
         if (seen.contains (stmt))
             return;
