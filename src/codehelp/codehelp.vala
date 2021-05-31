@@ -204,6 +204,13 @@ namespace Vls.CodeHelp {
         return (!) best;
     }
 
+    /**
+     * NOTE: if `instance_type` is recursively defined, `parent_symbol` must be
+     * referred to by one of the data types in the hierarchy, otherwise this
+     * function will never return. Currently, recursively-defined types are
+     * disallowed but regardless this function should never be called with a
+     * type symbol that does not belong to the hierarchy.
+     */
     private Vala.List<Vala.DataType>? get_actual_type_arguments_for_parent_symbol (Vala.DataType instance_type, Vala.TypeSymbol parent_symbol) {
         var search = new Queue<Vala.DataType> ();
         search.push_tail (instance_type);

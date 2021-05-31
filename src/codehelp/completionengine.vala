@@ -877,7 +877,11 @@ namespace Vls.CompletionEngine {
                                    Vala.Scope current_scope,
                                    bool in_oce,
                                    bool is_cm_this_or_base_access,
-                                   Set<string> seen_props = new HashSet<string> ()) {
+                                   Set<string> seen_props = new HashSet<string> (),
+                                   Set<Vala.TypeSymbol> seen_type_symbols = new HashSet<Vala.TypeSymbol> ()) {
+        if (type_symbol in seen_type_symbols)
+            return;     // bail out for recursive types
+        seen_type_symbols.add (type_symbol);
         bool is_instance = type != null;
         if (type_symbol is Vala.ObjectTypeSymbol) {
             /**
@@ -961,13 +965,13 @@ namespace Vls.CompletionEngine {
                     var class_sym = (Vala.Class) object_sym;
                     foreach (var base_type in class_sym.get_base_types ())
                         add_completions_for_type (lang_serv, project, type, base_type.type_symbol,
-                                                  completions, current_scope, in_oce, false, seen_props);
+                                                  completions, current_scope, in_oce, false, seen_props, seen_type_symbols);
                 }
                 if (object_sym is Vala.Interface) {
                     var iface_sym = (Vala.Interface) object_sym;
                     foreach (var base_type in iface_sym.get_prerequisites ())
                         add_completions_for_type (lang_serv, project, type, base_type.type_symbol,
-                                                  completions, current_scope, in_oce, false, seen_props);
+                                                  completions, current_scope, in_oce, false, seen_props, seen_type_symbols);
                 }
             }
         } else if (type_symbol is Vala.Enum) {
@@ -1028,7 +1032,7 @@ namespace Vls.CompletionEngine {
                     else
                         add_completions_for_type (lang_serv, project,
                             type, (Vala.TypeSymbol) gerror_sym, completions, 
-                            current_scope, in_oce, false, seen_props);
+                            current_scope, in_oce, false, seen_props, seen_type_symbols);
                 } else
                     warning ("GLib not found");
             }
@@ -1161,10 +1165,14 @@ namespace Vls.CompletionEngine {
                                            Vala.Class class_sym, Vala.Scope current_scope,
                                            Set<CompletionItem> completions) {
         var klasses = new GLib.Queue<Vala.Class> ();
+        var seen_klasses = new HashSet<Vala.Class> ();
         klasses.push_tail (class_sym);
 
         while (!klasses.is_empty ()) {
             var ks = klasses.pop_head ();
+            if (ks in seen_klasses)     // work around recursive types
+                break;
+            seen_klasses.add (ks);
             foreach (var method_sym in ks.get_methods ()) {
                 if (!(method_sym is Vala.CreationMethod) && method_sym.is_class_member ())
                     completions.add (new CompletionItem.from_symbol (null,
