@@ -2,3 +2,5 @@ option('active_parameter', type: 'boolean', value: false, description: 'Support 
 option('debug_mem', type: 'boolean', value: false, description: 'Debug memory usage')
 option('builder_abi', type: 'string', value: 'auto', description: 'Builder ABI version. Use a value like \'3.38\'')
 option('man_pages', type: 'feature', value: 'auto', description: 'Generate and install man pages.')
+option('plugins', type: 'boolean', value: 'true', description: 'Build plugin for Gnome-builder.')
+option('tests', type: 'boolean', value: 'true', description: 'Build tests.')

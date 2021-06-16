@@ -63,6 +63,11 @@ else
 endif
 
 subdir('data')
-subdir('plugins/gnome-builder')
 subdir('src')
-subdir('test')
+if get_option('plugins')
+  subdir('plugins/gnome-builder')
+endif
+
+if get_option('tests')
+  subdir('test')
+endif
