@@ -64,6 +64,7 @@ endif
 
 subdir('data')
 subdir('src')
+
 if get_option('plugins')
   subdir('plugins/gnome-builder')
 endif
