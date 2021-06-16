@@ -6,8 +6,7 @@ if builder_abi == 'auto'
   # attempt to guess the correct ABI from the installed GNOME Builder
   sh = find_program('sh', native: true, required: false)
   sed = find_program('sed', native: true, required: false)
-  gnome_builder = find_program('gnome-builder',
-    dirs: [get_option('prefix') / get_option('libdir')], native: true, required: false)
+  gnome_builder = find_program('gnome-builder', native: true, required: false)
   if gnome_builder.found() and sed.found() and sh.found()
     r = run_command(sh, '-c', gnome_builder.full_path() + ' --version | ' + sed.full_path() + ' -nr \'/GNOME Builder/ { s/GNOME Builder ([[:digit:]]+\.[[:digit:]]+).*$/\\1/ p }\'', check: true)
     builder_abi = r.stdout().strip()
