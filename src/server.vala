@@ -896,6 +896,24 @@ class Vls.Server : Object {
                 best = SymbolReferences.get_symbol_data_type_refers_to ((Vala.DataType) best);
             } else if (best is Vala.UsingDirective) {
                 best = ((Vala.UsingDirective)best).namespace_symbol;
+            } else if (best is Vala.Method) {
+                var m = (Vala.Method)best;
+
+                if (m.base_interface_method != m && m.base_interface_method != null)
+                    best = m.base_interface_method;
+                else if (m.base_method != m && m.base_method != null)
+                    best = m.base_method;
+                else
+                    best = null;
+            } else if (best is Vala.Property) {
+                var prop = (Vala.Property)best;
+
+                if (prop.base_interface_property != prop && prop.base_interface_property != null)
+                    best = prop.base_interface_property;
+                else if (prop.base_property != prop && prop.base_property != null)
+                    best = prop.base_property;
+                else
+                    best = null;
             } else {
                 debug ("[%s] best is %s, which we can't handle", method, best != null ? best.type_name : null);
                 try {
