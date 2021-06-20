@@ -875,28 +875,38 @@ namespace Lsp {
         }
 
         public bool deserialize_property (string property_name, out GLib.Value value, GLib.ParamSpec pspec, Json.Node property_node) {
-            if (property_name != "arguments")
-                return default_deserialize_property (property_name, out value, pspec, property_node);
-
-            value = Value (typeof (Array));
-            if (property_node.get_node_type () != Json.NodeType.ARRAY) {
-                warning ("unexpected property node type for 'arguments' %s", property_node.get_node_type ().to_string ());
-                return false;
-            }
-
-            var arguments = new Array<Variant> ();
-
-            property_node.get_array ().foreach_element ((array, index, element) => {
-                try {
-                    arguments.append_val (Json.gvariant_deserialize (element, null));
-                } catch (Error e) {
-                    warning ("argument %u to command could not be deserialized: %s", index, e.message);
+            if (property_name == "arguments") {
+                value = Value (typeof (Array));
+                if (property_node.get_node_type () != Json.NodeType.ARRAY) {
+                    warning ("unexpected property node type for 'arguments' %s", property_node.get_node_type ().to_string ());
+                    return false;
                 }
-            });
 
-            value.set_boxed (arguments);
+                var arguments = new Array<Variant> ();
 
-            return true;
+                property_node.get_array ().foreach_element ((array, index, element) => {
+                    try {
+                        arguments.append_val (Json.gvariant_deserialize (element, null));
+                    } catch (Error e) {
+                        warning ("argument %u to command could not be deserialized: %s", index, e.message);
+                    }
+                });
+
+                value.set_boxed (arguments);
+                return true;
+            } else if (property_name == "command") {
+                // workaround for json-glib < 1.5.2 (Ubuntu 20.04 / eOS 6)
+                if (property_node.get_value_type () != typeof (string)) {
+                    value = "";
+                    warning ("unexpected property node type for 'commands' %s", property_node.get_node_type ().to_string ());
+                    return false;
+                }
+
+                value = property_node.get_string ();
+                return true;
+            } else {
+                return default_deserialize_property (property_name, out value, pspec, property_node);
+            }
         }
     }
 

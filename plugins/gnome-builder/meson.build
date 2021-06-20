@@ -9,7 +9,7 @@ if builder_abi == 'auto'
   gnome_builder = find_program('gnome-builder',
     dirs: [get_option('prefix') / get_option('libdir')], native: true, required: false)
   if gnome_builder.found() and sed.found() and sh.found()
-    r = run_command(sh, '-c', gnome_builder.full_path() + ' --version | ' + sed.full_path() + ' -nr \'/GNOME Builder/ { s/GNOME Builder ([[:digit:]]+\.[[:digit:]]+).*$/\\1/ p }\'', check: true)
+    r = run_command(sh, 'get_builder_abi.sh', gnome_builder, sed, check: true)
     builder_abi = r.stdout().strip()
   else
     warning('Assuming version ' + BUILDER_VERSION_LATEST + ' for GNOME Builder plugin ABI')
