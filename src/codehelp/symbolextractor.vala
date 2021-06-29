@@ -207,6 +207,16 @@ class Vls.SymbolExtractor : Object {
         }
     }
 
+    class FakeNullLiteral : FakeLiteral {
+        public FakeNullLiteral () {
+            base ("null");
+        }
+
+        public override string to_string () {
+            return value;
+        }
+    }
+
     abstract class FakeDataType {
         public bool is_owned { get; private set; }
 
@@ -277,6 +287,17 @@ class Vls.SymbolExtractor : Object {
             if (_extracted_expression == null && !attempted_extract_expression)
                 compute_extracted_expression ();
             return _extracted_expression;
+        }
+    }
+
+
+    private bool _in_fake_oce;
+    /**
+     * Whether the atempted extracted expression is an OCE
+     */
+    public bool in_oce {
+        get {
+            return extracted_expression is Vala.ObjectCreationExpression || _in_fake_oce;
         }
     }
 
@@ -665,6 +686,10 @@ class Vls.SymbolExtractor : Object {
                 var expr = new Vala.RegexLiteral (fake_regex.value);
                 expr.value_type = context.analyzer.regex_type;
                 return expr;
+            } else if (fake_expr is FakeNullLiteral) {
+                var expr = new Vala.NullLiteral ();
+                expr.value_type = new Vala.NullType ();
+                return expr;
             }
             assert_not_reached ();
         } else if (fake_expr is FakeEmptyExpr) {
@@ -689,6 +714,7 @@ class Vls.SymbolExtractor : Object {
         }
 
         // debug ("extracted expression - %s", expr.to_string ());
+        _in_fake_oce = expr is FakeObjectCreationExpr;
         
         try {
             _extracted_expression = resolve_typed_expression (expr);
@@ -879,6 +905,8 @@ class Vls.SymbolExtractor : Object {
             return new FakeCharacterLiteral (str);
         if ((str = parse_boolean_literal ()) != null)
             return new FakeBooleanLiteral (str);
+        if (skip_ident ("null"))
+            return new FakeNullLiteral ();
         return null;
     }
 
