@@ -463,7 +463,8 @@ namespace Vls.CodeHelp {
     private string get_variable_representation (Vala.DataType? data_type, Vala.List<Vala.DataType>? method_type_arguments,
                                                 Vala.Variable variable_sym, Vala.Scope? scope, string? override_name,
                                                 bool allow_show_parent_member,
-                                                bool show_initializer) {
+                                                bool show_initializer,
+                                                bool show_parameter_direction) {
         Vala.DataType? actual_var_type = variable_sym.variable_type.get_actual_type (data_type, method_type_arguments, variable_sym);
         var builder = new StringBuilder ();
         if (!(variable_sym is Vala.Parameter)) {
@@ -473,12 +474,15 @@ namespace Vls.CodeHelp {
                 builder.append ((variable_sym is Vala.Field) ? "weak " : "unowned ");
         } else if (variable_sym is Vala.Parameter) {
             var param = (Vala.Parameter) variable_sym;
-            if (param.direction == Vala.ParameterDirection.OUT)
-                builder.append ("out ");
-            else if (param.direction == Vala.ParameterDirection.REF)
-                builder.append ("ref ");
-            else if (actual_var_type.value_owned)
+            if (param.direction == Vala.ParameterDirection.OUT) {
+                if (show_parameter_direction)
+                    builder.append ("out ");
+            } else if (param.direction == Vala.ParameterDirection.REF) {
+                if (show_parameter_direction)
+                    builder.append ("ref ");
+            } else if (actual_var_type.value_owned) {
                 builder.append ("owned ");
+            }
         }
         builder.append (get_data_type_representation (actual_var_type, scope));
         builder.append_c (' ');
@@ -619,7 +623,8 @@ namespace Vls.CodeHelp {
                                               Vala.List<Vala.DataType>? method_type_arguments = null,
                                               string? override_name = null, bool show_initializers = true,
                                               bool is_parent_symbol = false,
-                                              Vala.List<Vala.Parameter>? ellipsis_overrides = null) {
+                                              Vala.List<Vala.Parameter>? ellipsis_overrides = null,
+                                              bool show_parameter_direction = true) {
         if (data_type == null && sym == null)
             return null;
         if (data_type == null || sym != null && SymbolReferences.get_symbol_data_type_refers_to (data_type) == sym) {
@@ -630,7 +635,7 @@ namespace Vls.CodeHelp {
             } else if (sym is Vala.Variable) {
                 if (sym is Vala.Parameter && ((Vala.Parameter)sym).ellipsis)
                     return "...";
-                return get_variable_representation (data_type, method_type_arguments, (Vala.Variable) sym, scope, override_name, show_initializers, allow_show_parent_member);
+                return get_variable_representation (data_type, method_type_arguments, (Vala.Variable) sym, scope, override_name, show_initializers, allow_show_parent_member, show_parameter_direction);
             } else if (sym is Vala.TypeSymbol) {
                 var builder = new StringBuilder ();
                 Vala.DataType? actual_data_type = null;
@@ -764,7 +769,7 @@ namespace Vls.CodeHelp {
                 return get_callable_representation (data_type, method_type_arguments,
                     ((Vala.DelegateType)data_type).delegate_symbol, scope, true, allow_show_parent_member, sym.name, is_parent_symbol, ellipsis_overrides);
             }
-            return get_variable_representation (data_type, method_type_arguments, (Vala.Variable)sym, scope, override_name, show_initializers, allow_show_parent_member);
+            return get_variable_representation (data_type, method_type_arguments, (Vala.Variable)sym, scope, override_name, show_initializers, allow_show_parent_member, show_parameter_direction);
         }
 
         if (sym is Vala.Property)

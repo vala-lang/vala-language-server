@@ -43,6 +43,11 @@ class Vls.Compilation : BuildTarget {
      */
     private HashSet<File> _generated_sources = new HashSet<File> (Util.file_hash, Util.file_equal);
 
+    /**
+     * The analyses for each project source.
+     */
+    private HashMap<TextDocument, CodeAnalyzer> _source_analyzers = new HashMap<TextDocument, CodeAnalyzer> ();
+
     public Vala.CodeContext code_context { get; private set; default = new Vala.CodeContext (); }
 
     // CodeContext arguments:
@@ -374,6 +379,27 @@ class Vls.Compilation : BuildTarget {
                 source_file.accept (new CNameMapper (cname_to_sym));
         }
 
+        // update the code analyses
+        var removed_sources = new HashSet<TextDocument> ();
+        foreach (var entry in _source_analyzers)
+            removed_sources.add (entry.key);
+
+        foreach (var entry in _project_sources) {
+            var source = entry.value;
+            if (!_source_analyzers.has_key (source) ||
+                _source_analyzers[source].last_updated.compare (source.last_updated) < 0) {
+                var analyzer = new CodeStyleAnalyzer ();
+                analyzer.visit_source_file (source);
+                analyzer.last_updated = source.last_updated;
+                _source_analyzers[source] = analyzer;
+            }
+            removed_sources.remove (source);
+        }
+
+        // remove source analyzers for files that have been removed
+        foreach (var removed_source in removed_sources)
+            _source_analyzers.unset (removed_source, null);
+
         last_updated = new DateTime.now ();
         _completed_first_compile = true;
         Vala.CodeContext.pop ();
@@ -403,6 +429,18 @@ class Vls.Compilation : BuildTarget {
             // TODO: cancellable compilation
             compile ();
         }
+    }
+
+    /**
+     * Get the analysis for the source file
+     */
+    public T? get_analysis_for_file<T> (Vala.SourceFile source) {
+        var document = source as TextDocument;
+
+        if (document == null)
+            return null;
+
+        return _source_analyzers[document];
     }
 
     public bool lookup_input_source_file (File file, out Vala.SourceFile input_source) {
