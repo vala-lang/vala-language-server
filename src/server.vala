@@ -66,7 +66,12 @@ class Vls.Server : Object {
      * by VLS. This is used to clear the errors/warnings for the files on
      * the next context update.
      */
-    ArrayList<string> discarded_files = new ArrayList<string> ();
+    HashSet<string> discarded_files = new HashSet<string> ();
+
+    /**
+     * Files that are currently open in the editor
+     */
+    HashSet<string> open_files = new HashSet<string> ();
 
     static construct {
         Process.@signal (ProcessSignal.INT, () => {
@@ -459,6 +464,9 @@ class Vls.Server : Object {
         } else {
             debug (@"[textDocument/didOpen] opened read-only $(Uri.unescape_string (uri))");
         }
+
+        // add document to open list
+        open_files.add (uri);
     }
 
     void textDocumentDidSave (Jsonrpc.Client client, Variant @params) {
@@ -600,12 +608,37 @@ class Vls.Server : Object {
             debug ("updating contexts and publishing diagnostics...");
             update_context_requests = 0;
             update_context_time_us = 0;
+
             Project[] all_projects = projects.get_keys_as_array ();
             all_projects += default_project;
+            bool reconfigured_projects = false;
             foreach (var project in all_projects) {
                 try {
-                    project.reconfigure_if_stale (cancellable);
+                    bool reconfigured = project.reconfigure_if_stale (cancellable);
+                    reconfigured_projects |= reconfigured;
                     project.build_if_stale (cancellable);
+
+                    // remove all newly-added files from the default project
+                    if (reconfigured && project != default_project) {
+                        var newly_added = new HashSet<string> ();
+                        foreach (var compilation in project.get_compilations ())
+                            newly_added.add_all_iterator (compilation.get_project_files ().map<string> (f => f.filename));
+                        foreach (var compilation in default_project.get_compilations ()) {
+                            foreach (var source_file in compilation.get_project_files ()) {
+                                if (newly_added.contains (source_file.filename)) {
+                                    var uri = File.new_for_path (source_file.filename).get_uri ();
+                                    try {
+                                        default_project.close (uri);
+                                        discarded_files.add (uri);
+                                        debug ("discarding %s from DefaultProject", uri);
+                                    } catch (Error e) {
+                                        // just ignore
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     foreach (var compilation in project.get_compilations ())
                         /* This must come after the resetting of the two variables above,
                         * since it's possible for publishDiagnostics to eventually call
@@ -615,8 +648,39 @@ class Vls.Server : Object {
                         publishDiagnostics (project, compilation, update_context_client);
                 } catch (Error e) {
                     warning ("Failed to rebuild and/or reconfigure project: %s", e.message);
+                    showMessage (update_context_client, @"Failed to rebuild/reconfigure project: $(e.message)", MessageType.Error);
                 }
             }
+
+            // add open files that do not belong to any project to the default project
+            if (reconfigured_projects) {
+                var orphaned_files = new HashSet<string> ();
+                orphaned_files.add_all (open_files);
+                foreach (var project in projects.get_keys ()) {
+                    foreach (var compilation in project.get_compilations ()) {
+                        foreach (var source_file in compilation.code_context.get_source_files ()) {
+                            var uri = File.new_for_path (source_file.filename).get_uri ();
+                            orphaned_files.remove (uri);
+                        }
+                    }
+                }
+                foreach (var uri in orphaned_files) {
+                    try {
+                        var opened = default_project.open (uri, null, cancellable).first ();
+                        // ensure the file's contents are available
+                        var doc = opened.first;
+                        if (doc.content == null)
+                            doc.get_mapped_contents ();
+                        if (doc is TextDocument)
+                            ((TextDocument)doc).last_saved_content = doc.content;
+                        publishDiagnostics (default_project, opened.second, update_context_client);
+                    } catch (Error e) {
+                        warning ("Failed to reopen in default project %s - %s", uri, e.message);
+                    }
+                }
+            }
+
+            // rebuild the documentation
             documentation.rebuild_if_stale ();
         }
     }
@@ -669,15 +733,13 @@ class Vls.Server : Object {
     }
 
     void publishDiagnostics (Project project, Compilation target, Jsonrpc.Client client) {
-        var files_not_published = new HashSet<Vala.SourceFile> (Util.source_file_hash, Util.source_file_equal);
         var diags_without_source = new Json.Array ();
 
         debug ("publishing diagnostics for Compilation target %s", target.id);
 
+        var doc_diags = new HashMap<Vala.SourceFile, Json.Array?> ();
         foreach (var file in target.code_context.get_source_files ())
-            files_not_published.add (file);
-
-        var doc_diags = new HashMap<Vala.SourceFile, Json.Array> ();
+            doc_diags[file] = null;
 
         target.reporter.messages.foreach (err => {
             if (err.loc == null) {
@@ -719,54 +781,12 @@ class Vls.Server : Object {
             };
 
             var node = Json.gobject_serialize (diag);
-            if (!doc_diags.has_key (err.loc.file))
+            if (!doc_diags.has_key (err.loc.file) || doc_diags[err.loc.file] == null)
                 doc_diags[err.loc.file] = new Json.Array ();
             doc_diags[err.loc.file].add_element (node);
         });
 
-        // at the end, report diags for each source file
-        foreach (var entry in doc_diags.entries) {
-            Variant diags_variant_array;
-            var gfile = File.new_for_commandline_arg_and_cwd (entry.key.filename, target.code_context.directory);
-
-            files_not_published.remove (entry.key);
-            try {
-                diags_variant_array = Json.gvariant_deserialize (
-                    new Json.Node.alloc ().init_array (entry.value),
-                    null);
-            } catch (Error e) {
-                warning (@"[publishDiagnostics] failed to deserialize diags for `$(gfile.get_uri ())': $(e.message)");
-                continue;
-            }
-            try {
-                client.send_notification (
-                    "textDocument/publishDiagnostics",
-                    buildDict (
-                        uri: new Variant.string (gfile.get_uri ()),
-                        diagnostics: diags_variant_array
-                    ),
-                    cancellable);
-            } catch (Error e) {
-                warning (@"[publishDiagnostics] failed to notify client: $(e.message)");
-            }
-        }
-
-        foreach (var entry in files_not_published) {
-            var gfile = File.new_for_commandline_arg_and_cwd (entry.filename, target.code_context.directory);
-            try {
-                client.send_notification (
-                    "textDocument/publishDiagnostics",
-                    buildDict (
-                        uri: new Variant.string (gfile.get_uri ()),
-                        diagnostics: new Variant.array (VariantType.VARIANT, new Variant[]{})
-                    ),
-                    cancellable);
-            } catch (Error e) {
-                warning (@"[publishDiagnostics] failed to publish empty diags for $(gfile.get_uri ()): $(e.message)");
-            }
-        }
-
-        // publish empty diagnostics for discarded files
+        // first, publish empty diagnostics for discarded files
         var discarded_files_published = new ArrayList<string> ();
         foreach (string discarded_uri in discarded_files) {
             try {
@@ -783,6 +803,37 @@ class Vls.Server : Object {
             }
         }
         discarded_files.remove_all (discarded_files_published);
+
+        // report diagnostics for each source file that has diagnostics
+        foreach (var entry in doc_diags.entries) {
+            Variant diags_variant_array;
+            var gfile = File.new_for_commandline_arg_and_cwd (entry.key.filename, target.code_context.directory);
+
+            if (entry.value != null) {
+                try {
+                    diags_variant_array = Json.gvariant_deserialize (
+                        new Json.Node.alloc ().init_array (entry.value),
+                        null);
+                } catch (Error e) {
+                    warning (@"[publishDiagnostics] failed to deserialize diags for `$(gfile.get_uri ())': $(e.message)");
+                    continue;
+                }
+            } else {
+                diags_variant_array = new Variant.array (VariantType.VARIANT, new Variant[]{});
+            }
+
+            try {
+                client.send_notification (
+                    "textDocument/publishDiagnostics",
+                    buildDict (
+                        uri: new Variant.string (gfile.get_uri ()),
+                        diagnostics: diags_variant_array
+                    ),
+                    cancellable);
+            } catch (Error e) {
+                warning (@"[publishDiagnostics] failed to notify client: $(e.message)");
+            }
+        }
 
         try {
             Variant diags_wo_src_variant_array = Json.gvariant_deserialize (
