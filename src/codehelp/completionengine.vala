@@ -879,22 +879,23 @@ namespace Vls.CompletionEngine {
         return true;
     }
 
-    string? generate_insert_text_for_method (Vala.DataType? type, Vala.Method method_sym, Vala.Scope? current_scope, uint method_spaces) {
+    string? generate_insert_text_for_callable (Vala.DataType? type, Vala.Callable callable_sym,
+                                               Vala.Scope? current_scope, uint method_spaces) {
         var builder = new StringBuilder ();
 
-        if (method_sym.name == ".new") {
-            if (method_sym.parent_symbol == null) {
-                warning ("parent is null for %s()", method_sym.name);
+        if (callable_sym.name == ".new") {
+            if (callable_sym.parent_symbol == null) {
+                warning ("parent is null for %s()", callable_sym.name);
                 return null;
             }
-            builder.append (method_sym.parent_symbol.name);
+            builder.append (callable_sym.parent_symbol.name);
 
-            if (method_sym.parent_symbol is Vala.ObjectTypeSymbol && ((Vala.ObjectTypeSymbol) method_sym.parent_symbol).has_type_parameters ()) {
-                uint num_parameters = method_sym.get_parameters ().size;
+            if (callable_sym.parent_symbol is Vala.ObjectTypeSymbol && ((Vala.ObjectTypeSymbol) callable_sym.parent_symbol).has_type_parameters ()) {
+                uint num_parameters = callable_sym.get_parameters ().size;
 
                 builder.append_c ('<');
                 uint p = 0;
-                foreach (var type_parameter in ((Vala.ObjectTypeSymbol) method_sym.parent_symbol).get_type_parameters ()) {
+                foreach (var type_parameter in ((Vala.ObjectTypeSymbol) callable_sym.parent_symbol).get_type_parameters ()) {
                     if (p > 0)
                         builder.append (", ");
                     builder.append_printf ("${%u:%s}", num_parameters + p + 1, type_parameter.name);
@@ -903,10 +904,11 @@ namespace Vls.CompletionEngine {
                 builder.append_c ('>');
             }
         } else {
-            builder.append (method_sym.name);
+            builder.append (callable_sym.name);
 
-            if (method_sym.has_type_parameters ()) {
-                uint num_parameters = method_sym.get_parameters ().size;
+            var method_sym = callable_sym as Vala.Method;
+            if (method_sym != null && method_sym.has_type_parameters ()) {
+                uint num_parameters = callable_sym.get_parameters ().size;
 
                 builder.append_c ('<');
                 uint p = 0;
@@ -924,7 +926,7 @@ namespace Vls.CompletionEngine {
         builder.append_c ('(');
 
         uint p = 0;
-        foreach (var parameter in method_sym.get_parameters ()) {
+        foreach (var parameter in callable_sym.get_parameters ()) {
             if (p > 0)
                 builder.append (", ");
             if (parameter.direction == Vala.ParameterDirection.OUT)
@@ -980,7 +982,7 @@ namespace Vls.CompletionEngine {
                 var completion = new CompletionItem.from_symbol (type, method_sym, current_scope,
                     (method_sym is Vala.CreationMethod) ? CompletionItemKind.Constructor : CompletionItemKind.Method, 
                     lang_serv.get_symbol_documentation (project, method_sym));
-                completion.insertText = generate_insert_text_for_method (type, method_sym, current_scope, method_spaces);
+                completion.insertText = generate_insert_text_for_callable (type, method_sym, current_scope, method_spaces);
                 completion.insertTextFormat = InsertTextFormat.Snippet;
                 completions.add (completion);
             }
@@ -1000,8 +1002,17 @@ namespace Vls.CompletionEngine {
                     if (signal_sym.is_instance_member () != is_instance 
                         || !CodeHelp.is_symbol_accessible (signal_sym, current_scope))
                         continue;
-                    // TODO: generate one completion for invoking the signal and another without, for member access
+                    // generate one completion for invoking the signal and another without, for member access
                     completions.add (new CompletionItem.from_symbol (type, signal_sym, current_scope, CompletionItemKind.Event, lang_serv.get_symbol_documentation (project, signal_sym)));
+                    var emitter_documentation = lang_serv.get_symbol_documentation (project, signal_sym);
+                    emitter_documentation.body = "_(Invokes this signal)_\n\n" + emitter_documentation.body;
+                    completions.add (new CompletionItem.from_symbol (type, signal_sym, 
+                                                                     current_scope, 
+                                                                     CompletionItemKind.Method, 
+                                                                     emitter_documentation) {
+                        insertText = generate_insert_text_for_callable (type, signal_sym, current_scope, method_spaces),
+                        insertTextFormat = InsertTextFormat.Snippet
+                    });
                 }
 
                 foreach (var prop_sym in object_sym.get_properties ()) {
@@ -1030,14 +1041,8 @@ namespace Vls.CompletionEngine {
 
             // if we're inside an OCE (which are treated as instances), get only inner types
             if (!is_instance || in_oce) {
-                foreach (var class_sym in object_sym.get_classes ()) {
-                    var completion = new CompletionItem.from_symbol (type, class_sym, current_scope, CompletionItemKind.Class, lang_serv.get_symbol_documentation (project, class_sym));
-                    if (class_sym.default_construction_method != null) {
-                        completion.insertText = generate_insert_text_for_method (type, class_sym.default_construction_method, current_scope, method_spaces);
-                        completion.insertTextFormat = InsertTextFormat.Snippet;
-                    }
-                    completions.add (completion);
-                }
+                foreach (var class_sym in object_sym.get_classes ())
+                    add_class_completion (lang_serv, project, code_style, class_sym, current_scope, in_oce, completions);
 
                 foreach (var iface_sym in object_sym.get_interfaces ())
                     completions.add (new CompletionItem.from_symbol (type, iface_sym, current_scope, CompletionItemKind.Interface, lang_serv.get_symbol_documentation (project, iface_sym)));
@@ -1073,7 +1078,7 @@ namespace Vls.CompletionEngine {
                     || !CodeHelp.is_symbol_accessible (method_sym, current_scope))
                     continue;
                 var completion = new CompletionItem.from_symbol (type, method_sym, current_scope, CompletionItemKind.Method, lang_serv.get_symbol_documentation (project, method_sym));
-                completion.insertText = generate_insert_text_for_method (type, method_sym, current_scope, method_spaces);
+                completion.insertText = generate_insert_text_for_callable (type, method_sym, current_scope, method_spaces);
                 completion.insertTextFormat = InsertTextFormat.Snippet;
                 completions.add (completion);
             }
@@ -1108,7 +1113,7 @@ namespace Vls.CompletionEngine {
                         || !CodeHelp.is_symbol_accessible (method_sym, current_scope))
                         continue;
                     var completion = new CompletionItem.from_symbol (type, method_sym, current_scope, CompletionItemKind.Method, lang_serv.get_symbol_documentation (project, method_sym));
-                    completion.insertText = generate_insert_text_for_method (type, method_sym, current_scope, method_spaces);
+                    completion.insertText = generate_insert_text_for_callable (type, method_sym, current_scope, method_spaces);
                     completion.insertTextFormat = InsertTextFormat.Snippet;
                     completions.add (completion);
                 }
@@ -1151,7 +1156,7 @@ namespace Vls.CompletionEngine {
                         is_cm_this_or_base_access))
                     continue;
                 var completion = new CompletionItem.from_symbol (type, method_sym, current_scope, CompletionItemKind.Method, lang_serv.get_symbol_documentation (project, method_sym));
-                completion.insertText = generate_insert_text_for_method (type, method_sym, current_scope, method_spaces);
+                completion.insertText = generate_insert_text_for_callable (type, method_sym, current_scope, method_spaces);
                 completion.insertTextFormat = InsertTextFormat.Snippet;
                 completions.add (completion);
             }
@@ -1180,14 +1185,8 @@ namespace Vls.CompletionEngine {
      */
     void add_completions_for_ns (Server lang_serv, Project project, CodeStyleAnalyzer? code_style, Vala.Namespace ns, Vala.Scope scope, Set<CompletionItem> completions, bool in_oce) {
         uint method_spaces = code_style != null ? code_style.average_spacing_before_parens : 1;
-        foreach (var class_sym in ns.get_classes ()) {
-            var completion = new CompletionItem.from_symbol (null, class_sym, scope, CompletionItemKind.Class, lang_serv.get_symbol_documentation (project, class_sym));
-            if (in_oce && !class_sym.is_abstract && class_sym.default_construction_method != null) {
-                completion.insertText = generate_insert_text_for_method (null, class_sym.default_construction_method, scope, method_spaces);
-                completion.insertTextFormat = InsertTextFormat.Snippet;
-            }
-            completions.add (completion);
-        }
+        foreach (var class_sym in ns.get_classes ())
+            add_class_completion (lang_serv, project, code_style, class_sym, scope, in_oce, completions);
         // this is outside of the OCE check because while we cannot create new instances of 
         // raw interfaces, it's possible for interfaces to contain instantiable types declared inside,
         // so that we would call `new Iface.Thing ()'
@@ -1204,7 +1203,7 @@ namespace Vls.CompletionEngine {
                 completions.add (new CompletionItem.from_symbol (null, const_sym, scope, CompletionItemKind.Constant, lang_serv.get_symbol_documentation (project, const_sym)));
             foreach (var method_sym in ns.get_methods ()) {
                 var completion = new CompletionItem.from_symbol (null, method_sym, scope, CompletionItemKind.Method, lang_serv.get_symbol_documentation (project, method_sym));
-                completion.insertText = generate_insert_text_for_method (null, method_sym, scope, method_spaces);
+                completion.insertText = generate_insert_text_for_callable (null, method_sym, scope, method_spaces);
                 completion.insertTextFormat = InsertTextFormat.Snippet;
                 completions.add (completion);
             }
@@ -1226,17 +1225,17 @@ namespace Vls.CompletionEngine {
         completions.add_all_array (new CompletionItem []{
             new CompletionItem.from_symbol (instance_type, sig_type.get_member ("connect"), scope, CompletionItemKind.Method, 
                 new DocComment ("Connect to signal")) {
-                insertText = generate_insert_text_for_method (instance_type, sig_type.get_member ("connect") as Vala.Method, scope, method_spaces),
+                insertText = generate_insert_text_for_callable (instance_type, sig_type.get_member ("connect") as Vala.Method, scope, method_spaces),
                 insertTextFormat = InsertTextFormat.Snippet
             },
             new CompletionItem.from_symbol (instance_type, sig_type.get_member ("connect_after"), scope, CompletionItemKind.Method,
                 new DocComment ("Connect to signal after default handler")) {
-                insertText = generate_insert_text_for_method (instance_type, sig_type.get_member ("connect_after") as Vala.Method, scope, method_spaces),
+                insertText = generate_insert_text_for_callable (instance_type, sig_type.get_member ("connect_after") as Vala.Method, scope, method_spaces),
                 insertTextFormat = InsertTextFormat.Snippet
             },
             new CompletionItem.from_symbol (instance_type, sig_type.get_member ("disconnect"), scope, CompletionItemKind.Method,
                 new DocComment ("Disconnect signal")) {
-                insertText = generate_insert_text_for_method (instance_type, sig_type.get_member ("disconnect") as Vala.Method, scope, method_spaces),
+                insertText = generate_insert_text_for_callable (instance_type, sig_type.get_member ("disconnect") as Vala.Method, scope, method_spaces),
                 insertTextFormat = InsertTextFormat.Snippet
             }
         });
@@ -1298,7 +1297,7 @@ namespace Vls.CompletionEngine {
                                                                      method_sym, current_scope,
                                                                      CompletionItemKind.Method,
                                                                      lang_serv.get_symbol_documentation (project, method_sym));
-                    completion.insertText = generate_insert_text_for_method (null, method_sym, current_scope, method_spaces);
+                    completion.insertText = generate_insert_text_for_callable (null, method_sym, current_scope, method_spaces);
                     completion.insertTextFormat = InsertTextFormat.Snippet;
                     completions.add (completion);
                 }
@@ -1322,6 +1321,42 @@ namespace Vls.CompletionEngine {
                 if (base_type.type_symbol is Vala.Class)
                     klasses.push_tail ((Vala.Class) base_type.type_symbol);
             }
+        }
+    }
+
+    /**
+     * Show a suggestion for a class symbol and/or the default class
+     * constructor, depending on the context.
+     */
+    void add_class_completion (Server lang_serv, Project project,
+                               Vls.CodeStyleAnalyzer? code_style,
+                               Vala.Class class_sym, Vala.Scope scope,
+                               bool in_oce, Set<CompletionItem> completions) {
+        uint method_spaces = code_style != null ? code_style.average_spacing_before_parens : 1;
+
+        bool has_named_ctors = false;
+        foreach (var method in class_sym.get_methods ()) {
+            if (method is Vala.CreationMethod && method.name != ".new") {
+                has_named_ctors = true;
+                break;
+            }
+        }
+
+        if (!in_oce || has_named_ctors
+            || !class_sym.get_classes ().is_empty || !class_sym.get_interfaces ().is_empty
+            || !class_sym.get_structs ().is_empty) {
+            var class_suggestion = new CompletionItem.from_symbol (null, class_sym, scope, CompletionItemKind.Class, lang_serv.get_symbol_documentation (project, class_sym));
+            completions.add (class_suggestion);
+        }
+
+        if (in_oce && !class_sym.is_abstract && class_sym.default_construction_method != null) {
+            var ctor_documentation = lang_serv.get_symbol_documentation (project, class_sym.default_construction_method);
+            if (ctor_documentation == null)
+                ctor_documentation = lang_serv.get_symbol_documentation (project, class_sym);
+            var ctor_suggestion = new CompletionItem.from_symbol (null, class_sym.default_construction_method, scope, CompletionItemKind.Constructor, ctor_documentation, class_sym.name);
+            ctor_suggestion.insertText = generate_insert_text_for_callable (null, class_sym.default_construction_method, scope, method_spaces);
+            ctor_suggestion.insertTextFormat = InsertTextFormat.Snippet;
+            completions.add (ctor_suggestion);
         }
     }
 

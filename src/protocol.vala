@@ -495,7 +495,7 @@ namespace Lsp {
                 this.insertTextFormat = InsertTextFormat.Snippet;
             if (documentation != null)
                 this.documentation = new MarkupContent.from_plaintext (documentation);
-            this._hash = this.label.hash ();
+            this._hash = @"$label $kind".hash ();
         }
 
         /**
@@ -513,7 +513,7 @@ namespace Lsp {
             this.label = label_override ?? sym.name;
             this.kind = kind;
             this.detail = Vls.CodeHelp.get_symbol_representation (instance_type, sym, scope, true, null, null, false);
-            this._hash = this.label.hash ();
+            this._hash = @"$label $kind".hash ();
 
             if (documentation != null)
                 this.documentation = new MarkupContent.from_markdown (documentation.body);
@@ -539,7 +539,7 @@ namespace Lsp {
             this.label = symbol_name;
             this.kind = kind;
             this.detail = @"$(Vls.CodeHelp.get_symbol_representation (symbol_type, null, scope, true, null, null, false)) $symbol_name";
-            this._hash = this.label.hash ();
+            this._hash = @"$label $kind".hash ();
 
             if (documentation != null)
                 this.documentation = new MarkupContent.from_markdown (documentation.body);
@@ -554,7 +554,7 @@ namespace Lsp {
             this.insertText = insert_text;
             if (insert_text.contains ("$0") || insert_text.contains ("${0"))
                 this.insertTextFormat = InsertTextFormat.Snippet;
-            this._hash = this.label.hash ();
+            this._hash = @"$label $kind".hash ();
             if (documentation != null)
                 this.documentation = new MarkupContent.from_markdown (documentation.body);
         }

@@ -27,7 +27,7 @@ class Vls.DocComment {
      * The main body of the comment, in Markdown.
      * {@inheritDoc}
      */
-    public string body { get; private set; default = ""; }
+    public string body { get; set; default = ""; }
 
     /**
      * The list of parameters for this symbol. The key is the
