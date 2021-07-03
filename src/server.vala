@@ -676,6 +676,18 @@ class Vls.Server : Object {
                         publishDiagnostics (default_project, opened.second, update_context_client);
                     } catch (Error e) {
                         warning ("Failed to reopen in default project %s - %s", uri, e.message);
+                        // clear the diagnostics for the file
+                        try {
+                            update_context_client.send_notification (
+                                "textDocument/publishDiagnostics",
+                                buildDict (
+                                    uri: new Variant.string (uri),
+                                    diagnostics: new Variant.array (VariantType.VARIANT, {})
+                                )
+                            );
+                        } catch (Error e) {
+                            warning ("Failed to clear diagnostics for %s - %s", uri, e.message);
+                        }
                     }
                 }
             }
