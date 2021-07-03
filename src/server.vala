@@ -43,8 +43,6 @@ class Vls.Server : Object {
 
     bool shutting_down = false;
 
-    bool is_initialized = false;
-
     /**
      * The global cancellable object
      */
@@ -147,9 +145,7 @@ class Vls.Server : Object {
 
         server.notification.connect ((client, method, @params) => {
             // debug (@"Got notification! $method");
-            if (!is_initialized) {
-                debug (@"Server is not initialized, ignoring $method");
-            } else if (notif_handlers.contains (method))
+            if (notif_handlers.contains (method))
                 ((NotificationHandler) notif_handlers[method]) (this, client, @params);
             else
                 warning (@"no notification handler for $method");
@@ -157,12 +153,7 @@ class Vls.Server : Object {
 
         server.handle_call.connect ((client, method, id, @params) => {
             // debug (@"Got call! $method");
-            if (!is_initialized && !(method == "initialize" ||
-                                     method == "shutdown" ||
-                                     method == "exit")) {
-                debug (@"Server is not initialized, ignoring $method");
-                return false;
-            } else if (call_handlers.contains (method)) {
+            if (call_handlers.contains (method)) {
                 ((CallHandler) call_handlers[method]) (this, server, client, method, id, @params);
                 return true;
             } else {
@@ -325,25 +316,6 @@ class Vls.Server : Object {
         // always have default project
         default_project = new DefaultProject (root_path);
 
-        foreach (var project in new_projects) {
-            try {
-                project.build_if_stale (cancellable);
-            } catch (Error e) {
-                showMessage (client, @"failed to build project - $(e.message)", MessageType.Error);
-                warning ("[initialize] failed to build project - %s", e.message);
-                return;
-            }
-        }
-
-        // create documentation (compiles GIR files too)
-        var packages = new HashSet<Vala.SourceFile> ();
-        var custom_gir_dirs = new HashSet<File> (Util.file_hash, Util.file_equal);
-        foreach (var project in new_projects) {
-            packages.add_all (project.get_packages ());
-            custom_gir_dirs.add_all (project.get_custom_gir_dirs ());
-        }
-        documentation = new GirDocumentation (packages, custom_gir_dirs);
-
         // build and publish diagnostics
         foreach (var project in new_projects) {
             try {
@@ -357,6 +329,15 @@ class Vls.Server : Object {
             }
         }
 
+        // create documentation (compiles GIR files too)
+        var packages = new HashSet<Vala.SourceFile> ();
+        var custom_gir_dirs = new HashSet<File> (Util.file_hash, Util.file_equal);
+        foreach (var project in new_projects) {
+            packages.add_all (project.get_packages ());
+            custom_gir_dirs.add_all (project.get_custom_gir_dirs ());
+        }
+        documentation = new GirDocumentation (packages, custom_gir_dirs);
+
         // listen for context update requests
         update_context_client = client;
         g_sources += Timeout.add (check_update_context_period_ms, () => {
@@ -367,8 +348,6 @@ class Vls.Server : Object {
         // listen for project changed events
         foreach (Project project in new_projects)
             projects[project] = project.changed.connect (project_changed_event);
-
-        is_initialized = true;
     }
 
     void project_changed_event () {
