@@ -276,9 +276,9 @@ class Vls.Compilation : BuildTarget {
                     try {
                         _project_sources[file] = new TextDocument (code_context, file, _sources_initial_content[file], true);
                     } catch (Error e) {
-                        // TODO: fix meson introspection bugs (see buildtask.vala)
-                        //       and then remove this error handler
                         warning ("Compilation(%s): %s", id, e.message);
+                        Vala.CodeContext.pop ();
+                        throw e;    // rethrow
                     }
                 } else
                     _generated_sources.add (file);
@@ -337,10 +337,8 @@ class Vls.Compilation : BuildTarget {
             } catch (Error e) {
                 warning ("Compilation(%s): could not add file %s - %s", id, generated_file.get_uri (), e.message);
 
-                // Vala.CodeContext.pop ();
-                // TODO: fix Meson introspection bugs (see buildtask.vala)
-                //       first before enabling the following line
-                // throw e;        // rethrow
+                Vala.CodeContext.pop ();
+                throw e;        // rethrow
             }
         }
 

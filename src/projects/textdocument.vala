@@ -47,6 +47,8 @@ class Vls.TextDocument : SourceFile {
         path = path != null ? Util.realpath (path) : null;
         if (path != null && cont == null)
             FileUtils.get_contents (path, out cont);
+        else if (path == null && cont == null)
+            throw new FileError.NOENT (@"file $uri does not exist either on the system or in memory");
         SourceFileType ftype;
         if (uri.has_suffix (".vapi") || uri.has_suffix (".gir"))
             ftype = SourceFileType.PACKAGE;
