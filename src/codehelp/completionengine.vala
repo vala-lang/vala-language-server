@@ -338,21 +338,15 @@ namespace Vls.CompletionEngine {
         }
 
         if (nearest_symbol is Vala.Namespace) {
-            if (!(nearest_symbol is Vala.TypeSymbol))
-                completions.add (new CompletionItem.keyword ("namespace"));
-            if (!(nearest_symbol is Vala.TypeSymbol) || nearest_symbol is Vala.ObjectTypeSymbol)
-                completions.add (new CompletionItem.keyword ("struct"));
-
             completions.add_all_array ({
                 new CompletionItem.keyword ("delegate"),
-                new CompletionItem.keyword ("enum"),
-                new CompletionItem.keyword ("errordomain"),
-                new CompletionItem.keyword ("interface"),
+                new CompletionItem.keyword ("errordomain", "errordomain $0"),
                 new CompletionItem.keyword ("internal"),
-                new CompletionItem.keyword ("unowned"),
+                new CompletionItem.keyword ("namespace", "namespace $0"),
                 new CompletionItem.keyword ("params"),
                 new CompletionItem.keyword ("private"),
                 new CompletionItem.keyword ("public"),
+                new CompletionItem.keyword ("unowned"),
                 new CompletionItem.keyword ("void"),
             });
         }
@@ -360,7 +354,12 @@ namespace Vls.CompletionEngine {
         if (nearest_symbol is Vala.Namespace || nearest_symbol is Vala.ObjectTypeSymbol) {
             completions.add_all_array ({
                 new CompletionItem.keyword ("abstract"),
-                new CompletionItem.keyword ("virtual"),
+                new CompletionItem.keyword ("class", "class $0"),
+                new CompletionItem.keyword ("enum", "enum $0"),
+                new CompletionItem.keyword ("interface", "interface $0"),
+                new CompletionItem.keyword ("struct", "struct $0"),
+                new CompletionItem.keyword ("throws", "throws $0"),
+                new CompletionItem.keyword ("virtual")
             });
         }
 
@@ -374,18 +373,18 @@ namespace Vls.CompletionEngine {
                 new CompletionItem.keyword ("finally", "finally {$1}$0"),
                 new CompletionItem.keyword ("false"),
                 new CompletionItem.keyword ("for", "for (${3:var} ${1:i} = ${2:<expression>}; ${4:<condition>}; ${5:<expression>})$0"),
-                new CompletionItem.keyword ("foreach", "foreach (${3:var} ${1:thing} in ${2:<expression>})$0"),
+                new CompletionItem.keyword ("foreach", "foreach (${3:var} ${1:item} in ${2:<expression>})$0"),
                 new CompletionItem.keyword ("if", "if (${1:<condition>})$0"),
-                new CompletionItem.keyword ("in"),
-                new CompletionItem.keyword ("is"),
+                new CompletionItem.keyword ("in", "in ${1:<expression>}$0"),
+                new CompletionItem.keyword ("is", "is ${1:<type>}$0"),
                 new CompletionItem.keyword ("new"),
                 new CompletionItem.keyword ("null"),
-                new CompletionItem.keyword ("return"),
+                new CompletionItem.keyword ("return", "return ${1:<expression>};$0"),
                 new CompletionItem.keyword ("switch", "switch (${1:<expression>}) {$0}"),
                 new CompletionItem.keyword ("throw"),
                 new CompletionItem.keyword ("true"),
                 new CompletionItem.keyword ("try", "try {$1} catch ($2) {$3}$0"),
-                new CompletionItem.keyword ("var"),
+                new CompletionItem.keyword ("var", "var ${1:<var-name>} = $0"),
                 new CompletionItem.keyword ("while", "while (${1:<condition>})$0"),
 #if VALA_0_50
                 new CompletionItem.keyword ("with", "with (${1:<expression>}) {$0}"),
@@ -395,7 +394,7 @@ namespace Vls.CompletionEngine {
         }
 
         if (nearest_symbol == Vala.CodeContext.get ().root)
-            completions.add (new CompletionItem.keyword ("using"));
+            completions.add (new CompletionItem.keyword ("using", "using ${1:<namespace>};$0"));
         
         if (in_loop) {
             completions.add_all_array ({
