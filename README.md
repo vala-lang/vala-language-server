@@ -31,6 +31,7 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
     - [GNOME Builder](#gnome-builder)
     - [Kate](#kate)
     - [Emacs](#emacs)
+    - [Sublime Text](#sublime-text)
   - [Contributing](#contributing)
 
 ## Features
@@ -126,6 +127,10 @@ if executable('vala-language-server')
 endif
 ```
 
+#### nvim-lspconfig
+- [For Neovim 0.5.0](https://github.com/neovim/nvim-lspconfig)
+- see `CONFIG.md` in that project
+
 ### Visual Studio Code
 - [Official Vala plugin](https://marketplace.visualstudio.com/items?itemName=prince781.vala)
 
@@ -134,10 +139,28 @@ endif
 - Running `ninja -C build install` should install the third-party plugin to `$PREFIX/lib/gnome-builder/plugins`. Enable `Vala` and disable `GNOME Vala Language Server`.
 
 ### Kate
-- officially supported since Kate 21.07.70
+- officially supported in Kate git master
 
 ### Emacs
 - supported with the [lsp-mode](https://github.com/emacs-lsp/lsp-mode) plugin
+
+### Sublime Text
+- Install the [Vala-TMBundle](https://packagecontrol.io/packages/Vala-TMBundle) and [LSP](https://github.com/sublimelsp/LSP) packages
+- Add this to your `LSP.sublime-settings`:
+```json
+{
+    "clients": {
+        "vala-language-server": {
+            "command": [
+                "/usr/bin/vala-language-server"
+            ],
+            "selector": "source.vala | source.genie",
+            "enabled": true
+        }
+    }
+}
+```
+- Run `Tools > LSP > Enable Language Server Globally... > vala-language-server`
 
 ## Contributing
 Want to help out? Here are some helpful resources:
