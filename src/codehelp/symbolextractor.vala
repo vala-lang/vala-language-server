@@ -833,8 +833,8 @@ class Vls.SymbolExtractor : Object {
 
         while (lb_idx > 0 && source_file.content[lb_idx].isdigit ())
             lb_idx--;
-        
-        if (lb_idx == idx || lb_idx < 0)
+
+        if (lb_idx == idx || lb_idx < 0 || source_file.content[lb_idx].isalnum () || source_file.content[lb_idx] == '_')
             return null;
         
         string str = source_file.content.substring (lb_idx + 1, idx - lb_idx);
@@ -848,6 +848,12 @@ class Vls.SymbolExtractor : Object {
         string? second_part = parse_integer ();
         bool has_decimal_point = skip_char ('.');
         string? first_part = parse_integer ();
+
+        if ((first_part == null && has_decimal_point || second_part == null) &&
+            (source_file.content[idx].isalnum () || source_file.content[idx] == '_')) {
+            this.idx = saved_idx;
+            return null;
+        }
 
         if ((first_part != null || second_part != null) && has_decimal_point)
             return (first_part ?? "") + "." + (second_part ?? "");
