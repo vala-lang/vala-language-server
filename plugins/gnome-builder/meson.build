@@ -16,7 +16,7 @@ if builder_abi == 'auto'
   endif
 endif
 
-if builder_abi != 'auto'
+if builder_abi != 'auto' and builder_abi.version_compare('<3.41')
   conf.set('BUILDER_ABI', builder_abi)
   configure_file(
     input: 'vala_langserv.plugin.in',
