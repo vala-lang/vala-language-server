@@ -472,23 +472,20 @@ class Vls.SymbolExtractor : Object {
 #if VALA_0_50
                     if (current_block is Vala.WithStatement) {
                         inner_with = ((Vala.WithStatement)current_block).expression;
-                        Vala.Symbol? with_symbol;
 
                         if (inner_with is Vala.MemberAccess)
                             method_type_arguments = ((Vala.MemberAccess)inner_with).get_type_arguments ();
 
                         if (inner_with.value_type != null) {
-                            with_symbol = Vala.SemanticAnalyzer.get_symbol_for_data_type (inner_with.value_type);
+                            resolved_sym = inner_with.value_type.get_member (fake_ma.member_name);
                         } else {
-                            with_symbol = inner_with.symbol_reference;
+                            var with_symbol = inner_with.symbol_reference;
+                            if (with_symbol != null)
+                                resolved_sym = Vala.SemanticAnalyzer.symbol_lookup_inherited (with_symbol, fake_ma.member_name);
                         }
 
-                        if (with_symbol != null) {
-                            resolved_sym = Vala.SemanticAnalyzer.symbol_lookup_inherited (with_symbol, fake_ma.member_name);
-
-                            if (resolved_sym != null)
-                                break;
-                        }
+                        if (resolved_sym != null)
+                            break;
                     }
 #endif
                     resolved_sym = current_block.scope.lookup (fake_ma.member_name);
@@ -553,21 +550,20 @@ class Vls.SymbolExtractor : Object {
             } else {
                 Vala.Expression inner = resolve_typed_expression (fake_ma.inner);
                 Vala.List<Vala.DataType>? method_type_arguments = null;
-                Vala.Symbol? symbol;
+                Vala.Symbol? member;
 
                 if (inner is Vala.MemberAccess)
                     method_type_arguments = ((Vala.MemberAccess)inner).get_type_arguments ();
 
                 if (inner.value_type != null) {
-                    symbol = Vala.SemanticAnalyzer.get_symbol_for_data_type (inner.value_type);
-                    if (symbol == null)
-                        throw new TypeResolutionError.NTH_EXPRESSION ("could not get symbol for inner data type");
+                    member = inner.value_type.get_member (fake_ma.member_name);
                 } else {
-                    symbol = inner.symbol_reference;
-                    if (symbol == null)
+                    var inner_symbol = inner.symbol_reference;
+                    if (inner_symbol == null)
                         throw new TypeResolutionError.NTH_EXPRESSION ("inner expr `%s' has no symbol reference", inner.to_string ());
+                    member = Vala.SemanticAnalyzer.symbol_lookup_inherited (inner_symbol, fake_ma.member_name);
                 }
-                Vala.Symbol? member = Vala.SemanticAnalyzer.symbol_lookup_inherited (symbol, fake_ma.member_name);
+
                 if (member == null)
                     throw new TypeResolutionError.NTH_EXPRESSION ("could not resolve member `%s' from inner", fake_ma.member_name);
                 var expr = new Vala.MemberAccess (inner, fake_ma.member_name);
