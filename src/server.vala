@@ -73,13 +73,9 @@ class Vls.Server : Object {
 
     static construct {
         Process.@signal (ProcessSignal.INT, () => {
-            if (!Server.received_signal)
-                cancellable.cancel ();
             Server.received_signal = true;
         });
         Process.@signal (ProcessSignal.TERM, () => {
-            if (!Server.received_signal)
-                cancellable.cancel ();
             Server.received_signal = true;
         });
     }
