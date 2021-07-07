@@ -778,7 +778,7 @@ namespace Vls.CompletionEngine {
             else if (symbol is Vala.Method && ((Vala.Method) symbol).coroutine)
                 add_completions_for_async_method (data_type, (Vala.Method) symbol, current_scope, completions);
             else if (data_type is Vala.ArrayType)
-                add_completions_for_array_type ((Vala.ArrayType) data_type, current_scope, completions);
+                add_completions_for_array_type (code_style, (Vala.ArrayType) data_type, current_scope, completions);
             else if (symbol is Vala.TypeSymbol)
                 add_completions_for_type (lang_serv, project, code_style, null, (Vala.TypeSymbol)symbol, completions, current_scope, in_oce, is_cm_this_or_base_access);
             else {
@@ -1243,8 +1243,10 @@ namespace Vls.CompletionEngine {
     /**
      * Use this to complete members of an array.
      */
-    void add_completions_for_array_type (Vala.ArrayType atype, Vala.Scope scope, Set<CompletionItem> completions) {
+    void add_completions_for_array_type (CodeStyleAnalyzer? code_style,
+                                         Vala.ArrayType atype, Vala.Scope scope, Set<CompletionItem> completions) {
         var length_member = atype.get_member ("length");
+        uint method_spaces = code_style != null ? code_style.average_spacing_before_parens : 1;
         if (length_member != null)
             completions.add (new CompletionItem.from_symbol (
                 atype,
@@ -1255,12 +1257,17 @@ namespace Vls.CompletionEngine {
                     new DocComment (@"(= $(CodeHelp.get_expression_representation (atype.length)))") : null)));
         foreach (string method_name in new string[] {"copy", "move", "resize"}) {
             var method = atype.get_member (method_name);
-            if (method != null)
+            if (method is Vala.Method) {
                 completions.add (new CompletionItem.from_symbol (
-                    atype,
-                    method,
-                    scope,
-                    CompletionItemKind.Method, null));
+                        atype,
+                        method,
+                        scope,
+                        CompletionItemKind.Method,
+                        null) {
+                    insertText = generate_insert_text_for_callable (atype, (Vala.Method)method, scope, method_spaces),
+                    insertTextFormat = InsertTextFormat.Snippet,
+                });
+            }
         }
     }
 
