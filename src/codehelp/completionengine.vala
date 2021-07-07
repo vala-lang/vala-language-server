@@ -878,6 +878,37 @@ namespace Vls.CompletionEngine {
         return true;
     }
 
+    /**
+     * Generate insert text for a class, struct, or interface
+     */
+    string? generate_insert_text_for_type_symbol (Vala.TypeSymbol type_symbol,
+                                                  Vala.Scope? current_scope, uint method_spaces) {
+        Vala.List<Vala.TypeParameter>? type_parameters = null;
+
+        if (type_symbol is Vala.ObjectTypeSymbol)
+            type_parameters = ((Vala.ObjectTypeSymbol)type_symbol).get_type_parameters ();
+        else if (type_symbol is Vala.Struct)
+            type_parameters = ((Vala.Struct)type_symbol).get_type_parameters ();
+        else if (type_symbol is Vala.Delegate)
+            type_parameters = ((Vala.Delegate)type_symbol).get_type_parameters ();
+
+        if (type_parameters == null || type_parameters.is_empty)
+            return null;
+
+        var builder = new StringBuilder (type_symbol.name);
+        builder.append_c ('<');
+        uint p = 0;
+        foreach (var type_parameter in type_parameters) {
+            if (p > 0)
+                builder.append (", ");
+            builder.append_printf ("${%u:%s}", p + 1, type_parameter.name);
+            p++;
+        }
+        builder.append_c ('>');
+        builder.append ("$0");
+        return builder.str;
+    }
+
     string? generate_insert_text_for_callable (Vala.DataType? type, Vala.Callable callable_sym,
                                                Vala.Scope? current_scope, uint method_spaces) {
         var builder = new StringBuilder ();
@@ -1351,18 +1382,31 @@ namespace Vls.CompletionEngine {
         if (!in_oce || has_named_ctors
             || !class_sym.get_classes ().is_empty || !class_sym.get_interfaces ().is_empty
             || !class_sym.get_structs ().is_empty) {
-            var class_suggestion = new CompletionItem.from_symbol (null, class_sym, scope, CompletionItemKind.Class, lang_serv.get_symbol_documentation (project, class_sym));
-            completions.add (class_suggestion);
+            completions.add (new CompletionItem.from_symbol (
+                null,
+                class_sym,
+                scope,
+                CompletionItemKind.Class,
+                lang_serv.get_symbol_documentation (project, class_sym)) {
+                insertText = generate_insert_text_for_type_symbol (class_sym, scope, method_spaces),
+                insertTextFormat = InsertTextFormat.Snippet
+            });
         }
 
         if (in_oce && !class_sym.is_abstract && class_sym.default_construction_method != null) {
             var ctor_documentation = lang_serv.get_symbol_documentation (project, class_sym.default_construction_method);
             if (ctor_documentation == null)
                 ctor_documentation = lang_serv.get_symbol_documentation (project, class_sym);
-            var ctor_suggestion = new CompletionItem.from_symbol (null, class_sym.default_construction_method, scope, CompletionItemKind.Constructor, ctor_documentation, class_sym.name);
-            ctor_suggestion.insertText = generate_insert_text_for_callable (null, class_sym.default_construction_method, scope, method_spaces);
-            ctor_suggestion.insertTextFormat = InsertTextFormat.Snippet;
-            completions.add (ctor_suggestion);
+            completions.add (new CompletionItem.from_symbol (
+                null,
+                class_sym.default_construction_method,
+                scope,
+                CompletionItemKind.Constructor,
+                ctor_documentation,
+                class_sym.name) {
+                insertText = generate_insert_text_for_callable (null, class_sym.default_construction_method, scope, method_spaces),
+                insertTextFormat = InsertTextFormat.Snippet
+            });
         }
     }
 
