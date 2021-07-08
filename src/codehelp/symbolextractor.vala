@@ -297,7 +297,9 @@ class Vls.SymbolExtractor : Object {
      */
     public bool in_oce {
         get {
-            return extracted_expression is Vala.ObjectCreationExpression || _in_fake_oce;
+            if (_extracted_expression == null && !attempted_extract_expression)
+                compute_extracted_expression ();
+            return _in_fake_oce;
         }
     }
 
@@ -700,7 +702,7 @@ class Vls.SymbolExtractor : Object {
         bool at_ma = skip_member_access ();
         skip_whitespace ();
         // check lookup was successful
-        FakeExpr? expr = parse_fake_expr (true, true, at_ma);
+        FakeExpr? expr = parse_fake_expr (true, true, at_ma, true);
 
         attempted_extract_expression = true;
 
@@ -710,7 +712,7 @@ class Vls.SymbolExtractor : Object {
         }
 
         // debug ("extracted expression - %s", expr.to_string ());
-        _in_fake_oce = expr is FakeObjectCreationExpr;
+        _in_fake_oce = expr is FakeObjectCreationExpr && !(((FakeObjectCreationExpr)expr).inner is FakeMethodCall && at_ma);
         
         try {
             _extracted_expression = resolve_typed_expression (expr);
@@ -1099,7 +1101,7 @@ class Vls.SymbolExtractor : Object {
             skip_whitespace ();
             if (skip_member_access ()) {
                 skip_whitespace ();
-                inner = allow_inner_exprs ? parse_fake_expr () : parse_fake_member_access_expr ();
+                inner = allow_inner_exprs ? parse_fake_expr (true) : parse_fake_member_access_expr (false);
             }
             ma_expr = new FakeMemberAccess (ident, type_arguments, inner);
         } else {
@@ -1112,7 +1114,8 @@ class Vls.SymbolExtractor : Object {
 
     private FakeExpr? parse_fake_expr (bool oce_allowed = false, 
                                        bool accept_incomplete_method_call = false,
-                                       bool at_member_access = false) {
+                                       bool at_member_access = false,
+                                       bool accept_incomplete_oce = false) {
         // because a regex literal may end with a modifier, attempt to parse literals first
         FakeExpr? expr = null;
         if ((expr = parse_literal ()) != null)
@@ -1155,7 +1158,7 @@ class Vls.SymbolExtractor : Object {
         
         if (oce_allowed) {
             skip_whitespace ();
-            if (skip_ident ("new")) {
+            if ((have_tuple || accept_incomplete_oce) && skip_ident ("new")) {
                 if (have_tuple)
                     expr = new FakeObjectCreationExpr.with_method_call ((FakeMethodCall)expr);
                 else
