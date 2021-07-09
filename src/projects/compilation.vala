@@ -322,6 +322,7 @@ class Vls.Compilation : BuildTarget {
     }
 
     private void compile () throws Error {
+        debug ("compiling %s ...", id);
         Vala.CodeContext.push (code_context);
         var vala_parser = new Vala.Parser ();
         var genie_parser = new Vala.Genie.Parser ();
@@ -335,7 +336,7 @@ class Vls.Compilation : BuildTarget {
                     throw new FileError.NOENT (@"file does not exist");
                 code_context.add_source_file (new TextDocument (code_context, generated_file));
             } catch (Error e) {
-                warning ("Compilation(%s): could not add file %s - %s", id, generated_file.get_uri (), e.message);
+                warning ("could not add file for %s: %s - %s", id, generated_file.get_uri (), e.message);
 
                 Vala.CodeContext.pop ();
                 throw e;        // rethrow
@@ -401,6 +402,7 @@ class Vls.Compilation : BuildTarget {
         last_updated = new DateTime.now ();
         _completed_first_compile = true;
         Vala.CodeContext.pop ();
+        debug ("finished compiling %s", id);
     }
 
     public override void build_if_stale (Cancellable? cancellable = null) throws Error {
