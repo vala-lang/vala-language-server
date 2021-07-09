@@ -32,7 +32,7 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
         get {
             if (_num_callable == 0)
                 return 1;
-            return _total_spacing / _num_callable;
+            return (_total_spacing + _num_callable / 2) / _num_callable;
         }
     }
 
