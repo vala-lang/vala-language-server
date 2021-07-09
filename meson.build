@@ -42,11 +42,16 @@ endif
 
 conf = configuration_data()
 conf.set('LIBVALA_VERSION', libvala.version())
-conf.set('VLS_VERSION', meson.project_version())
+conf.set('PROJECT_BUGSITE', 'https://github.com/Prince781/vala-language-server/issues')
+conf.set('PROJECT_NAME', meson.project_name())
 
 conf_file = configure_file(input: 'config.vala.in',
                            output: 'config.vala',
                            configuration: conf)
+
+version_file = vcs_tag(input: 'version.vala.in',
+                       output: 'version.vala',
+                       command: ['git', 'describe', '--tags', '--dirty'])
 
 add_project_arguments(['--enable-gobject-tracing', '--fatal-warnings'], language: 'vala')
 

@@ -1,4 +1,5 @@
 namespace Config {
-    const string libvala_version = "@LIBVALA_VERSION@";
-    const string version = "@VLS_VERSION@";
+    const string LIBVALA_VERSION = "@LIBVALA_VERSION@";
+    const string PROJECT_BUGSITE = "@PROJECT_BUGSITE@";
+    const string PROJECT_NAME = "@PROJECT_NAME@";
 }

@@ -253,7 +253,7 @@ class Vls.Server : Object {
                 ),
                 serverInfo: buildDict (
                     name: new Variant.string ("Vala Language Server"),
-                    version: new Variant.string (Config.version)
+                    version: new Variant.string (Config.PROJECT_VERSION)
                 )
             ), cancellable);
         } catch (Error e) {
@@ -1968,9 +1968,38 @@ class Vls.Server : Object {
     }
 }
 
-void main () {
+/**
+ * `--version`
+ */
+bool opt_version;
+
+const OptionEntry[] entries = {
+    { "version", 'V', OptionFlags.NONE, OptionArg.NONE, ref opt_version, "Print the version and commit info", null },
+    {}
+};
+
+int main (string[] args) {
     Environment.set_prgname ("vala-language-server");
+    var ocontext = new OptionContext ("- vala-language-server");
+    ocontext.add_main_entries (entries, null);
+    ocontext.set_summary ("A language server for Vala");
+    ocontext.set_description (@"Report bugs to $(Config.PROJECT_BUGSITE)");
+    try {
+        ocontext.parse (ref args);
+    } catch (Error e) {
+        stderr.printf ("%s\n", e.message);
+        stderr.printf ("Run '%s --version' to print version, or no arguments to run the language server.\n", args[0]);
+        return 1;
+    }
+
+    if (opt_version) {
+        stdout.printf ("%s %s\n", Config.PROJECT_NAME, Config.PROJECT_VERSION);
+        return 1;
+    }
+
+    // otherwise
     var loop = new MainLoop ();
     new Vls.Server (loop);
     loop.run ();
+    return 0;
 }

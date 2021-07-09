@@ -35,6 +35,6 @@ endif
 
 executable('vala-language-server',
   dependencies: deps,
-  sources: [vls_src, conf_file, extra_vala_sources],
+  sources: [vls_src, conf_file, version_file, extra_vala_sources],
   c_args: ['-DG_LOG_DOMAIN="vls"'],
   install: true)
