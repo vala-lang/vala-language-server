@@ -286,12 +286,16 @@ namespace Lsp {
         }
         public Range selectionRange { get; set; }
         public Gee.List<DocumentSymbol> children { get; private set; default = new Gee.LinkedList<DocumentSymbol> (); }
+        public string? parent_name;
+
+        private DocumentSymbol () {}
 
         /**
          * @param type the data type containing this symbol, if there was one (not available for Namespaces, for example)
          * @param sym the symbol
          */
         public DocumentSymbol.from_vala_symbol (Vala.DataType? type, Vala.Symbol sym, SymbolKind kind) {
+            this.parent_name = sym.parent_symbol != null ? sym.parent_symbol.name : null;
             this._initial_range = new Range.from_sourceref (sym.source_reference);
             if (sym is Vala.Subroutine) {
                 var sub = (Vala.Subroutine) sym;
@@ -350,6 +354,7 @@ namespace Lsp {
             this.name = dsym.name;
             this.kind = dsym.kind;
             this.location = new Location (uri, dsym.range);
+            this.containerName = dsym.parent_name;
         }
     }
 
