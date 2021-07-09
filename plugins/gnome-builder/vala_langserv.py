@@ -190,3 +190,6 @@ class VlsHoverProvider(Ide.LspHoverProvider):
         self.props.priority = 200
         VlsService.bind_client(self)
 
+class VlsSearchProvider(Ide.LspSearchProvider, Ide.SearchProvider):
+    def do_load(self, context):
+        VlsService.bind_client(self)
