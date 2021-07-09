@@ -214,7 +214,7 @@ namespace Vls.CompletionEngine {
                        Set<CompletionItem> completions,
                        bool in_oce) {
         string method = "textDocument/completion";
-        var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (doc);
+        var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (doc) as CodeStyleAnalyzer;
         bool in_instance = false;
         bool inside_static_or_class_construct_block = false;
         var seen_props = new HashSet<string> ();
@@ -415,7 +415,7 @@ namespace Vls.CompletionEngine {
                                      Vala.SourceFile doc, Vala.TypeSymbol type_symbol, Vala.Scope scope,
                                      Gee.List<Pair<Vala.DataType?, Vala.Symbol>> missing_symbols,
                                      Set<CompletionItem> completions) {
-        var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (doc);
+        var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (doc) as CodeStyleAnalyzer;
         string spaces = " ";
 
         if (code_style != null)
@@ -745,7 +745,7 @@ namespace Vls.CompletionEngine {
                        Vala.CodeNode result, Vala.Scope? scope, Set<CompletionItem> completions,
                        bool retry_inner = true) {
         string method = "textDocument/completion";
-        var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (doc);
+        var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (doc) as CodeStyleAnalyzer;
         Vala.Scope current_scope = scope ?? CodeHelp.get_scope_containing_node (result);
         Vala.DataType? data_type = null;
         Vala.Symbol? symbol = null;

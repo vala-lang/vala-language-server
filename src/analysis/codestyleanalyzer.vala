@@ -36,6 +36,10 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
         }
     }
 
+    public CodeStyleAnalyzer (Vala.SourceFile source_file) {
+        this.visit_source_file (source_file);
+    }
+
     public override void visit_source_file (SourceFile source_file) {
         current_file = source_file;
         source_file.accept_children (this);
@@ -72,13 +76,17 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
         st.accept_children (this);
     }
 
-    public override void visit_delegate (Delegate d) {
-        if (d.source_reference == null || d.source_reference.file != current_file ||
-            d.source_reference.begin.pos == null)
-            return;
+    private void analyze_callable (Callable callable) {
         _num_callable++;
 
-        unowned string text = (string)d.source_reference.end.pos;
+        // because we allow content to be temporarily inconsistent with the
+        // parse tree (to allow for fast code completion), we have to use
+        // [last_fresh_content]
+        unowned var content = (current_file is TextDocument) ?
+            ((TextDocument)current_file).last_fresh_content : current_file.content;
+        var sr = callable.source_reference;
+        var zero_idx = (long) Util.get_string_pos (content, sr.end.line - 1, sr.end.column);
+        unowned string text = content.offset (zero_idx);
         var spaces = 0;
         unichar c = '\0';
         for (var i = 0; text.get_next_char (ref i, out c) && c != '(' && !(c == '\r' || c == '\n');)
@@ -88,18 +96,16 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
         _total_spacing += spaces;
     }
 
+    public override void visit_delegate (Delegate d) {
+        if (d.source_reference == null || d.source_reference.file != current_file ||
+            d.source_reference.begin.pos == null)
+            return;
+        analyze_callable (d);
+    }
+
     public override void visit_method (Method m) {
         if (m.source_reference == null || m.source_reference.begin.pos == null)
             return;
-        _num_callable++;
-
-        unowned string text = (string)m.source_reference.end.pos;
-        var spaces = 0;
-        unichar c = '\0';
-        for (var i = 0; text.get_next_char (ref i, out c) && c != '(' && !(c == '\r' || c == '\n');)
-            spaces++;
-        if (c == '\r' || c == '\n')
-            spaces = 1;
-        _total_spacing += spaces;
+        analyze_callable (m);
     }
 }

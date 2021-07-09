@@ -374,12 +374,13 @@ abstract class Vls.Project : Object {
     /**
      * Get all source files used in this project.
      */
-    public Collection<Vala.SourceFile> get_project_source_files () {
-        var results = new ArrayList<Vala.SourceFile> ();
+    public Iterable<Map.Entry<Vala.SourceFile, Compilation>> get_project_source_files () {
+        var results = new HashMap<Vala.SourceFile, Compilation> ();
         foreach (var btarget in build_targets) {
             if (!(btarget is Compilation))
                 continue;
-            results.add_all (((Compilation)btarget).get_project_files ());
+            foreach (var file in ((Compilation)btarget).get_project_files ())
+                results[file] = (Compilation)btarget;
         }
         return results;
     }

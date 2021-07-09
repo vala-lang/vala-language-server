@@ -40,6 +40,22 @@ class Vls.TextDocument : SourceFile {
         }
     }
 
+    private string? _last_fresh_content = null;
+
+    /**
+     * The contents at the time of compilation.
+     */
+    public string last_fresh_content {
+        get {
+            if (_last_fresh_content == null)
+                return this.content;
+            return _last_fresh_content;
+        }
+        set {
+            _last_fresh_content = value;
+        }
+    }
+
     public TextDocument (CodeContext context, File file, string? content = null, bool cmdline = false) throws FileError {
         string? cont = content;
         string uri = file.get_uri ();

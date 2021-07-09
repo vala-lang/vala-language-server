@@ -176,7 +176,7 @@ class Vls.Server : Object {
         call_handlers["textDocument/references"] = this.textDocumentReferences;
         call_handlers["textDocument/documentHighlight"] = this.textDocumentReferences;
         call_handlers["textDocument/implementation"] = this.textDocumentImplementation;
-        call_handlers["workspace/symbol"] = this.workspaceSymbol;
+        call_handlers["workspace/symbol"] = this.handle_workspace_symbol_request;
         call_handlers["textDocument/rename"] = this.textDocumentRename;
         call_handlers["textDocument/prepareRename"] = this.textDocumentPrepareRename;
         call_handlers["textDocument/codeLens"] = this.handle_code_lens_request;
@@ -1026,7 +1026,7 @@ class Vls.Server : Object {
             Vala.CodeContext.push (compilation.code_context);
 
             var array = new Json.Array ();
-            var syms = new ListSymbols (file);
+            var syms = compilation.get_analysis_for_file<SymbolEnumerator> (file) as SymbolEnumerator;
             if (init_params.capabilities.textDocument.documentSymbol.hierarchicalDocumentSymbolSupport)
                 foreach (var dsym in syms) {
                     // debug(@"found $(dsym.name)");
@@ -1035,7 +1035,7 @@ class Vls.Server : Object {
             else {
                 foreach (var dsym in syms.flattened ()) {
                     // debug(@"found $(dsym.name)");
-                    array.add_element (Json.gobject_serialize (new SymbolInformation.from_document_symbol (dsym, p.textDocument.uri)));
+                    array.add_element (Json.gobject_serialize (dsym));
                 }
             }
 
@@ -1586,8 +1586,7 @@ class Vls.Server : Object {
         });
     }
 
-    // TODO: avoid recreating SymbolInformation unless the compilation has changed?
-    void workspaceSymbol (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void handle_workspace_symbol_request (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var query = (string) @params.lookup_value ("query", VariantType.STRING);
 
         wait_for_context_update (id, request_cancelled => {
@@ -1600,19 +1599,22 @@ class Vls.Server : Object {
             Project[] all_projects = projects.get_keys_as_array ();
             all_projects += default_project;
             foreach (var project in all_projects) {
-                foreach (var text_document in project.get_project_source_files ()) {
-                    Vala.CodeContext.push (text_document.context);
-                    new ListSymbols (text_document)
-                        .flattened ()
-                        // NOTE: if introspection for g_str_match_string () / string.match_string ()
-                        // is fixed, this will have to be changed to `dsym.name.match_sting (query, true)`
-                        .filter (dsym => query.match_string (dsym.name, true))
-                        .foreach (dsym => {
-                            var si = new SymbolInformation.from_document_symbol (dsym, 
-                                File.new_for_commandline_arg_and_cwd (text_document.filename, project.root_path).get_uri ());
-                            json_array.add_element (Json.gobject_serialize (si));
-                            return true;
-                        });
+                foreach (var source_pair in project.get_project_source_files ()) {
+                    var text_document = source_pair.key;
+                    var compilation = source_pair.value;
+                    Vala.CodeContext.push (compilation.code_context);
+                    var symbol_enumerator = compilation.get_analysis_for_file<SymbolEnumerator> (text_document) as SymbolEnumerator;
+                    if (symbol_enumerator != null) {
+                        symbol_enumerator
+                            .flattened ()
+                            // NOTE: if introspection for g_str_match_string () / string.match_string ()
+                            // is fixed, this will have to be changed to `dsym.name.match_sting (query, true)`
+                            .filter (dsym => query.match_string (dsym.name, true))
+                            .foreach (dsym => {
+                                json_array.add_element (Json.gobject_serialize (dsym));
+                                return true;
+                            });
+                    }
                     Vala.CodeContext.pop ();
                 }
             }

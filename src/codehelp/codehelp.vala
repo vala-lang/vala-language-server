@@ -70,15 +70,21 @@ namespace Vls.CodeHelp {
         if (sr == null)
             return @"(error - $(expr.type_name) does not have source ref!)";
         var file = sr.file;
+        unowned string content;
         if (file.content == null)
             file.content = (string) file.get_mapped_contents ();
-        var from = (long) Util.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
-        var to = (long) Util.get_string_pos (file.content, sr.end.line-1, sr.end.column);
+        if (sr.file is TextDocument) {
+            content = ((TextDocument)sr.file).last_fresh_content;
+        } else {
+            content = file.content;
+        }
+        var from = (long) Util.get_string_pos (content, sr.begin.line-1, sr.begin.column-1);
+        var to = (long) Util.get_string_pos (content, sr.end.line-1, sr.end.column);
         if (from > to) {
             warning ("expression %s has bad source reference %s", expr.to_string (), expr.source_reference.to_string ());
             return expr.to_string ();
         }
-        return file.content [from:to];
+        return file.content[from:to];
     }
 
     /**

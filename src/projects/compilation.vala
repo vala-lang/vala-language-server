@@ -46,7 +46,7 @@ class Vls.Compilation : BuildTarget {
     /**
      * The analyses for each project source.
      */
-    private HashMap<TextDocument, CodeAnalyzer> _source_analyzers = new HashMap<TextDocument, CodeAnalyzer> ();
+    private HashMap<Vala.SourceFile, HashMap<Type, CodeAnalyzer>> _source_analyzers = new HashMap<Vala.SourceFile, HashMap<Type, CodeAnalyzer>> ();
 
     public Vala.CodeContext code_context { get; private set; default = new Vala.CodeContext (); }
 
@@ -378,26 +378,16 @@ class Vls.Compilation : BuildTarget {
                 source_file.accept (new CNameMapper (cname_to_sym));
         }
 
-        // update the code analyses
-        var removed_sources = new HashSet<TextDocument> ();
-        foreach (var entry in _source_analyzers)
-            removed_sources.add (entry.key);
-
+        // remove analyses for sources that are no longer a part of the code context
+        var removed_sources = new Vala.HashSet<Vala.SourceFile> ();
+        removed_sources.add_all (code_context.get_source_files ());
         foreach (var entry in _project_sources) {
-            var source = entry.value;
-            if (!_source_analyzers.has_key (source) ||
-                _source_analyzers[source].last_updated.compare (source.last_updated) < 0) {
-                var analyzer = new CodeStyleAnalyzer ();
-                analyzer.visit_source_file (source);
-                analyzer.last_updated = source.last_updated;
-                _source_analyzers[source] = analyzer;
-            }
-            removed_sources.remove (source);
+            var text_document = entry.value;
+            text_document.last_fresh_content = text_document.content;
+            removed_sources.remove (entry.value);
         }
-
-        // remove source analyzers for files that have been removed
-        foreach (var removed_source in removed_sources)
-            _source_analyzers.unset (removed_source, null);
+        foreach (var source in removed_sources)
+            _source_analyzers.unset (source, null);
 
         last_updated = new DateTime.now ();
         _completed_first_compile = true;
@@ -434,13 +424,33 @@ class Vls.Compilation : BuildTarget {
     /**
      * Get the analysis for the source file
      */
-    public T? get_analysis_for_file<T> (Vala.SourceFile source) {
-        var document = source as TextDocument;
+    public CodeAnalyzer? get_analysis_for_file<T> (Vala.SourceFile source) {
+        var analyses = _source_analyzers[source];
+        if (analyses == null) {
+            analyses = new HashMap<Type, CodeAnalyzer> ();
+            _source_analyzers[source] = analyses;
+        }
 
-        if (document == null)
-            return null;
+        // generate the analysis on demand if it doesn't exist or it is stale
+        CodeAnalyzer? analysis = null;
+        if (!analyses.has_key (typeof (T)) || analyses[typeof (T)].last_updated.compare (last_updated) < 0) {
+            Vala.CodeContext.push (code_context);
+            if (typeof (T) == typeof (CodeStyleAnalyzer)) {
+                analysis = new CodeStyleAnalyzer (source);
+            } else if (typeof (T) == typeof (SymbolEnumerator)) {
+                analysis = new SymbolEnumerator (source);
+            }
 
-        return _source_analyzers[document];
+            if (analysis != null) {
+                analysis.last_updated = new DateTime.now ();
+                analyses[typeof (T)] = analysis;
+            }
+            Vala.CodeContext.pop ();
+        } else {
+            analysis = analyses[typeof (T)];
+        }
+
+        return analysis;
     }
 
     public bool lookup_input_source_file (File file, out Vala.SourceFile input_source) {

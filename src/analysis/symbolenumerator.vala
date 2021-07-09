@@ -1,4 +1,4 @@
-/* list_symbols.vala
+/* symbolenumerator.vala
  *
  * Copyright 2020 Princeton Ferro <princetonferro@gmail.com>
  *
@@ -21,16 +21,20 @@ using Lsp;
 /**
  * Used to list all symbols defined in a document, usually for outlining.
  */
-class Vls.ListSymbols : Vala.CodeVisitor {
+class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
     private Vala.SourceFile file;
     private Gee.Deque<DocumentSymbol> containers;
     private Gee.List<DocumentSymbol> top_level_syms;
     private Gee.TreeMap<Range, DocumentSymbol> syms_flat;
     private Gee.List<DocumentSymbol> all_syms;
+    private Gee.List<SymbolInformation>? all_sym_infos;
     private Gee.HashMap<string, DocumentSymbol> ns_name_to_dsym;
     Vala.TypeSymbol? str_sym; 
+    string uri;
 
-    public ListSymbols (Vala.SourceFile file) {
+    public DateTime last_updated { get; set; }
+
+    public SymbolEnumerator (Vala.SourceFile file) {
         this.file = file;
         this.top_level_syms = new Gee.LinkedList<DocumentSymbol> ();
         this.containers = new Gee.LinkedList<DocumentSymbol> ();
@@ -38,17 +42,30 @@ class Vls.ListSymbols : Vala.CodeVisitor {
         this.all_syms = new Gee.LinkedList<DocumentSymbol> ();
         this.ns_name_to_dsym = new Gee.HashMap<string, DocumentSymbol> ();
 
-        str_sym = file.context.root.scope.lookup ("string") as Vala.TypeSymbol;
+        try {
+            uri = Filename.to_uri (file.filename);
+        } catch (Error e) {
+            warning ("%s is not a URI!", file.filename);
+            return;
+        }
 
+        str_sym = file.context.root.scope.lookup ("string") as Vala.TypeSymbol;
         this.visit_source_file (file);
+        str_sym = null;
     }
 
     public Gee.Iterator<DocumentSymbol> iterator () {
         return top_level_syms.iterator ();
     }
 
-    public Gee.Iterable<DocumentSymbol> flattened () {
-        return all_syms;
+    public Gee.Iterable<SymbolInformation> flattened () {
+        if (all_sym_infos == null) {
+            all_sym_infos = new Gee.LinkedList<SymbolInformation> ();
+            all_sym_infos.add_all_iterator (
+                all_syms
+                .map<SymbolInformation> (s => new SymbolInformation.from_document_symbol (s, uri)));
+        }
+        return all_sym_infos;
     }
 
     public DocumentSymbol? add_symbol (Vala.Symbol sym, SymbolKind kind, bool adding_parent = false) {
