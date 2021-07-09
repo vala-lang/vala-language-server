@@ -439,6 +439,8 @@ class Vls.Compilation : BuildTarget {
                 analysis = new CodeStyleAnalyzer (source);
             } else if (typeof (T) == typeof (SymbolEnumerator)) {
                 analysis = new SymbolEnumerator (source);
+            } else if (typeof (T) == typeof (CodeLensAnalyzer)) {
+                analysis = new CodeLensAnalyzer (source);
             }
 
             if (analysis != null) {

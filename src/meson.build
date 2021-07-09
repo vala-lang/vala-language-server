@@ -1,5 +1,6 @@
 vls_src = files([
   'analysis/codeanalyzer.vala',
+  'analysis/codelensanalyzer.vala',
   'analysis/codestyleanalyzer.vala',
   'analysis/symbolenumerator.vala',
   'codehelp/codehelp.vala',
