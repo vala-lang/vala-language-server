@@ -412,7 +412,7 @@ class Vls.SymbolExtractor : Object {
      * @return the new data type, or invalid if the member access is not of a type symbol
      */
     private Vala.DataType convert_member_access_to_data_type (Vala.MemberAccess ma_expr) {
-        if (ma_expr.symbol_reference is Vala.Namespace)
+        if (!(ma_expr.symbol_reference is Vala.TypeSymbol))
             return new Vala.InvalidType ();
         var data_type = Vala.SemanticAnalyzer.get_data_type_for_symbol (ma_expr.symbol_reference);
         var data_type_type_arguments = data_type.get_type_arguments ();
