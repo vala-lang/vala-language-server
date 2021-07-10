@@ -11,6 +11,8 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 
 - Ubuntu, Fedora, Debian, openSUSE, and Mageia: install from [the OBS repo](https://software.opensuse.org//download.html?project=home%3APrince781&package=vala-language-server)
 
+- elementaryOS: `sudo apt install vala-language-server`
+
 - Alpine Linux: `apk add vala-language-server`
 
 - Guix: `guix install vala-language-server`
