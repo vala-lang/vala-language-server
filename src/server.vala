@@ -858,7 +858,9 @@ class Vls.Server : Object {
                     // allow exception for local variables (pick the last one) - this helps foreach
                     (best is Vala.LocalVariable && node is Vala.LocalVariable) ||
                     // allow exception for lone properties - their implicit _* fields are declared in the same location
-                    (best is Vala.Field && node is Vala.Property)
+                    (best is Vala.Field && node is Vala.Property) ||
+                    // allow exception for null literals which for some reason are created over async methods that are accessed
+                    (best is Vala.NullLiteral && node is Vala.Method)
                 )) {
                     best = node;
                 }
