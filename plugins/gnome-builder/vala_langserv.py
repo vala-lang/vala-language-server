@@ -70,10 +70,9 @@ class VlsService(Ide.Object):
 
     def _ensure_started(self):
         """
-        Start the rust service which provides communication with the
-        Vala Language Server. We supervise our own instance of the
-        language server and restart it as necessary using the
-        Ide.SubprocessSupervisor.
+        Start the service which provides communication with the Vala Language
+        Server. We supervise our own instance of the language server and
+        restart it as necessary using the Ide.SubprocessSupervisor.
 
         Various extension points (diagnostics, symbol providers, etc) use
         the VlsService to access the rust components they need.
@@ -155,6 +154,16 @@ class VlsService(Ide.Object):
         self._ensure_started()
         self.bind_property('client', provider, 'client', GObject.BindingFlags.SYNC_CREATE)
 
+    @classmethod
+    def bind_client_lazy(cls, provider):
+        """
+        This helper will bind the client to the provider, but only after the
+        client has started.
+        """
+        context = provider.get_context()
+        self = VlsService.from_context(context)
+        self.bind_property('client', provider, 'client', GObject.BindingFlags.SYNC_CREATE)
+
 class VlsDiagnosticProvider(Ide.LspDiagnosticProvider):
     def do_load(self):
         VlsService.bind_client(self)
@@ -187,9 +196,9 @@ class VlsFormatter(Ide.LspFormatter):
 class VlsHoverProvider(Ide.LspHoverProvider):
     def do_prepare(self):
         self.props.category = 'Vala'
-        self.props.priority = 200
+        self.props.priority = 100
         VlsService.bind_client(self)
 
-class VlsSearchProvider(Ide.LspSearchProvider, Ide.SearchProvider):
+class VlsSearchProvider(Ide.LspSearchProvider):
     def do_load(self, context):
-        VlsService.bind_client(self)
+        VlsService.bind_client_lazy(self)
