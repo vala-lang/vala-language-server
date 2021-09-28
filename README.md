@@ -86,7 +86,7 @@ guix environment vala-language-server
 
 ## Building from Source
 ```sh
-meson -Dprefix=/usr/bin build
+meson -Dprefix=/usr build
 ninja -C build
 sudo ninja -C build install
 ```
