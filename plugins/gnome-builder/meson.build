@@ -1,5 +1,3 @@
-BUILDER_VERSION_LATEST = '3.38'
-
 conf = configuration_data()
 builder_abi = get_option('builder_abi')
 if builder_abi == 'auto'
@@ -10,9 +8,6 @@ if builder_abi == 'auto'
   if gnome_builder.found() and sed.found() and sh.found()
     r = run_command(sh, 'get_builder_abi.sh', gnome_builder, sed, check: true)
     builder_abi = r.stdout().strip()
-  else
-    warning('Assuming version ' + BUILDER_VERSION_LATEST + ' for GNOME Builder plugin ABI')
-    builder_abi = BUILDER_VERSION_LATEST
   endif
 endif
 
