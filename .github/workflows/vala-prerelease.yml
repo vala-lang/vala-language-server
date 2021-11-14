@@ -19,7 +19,7 @@ jobs:
     - uses: elementary/actions/vala-lint@master
       with:
         conf: .vala-lint.conf
-        fail: true
+        fail: false
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
