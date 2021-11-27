@@ -806,6 +806,14 @@ namespace Vls.CompletionEngine {
                     // new Vls. for example
                     continue;
                 }
+                if (is_pointer_access && data_type is Vala.PointerType) {
+                    // unwrap pointer type
+                    var base_type = ((Vala.PointerType)data_type).base_type;
+                    debug (@"[$method] unwrapping data type $data_type => $base_type");
+                    result = base_type;
+                    data_type = base_type;
+                    continue;
+                }
                 debug ("[%s] could not get datatype for %s", method,
                         result == null ? "(null)" : @"($(result.type_name)) $result");
             }

@@ -57,11 +57,13 @@ class Vls.SymbolExtractor : Object {
     class FakeMemberAccess : FakeExpr {
         public string member_name { get; private set; }
         public ArrayList<FakeDataType> type_arguments { get; private set; }
+        public bool is_pointer { get; private set; }
 
-        public FakeMemberAccess (string member_name, ArrayList<FakeDataType>? type_arguments = null, FakeExpr? inner = null) {
+        public FakeMemberAccess (string member_name, ArrayList<FakeDataType>? type_arguments = null, FakeExpr? inner = null, bool is_pointer = false) {
             base (inner);
             this.member_name = member_name;
             this.type_arguments = type_arguments ?? new ArrayList<FakeDataType> ();
+            this.is_pointer = is_pointer;
         }
 
         public override string to_string () {
@@ -412,7 +414,7 @@ class Vls.SymbolExtractor : Object {
      * @return the new data type, or invalid if the member access is not of a type symbol
      */
     private Vala.DataType convert_member_access_to_data_type (Vala.MemberAccess ma_expr) {
-        if (!(ma_expr.symbol_reference is Vala.TypeSymbol))
+        if (!(ma_expr.symbol_reference is Vala.TypeSymbol) || ma_expr.pointer_member_access)
             return new Vala.InvalidType ();
         var data_type = Vala.SemanticAnalyzer.get_data_type_for_symbol (ma_expr.symbol_reference);
         var data_type_type_arguments = data_type.get_type_arguments ();
@@ -558,7 +560,10 @@ class Vls.SymbolExtractor : Object {
                     method_type_arguments = ((Vala.MemberAccess)inner).get_type_arguments ();
 
                 if (inner.value_type != null) {
-                    member = inner.value_type.get_member (fake_ma.member_name);
+                    if (inner.value_type is Vala.PointerType && fake_ma.is_pointer)
+                        member = ((Vala.PointerType)inner.value_type).get_pointer_member (fake_ma.member_name);
+                    else
+                        member = inner.value_type.get_member (fake_ma.member_name);
                 } else {
                     var inner_symbol = inner.symbol_reference;
                     if (inner_symbol == null)
@@ -568,7 +573,9 @@ class Vls.SymbolExtractor : Object {
 
                 if (member == null)
                     throw new TypeResolutionError.NTH_EXPRESSION ("could not resolve member `%s' from inner", fake_ma.member_name);
-                var expr = new Vala.MemberAccess (inner, fake_ma.member_name);
+                var expr = fake_ma.is_pointer ?
+                    new Vala.MemberAccess.pointer (inner, fake_ma.member_name) :
+                    new Vala.MemberAccess (inner, fake_ma.member_name);
                 foreach (var type_argument in fake_ma.type_arguments) {
                     var data_type = resolve_fake_data_type (type_argument);
                     expr.add_type_argument (data_type);
@@ -1098,12 +1105,13 @@ class Vls.SymbolExtractor : Object {
         type_arguments = parse_fake_type_arguments ();
         if ((ident = parse_ident ()) != null) {
             FakeExpr? inner = null;
+            bool is_pointer = false;
             skip_whitespace ();
-            if (skip_member_access ()) {
+            if (skip_char ('.') || (is_pointer = skip_string ("->"))) {
                 skip_whitespace ();
                 inner = allow_inner_exprs ? parse_fake_expr (true) : parse_fake_member_access_expr (false);
             }
-            ma_expr = new FakeMemberAccess (ident, type_arguments, inner);
+            ma_expr = new FakeMemberAccess (ident, type_arguments, inner, is_pointer);
         } else {
             // reset
             this.idx = saved_idx;
