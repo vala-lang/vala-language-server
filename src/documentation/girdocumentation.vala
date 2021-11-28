@@ -192,12 +192,62 @@ class Vls.GirDocumentation {
     }
 
     /**
-     * Decide to render a GTK-Doc formatted comment into Markdown.
+     * Renders a gi-docgen formatted comment into Markdown.
      *
-     * see https://developer.gnome.org/gtk-doc-manual/stable/documenting_syntax.html.en
+     * see [[https://gnome.pages.gitlab.gnome.org/gi-docgen/linking.html]]
      */
-    public string render_gtk_doc_comment (Vala.Comment comment, Compilation compilation) throws GLib.RegexError {
+    public string render_gi_docgen_comment (Vala.Comment comment, Compilation compilation) throws GLib.RegexError {
         string comment_data = comment.content;
+
+        comment_data = /\[(\w+)@(\w+(\.\w+)*)(::?([\w+\-]+))?\]/
+            .replace_eval (comment_data, comment_data.length, 0, 0, (match_info, result) => {
+                // string link_type = (!) match_info.fetch (1);
+                string symbol_full = (!) match_info.fetch (2);
+                string? signal_or_property_name = match_info.fetch (5);
+                if (signal_or_property_name != null && signal_or_property_name.length > 0)
+                    symbol_full += "." + signal_or_property_name.replace ("-", "_");
+                Vala.Symbol? vala_symbol = CodeHelp.lookup_symbol_full_name (symbol_full, compilation.code_context.root.scope);
+
+                if (vala_symbol == null) {
+                    result.append ("**");
+                    result.append (symbol_full);
+                    result.append ("**");
+                } else {
+                    var sym_sb = new StringBuilder ();
+                    Vala.Symbol? previous_sym = null;
+                    for (var current_sym = vala_symbol;
+                            current_sym != null && current_sym.name != null; 
+                            current_sym = current_sym.parent_symbol) {
+                        if (current_sym is Vala.CreationMethod) {
+                            sym_sb.prepend (current_sym.name == ".new" ? current_sym.parent_symbol.name : current_sym.name);
+                        } else {
+                            if (current_sym != vala_symbol) {
+                                if (previous_sym is Vala.CreationMethod)
+                                    sym_sb.prepend ("::");
+                                else
+                                    sym_sb.prepend_c ('.');
+                            }
+                            sym_sb.prepend (current_sym.name);
+                        }
+                        previous_sym = current_sym;
+                    }
+                    result.append ("**");
+                    result.append (sym_sb.str);
+                    if (vala_symbol is Vala.Callable && !(vala_symbol is Vala.Delegate))
+                        result.append ("()");
+                    result.append ("**");
+                }
+                return false;
+            });
+
+        return render_gtk_doc_content (comment_data, comment, compilation);
+    }
+
+    /**
+     * Renders @comment_data possibly after it has been processed.
+     */
+    public string render_gtk_doc_content (string content, Vala.Comment comment, Compilation compilation) throws GLib.RegexError {
+        string comment_data = content;  // FIXME: workaround for valac codegen bug
 
         // replace code blocks
         comment_data = /\|\[(<!-- language="(\w+)" -->)?((.|\s)*?)\]\|/
@@ -269,7 +319,7 @@ class Vls.GirDocumentation {
                 debug ("found new GTK-Doc dir for GIR %s%s: %s", gir_package_name, vapi_pkg_name != null ? @" (VAPI $vapi_pkg_name)" : "", gtkdoc_dir);
             }
         }
-        
+
         if (gtkdoc_dir != null) {
             // substitute image URLs
             // substitute relative paths in GIR comments for absolute paths to GTK-Doc resources
@@ -281,7 +331,7 @@ class Vls.GirDocumentation {
                     result.append ("![");
                     result.append (link_label);
                     result.append ("](");
-                    if (!Path.is_absolute (link_href))
+                    if (link_href.length > 0 && !Path.is_absolute (link_href))
                         link_href = Path.build_filename (gtkdoc_dir, link_href);
                     result.append (link_href);
                     result.append_c (')');
@@ -408,6 +458,15 @@ class Vls.GirDocumentation {
             .replace (comment_data, comment_data.length, 0, "`\\1`");
 
         return comment_data;
+    }
+
+    /**
+     * Renders a GTK-Doc formatted comment into Markdown.
+     *
+     * see [[https://developer.gnome.org/gtk-doc-manual/stable/documenting_syntax.html.en]]
+     */
+    public string render_gtk_doc_comment (Vala.Comment comment, Compilation compilation) throws GLib.RegexError {
+        return render_gtk_doc_content (comment.content, comment, compilation);
     }
 
     /**

@@ -49,22 +49,32 @@ class Vls.DocComment {
     }
 
     /**
-     * Render a GTK-Doc-formatted comment into Markdown.
+     * Render a GTK-Doc- or gi-docgen-formatted comment into Markdown.
      *
      * see [[https://developer.gnome.org/gtk-doc-manual/stable/documenting_syntax.html.en]]
+     * and [[https://gnome.pages.gitlab.gnome.org/gi-docgen/linking.html]]
      *
-     * @param comment           A comment in GTK-Doc format
+     * @param comment           A comment in GTK-Doc or gi-docgen format
      * @param documentation     Holds GIR documentation and renders the comment
      * @param compilation       The current compilation that is the context of the comment
      */
     public DocComment.from_gir_comment (Vala.Comment comment, GirDocumentation documentation, Compilation compilation) throws RegexError {
-        body = documentation.render_gtk_doc_comment (comment, compilation);
+        Regex regex = /\[(\w+)@(\w+(\.\w+)*)(::?([\w\-]+))?\]/;
+        body = regex.match (comment.content) ?
+            documentation.render_gi_docgen_comment (comment, compilation) :
+            documentation.render_gtk_doc_comment (comment, compilation);
         if (comment is Vala.GirComment) {
             var gir_comment = (Vala.GirComment) comment;
-            for (var it = gir_comment.parameter_iterator (); it.next (); )
-                parameters[it.get_key ()] = documentation.render_gtk_doc_comment (it.get_value (), compilation);
+            for (var it = gir_comment.parameter_iterator (); it.next (); ) {
+                Vala.Comment param_comment = it.get_value ();
+                parameters[it.get_key ()] = regex.match (param_comment.content) ?
+                    documentation.render_gi_docgen_comment (param_comment, compilation) :
+                    documentation.render_gtk_doc_comment (param_comment, compilation);
+            }
             if (gir_comment.return_content != null)
-                return_body = documentation.render_gtk_doc_comment (gir_comment.return_content, compilation);
+                return_body = regex.match (gir_comment.return_content.content) ?
+                    documentation.render_gi_docgen_comment (gir_comment.return_content, compilation) :
+                    documentation.render_gtk_doc_comment (gir_comment.return_content, compilation);
         }
     }
 
