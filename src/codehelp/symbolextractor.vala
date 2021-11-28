@@ -58,19 +58,24 @@ class Vls.SymbolExtractor : Object {
         public string member_name { get; private set; }
         public ArrayList<FakeDataType> type_arguments { get; private set; }
         public bool is_pointer { get; private set; }
+        public bool null_safe { get; private set; }
 
-        public FakeMemberAccess (string member_name, ArrayList<FakeDataType>? type_arguments = null, FakeExpr? inner = null, bool is_pointer = false) {
+        public FakeMemberAccess (string member_name, ArrayList<FakeDataType>? type_arguments = null, FakeExpr? inner = null, bool is_pointer = false, bool null_safe = false) {
             base (inner);
             this.member_name = member_name;
             this.type_arguments = type_arguments ?? new ArrayList<FakeDataType> ();
             this.is_pointer = is_pointer;
+            this.null_safe = null_safe;
         }
 
         public override string to_string () {
             var builder = new StringBuilder ();
             if (inner != null) {
                 builder.append (inner.to_string ());
-                builder.append_c ('.');
+                if (null_safe)
+                    builder.append ("?.");
+                else
+                    builder.append_c ('.');
                 builder.append (member_name);
             } else {
                 builder.append (member_name);
@@ -414,7 +419,11 @@ class Vls.SymbolExtractor : Object {
      * @return the new data type, or invalid if the member access is not of a type symbol
      */
     private Vala.DataType convert_member_access_to_data_type (Vala.MemberAccess ma_expr) {
-        if (!(ma_expr.symbol_reference is Vala.TypeSymbol) || ma_expr.pointer_member_access)
+        if (!(ma_expr.symbol_reference is Vala.TypeSymbol) || ma_expr.pointer_member_access
+#if VALA_0_54
+            || ma_expr.null_safe_access
+#endif
+            )
             return new Vala.InvalidType ();
         var data_type = Vala.SemanticAnalyzer.get_data_type_for_symbol (ma_expr.symbol_reference);
         var data_type_type_arguments = data_type.get_type_arguments ();
@@ -540,6 +549,9 @@ class Vls.SymbolExtractor : Object {
                 }
 
                 var expr = new Vala.MemberAccess (null, fake_ma.member_name);
+#if VALA_0_54
+                expr.null_safe_access = fake_ma.null_safe;
+#endif
                 foreach (var type_argument in fake_ma.type_arguments) {
                     var data_type = resolve_fake_data_type (type_argument);
                     expr.add_type_argument (data_type);
@@ -576,6 +588,9 @@ class Vls.SymbolExtractor : Object {
                 var expr = fake_ma.is_pointer ?
                     new Vala.MemberAccess.pointer (inner, fake_ma.member_name) :
                     new Vala.MemberAccess (inner, fake_ma.member_name);
+#if VALA_0_54
+                expr.null_safe_access = fake_ma.null_safe;
+#endif
                 foreach (var type_argument in fake_ma.type_arguments) {
                     var data_type = resolve_fake_data_type (type_argument);
                     expr.add_type_argument (data_type);
@@ -922,7 +937,7 @@ class Vls.SymbolExtractor : Object {
     }
 
     private bool skip_member_access () {
-        return skip_char ('.') || skip_string ("->");
+        return skip_string ("?.") || skip_char ('.') || skip_string ("->");
     }
 
     private bool parse_expr_tuple (bool allow_no_right_paren, ArrayList<FakeExpr> expressions, 
@@ -1106,12 +1121,13 @@ class Vls.SymbolExtractor : Object {
         if ((ident = parse_ident ()) != null) {
             FakeExpr? inner = null;
             bool is_pointer = false;
+            bool null_safe = false;
             skip_whitespace ();
-            if (skip_char ('.') || (is_pointer = skip_string ("->"))) {
+            if ((null_safe = skip_string ("?.")) || skip_char ('.') || (is_pointer = skip_string ("->"))) {
                 skip_whitespace ();
                 inner = allow_inner_exprs ? parse_fake_expr (true) : parse_fake_member_access_expr (false);
             }
-            ma_expr = new FakeMemberAccess (ident, type_arguments, inner, is_pointer);
+            ma_expr = new FakeMemberAccess (ident, type_arguments, inner, is_pointer, null_safe);
         } else {
             // reset
             this.idx = saved_idx;

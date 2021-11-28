@@ -29,6 +29,7 @@ namespace Vls.CompletionEngine {
 
         Position end_pos = pos.dup ();
         bool is_member_access = false;
+        bool is_null_safe_access = false;
 
         // move back to the nearest member access if there is one
         long lb_idx = idx;
@@ -43,7 +44,10 @@ namespace Vls.CompletionEngine {
         // now attempt to find a member access
         while (lb_idx >= 0 && !doc.content[lb_idx].isspace ()) {
             // if we're at a member access operator, we're done
-            if (doc.content[lb_idx] == '.' || (lb_idx >= 1 && doc.content[lb_idx-1] == '-' && doc.content[lb_idx] == '>')) {
+            if ((lb_idx >= 1 &&
+                 ((doc.content[lb_idx-1] == '-' && doc.content[lb_idx] == '>') ||
+                  (doc.content[lb_idx-1] == '?' && doc.content[lb_idx] == '.'))) ||
+                doc.content[lb_idx] == '.') {
                 var new_pos = pos.translate (0, (int) (lb_idx - idx));
                 // debug ("[%s] moved cursor back from '%c'@%s -> '%c'@%s",
                 //     method, doc.content[idx], pos.to_string (), doc.content[lb_idx], new_pos.to_string ());
@@ -68,6 +72,11 @@ namespace Vls.CompletionEngine {
             is_pointer_access = true;
             is_member_access = true;
             // debug (@"[$method] found pointer access @ $pos");
+            // pos = pos.translate (0, -2);
+        } else if (idx >= 1 && doc.content[idx-1] == '?' && doc.content[idx] == '.') {
+            is_null_safe_access = true;
+            is_member_access = true;
+            // debug (@"[$method] found null-safe member access @ $pos");
             // pos = pos.translate (0, -2);
         } else if (doc.content[idx] == '.') {
             // pos = pos.translate (0, -1);
