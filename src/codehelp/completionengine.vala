@@ -100,7 +100,8 @@ namespace Vls.CompletionEngine {
 
             var se = new SymbolExtractor (pos, doc);
             if (se.extracted_expression != null)
-                show_members (lang_serv, project, doc, compilation, is_pointer_access, se.in_oce, 
+                show_members (lang_serv, project, doc, compilation,
+                              is_null_safe_access, is_pointer_access, se.in_oce,
                               se.extracted_expression, se.block.scope, completions, false);
 
             if (completions.is_empty) {
@@ -115,7 +116,7 @@ namespace Vls.CompletionEngine {
                     show_members_with_updated_context (lang_serv, project,
                                                        client, id, 
                                                        doc, compilation, 
-                                                       is_pointer_access, 
+                                                       is_null_safe_access, is_pointer_access,
                                                        pos, end_pos, completions);
                     finish (client, id, completions);
                     Vala.CodeContext.pop ();
@@ -134,7 +135,7 @@ namespace Vls.CompletionEngine {
             bool showing_override_suggestions = false;
             walk_up_current_scope (lang_serv, doc, pos, out best_scope, out nearest_symbol, out nearest_with_expression, out in_loop);
             if (nearest_with_expression != null) {
-                show_members (lang_serv, project, doc, compilation, false, false, nearest_with_expression, best_scope, completions);
+                show_members (lang_serv, project, doc, compilation, false, false, false, nearest_with_expression, best_scope, completions);
             }
             if (nearest_symbol is Vala.Class) {
                 var results = gather_missing_prereqs_and_unimplemented_symbols ((Vala.Class) nearest_symbol);
@@ -750,7 +751,7 @@ namespace Vls.CompletionEngine {
      */
     void show_members (Server lang_serv, Project project,
                        Vala.SourceFile doc, Compilation compilation,
-                       bool is_pointer_access, bool in_oce,
+                       bool is_null_safe_access, bool is_pointer_access, bool in_oce,
                        Vala.CodeNode result, Vala.Scope? scope, Set<CompletionItem> completions,
                        bool retry_inner = true) {
         string method = "textDocument/completion";
@@ -778,17 +779,19 @@ namespace Vls.CompletionEngine {
                 symbol = (Vala.Symbol) result;
             }
 
-            if (data_type != null && data_type.type_symbol != null)
+            if (data_type != null && data_type.type_symbol != null &&
+                (data_type is Vala.PointerType == is_pointer_access) &&
+                (!in_oce || !(is_null_safe_access || is_pointer_access)))
                 add_completions_for_type (lang_serv, project, code_style, data_type, data_type.type_symbol, completions, current_scope, in_oce, is_cm_this_or_base_access);
-            else if (symbol is Vala.Signal)
+            else if (symbol is Vala.Signal && !(is_null_safe_access || is_pointer_access))
                 add_completions_for_signal (code_style, data_type, (Vala.Signal) symbol, current_scope, completions);
-            else if (symbol is Vala.Namespace)
+            else if (symbol is Vala.Namespace && !(is_null_safe_access || is_pointer_access))
                 add_completions_for_ns (lang_serv, project, code_style, (Vala.Namespace) symbol, current_scope, completions, in_oce);
-            else if (symbol is Vala.Method && ((Vala.Method) symbol).coroutine)
+            else if (symbol is Vala.Method && ((Vala.Method) symbol).coroutine && !(is_null_safe_access || is_pointer_access))
                 add_completions_for_async_method (data_type, (Vala.Method) symbol, current_scope, completions);
-            else if (data_type is Vala.ArrayType)
+            else if (data_type is Vala.ArrayType && !is_pointer_access)
                 add_completions_for_array_type (code_style, (Vala.ArrayType) data_type, current_scope, completions);
-            else if (symbol is Vala.TypeSymbol)
+            else if (symbol is Vala.TypeSymbol && !(is_null_safe_access || is_pointer_access))
                 add_completions_for_type (lang_serv, project, code_style, null, (Vala.TypeSymbol)symbol, completions, current_scope, in_oce, is_cm_this_or_base_access);
             else {
                 if (result is Vala.MemberAccess &&
@@ -821,6 +824,7 @@ namespace Vls.CompletionEngine {
                     debug (@"[$method] unwrapping data type $data_type => $base_type");
                     result = base_type;
                     data_type = base_type;
+                    is_pointer_access = false;
                     continue;
                 }
                 debug ("[%s] could not get datatype for %s", method,
@@ -836,7 +840,7 @@ namespace Vls.CompletionEngine {
     void show_members_with_updated_context (Server lang_serv, Project project,
                                             Jsonrpc.Client client, Variant id,
                                             Vala.SourceFile doc, Compilation compilation,
-                                            bool is_pointer_access,
+                                            bool is_null_safe_access, bool is_pointer_access,
                                             Position pos, Position? end_pos, Set<CompletionItem> completions) {
         string method = "textDocument/completion";
         // debug (@"[$method] FindSymbol @ $pos" + (end_pos != null ? @" -> $end_pos" : ""));
@@ -859,7 +863,7 @@ namespace Vls.CompletionEngine {
         }
 
         Vala.CodeNode result = Server.get_best (fs, doc);
-        show_members (lang_serv, project, doc, compilation, is_pointer_access, in_oce, result, null, completions);
+        show_members (lang_serv, project, doc, compilation, is_null_safe_access, is_pointer_access, in_oce, result, null, completions);
         Vala.CodeContext.pop ();
     }
 
