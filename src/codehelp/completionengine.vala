@@ -1043,7 +1043,8 @@ namespace Vls.CompletionEngine {
                     // generate one completion for invoking the signal and another without, for member access
                     completions.add (new CompletionItem.from_symbol (type, signal_sym, current_scope, CompletionItemKind.Event, lang_serv.get_symbol_documentation (project, signal_sym)));
                     var emitter_documentation = lang_serv.get_symbol_documentation (project, signal_sym);
-                    emitter_documentation.body = "_(Invokes this signal)_\n\n" + emitter_documentation.body;
+                    if (emitter_documentation != null)
+                        emitter_documentation.body = "_(Invokes this signal)_\n\n" + emitter_documentation.body;
                     completions.add (new CompletionItem.from_symbol (type, signal_sym, 
                                                                      current_scope, 
                                                                      CompletionItemKind.Method, 
