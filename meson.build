@@ -1,5 +1,5 @@
 project('vala-language-server', 'vala', 'c',
-  version: '0.48.3',
+  version: '0.48.4',
   license: 'LGPL2.1+',
   default_options: [
     'default_library=static'
