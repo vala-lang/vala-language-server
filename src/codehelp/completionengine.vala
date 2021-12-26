@@ -1318,7 +1318,7 @@ namespace Vls.CompletionEngine {
                         CompletionItemKind.Method,
                         null) {
                     insertText = generate_insert_text_for_callable (atype, (Vala.Method)method, scope, method_spaces),
-                    insertTextFormat = InsertTextFormat.Snippet,
+                    insertTextFormat = InsertTextFormat.Snippet
                 });
             }
         }
