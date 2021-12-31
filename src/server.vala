@@ -1978,7 +1978,7 @@ class Vls.Server : Object {
 bool opt_version;
 
 const OptionEntry[] entries = {
-    { "version", 'V', OptionFlags.NONE, OptionArg.NONE, ref opt_version, "Print the version and commit info", null },
+    { "version", 'v', OptionFlags.NONE, OptionArg.NONE, ref opt_version, "Print the version and commit info", null },
     {}
 };
 
