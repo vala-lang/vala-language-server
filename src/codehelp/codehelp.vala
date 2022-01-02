@@ -317,14 +317,19 @@ namespace Vls.CodeHelp {
                 builder.append_c (' ');
             }
             // print parent symbol
-            if (allow_show_parent_member && callable_sym.parent_symbol is Vala.TypeSymbol) {
-                Vala.List<Vala.DataType>? parent_type_arguments = null;
-                if (instance_type != null)
-                    parent_type_arguments = get_actual_type_arguments_for_parent_symbol (instance_type, (Vala.TypeSymbol)callable_sym.parent_symbol);
-                string? parent_symbol_representation =
-                    get_symbol_representation (null, callable_sym.parent_symbol, scope, allow_show_parent_member, parent_type_arguments, null, false, true);
-                builder.append (parent_symbol_representation);
-                builder.append_c ('.');
+            if (allow_show_parent_member) {
+                if (callable_sym.parent_symbol is Vala.TypeSymbol) {
+                    Vala.List<Vala.DataType>? parent_type_arguments = null;
+                    if (instance_type != null)
+                        parent_type_arguments = get_actual_type_arguments_for_parent_symbol (instance_type, (Vala.TypeSymbol)callable_sym.parent_symbol);
+                    string? parent_symbol_representation =
+                        get_symbol_representation (null, callable_sym.parent_symbol, scope, allow_show_parent_member, parent_type_arguments, null, false, true);
+                    builder.append (parent_symbol_representation);
+                    builder.append_c ('.');
+                } else if (callable_sym.parent_symbol is Vala.Namespace) {
+                    builder.append (get_symbol_representation (null, callable_sym.parent_symbol, scope, allow_show_parent_member, null, null, false, true));
+                    builder.append_c ('.');
+                }
             }
             builder.append (override_name ?? callable_sym.name);
         }
@@ -493,14 +498,19 @@ namespace Vls.CodeHelp {
         builder.append (get_data_type_representation (actual_var_type, scope));
         builder.append_c (' ');
         // print parent symbol
-        if (allow_show_parent_member && variable_sym.parent_symbol is Vala.TypeSymbol) {
-            Vala.List<Vala.DataType>? parent_type_arguments = null;
-            if (data_type != null)
-                parent_type_arguments = get_actual_type_arguments_for_parent_symbol (data_type, (Vala.TypeSymbol)variable_sym.parent_symbol);
-            string? parent_symbol_representation =
-                get_symbol_representation (null, variable_sym.parent_symbol, scope, allow_show_parent_member, parent_type_arguments, null, false, true);
-            builder.append (parent_symbol_representation);
-            builder.append_c ('.');
+        if (allow_show_parent_member) {
+            if (variable_sym.parent_symbol is Vala.TypeSymbol) {
+                Vala.List<Vala.DataType>? parent_type_arguments = null;
+                if (data_type != null)
+                    parent_type_arguments = get_actual_type_arguments_for_parent_symbol (data_type, (Vala.TypeSymbol)variable_sym.parent_symbol);
+                string? parent_symbol_representation =
+                    get_symbol_representation (null, variable_sym.parent_symbol, scope, allow_show_parent_member, parent_type_arguments, null, false, true);
+                builder.append (parent_symbol_representation);
+                builder.append_c ('.');
+            } else if (variable_sym.parent_symbol is Vala.Namespace) {
+                builder.append (get_symbol_representation (null, variable_sym.parent_symbol, scope, allow_show_parent_member, null, null, false, true));
+                builder.append_c ('.');
+            }
         }
         builder.append (override_name ?? variable_sym.name);
         if (variable_sym.initializer != null && show_initializer) {
@@ -554,14 +564,19 @@ namespace Vls.CodeHelp {
         builder.append (get_data_type_representation (actual_property_type, scope));
         builder.append_c (' ');
         // print parent symbol
-        if (allow_show_parent_member && property_sym.parent_symbol is Vala.TypeSymbol) {
-            Vala.List<Vala.DataType>? parent_type_arguments = null;
-            if (data_type != null)
-                parent_type_arguments = get_actual_type_arguments_for_parent_symbol (data_type, (Vala.TypeSymbol)property_sym.parent_symbol);
-            string? parent_symbol_representation =
-                get_symbol_representation (null, property_sym.parent_symbol, scope, allow_show_parent_member, parent_type_arguments, null, false, true);
-            builder.append (parent_symbol_representation);
-            builder.append_c ('.');
+        if (allow_show_parent_member) {
+            if (property_sym.parent_symbol is Vala.TypeSymbol) {
+                Vala.List<Vala.DataType>? parent_type_arguments = null;
+                if (data_type != null)
+                    parent_type_arguments = get_actual_type_arguments_for_parent_symbol (data_type, (Vala.TypeSymbol)property_sym.parent_symbol);
+                string? parent_symbol_representation =
+                    get_symbol_representation (null, property_sym.parent_symbol, scope, allow_show_parent_member, parent_type_arguments, null, false, true);
+                builder.append (parent_symbol_representation);
+                builder.append_c ('.');
+            } else if (property_sym.parent_symbol is Vala.Namespace) {
+                builder.append (get_symbol_representation (null, property_sym.parent_symbol, scope, allow_show_parent_member, null, null, false, true));
+                builder.append_c ('.');
+            }
         }
         builder.append (property_sym.name);
         builder.append (" {");
