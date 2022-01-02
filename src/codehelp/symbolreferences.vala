@@ -43,6 +43,10 @@ namespace Vls.SymbolReferences {
             symbols.push_head (current_sym);
         }
 
+        // nothing found
+        if (symbols.length == 0)
+            return null;
+
         matching_sym = context.root.scope.lookup (symbols.pop_head ().name);
         while (!symbols.is_empty () && matching_sym != null) {
             var parent_sym = matching_sym;
