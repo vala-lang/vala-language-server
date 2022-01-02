@@ -87,7 +87,7 @@ namespace Vls.Util {
                 flag_name = match_info.fetch (1);
                 arg_value = match_info.fetch (2);
 
-                if (arg_value != null)
+                if (arg_value != null && arg_value.length > 0)
                     arg_value = arg_value.substring (1);
 
                 if (arg_value == null || arg_value.length == 0) {
