@@ -244,7 +244,10 @@ class Vls.GirDocumentation {
     }
 
     /**
-     * Renders @comment_data possibly after it has been processed.
+     * Renders a GTK-Doc formatted comment into Markdown, after it has already
+     * been processed.
+     *
+     * see [[https://developer.gnome.org/gtk-doc-manual/stable/documenting_syntax.html.en]]
      */
     public string render_gtk_doc_content (string content, Vala.Comment comment, Compilation compilation) throws GLib.RegexError {
         string comment_data = content;  // FIXME: workaround for valac codegen bug
@@ -337,72 +340,82 @@ class Vls.GirDocumentation {
                     result.append_c (')');
                     return false;
                 });
-            
-            // first, find (and remove) all section headers in the document
-            var headers = new Gee.ArrayList<string> ();
+        }
 
-            comment_data = /(\s*?#*?\s*?)?\{#([\w-]+)\}/
-                .replace_eval (comment_data, comment_data.length, 0, 0, (match_info, result) => {
-                    string? header = match_info.fetch (2);
+        // first, find (and remove) all section headers in the document
+        var headers = new Gee.ArrayList<string> ();
 
-                    if (header != null)
-                        headers.add (header);
-                    
-                    return false;
-                });
+        comment_data = /(\s*?#*?\s*?)?\{#([\w-]+)\}/
+            .replace_eval (comment_data, comment_data.length, 0, 0, (match_info, result) => {
+                string? header = match_info.fetch (2);
 
-            // now, substitute references to sections
-            comment_data = /\[(.*?)\]\[([\w-\s]+)\]/
-                .replace_eval (comment_data, comment_data.length, 0, 0, (match_info, result) => {
-                    string link_label = match_info.fetch (1) ?? "";
-                    string section = match_info.fetch (2) ?? "";
+                if (header != null)
+                    headers.add (header);
 
-                    if (section in headers) {
+                return false;
+            });
+
+        // now, substitute references to sections
+        comment_data = /\[(.*?)\]\[([\w-\s]+)\]/
+            .replace_eval (comment_data, comment_data.length, 0, 0, (match_info, result) => {
+                string link_label = match_info.fetch (1) ?? "";
+                string section = match_info.fetch (2) ?? "";
+
+                if (section in headers) {
+                    result.append_c ('[');
+                    result.append (link_label);
+                    result.append ("](");
+                    result.append_c ('#');
+                    result.append (section);
+                    result.append_c (')');
+                } else if (gtkdoc_dir != null) {
+                    // if the reference is to an external section
+                    var section_html_file = File.new_build_filename (gtkdoc_dir, @"$section.html");
+                    if (section_html_file.query_exists ()) {
                         result.append_c ('[');
                         result.append (link_label);
                         result.append ("](");
-                        result.append_c ('#');
-                        result.append (section);
+                        result.append ((!) section_html_file.get_path ());
                         result.append_c (')');
                     } else {
-                        // if the reference is to an external section
-                        var section_html_file = File.new_build_filename (gtkdoc_dir, @"$section.html");
-                        if (section_html_file.query_exists ()) {
-                            result.append_c ('[');
-                            result.append (link_label);
-                            result.append ("](");
-                            result.append ((!) section_html_file.get_path ());
-                            result.append_c (')');
-                        } else {
-                            result.append (link_label);
-                        }
+                        result.append (link_label);
                     }
+                } else {
+                    result.append (link_label);
+                }
 
-                    return false;
-                });
-        }
+                return false;
+            });
 
         // substitute references to C names with their Vala symbol names
-        comment_data = /([`])?([#%]([A-Za-z_]\w+)|([A-Za-z_]\w+)(\(\)))([`])?/
+        comment_data = /[#%]([A-Za-z_]\w+)(?:([:]{0,2})([A-Za-z_][A-Za-z_\-]+))?|([A-Za-z_]\w+)\(\)|`([A-Za-z_]\w+)`/
             .replace_eval (comment_data, comment_data.length, 0, 0, (match_info, result) => {
-                string? begin_tick = match_info.fetch (1);
-                string? group3 = match_info.fetch (3);
+                string? group1 = match_info.fetch (1);
+                string? member = match_info.fetch (3);
                 string? group4 = match_info.fetch (4);
-                string c_symbol = group3 != null && group3.length > 0 ? group3 : group4;
-                string parameters = match_info.fetch (5) ?? "";
-                string? end_tick = match_info.fetch (6);
+                string? group5 = match_info.fetch (5);
+                string c_symbol = group1 != null && group1.length > 0 ? group1 : (group4 != null && group4.length > 0 ? group4 : group5);
+                bool is_method = group4 != null && group4.length > 0;
+                bool is_plural = false;
+                bool member_is_signal = match_info.fetch (2) == "::";
+
                 Vala.Symbol? vala_symbol = compilation.cname_to_sym[c_symbol];
+                if (vala_symbol == null && !is_method && c_symbol.has_suffix ("s")) {
+                    vala_symbol = compilation.cname_to_sym[c_symbol[:-1]];
+                    if (vala_symbol != null)
+                        is_plural = true;
+                }
 
-                bool inside_code = begin_tick != null && begin_tick.length > 0 || end_tick != null && end_tick.length > 0;
+                Vala.Symbol? vala_member = null;
+                if (vala_symbol != null && member != null && member.length > 0) {
+                    vala_member = vala_symbol.scope.lookup (member);
+                }
 
-                if (vala_symbol == null) {
-                    if (c_symbol == "NULL" || c_symbol == "TRUE" || c_symbol == "FALSE") {
-                        result.append ("**");
-                        result.append (c_symbol.down ());
-                        result.append ("**");
-                    } else
-                        result.append ((!) match_info.fetch (0));
-                } else {
+                if (c_symbol.down() == "null" || c_symbol.down() == "true" || c_symbol.down() == "false") {
+                    result.append ("**");
+                    result.append (c_symbol.down ());
+                    result.append ("**");
+                } else if (vala_symbol != null) {
                     // debug ("replacing %s in documentation with %s", c_symbol, vala_symbol.get_full_name ());
                     var sym_sb = new StringBuilder ();
                     Vala.Symbol? previous_sym = null;
@@ -422,12 +435,31 @@ class Vls.GirDocumentation {
                         }
                         previous_sym = current_sym;
                     }
-                    if (!inside_code)
-                        result.append ("**");
+                    if (vala_member != null) {
+                        sym_sb.append_c ('.');
+                        sym_sb.append (vala_member.name);
+                    }
+                    result.append ("**");
                     result.append (sym_sb.str);
-                    result.append (parameters);
-                    if (!inside_code)
-                        result.append ("**");
+                    if (is_method || member_is_signal) {
+                        result.append ("()");
+                    } else if (vala_member != null) {
+                        var property = vala_member as Vala.Property;
+                        if (property != null) {
+                            result.append (" {");
+                            if (property.get_accessor != null)
+                                result.append (" get; ");
+                            if (property.set_accessor != null)
+                                result.append (" set; ");
+                            result.append_c ('}');
+                        }
+                    }
+                    result.append ("**");
+                    if (is_plural)
+                        result.append_c ('s');
+                } else {
+                    // debug ("C symbol does not match anything: %s", c_symbol);
+                    result.append ((!) match_info.fetch (0));
                 }
                 return false;
             });
@@ -453,9 +485,23 @@ class Vls.GirDocumentation {
                 return false;
             });
         
-        // highlight references to parameters
+        // highlight references to parameters and other symbols
         comment_data = /(?<=\s|^|(?<!\w)\W)@([A-Za-z_]\w*)(?=\s|$|[^a-zA-Z0-9_.]|\.(?!\w))/
-            .replace (comment_data, comment_data.length, 0, "`\\1`");
+            .replace_eval (comment_data, comment_data.length, 0, 0, (match_info, result) => {
+                string c_symbol = match_info.fetch (1);
+                Vala.Symbol? sym = compilation.cname_to_sym[c_symbol];
+
+                if (sym != null) {
+                    result.append ("**");
+                    result.append (sym.get_full_name ());
+                    result.append ("**");
+                } else {
+                    result.append_c ('`');
+                    result.append (c_symbol);
+                    result.append_c ('`');
+                }
+                return false;
+            });
 
         return comment_data;
     }

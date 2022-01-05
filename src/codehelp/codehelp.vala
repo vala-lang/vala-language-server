@@ -808,7 +808,8 @@ namespace Vls.CodeHelp {
 
     private bool is_snake_case_symbol (Vala.Symbol sym) {
         return sym is Vala.Method || sym is Vala.Property || sym is Vala.Field ||
-            sym is Vala.EnumValue || sym is Vala.ErrorCode || sym is Vala.Constant;
+            sym is Vala.EnumValue || sym is Vala.ErrorCode || sym is Vala.Constant ||
+            sym is Vala.Signal;
     }
 
     /**
