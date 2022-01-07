@@ -186,6 +186,7 @@ class Vls.GirDocumentation {
         gir_parser.parse (context);
 
         // build a cache of all CodeNodes with a C name
+        cname_to_sym.clear ();
         context.accept (new CNameMapper (cname_to_sym));
 
         Vala.CodeContext.pop ();
