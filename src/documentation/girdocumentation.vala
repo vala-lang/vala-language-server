@@ -402,7 +402,7 @@ class Vls.GirDocumentation {
 
                 Vala.Symbol? vala_symbol = compilation.cname_to_sym[c_symbol];
                 if (vala_symbol == null && !is_method && c_symbol.has_suffix ("s")) {
-                    vala_symbol = compilation.cname_to_sym[c_symbol[:-1]];
+                    vala_symbol = compilation.cname_to_sym[c_symbol.substring (0, c_symbol.length-1)];
                     if (vala_symbol != null)
                         is_plural = true;
                 }
