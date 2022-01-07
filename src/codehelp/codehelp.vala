@@ -326,7 +326,8 @@ namespace Vls.CodeHelp {
                         get_symbol_representation (null, callable_sym.parent_symbol, scope, allow_show_parent_member, parent_type_arguments, null, false, true);
                     builder.append (parent_symbol_representation);
                     builder.append_c ('.');
-                } else if (callable_sym.parent_symbol is Vala.Namespace) {
+                } else if (callable_sym.parent_symbol is Vala.Namespace &&
+                           callable_sym.parent_symbol.to_string () != "(root namespace)") {
                     builder.append (get_symbol_representation (null, callable_sym.parent_symbol, scope, allow_show_parent_member, null, null, false, true));
                     builder.append_c ('.');
                 }
@@ -507,7 +508,8 @@ namespace Vls.CodeHelp {
                     get_symbol_representation (null, variable_sym.parent_symbol, scope, allow_show_parent_member, parent_type_arguments, null, false, true);
                 builder.append (parent_symbol_representation);
                 builder.append_c ('.');
-            } else if (variable_sym.parent_symbol is Vala.Namespace) {
+            } else if (variable_sym.parent_symbol is Vala.Namespace &&
+                       variable_sym.parent_symbol.to_string () != "(root namespace)") {
                 builder.append (get_symbol_representation (null, variable_sym.parent_symbol, scope, allow_show_parent_member, null, null, false, true));
                 builder.append_c ('.');
             }
@@ -573,7 +575,8 @@ namespace Vls.CodeHelp {
                     get_symbol_representation (null, property_sym.parent_symbol, scope, allow_show_parent_member, parent_type_arguments, null, false, true);
                 builder.append (parent_symbol_representation);
                 builder.append_c ('.');
-            } else if (property_sym.parent_symbol is Vala.Namespace) {
+            } else if (property_sym.parent_symbol is Vala.Namespace &&
+                       property_sym.parent_symbol.to_string () != "(root namespace)") {
                 builder.append (get_symbol_representation (null, property_sym.parent_symbol, scope, allow_show_parent_member, null, null, false, true));
                 builder.append_c ('.');
             }
