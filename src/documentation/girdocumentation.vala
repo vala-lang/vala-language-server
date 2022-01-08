@@ -232,11 +232,25 @@ class Vls.GirDocumentation {
                         }
                         previous_sym = current_sym;
                     }
+                    string? package_name = null;
+                    if (vala_symbol.source_reference != null)
+                        package_name = vala_symbol.source_reference.file.package_name;
+                    if (package_name != null)
+                        result.append_c ('[');
                     result.append ("**");
                     result.append (sym_sb.str);
                     if (vala_symbol is Vala.Callable && !(vala_symbol is Vala.Delegate))
                         result.append ("()");
                     result.append ("**");
+                    if (package_name != null) {
+                        result.append ("](");
+                        result.append ("https://valadoc.org/");
+                        result.append (package_name);
+                        result.append_c ('/');
+                        result.append (vala_symbol.get_full_name ());
+                        result.append (".html");
+                        result.append_c (')');
+                    }
                 }
                 return false;
             });
@@ -436,10 +450,21 @@ class Vls.GirDocumentation {
                         }
                         previous_sym = current_sym;
                     }
+                    string? package_name = null;
+                    string full_name;
                     if (vala_member != null) {
                         sym_sb.append_c ('.');
                         sym_sb.append (vala_member.name);
+                        if (vala_member.source_reference != null)
+                            package_name = vala_member.source_reference.file.package_name;
+                        full_name = vala_member.get_full_name ();
+                    } else {
+                        if (vala_symbol.source_reference != null)
+                            package_name = vala_symbol.source_reference.file.package_name;
+                        full_name = vala_symbol.get_full_name ();
                     }
+                    if (package_name != null)
+                        result.append_c ('[');
                     result.append ("**");
                     result.append (sym_sb.str);
                     if (is_method || member_is_signal) {
@@ -456,6 +481,15 @@ class Vls.GirDocumentation {
                         }
                     }
                     result.append ("**");
+                    if (package_name != null) {
+                        result.append ("](");
+                        result.append ("https://valadoc.org/");
+                        result.append (package_name);
+                        result.append_c ('/');
+                        result.append (full_name);
+                        result.append (".html");
+                        result.append_c (')');
+                    }
                     if (is_plural)
                         result.append_c ('s');
                 } else {
@@ -475,10 +509,24 @@ class Vls.GirDocumentation {
                 Vala.Method? method_sym = null;
 
                 if (sym != null && (method_sym = sym.scope.lookup (vmethod_name) as Vala.Method) != null) {
+                    string? package_name = null;
+                    if (method_sym.source_reference != null)
+                        package_name = method_sym.source_reference.file.package_name;
+                    if (package_name != null)
+                        result.append_c ('[');
                     result.append ("**");
                     result.append (method_sym.get_full_name ());
                     result.append (parens);
                     result.append ("**");
+                    if (package_name != null) {
+                        result.append ("](");
+                        result.append ("https://valadoc.org/");
+                        result.append (package_name);
+                        result.append_c ('/');
+                        result.append (method_sym.get_full_name ());
+                        result.append (".html");
+                        result.append_c (')');
+                    }
                 } else {
                     result.append ((!) match_info.fetch (0));
                 }
@@ -493,9 +541,23 @@ class Vls.GirDocumentation {
                 Vala.Symbol? sym = compilation.cname_to_sym[c_symbol];
 
                 if (sym != null) {
+                    string? package_name = null;
+                    if (sym.source_reference != null)
+                        package_name = sym.source_reference.file.package_name;
+                    if (package_name != null)
+                        result.append_c ('[');
                     result.append ("**");
                     result.append (sym.get_full_name ());
                     result.append ("**");
+                    if (package_name != null) {
+                        result.append ("](");
+                        result.append ("https://valadoc.org/");
+                        result.append (package_name);
+                        result.append_c ('/');
+                        result.append (sym.get_full_name ());
+                        result.append (".html");
+                        result.append_c (')');
+                    }
                 } else {
                     result.append_c ('`');
                     result.append (c_symbol);
