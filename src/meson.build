@@ -34,7 +34,7 @@ if get_option('active_parameter')
   add_project_arguments(['--define=VALA_FEATURE_INITIAL_ARGUMENT_COUNT'], language: 'vala')
 endif
 
-executable('vala-language-server',
+vls = executable('vala-language-server',
   dependencies: deps,
   sources: [vls_src, conf_file, version_file, extra_vala_sources],
   c_args: ['-DG_LOG_DOMAIN="vls"'],
