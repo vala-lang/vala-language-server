@@ -943,8 +943,6 @@ class Vls.Server : Object {
                     best = m.base_interface_method;
                 else if (m.base_method != m && m.base_method != null)
                     best = m.base_method;
-                else
-                    best = null;
             } else if (best is Vala.Property) {
                 var prop = (Vala.Property)best;
 
@@ -952,8 +950,6 @@ class Vls.Server : Object {
                     best = prop.base_interface_property;
                 else if (prop.base_property != prop && prop.base_property != null)
                     best = prop.base_property;
-                else
-                    best = null;
             } else {
                 debug ("[%s] best is %s, which we can't handle", method, best != null ? best.type_name : null);
                 try {
