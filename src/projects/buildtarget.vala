@@ -51,7 +51,7 @@ abstract class Vls.BuildTarget : Object, Hashable<BuildTarget> {
      * its dependencies are newer than this target. This does not take care of 
      * building the target's dependencies.
      */
-    public abstract void build_if_stale (Cancellable? cancellable = null) throws Error;
+    public abstract async void rebuild_async (Cancellable? cancellable = null) throws Error;
 
     public bool equal_to (BuildTarget other) {
         return output_dir == other.output_dir && name == other.name && id == other.id;

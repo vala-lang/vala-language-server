@@ -254,15 +254,15 @@ abstract class Vls.Project : Object {
      * Reconfigure the project if there were changes to the build files that warrant doing so.
      * Returns true if the project was actually reconfigured, false otherwise.
      */
-    public abstract bool reconfigure_if_stale (Cancellable? cancellable = null) throws Error;
+    public abstract async bool reconfigure_async (Cancellable? cancellable = null) throws Error;
 
     /**
      * Build those elements of the project that need to be rebuilt.
      */
-    public virtual void build_if_stale (Cancellable? cancellable = null) throws Error {
+    public virtual async void rebuild_async (Cancellable? cancellable = null) throws Error {
         // this iteration should be in topological order
         foreach (var btarget in build_targets)
-            btarget.build_if_stale (cancellable);
+            yield btarget.rebuild_async (cancellable);
     }
 
     /**
@@ -303,7 +303,11 @@ abstract class Vls.Project : Object {
      * Open the file. Is guaranteed to return a non-empty result, or will
      * throw an error.
      */
-    public virtual ArrayList<Pair<Vala.SourceFile, Compilation>> open (string escaped_uri, string? content = null, Cancellable? cancellable = null) throws Error {
+    public virtual async ArrayList<Pair<Vala.SourceFile, Compilation>> open (
+        string escaped_uri,
+        string? content = null,
+        Cancellable? cancellable = null
+    ) throws Error {
         var results = lookup_compile_input_source_file (escaped_uri);
         if (results.is_empty)
             throw new ProjectError.NOT_FOUND ("cannot open %s - file cannot be created for this type of project", escaped_uri);

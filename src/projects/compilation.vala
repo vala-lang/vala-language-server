@@ -395,7 +395,7 @@ class Vls.Compilation : BuildTarget {
         debug ("finished compiling %s", id);
     }
 
-    public override void build_if_stale (Cancellable? cancellable = null) throws Error {
+    public override async void rebuild_async (Cancellable? cancellable = null) throws Error {
         if (_project_sources.is_empty)
             // configure for first time
             configure (cancellable);

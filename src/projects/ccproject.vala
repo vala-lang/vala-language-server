@@ -28,7 +28,7 @@ class Vls.CcProject : Project {
 
     private string build_dir;
 
-    public override bool reconfigure_if_stale (Cancellable? cancellable = null) throws Error {
+    public override async bool reconfigure_async (Cancellable? cancellable = null) throws Error {
         if (!build_files_have_changed) {
             return false;
         }
@@ -72,10 +72,10 @@ class Vls.CcProject : Project {
                                                     cc.command[0:1], cc.command[1:cc.command.length],
                                                     new string[]{}, new string[]{}, new string[]{}));
             else
-                build_targets.add (new BuildTask (cc.directory, cc.directory, cc.file ?? @"CC#$i", @"CC#$i", i,
-                                                  cc.command[0:1], cc.command[1:cc.command.length], 
-                                                  new string[]{}, new string[]{},
-                                                  new string[]{}, "unknown"));
+                build_targets.add (yield new BuildTask (cc.directory, cc.directory, cc.file ?? @"CC#$i", @"CC#$i", i,
+                                                        cc.command[0:1], cc.command[1:cc.command.length], 
+                                                        new string[]{}, new string[]{},
+                                                        new string[]{}, "unknown"));
         }
 
         analyze_build_targets (cancellable);
@@ -83,7 +83,7 @@ class Vls.CcProject : Project {
         return true;
     }
 
-    public CcProject (string root_path, string cc_location, Cancellable? cancellable = null) throws Error {
+    public async CcProject (string root_path, string cc_location, Cancellable? cancellable = null) throws Error {
         base (root_path);
 
         var root_dir = File.new_for_path (root_path);
@@ -97,7 +97,7 @@ class Vls.CcProject : Project {
         this.build_dir = cc_json_file.get_parent ().get_path ();
         this.cc_json_file = cc_json_file;
 
-        reconfigure_if_stale (cancellable);
+        yield reconfigure_async (cancellable);
     }
 
     private void file_changed_event (File src, File? dest, FileMonitorEvent event_type) {

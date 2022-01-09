@@ -26,12 +26,16 @@ class Vls.DefaultProject : Project {
         base (root_path);
     }
 
-    public override bool reconfigure_if_stale (Cancellable? cancellable = null) throws Error {
+    public override async bool reconfigure_async (Cancellable? cancellable = null) throws Error {
         // this should do nothing, since we don't have a backend
         return false;
     }
 
-    public override ArrayList<Pair<Vala.SourceFile, Compilation>> open (string escaped_uri, string? content = null, Cancellable? cancellable = null) throws Error {
+    public override async ArrayList<Pair<Vala.SourceFile, Compilation>> open (
+        string escaped_uri,
+        string? content = null,
+        Cancellable? cancellable = null
+    ) throws Error {
         // create a new compilation
         var file = File.new_for_uri (Uri.unescape_string (escaped_uri));
         Compilation btarget;
@@ -58,7 +62,7 @@ class Vls.DefaultProject : Project {
         // build it now so that information is available immediately on
         // file open (other projects compile on LSP initialize(), so they don't
         // need to do this)
-        btarget.build_if_stale (cancellable);
+        yield btarget.rebuild_async (cancellable);
         // make sure this comes after, that way btarget only gets added
         // if the build succeeds
         build_targets.add (btarget);

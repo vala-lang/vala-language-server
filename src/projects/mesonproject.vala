@@ -223,7 +223,7 @@ class Vls.MesonProject : Project {
         }
     }
 
-    public override bool reconfigure_if_stale (Cancellable? cancellable = null) throws Error {
+    public override async bool reconfigure_async (Cancellable? cancellable = null) throws Error {
         if (!build_files_have_changed) {
             return false;
         }
@@ -533,17 +533,17 @@ class Vls.MesonProject : Project {
                     executes_generated_program = true;
                 }
 
-                var added_task = new BuildTask (build_dir,
-                                                target_private_output_dir,
-                                                meson_target_info.name,
-                                                meson_target_info.id,
-                                                elem_idx + (swap_with_previous_target ? -1 : 0),
-                                                first_source.compiler,
-                                                first_source.parameters,
-                                                first_source.sources,
-                                                first_source.generated_sources,
-                                                meson_target_info.filename,
-                                                first_source.language);
+                var added_task = yield new BuildTask (build_dir,
+                                                      target_private_output_dir,
+                                                      meson_target_info.name,
+                                                      meson_target_info.id,
+                                                      elem_idx + (swap_with_previous_target ? -1 : 0),
+                                                      first_source.compiler,
+                                                      first_source.parameters,
+                                                      first_source.sources,
+                                                      first_source.generated_sources,
+                                                      meson_target_info.filename,
+                                                      first_source.language);
                 build_targets.add (added_task);
                 if (previous_target != null) {
                     previous_target.no = elem_idx;
@@ -726,7 +726,7 @@ class Vls.MesonProject : Project {
         return true;
     }
 
-    public override void build_if_stale (GLib.Cancellable? cancellable = null) throws Error {
+    public override async void rebuild_async (GLib.Cancellable? cancellable = null) throws Error {
         if (requires_general_build) {
             int proc_status;
             string proc_stdout, proc_stderr;
@@ -747,13 +747,13 @@ class Vls.MesonProject : Project {
             }
         }
 
-        base.build_if_stale (cancellable);
+        yield base.rebuild_async (cancellable);
     }
 
-    public MesonProject (string root_path, Cancellable? cancellable = null) throws Error {
+    public async MesonProject (string root_path, Cancellable? cancellable = null) throws Error {
         base (root_path);
         this.build_dir = DirUtils.make_tmp (@"vls-meson-$(str_hash (root_path))-XXXXXX");
-        reconfigure_if_stale (cancellable);
+        yield reconfigure_async (cancellable);
     }
 
     ~MesonProject () {

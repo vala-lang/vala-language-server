@@ -40,10 +40,10 @@ class Vls.BuildTask : BuildTarget {
      */
     public ArrayList<File> candidate_inputs { get; private set; default = new ArrayList<File> (); }
 
-    public BuildTask (string build_dir, string output_dir, string name, string id, int no,
-                      string[] compiler, string[] args, string[] sources, string[] generated_sources,
-                      string[] target_output_files,
-                      string language) throws Error {
+    public async BuildTask (string build_dir, string output_dir, string name, string id, int no,
+                            string[] compiler, string[] args, string[] sources, string[] generated_sources,
+                            string[] target_output_files,
+                            string language, Cancellable? cancellable = null) throws Error {
         base (output_dir, name, id, no);
         // don't pipe stderr since we want to print that if something goes wrong
         this.build_dir = build_dir;
@@ -191,13 +191,23 @@ class Vls.BuildTask : BuildTarget {
                             // real file. To do this, we read the location pointed to by the symlink.
                             File real_file = library_file;
                             try {
-                                FileInfo? info = real_file.query_info ("standard::*", FileQueryInfoFlags.NONE);
+                                FileInfo? info = yield real_file.query_info_async (
+                                    "standard::*",
+                                    FileQueryInfoFlags.NONE,
+                                    Priority.DEFAULT,
+                                    cancellable
+                                );
                                 // sometimes there can be symlinks to symlinks,
                                 // such as libthing.so -> libthing.so.0 -> libthing.so.0.0.0
                                 while (info.get_is_symlink ()) {
                                     real_file = gir_library_dir.get_child (info.get_symlink_target ());
                                     try {
-                                        info = real_file.query_info ("standard::*", FileQueryInfoFlags.NONE);
+                                        info = yield real_file.query_info_async (
+                                            "standard::*",
+                                            FileQueryInfoFlags.NONE,
+                                            Priority.DEFAULT,
+                                            cancellable
+                                        );
                                     } catch (Error e) {
                                         // if this file does not exist, then it's probably the real file,
                                         // yet-to-be-created
@@ -244,13 +254,18 @@ class Vls.BuildTask : BuildTarget {
         }
     }
 
-    public override void build_if_stale (Cancellable? cancellable = null) throws Error {
+    public override async void rebuild_async (Cancellable? cancellable = null) throws Error {
         // don't run this task if our inputs haven't changed
         if (!input.is_empty && !output.is_empty) {
             bool inputs_modified_after = false;
 
             foreach (File file in input) {
-                FileInfo info = file.query_info (FileAttribute.TIME_MODIFIED, FileQueryInfoFlags.NONE, cancellable);
+                FileInfo info = yield file.query_info_async (
+                    FileAttribute.TIME_MODIFIED,
+                    FileQueryInfoFlags.NONE,
+                    Priority.DEFAULT,
+                    cancellable
+                );
                 DateTime? file_last_modified;
 #if GLIB_2_62
                 file_last_modified = info.get_modification_date_time ();
@@ -271,7 +286,7 @@ class Vls.BuildTask : BuildTarget {
         }
 
         Subprocess process = launcher.spawnv (arguments);
-        process.wait (cancellable);
+        yield process.wait_async (cancellable);
         if (cancellable.is_cancelled ()) {
             process.force_exit ();
             cancellable.set_error_if_cancelled ();
@@ -296,8 +311,19 @@ class Vls.BuildTask : BuildTarget {
                 var output_file = output[0];
                 var process_output_istream = process.get_stdout_pipe ();
                 if (process_output_istream != null) {
-                    var outfile_ostream = output_file.replace (null, false, FileCreateFlags.NONE, cancellable);
-                    outfile_ostream.splice (process_output_istream, OutputStreamSpliceFlags.NONE, cancellable);
+                    var outfile_ostream = yield output_file.replace_async (
+                        null,
+                        false,
+                        FileCreateFlags.NONE,
+                        Priority.DEFAULT,
+                        cancellable
+                    );
+                    yield outfile_ostream.splice_async (
+                        process_output_istream,
+                        OutputStreamSpliceFlags.NONE,
+                        Priority.DEFAULT,
+                        cancellable
+                    );
                 }
             }
             last_updated = new DateTime.now ();
