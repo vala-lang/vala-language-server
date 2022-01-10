@@ -396,10 +396,6 @@ class Vls.Compilation : BuildTarget {
     }
 
     public override async void rebuild_async (Cancellable? cancellable = null) throws Error {
-        if (_project_sources.is_empty)
-            // configure for first time
-            configure (cancellable);
-
         bool stale = false;
         foreach (BuildTarget dep in dependencies.values) {
             if (dep.last_updated.compare (last_updated) > 0) {
