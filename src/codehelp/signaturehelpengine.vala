@@ -20,10 +20,10 @@ using Gee;
 using Lsp;
 
 namespace Vls.SignatureHelpEngine {
-    void begin_response (Server lang_serv, Project project,
-                         Jsonrpc.Client client, Variant id, string method,
-                         Vala.SourceFile doc, Compilation compilation,
-                         Position pos) {
+    async void begin_response_async (Server lang_serv, Project project,
+                               Jsonrpc.Client client, Variant id, string method,
+                               Vala.SourceFile doc, Compilation compilation,
+                               Position pos) {
         // long idx = (long) Util.get_string_pos (doc.content, pos.line, pos.character);
 
         // if (idx >= 2 && doc.content[idx-1:idx] == "(") {
@@ -51,28 +51,23 @@ namespace Vls.SignatureHelpEngine {
         }
         
         if (signatures.is_empty) {
-            lang_serv.wait_for_context_update (id, request_cancelled => {
-                if (request_cancelled) {
-                    Server.reply_null (id, client, method);
-                    return;
-                }
-
-                Vala.CodeContext.push (compilation.code_context);
-                show_help_with_updated_context (lang_serv, project,
-                                                method,
-                                                doc, compilation, pos, 
-                                                signatures, ref active_param);
-                
-                if (!signatures.is_empty)
-                    finish (client, id, signatures, active_param);
-                else
-                    Server.reply_null (id, client, method);
+            if (!yield lang_serv.wait_for_context_update_async (id, method)) {
                 Vala.CodeContext.pop ();
-            });
-        } else {
-            finish (client, id, signatures, active_param);
+                yield Server.reply_null_async (id, client, method);
+                return;
+            }
+
+            show_help_with_updated_context (lang_serv, project,
+                                            method,
+                                            doc, compilation, pos, 
+                                            signatures, ref active_param);
         }
+
         Vala.CodeContext.pop ();
+        if (signatures.is_empty)
+            yield Server.reply_null_async (id, client, method);
+        else
+            yield finish_async (client, id, signatures, active_param);
     }
 
     void show_help (Server lang_serv, Project project,
@@ -302,10 +297,10 @@ namespace Vls.SignatureHelpEngine {
         show_help (lang_serv, project, method, result, scope, compilation, signatures, ref active_param);
     }
 
-    void finish (Jsonrpc.Client client, Variant id, Collection<SignatureInformation> signatures, int active_param) {
+    async void finish_async (Jsonrpc.Client client, Variant id, Collection<SignatureInformation> signatures, int active_param) {
         try {
             // debug ("sending with active_param = %d", active_param);
-            client.reply (id, Util.object_to_variant (new SignatureHelp () {
+            yield client.reply_async (id, Util.object_to_variant (new SignatureHelp () {
                 signatures = signatures,
                 activeParameter = active_param
             }), Server.cancellable);

@@ -117,7 +117,7 @@ class Vls.Server : Jsonrpc.Server {
         // shutdown if/when we get a signal
         Timeout.add (1 * 1000, () => {
             if (Server.received_signal) {
-                shutdown_real ();
+                shutdown ();
                 return Source.REMOVE;
             }
             return !this.shutting_down;
@@ -127,7 +127,7 @@ class Vls.Server : Jsonrpc.Server {
 
 #if WITH_JSONRPC_GLIB_3_30
         client_closed_event_id = client_closed.connect (client => {
-            shutdown_real ();
+            shutdown ();
         });
 #endif
 
@@ -145,7 +145,7 @@ class Vls.Server : Jsonrpc.Server {
                 return true;
 
             case "shutdown":
-                shutdown (client, method, id, @params);
+                shutdown_reply_async.begin (client, method, id, @params);
                 return true;
 
             case "textDocument/definition":
@@ -157,7 +157,7 @@ class Vls.Server : Jsonrpc.Server {
                 return true;
 
             case "textDocument/completion":
-                text_document_completion (client, method, id, @params);
+                text_document_completion_async.begin (client, method, id, @params);
                 return true;
 
             case "textDocument/hover":
@@ -170,7 +170,7 @@ class Vls.Server : Jsonrpc.Server {
                 return true;
 
             case "textDocument/signatureHelp":
-                text_document_signature_help (client, method, id, @params);
+                text_document_signature_help_async.begin (client, method, id, @params);
                 return true;
 
             case "textDocument/implementation":
@@ -186,11 +186,11 @@ class Vls.Server : Jsonrpc.Server {
                 return true;
 
             case "textDocument/codeLens":
-                text_document_code_lens (client, method, id, @params);
+                text_document_code_lens_async.begin (client, method, id, @params);
                 return true;
 
             case "textDocument/formatting":
-                text_document_formatting (client, method, id, @params);
+                text_document_formatting.begin (client, method, id, @params);
                 return true;
 
             case "workspace/symbol":
@@ -412,14 +412,6 @@ class Vls.Server : Jsonrpc.Server {
         // else
         //     debug (@"[cancelRequest] request $req not found");
         pending_requests.remove (req);
-    }
-
-    public static void reply_null (Variant id, Jsonrpc.Client client, string method) {
-        try {
-            client.reply (id, new Variant.maybe (VariantType.VARIANT, null), cancellable);
-        } catch (Error e) {
-            debug (@"[$method] failed to reply to client: $(e.message)");
-        }
     }
 
     public static async void reply_null_async (Variant id, Jsonrpc.Client client, string method) {
@@ -742,51 +734,6 @@ class Vls.Server : Jsonrpc.Server {
         }
     }
 
-    public delegate void OnContextUpdatedFunc (bool request_cancelled);
-
-    /**
-     * Runs `on_context_updated_func` after the context has updated.
-     */
-    public void wait_for_context_update (Variant id, owned OnContextUpdatedFunc on_context_updated_func) {
-        // we've already updated the context
-        if (update_context_requests == 0)
-            on_context_updated_func (false);
-        else {
-            var req = new Request (id);
-            if (!pending_requests.add (req))
-                warning (@"Request ($req): request already in pending requests, this should not happen");
-            /* else
-                debug (@"Request ($req): added request to pending requests"); */
-            wait_for_context_update_aux (req, (owned) on_context_updated_func);
-        }
-    }
-
-    /**
-     * Execute `on_context_updated_func ()` or wait.
-     */
-    void wait_for_context_update_aux (Request req, owned OnContextUpdatedFunc on_context_updated_func) {
-        // we've already updated the context
-        if (update_context_requests == 0) {
-            if (!pending_requests.remove (req)) {
-                // debug (@"Request ($req): context updated but request cancelled");
-                on_context_updated_func (true);
-            } else {
-                // debug (@"Request ($req): context updated");
-                on_context_updated_func (false);
-            }
-        } else {
-            Timeout.add (wait_for_context_update_delay_ms, () => {
-                if (pending_requests.contains (req))
-                    wait_for_context_update_aux (req, (owned) on_context_updated_func);
-                else {
-                    // debug (@"Request ($req): cancelled before context update");
-                    on_context_updated_func (true);
-                }
-                return Source.REMOVE;
-            });
-        }
-    }
-
     /**
      * Returns `false` if the request was cancelled.
      */
@@ -825,7 +772,7 @@ class Vls.Server : Jsonrpc.Server {
             return Source.CONTINUE;
         });
 
-        yield;  // wait for scheduling of background
+        yield;  // wait for invocation of callback
 
         return success;
     }
@@ -1205,7 +1152,7 @@ class Vls.Server : Jsonrpc.Server {
         return doc_comment;
     }
 
-    void text_document_completion (Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    async void text_document_completion_async (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<Lsp.CompletionParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
@@ -1223,17 +1170,17 @@ class Vls.Server : Jsonrpc.Server {
         }
         if (results.is_empty) {
             debug (@"[$method] failed to find file $(p.textDocument.uri)");
-            reply_null (id, client, method);
+            yield reply_null_async (id, client, method);
             return;
         }
 
-        CompletionEngine.begin_response (this, selected_project,
-                                         client, id, method,
-                                         results[0].first, results[0].second,
-                                         p.position, p.context);
+        yield CompletionEngine.begin_response_async (this, selected_project,
+                                                     client, id, method,
+                                                     results[0].first, results[0].second,
+                                                     p.position, p.context);
     }
 
-    void text_document_signature_help (Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    async void text_document_signature_help_async (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<Lsp.TextDocumentPositionParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
@@ -1251,14 +1198,14 @@ class Vls.Server : Jsonrpc.Server {
         }
         if (results.is_empty) {
             debug ("unknown file %s", p.textDocument.uri);
-            reply_null (id, client, "textDocument/signatureHelp");
+            yield reply_null_async (id, client, method);
             return;
         }
 
-        SignatureHelpEngine.begin_response (this, selected_project,
-                                            client, id, method,
-                                            results[0].first, results[0].second,
-                                            p.position);
+        yield SignatureHelpEngine.begin_response_async (this, selected_project,
+                                                        client, id, method,
+                                                        results[0].first, results[0].second,
+                                                        p.position);
     }
 
     async void text_document_hover_async (Jsonrpc.Client client, string method, Variant id, Variant @params) {
@@ -1683,7 +1630,7 @@ class Vls.Server : Jsonrpc.Server {
         }
     }
     
-    void text_document_formatting (Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    async void text_document_formatting (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<Lsp.DocumentFormattingParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
@@ -1701,7 +1648,7 @@ class Vls.Server : Jsonrpc.Server {
         }
         if (results.is_empty) {
             debug (@"file `$(Uri.unescape_string (p.textDocument.uri))' not found");
-            reply_null (id, client, method);
+            yield reply_null_async (id, client, method);
             return;
         }
         var json_array = new Json.Array ();
@@ -1711,14 +1658,13 @@ class Vls.Server : Jsonrpc.Server {
             Compilation compilation = pair.second;
             var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (source_file) as CodeStyleAnalyzer;
             try {
-                edited = Formatter.format (p.options, code_style, source_file, cancellable);
+                edited = yield Formatter.format_async (p.options, code_style, source_file, cancellable);
             } catch (Error e) {
-                client.reply_error_async.begin (
-                    id,
-                    Jsonrpc.ClientError.INTERNAL_ERROR,
-                    e.message,
-                cancellable);
-                warning ("Formatting failed: %s", e.message);
+                try {
+                    yield client.reply_error_async (id, Jsonrpc.ClientError.INTERNAL_ERROR, e.message, cancellable);
+                    warning ("Formatting failed: %s", e.message);
+                } catch (Error e) {
+                }
                 return;
             }
             json_array.add_element (Json.gobject_serialize (edited));
@@ -2077,13 +2023,13 @@ class Vls.Server : Jsonrpc.Server {
     /**
      * handle an incoming `textDocument/codeLens` request
      */
-    void text_document_code_lens (Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    async void text_document_code_lens_async (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
         string? uri = document != null ? (string?) document.lookup_value ("uri", VariantType.STRING) : null;
 
         if (document == null || uri == null) {
             warning ("[%s] `textDocument` or `uri` not provided as expected", method);
-            reply_null (id, client, method);
+            yield reply_null_async (id, client, method);
             return;
         }
 
@@ -2103,25 +2049,25 @@ class Vls.Server : Jsonrpc.Server {
         }
         if (results.is_empty) {
             debug (@"file `$(Uri.unescape_string (uri))' not found");
-            reply_null (id, client, method);
+            yield reply_null_async (id, client, method);
             return;
         }
 
-        CodeLensEngine.begin_response (this, selected_project,
-                                       client, id, method,
-                                       results[0].first, results[0].second);
+        yield CodeLensEngine.begin_response_async (this, selected_project,
+                                                   client, id, method,
+                                                   results[0].first, results[0].second);
     }
 
-    void shutdown (Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        reply_null (id, client, "shutdown");
-        shutdown_real ();
+    async void shutdown_reply_async (Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        yield reply_null_async (id, client, method);
+        shutdown ();
     }
 
     void exit (Jsonrpc.Client client, Variant @params) {
-        shutdown_real ();
+        shutdown ();
     }
 
-    void shutdown_real () {
+    void shutdown () {
         debug ("shutting down...");
         this.shutting_down = true;
         cancellable.cancel ();
