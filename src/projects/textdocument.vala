@@ -26,6 +26,9 @@ class Vls.TextDocument : SourceFile {
     public DateTime last_updated { get; set; default = new DateTime.now (); }
     public int version { get; set; }
 
+    /**
+     * Used along with {@link last_saved_content} for checkpoint and restore.
+     */
     public int last_saved_version { get; private set; }
     private string? _last_saved_content = null;
     public string last_saved_content {
@@ -40,19 +43,20 @@ class Vls.TextDocument : SourceFile {
         }
     }
 
-    private string? _last_fresh_content = null;
+    private string? _last_compiled_content = null;
 
     /**
-     * The contents at the time of compilation.
+     * The contents at the last time the code context was compiled, that is,
+     * before any intermediate modifications.
      */
-    public string last_fresh_content {
+    public string last_compiled_content {
         get {
-            if (_last_fresh_content == null)
+            if (_last_compiled_content == null)
                 return this.content;
-            return _last_fresh_content;
+            return _last_compiled_content;
         }
         set {
-            _last_fresh_content = value;
+            _last_compiled_content = value;
         }
     }
 
@@ -77,5 +81,14 @@ class Vls.TextDocument : SourceFile {
         // prefer paths to URIs, unless we don't have a path
         // (this happens when we have just opened a new file in some editors)
         base (context, ftype, path ?? uri, cont, cmdline);
+    }
+
+    public TextDocument.clone (CodeContext context, TextDocument document) {
+        base (context, document.file_type, document.filename, document.content, document.from_commandline);
+        this.last_updated = document.last_updated;
+        this.version = document.version;
+        this.last_saved_version = document.last_saved_version;
+        this._last_saved_content = document._last_saved_content;
+        this._last_compiled_content = document._last_compiled_content;
     }
 }

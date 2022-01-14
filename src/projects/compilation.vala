@@ -224,9 +224,9 @@ class Vls.Compilation : BuildTarget {
         }
     }
 
-    private void configure (Cancellable? cancellable = null) throws Error {
+    private async void compile_async (Cancellable? cancellable = null) throws Error {
         // 1. recreate code context
-        code_context = new Vala.CodeContext () {
+        var code_context = new Vala.CodeContext () {
             deprecated = _deprecated,
             experimental = _experimental,
             experimental_non_null = _experimental_non_null,
@@ -287,11 +287,12 @@ class Vls.Compilation : BuildTarget {
             }
         }
 
-        foreach (TextDocument doc in _project_sources.values) {
-            doc.context = code_context;
+        var new_project_sources = new HashMap<File, TextDocument> (Util.file_hash, Util.file_equal);
+
+        foreach (Map.Entry<File, TextDocument> pair in _project_sources) {
+            var doc = new TextDocument.clone (code_context, pair.value);
+            new_project_sources[pair.key] = doc;
             code_context.add_source_file (doc);
-            // clear all using directives (to avoid "T ambiguous with T" errors)
-            doc.current_using_directives.clear ();
             // add default using directives for the profile
             if (_profile == Vala.Profile.POSIX) {
                 // import the Posix namespace by default (namespace of backend-specific standard library)
@@ -304,35 +305,17 @@ class Vls.Compilation : BuildTarget {
                 doc.add_using_directive (ns_ref);
                 code_context.root.add_using_directive (ns_ref);
             }
-
-            // clear all comments from file
-            doc.get_comments ().clear ();
-
-            // clear all code nodes from file
-            doc.get_nodes ().clear ();
-
-            cancellable.set_error_if_cancelled ();
         }
 
         // packages (should come after in case we've wrapped any package files in TextDocuments)
         foreach (string package in _packages)
             code_context.add_external_package (package);
 
-        Vala.CodeContext.pop ();
-    }
-
-    private void compile () throws Error {
-        debug ("compiling %s ...", id);
-        Vala.CodeContext.push (code_context);
-        var vala_parser = new Vala.Parser ();
-        var genie_parser = new Vala.Genie.Parser ();
-        var gir_parser = new Vala.GirParser ();
-
         // add all generated files before compiling
         foreach (File generated_file in _generated_sources) {
             // generated files are also part of the project, so we use TextDocument intead of Vala.SourceFile
             try {
-                if (!generated_file.query_exists ())
+                if (!generated_file.query_exists (cancellable))
                     throw new FileError.NOENT (@"file does not exist");
                 code_context.add_source_file (new TextDocument (code_context, generated_file));
             } catch (Error e) {
@@ -343,11 +326,32 @@ class Vls.Compilation : BuildTarget {
             }
         }
 
-        // compile everything
-        vala_parser.parse (code_context);
-        genie_parser.parse (code_context);
-        gir_parser.parse (code_context);
-        code_context.check ();
+        Vala.CodeContext.pop();
+
+        // compile everything, suspend while we wait
+        yield Scheduler.run_async<void> (() => {
+            Vala.CodeContext.push (code_context);
+
+            var vala_parser = new Vala.Parser ();
+            var genie_parser = new Vala.Genie.Parser ();
+            var gir_parser = new Vala.GirParser ();
+
+            vala_parser.parse (code_context);
+            genie_parser.parse (code_context);
+            gir_parser.parse (code_context);
+            code_context.check ();
+
+            Vala.CodeContext.pop ();
+        }, cancellable);
+
+        // we're done. update the code context in the main thread
+        // XXX: check for any potential problems here
+        var old_project_sources = this._project_sources;
+        var old_context = this.code_context;
+        this._project_sources = new_project_sources;
+        this.code_context = code_context;
+
+        Vala.CodeContext.push (code_context);
 
         // generate output files
         // generate VAPI
@@ -378,16 +382,28 @@ class Vls.Compilation : BuildTarget {
                 source_file.accept (new CNameMapper (cname_to_sym));
         }
 
-        // remove analyses for sources that are no longer a part of the code context
-        var removed_sources = new Vala.HashSet<Vala.SourceFile> ();
-        removed_sources.add_all (code_context.get_source_files ());
-        foreach (var entry in _project_sources) {
-            var text_document = entry.value;
-            text_document.last_fresh_content = text_document.content;
-            removed_sources.remove (entry.value);
+        // clear all analyses
+        _source_analyzers.clear ();
+
+        // update the new text documents
+        foreach (Map.Entry<File, TextDocument> pair in _project_sources) {
+            var text_document = pair.value;
+            var old_text_document = old_project_sources[pair.key];
+            // confirm the change to last_compiled_content
+            text_document.last_compiled_content = text_document.content;
+            // also copy old text document metadata that may have been modified during async compilation
+            text_document.content = old_text_document.content;
+            text_document.version = old_text_document.version;
+            text_document.last_updated = old_text_document.last_updated;
+            text_document.last_saved_content = old_text_document.last_saved_content;
         }
-        foreach (var source in removed_sources)
-            _source_analyzers.unset (source, null);
+
+        // free up memory used by the old files
+        foreach (var source_file in old_context.get_source_files ()) {
+            source_file.current_using_directives.clear ();
+            source_file.get_comments ().clear ();
+            source_file.get_nodes ().clear ();
+        }
 
         last_updated = new DateTime.now ();
         _completed_first_compile = true;
@@ -410,10 +426,7 @@ class Vls.Compilation : BuildTarget {
             }
         }
         if (stale || !_completed_first_compile) {
-            configure (cancellable);
-            cancellable.set_error_if_cancelled ();
-            // TODO: cancellable compilation
-            compile ();
+            yield compile_async (cancellable);
         }
     }
 

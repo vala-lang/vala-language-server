@@ -29,6 +29,7 @@ vls_src = files([
   'reporter.vala',
   'server.vala',
   'servertypes.vala',
+  'scheduler.vala'
 ])
 
 if get_option('active_parameter')

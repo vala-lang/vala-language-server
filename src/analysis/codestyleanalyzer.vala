@@ -83,7 +83,7 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
         // parse tree (to allow for fast code completion), we have to use
         // [last_fresh_content]
         unowned var content = (current_file is TextDocument) ?
-            ((TextDocument)current_file).last_fresh_content : current_file.content;
+            ((TextDocument)current_file).last_compiled_content : current_file.content;
         var sr = callable.source_reference;
         var zero_idx = (long) Util.get_string_pos (content, sr.end.line - 1, sr.end.column);
         unowned string text = content.offset (zero_idx);

@@ -74,7 +74,7 @@ namespace Vls.CodeHelp {
         if (file.content == null)
             file.content = (string) file.get_mapped_contents ();
         if (sr.file is TextDocument) {
-            content = ((TextDocument)sr.file).last_fresh_content;
+            content = ((TextDocument)sr.file).last_compiled_content;
         } else {
             content = file.content;
         }

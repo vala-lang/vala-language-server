@@ -562,6 +562,7 @@ class Vls.Server : Jsonrpc.Server {
     Jsonrpc.Client? update_context_client = null;
     int64 update_context_requests = 0;
     int64 update_context_time_us = 0;
+    bool updating_context = false;
 
     void text_document_did_change (Jsonrpc.Client client, Variant @params) {
         var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
@@ -642,9 +643,10 @@ class Vls.Server : Jsonrpc.Server {
     async void check_update_context_async () {
         while (!shutting_down && !cancellable.is_cancelled ()) {
             if (update_context_requests > 0 && get_monotonic_time () >= update_context_time_us) {
-                debug ("updating contexts and publishing diagnostics...");
                 update_context_requests = 0;
                 update_context_time_us = 0;
+                debug ("updating contexts and publishing diagnostics...");
+                updating_context = true;
 
                 Project[] all_projects = projects.get_keys_as_array ();
                 all_projects += default_project;
@@ -677,11 +679,6 @@ class Vls.Server : Jsonrpc.Server {
                         }
 
                         foreach (var compilation in project.get_compilations ())
-                            /* NOTE: This must come after the resetting of the two variables above,
-                             * since it's possible for publish_diagnostics_async() to eventually call
-                             * one of our JSON-RPC callbacks through g_main_context_iteration (),
-                             * if we get a new message while sending the textDocument/publishDiagnostics
-                             * notifications. */
                             yield publish_diagnostics_async (project, compilation, update_context_client);
                     } catch (Error e) {
                         warning ("Failed to rebuild and/or reconfigure project: %s", e.message);
@@ -732,6 +729,7 @@ class Vls.Server : Jsonrpc.Server {
 
                 // rebuild the documentation
                 documentation.rebuild_if_stale ();
+                updating_context = false;
             }
 
             // schedule ourselves
@@ -765,7 +763,7 @@ class Vls.Server : Jsonrpc.Server {
         RequestError? err = null;
 
         Timeout.add (wait_for_context_update_delay_ms, () => {
-            if (initialized && update_context_requests == 0) {
+            if (initialized && update_context_requests == 0 && !updating_context) {
                 // context was updated
                 // if [req] is still present, it hasn't been cancelled
                 if (!pending_requests.remove (req))
@@ -1055,6 +1053,14 @@ class Vls.Server : Jsonrpc.Server {
 
     async void text_document_document_symbol_async (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<Lsp.TextDocumentPositionParams>(@params);
+
+        try {
+            yield wait_for_context_update_async (id, method);
+        } catch (Error e) {
+            yield reply_null_async (id, client, method);
+            return;
+        }
+
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {
@@ -1075,28 +1081,9 @@ class Vls.Server : Jsonrpc.Server {
             return;
         }
 
-        try {
-            yield wait_for_context_update_async (id, method);
-        } catch (Error e) {
-            yield reply_null_async (id, client, method);
-            return;
-        }
-
         // ignore multiple results
         Vala.SourceFile file = results[0].first;
         Compilation compilation = results[0].second;
-
-        if (compilation.code_context != file.context) {
-            // This means the file was probably deleted from the current code context,
-            // and so it's no longer valid. This is often the case for system files 
-            // that are added automatically in Vala.CodeContext
-            // This seems to be especially a problem on GNOME Builder, which runs
-            // this query on all files right after the user updates a file, but before
-            // the code context is updated.
-            debug ("[%s] file (%s) context != compilation.code_context; not proceeding further",
-                method, p.textDocument.uri);
-            return;
-        }
 
         Vala.CodeContext.push (compilation.code_context);
 
@@ -1432,6 +1419,13 @@ class Vls.Server : Jsonrpc.Server {
 
     async void text_document_references_async (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<ReferenceParams>(@params);
+        try {
+            yield wait_for_context_update_async (id, method);
+        } catch (Error e) {
+            yield reply_null_async (id, client, method);
+            return;
+        }
+
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {
@@ -1455,12 +1449,6 @@ class Vls.Server : Jsonrpc.Server {
         Position pos = p.position;
         bool is_highlight = method == "textDocument/documentHighlight";
         bool include_declaration = p.context != null ? p.context.includeDeclaration : true;
-        try {
-            yield wait_for_context_update_async (id, method);
-        } catch (Error e) {
-            yield reply_null_async (id, client, method);
-            return;
-        }
 
         Vala.SourceFile doc = results[0].first;
         Compilation compilation = results[0].second;
