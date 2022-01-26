@@ -517,7 +517,7 @@ namespace Lsp {
             CompletionItemKind kind, Vls.DocComment? documentation, string? label_override = null) {
             this.label = label_override ?? sym.name;
             this.kind = kind;
-            this.detail = Vls.CodeHelp.get_symbol_representation (instance_type, sym, scope, true, null, null, false);
+            this.detail = Vls.CodeHelp.get_symbol_representation (instance_type, sym, scope, true, null, label_override, false);
             this._hash = @"$label $kind".hash ();
 
             if (documentation != null)

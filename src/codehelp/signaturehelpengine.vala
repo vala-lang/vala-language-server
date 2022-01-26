@@ -95,9 +95,9 @@ namespace Vls.SignatureHelpEngine {
         // The data type of the expression
         Vala.DataType? data_type = null;
         Vala.List<Vala.DataType>? method_type_arguments = null;
+        Vala.List<Vala.Parameter>? ellipsis_override_params = null;
         // either "begin" or "end" or null
         string? coroutine_name = null;
-        Vala.List<Vala.Parameter>? ellipsis_override_params = null;
 
         if (result is Vala.MethodCall) {
             var mc = result as Vala.MethodCall;
@@ -171,19 +171,15 @@ namespace Vls.SignatureHelpEngine {
                     }
                 } else {
                     // handle special cases for .begin() and .end() in coroutines (async methods)
-                    if (mc.call is Vala.MemberAccess && mt.method_symbol.coroutine &&
-                        (explicit_sym == null || (((Vala.MemberAccess)mc.call).inner).symbol_reference == explicit_sym)) {
-                        coroutine_name = ((Vala.MemberAccess)mc.call).member_name ?? "";
-                        if (coroutine_name[0] == 'S')   // is possible because of incomplete member access
-                            coroutine_name = null;
-                        if (coroutine_name == "begin")
+                    string[] async_methods = {"begin", "end"};
+                    if (mc.call is Vala.MemberAccess && mt.method_symbol.coroutine
+                        && ((Vala.MemberAccess)mc.call).member_name in async_methods) {
+                        coroutine_name = ((Vala.MemberAccess)mc.call).member_name;
+                        if (coroutine_name == "begin") {
                             param_list = mt.method_symbol.get_async_begin_parameters ();
-                        else if (coroutine_name == "end") {
+                        } else if (coroutine_name == "end") {
                             param_list = mt.method_symbol.get_async_end_parameters ();
                             explicit_sym = mt.method_symbol.get_end_method ();
-                            coroutine_name = null;  // .end() is its own method
-                        } else if (coroutine_name != null) {
-                            debug (@"[$method] coroutine name `$coroutine_name' not handled");
                         }
                     }
                 }
@@ -239,7 +235,7 @@ namespace Vls.SignatureHelpEngine {
         }
 
         si.label = CodeHelp.get_symbol_representation (data_type, explicit_sym, scope, true, method_type_arguments,
-                                                       null, true, false, ellipsis_override_params);
+                                                       coroutine_name, true, false, ellipsis_override_params);
         DocComment? doc_comment = null;
         if (explicit_sym != null) {
             doc_comment = lang_serv.get_symbol_documentation (project, explicit_sym);

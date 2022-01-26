@@ -788,7 +788,7 @@ namespace Vls.CompletionEngine {
             else if (symbol is Vala.Namespace && !(is_null_safe_access || is_pointer_access))
                 add_completions_for_ns (lang_serv, project, code_style, (Vala.Namespace) symbol, current_scope, completions, in_oce);
             else if (symbol is Vala.Method && ((Vala.Method) symbol).coroutine && !(is_null_safe_access || is_pointer_access))
-                add_completions_for_async_method (data_type, (Vala.Method) symbol, current_scope, completions);
+                add_completions_for_async_method (code_style, data_type, (Vala.Method) symbol, current_scope, completions);
             else if (data_type is Vala.ArrayType && !is_pointer_access)
                 add_completions_for_array_type (code_style, (Vala.ArrayType) data_type, current_scope, completions);
             else if (symbol is Vala.TypeSymbol && !(is_null_safe_access || is_pointer_access))
@@ -931,7 +931,8 @@ namespace Vls.CompletionEngine {
     }
 
     string? generate_insert_text_for_callable (Vala.DataType? type, Vala.Callable callable_sym,
-                                               Vala.Scope? current_scope, uint method_spaces) {
+                                               Vala.Scope? current_scope, uint method_spaces,
+                                               string? symbol_override = null) {
         var builder = new StringBuilder ();
 
         if (callable_sym.name == ".new") {
@@ -939,7 +940,7 @@ namespace Vls.CompletionEngine {
                 warning ("parent is null for %s()", callable_sym.name);
                 return null;
             }
-            builder.append (callable_sym.parent_symbol.name);
+            builder.append (symbol_override ?? callable_sym.parent_symbol.name);
 
             if (callable_sym.parent_symbol is Vala.ObjectTypeSymbol && ((Vala.ObjectTypeSymbol) callable_sym.parent_symbol).has_type_parameters ()) {
                 uint num_parameters = callable_sym.get_parameters ().size;
@@ -955,7 +956,7 @@ namespace Vls.CompletionEngine {
                 builder.append_c ('>');
             }
         } else {
-            builder.append (callable_sym.name);
+            builder.append (symbol_override ?? callable_sym.name);
 
             var method_sym = callable_sym as Vala.Method;
             if (method_sym != null && method_sym.has_type_parameters ()) {
@@ -977,7 +978,7 @@ namespace Vls.CompletionEngine {
         builder.append_c ('(');
 
         uint p = 0;
-        foreach (var parameter in callable_sym.get_parameters ()) {
+	Func<Vala.Parameter> serialize_parameter = (parameter) => {
             if (p > 0)
                 builder.append (", ");
             if (parameter.direction == Vala.ParameterDirection.OUT)
@@ -986,6 +987,14 @@ namespace Vls.CompletionEngine {
                 builder.append ("ref ");
             builder.append_printf ("${%u:%s}", p + 1, CodeHelp.get_symbol_representation (type, parameter, current_scope, false, null, null, false, false, null, false));
             p++;
+	};
+
+	if (symbol_override == "begin" && callable_sym is Vala.Method && ((Vala.Method)callable_sym).coroutine) {
+	    foreach (var parameter in ((Vala.Method)callable_sym).get_async_begin_parameters ())
+		serialize_parameter (parameter);
+	} else {
+            foreach (var parameter in callable_sym.get_parameters ())
+                serialize_parameter (parameter);
         }
         builder.append_c (')');
         builder.append ("$0");
@@ -1227,6 +1236,11 @@ namespace Vls.CompletionEngine {
                     completions.add (new CompletionItem.from_symbol (type, constant_sym, current_scope, CompletionItemKind.Constant, lang_serv.get_symbol_documentation (project, constant_sym)));
                 }
             }
+        } else if (type_symbol is Vala.TypeParameter) {
+            var typeparam_sym = (Vala.TypeParameter) type_symbol;
+            var generic_type = new Vala.GenericType (typeparam_sym);
+            completions.add (new CompletionItem.from_symbol (type, generic_type.get_member ("dup"), current_scope, CompletionItemKind.Field, new DocComment (@"a function that knows how to duplicate instances of $(typeparam_sym.name)")));
+            completions.add (new CompletionItem.from_symbol (type, generic_type.get_member ("destroy"), current_scope, CompletionItemKind.Field, new DocComment (@"a function that knows how to destroy instances of $(typeparam_sym.name)")));
         } else {
             warning (@"other type symbol $type_symbol.\n");
         }
@@ -1327,13 +1341,27 @@ namespace Vls.CompletionEngine {
     /**
      * Use this to complete members of an async method.
      */
-    void add_completions_for_async_method (Vala.DataType? instance_type, Vala.Method m, Vala.Scope scope, Set<CompletionItem> completions) {
-        completions.add_all_array(new CompletionItem []{
-            new CompletionItem.from_symbol (instance_type, m, scope, CompletionItemKind.Method,
-                new DocComment ("Begin asynchronous operation"), "begin"),
-            new CompletionItem.from_symbol (instance_type, m.get_end_method (), scope, CompletionItemKind.Method,
-	    	    new DocComment ("Get results of asynchronous operation"))
-        });
+    void add_completions_for_async_method (CodeStyleAnalyzer? code_style,
+                                           Vala.DataType? instance_type, Vala.Method m, Vala.Scope scope, Set<CompletionItem> completions) {
+        Vala.Scope topmost = get_topmost_scope (scope);
+        Vala.Symbol? glib_ns = topmost.lookup ("GLib");
+        // don't show async members if we don't have GAsyncResult available (included in gio-2.0)
+        if (glib_ns != null && glib_ns.scope.lookup ("AsyncResult") != null) {
+            completions.add_all_array(new CompletionItem []{
+                new CompletionItem.from_symbol (instance_type, m, scope, CompletionItemKind.Method,
+                    new DocComment ("Begin asynchronous operation"), "begin") {
+		    insertText = generate_insert_text_for_callable (instance_type, m, scope, code_style.average_spacing_before_parens, "begin"),
+		    insertTextFormat = InsertTextFormat.Snippet
+		},
+                new CompletionItem.from_symbol (instance_type, m.get_end_method (), scope, CompletionItemKind.Method,
+                    new DocComment ("Get results of asynchronous operation")) {
+                    insertText = generate_insert_text_for_callable (instance_type, m.get_end_method (), scope, code_style.average_spacing_before_parens),
+                    insertTextFormat = InsertTextFormat.Snippet
+                },
+                new CompletionItem.from_symbol (instance_type, m.get_callback_method (), scope, CompletionItemKind.Field,
+                    new DocComment ("Callback into asynchronous method"))
+            });
+        }
     }
 
     void add_completions_for_class_access (Server lang_serv, Project project,
