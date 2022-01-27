@@ -119,7 +119,7 @@ class Vls.GirDocumentation {
         }
 
         string missed = "";
-        vala_packages.filter (pkg => !added.keys.any_match (pkg_name => pkg.gir_version != null && pkg_name == @"$(pkg.gir_namespace)-$(pkg.gir_version)"))
+        vala_packages.filter (pkg => !added.keys.any_match (pkg_name => pkg.gir_namespace != null && pkg.gir_version != null && pkg_name == @"$(pkg.gir_namespace)-$(pkg.gir_version)"))
             .foreach (vapi_pkg => {
                 if (missed.length > 0)
                     missed += ", ";
