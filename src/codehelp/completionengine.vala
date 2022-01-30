@@ -107,7 +107,9 @@ namespace Vls.CompletionEngine {
 
             if (completions.is_empty) {
                 // debug ("[%s] trying MA completion again after context update ...", method);
-                if (!yield lang_serv.wait_for_context_update_async (id, method)) {
+                try {
+                    yield lang_serv.wait_for_context_update_async (id, method);
+                } catch (Error e) {
                     yield Server.reply_null_async (id, client, method);
                     return;
                 }

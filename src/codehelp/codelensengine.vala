@@ -122,7 +122,9 @@ namespace Vls.CodeLensEngine {
     async void begin_response_async (Server lang_serv, Project project,
                                Jsonrpc.Client client, Variant id, string method,
                                Vala.SourceFile doc, Compilation compilation) {
-        if (!yield lang_serv.wait_for_context_update_async (id, method)) {
+        try {
+            yield lang_serv.wait_for_context_update_async (id, method);
+        } catch (Error e) {
             yield Server.reply_null_async (id, client, method);
             return;
         }

@@ -20,6 +20,16 @@
 using Lsp;
 using Gee;
 
+/**
+ * Errors occuring while servicing requests.
+ */
+public errordomain Vls.RequestError {
+    /**
+     * The request was cancelled before or while the context was being updated.
+     */
+    CANCELLED
+}
+
 class Vls.Server : Jsonrpc.Server {
     private static bool received_signal = false;
     MainLoop loop;
@@ -735,25 +745,31 @@ class Vls.Server : Jsonrpc.Server {
     }
 
     /**
-     * Returns `false` if the request was cancelled.
+     * Waits for the code context to be refreshed.
+     *
+     * @param id        an identifier for the request
+     * @param method    the name of the method, for debugging purposes
+     *
+     * @throws RequestError if the request was cancelled or some failure happened
      */
-    public async bool wait_for_context_update_async (Variant id, string? method = null) {
+    public async void wait_for_context_update_async (Variant id, string? method = null) throws RequestError {
         if (initialized && update_context_requests == 0)
-            return true;
+            return;     // there's nothing to wait for
 
         var req = new Request (id, method);
 
         if (!pending_requests.add (req))
-            warning (@"Request ($req): request already in pending requests, this should not happen");
+            warning (@"Request($req): request already in pending requests, this should not happen");
 
-        bool success = false;
         SourceFunc callback = wait_for_context_update_async.callback;
+        RequestError? err = null;
 
         Timeout.add (wait_for_context_update_delay_ms, () => {
             if (initialized && update_context_requests == 0) {
                 // context was updated
                 // if [req] is still present, it hasn't been cancelled
-                success = pending_requests.remove (req);
+                if (!pending_requests.remove (req))
+                    err = new RequestError.CANCELLED (@"Request($req) already cancelled by the time context was updated");
                 callback ();
                 return Source.REMOVE;
             }
@@ -762,19 +778,20 @@ class Vls.Server : Jsonrpc.Server {
 
             if (!pending_requests.contains (req)) {
                 // request has been cancelled before context was updated
-                success = false;
+                err = new RequestError.CANCELLED (@"Request($req) cancelled before context before context has been updated");
                 callback ();
                 return Source.REMOVE;
             }
 
             // otherwise just continue waiting...
-            debug (@"Request ($req): waiting for context update ...");
+            // debug (@"Request($req): waiting for context update ...");
             return Source.CONTINUE;
         });
 
         yield;  // wait for invocation of callback
 
-        return success;
+        if (err != null)
+            throw err;
     }
 
     async void publish_diagnostics_async (Project project, Compilation target, Jsonrpc.Client client) {
@@ -960,7 +977,9 @@ class Vls.Server : Jsonrpc.Server {
             return;
         }
 
-        if (!yield wait_for_context_update_async (id)) {
+        try {
+            yield wait_for_context_update_async (id, method);
+        } catch (Error e) {
             yield reply_null_async (id, client, method);
             return;
         }
@@ -1056,7 +1075,9 @@ class Vls.Server : Jsonrpc.Server {
             return;
         }
 
-        if (!yield wait_for_context_update_async (id, method)) {
+        try {
+            yield wait_for_context_update_async (id, method);
+        } catch (Error e) {
             yield reply_null_async (id, client, method);
             return;
         }
@@ -1231,7 +1252,9 @@ class Vls.Server : Jsonrpc.Server {
         }
 
         Position pos = p.position;
-        if (!yield wait_for_context_update_async (id, method)) {
+        try {
+            yield wait_for_context_update_async (id, method);
+        } catch (Error e) {
             yield reply_null_async (id, client, method);
             return;
         }
@@ -1432,7 +1455,9 @@ class Vls.Server : Jsonrpc.Server {
         Position pos = p.position;
         bool is_highlight = method == "textDocument/documentHighlight";
         bool include_declaration = p.context != null ? p.context.includeDeclaration : true;
-        if (!yield wait_for_context_update_async (id, method)) {
+        try {
+            yield wait_for_context_update_async (id, method);
+        } catch (Error e) {
             yield reply_null_async (id, client, method);
             return;
         }
@@ -1680,7 +1705,9 @@ class Vls.Server : Jsonrpc.Server {
     async void workspace_symbol_async (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var query = (string) @params.lookup_value ("query", VariantType.STRING);
 
-        if (!yield wait_for_context_update_async (id, method)) {
+        try {
+            yield wait_for_context_update_async (id, method);
+        } catch (Error e) {
             yield reply_null_async (id, client, method);
             return;
         }
@@ -1758,7 +1785,9 @@ class Vls.Server : Jsonrpc.Server {
         }
 
         Position pos = p.position;
-        if (!yield wait_for_context_update_async (id, method)) {
+        try {
+            yield wait_for_context_update_async (id, method);
+        } catch (Error e) {
             yield reply_null_async (id, client, method);
             return;
         }
@@ -1911,7 +1940,9 @@ class Vls.Server : Jsonrpc.Server {
         }
 
         Position pos = p.position;
-        if (!yield wait_for_context_update_async (id, method)) {
+        try {
+            yield wait_for_context_update_async (id, method);
+        } catch (Error e) {
             yield reply_null_async (id, client, method);
             return;
         }

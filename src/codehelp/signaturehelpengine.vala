@@ -51,7 +51,9 @@ namespace Vls.SignatureHelpEngine {
         }
         
         if (signatures.is_empty) {
-            if (!yield lang_serv.wait_for_context_update_async (id, method)) {
+            try {
+                yield lang_serv.wait_for_context_update_async (id, method);
+            } catch (Error e) {
                 Vala.CodeContext.pop ();
                 yield Server.reply_null_async (id, client, method);
                 return;
