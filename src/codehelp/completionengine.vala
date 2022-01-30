@@ -978,7 +978,7 @@ namespace Vls.CompletionEngine {
         builder.append_c ('(');
 
         uint p = 0;
-	Func<Vala.Parameter> serialize_parameter = (parameter) => {
+        Func<Vala.Parameter> serialize_parameter = (parameter) => {
             if (p > 0)
                 builder.append (", ");
             if (parameter.direction == Vala.ParameterDirection.OUT)
@@ -987,12 +987,12 @@ namespace Vls.CompletionEngine {
                 builder.append ("ref ");
             builder.append_printf ("${%u:%s}", p + 1, CodeHelp.get_symbol_representation (type, parameter, current_scope, false, null, null, false, false, null, false));
             p++;
-	};
+        };
 
-	if (symbol_override == "begin" && callable_sym is Vala.Method && ((Vala.Method)callable_sym).coroutine) {
-	    foreach (var parameter in ((Vala.Method)callable_sym).get_async_begin_parameters ())
-		serialize_parameter (parameter);
-	} else {
+        if (symbol_override == "begin" && callable_sym is Vala.Method && ((Vala.Method)callable_sym).coroutine) {
+            foreach (var parameter in ((Vala.Method)callable_sym).get_async_begin_parameters ())
+                serialize_parameter (parameter);
+        } else {
             foreach (var parameter in callable_sym.get_parameters ())
                 serialize_parameter (parameter);
         }
@@ -1350,9 +1350,9 @@ namespace Vls.CompletionEngine {
             completions.add_all_array(new CompletionItem []{
                 new CompletionItem.from_symbol (instance_type, m, scope, CompletionItemKind.Method,
                     new DocComment ("Begin asynchronous operation"), "begin") {
-		    insertText = generate_insert_text_for_callable (instance_type, m, scope, code_style.average_spacing_before_parens, "begin"),
-		    insertTextFormat = InsertTextFormat.Snippet
-		},
+                    insertText = generate_insert_text_for_callable (instance_type, m, scope, code_style.average_spacing_before_parens, "begin"),
+                    insertTextFormat = InsertTextFormat.Snippet
+                },
                 new CompletionItem.from_symbol (instance_type, m.get_end_method (), scope, CompletionItemKind.Method,
                     new DocComment ("Get results of asynchronous operation")) {
                     insertText = generate_insert_text_for_callable (instance_type, m.get_end_method (), scope, code_style.average_spacing_before_parens),
