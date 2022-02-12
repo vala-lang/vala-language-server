@@ -122,13 +122,6 @@ namespace Vls.CodeLensEngine {
     async void begin_response_async (Server lang_serv, Project project,
                                Jsonrpc.Client client, Variant id, string method,
                                Vala.SourceFile doc, Compilation compilation) {
-        try {
-            yield lang_serv.wait_for_context_update_async (id, method);
-        } catch (Error e) {
-            yield Server.reply_null_async (id, client, method);
-            return;
-        }
-
         Vala.CodeContext.push (compilation.code_context);
         var collected_symbols = compilation.get_analysis_for_file<CodeLensAnalyzer> (doc) as CodeLensAnalyzer;
         Vala.CodeContext.pop ();

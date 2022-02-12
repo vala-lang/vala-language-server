@@ -1053,14 +1053,6 @@ class Vls.Server : Jsonrpc.Server {
 
     async void text_document_document_symbol_async (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<Lsp.TextDocumentPositionParams>(@params);
-
-        try {
-            yield wait_for_context_update_async (id, method);
-        } catch (Error e) {
-            yield reply_null_async (id, client, method);
-            return;
-        }
-
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {
@@ -1239,13 +1231,6 @@ class Vls.Server : Jsonrpc.Server {
         }
 
         Position pos = p.position;
-        try {
-            yield wait_for_context_update_async (id, method);
-        } catch (Error e) {
-            yield reply_null_async (id, client, method);
-            return;
-        }
-
         Vala.SourceFile doc = results[0].first;
         Compilation compilation = results[0].second;
         Vala.CodeContext.push (compilation.code_context);
@@ -1419,13 +1404,6 @@ class Vls.Server : Jsonrpc.Server {
 
     async void text_document_references_async (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<ReferenceParams>(@params);
-        try {
-            yield wait_for_context_update_async (id, method);
-        } catch (Error e) {
-            yield reply_null_async (id, client, method);
-            return;
-        }
-
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {
@@ -1751,6 +1729,14 @@ class Vls.Server : Jsonrpc.Server {
             return;
         }
 
+        // we cannot rename until everything is up-to-date
+        try {
+            yield wait_for_context_update_async (id, method);
+        } catch (Error e) {
+            yield reply_null_async (id, client, method);
+            return;
+        }
+
         var p = Util.parse_variant<TextDocumentPositionParams> (@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
@@ -1773,13 +1759,6 @@ class Vls.Server : Jsonrpc.Server {
         }
 
         Position pos = p.position;
-        try {
-            yield wait_for_context_update_async (id, method);
-        } catch (Error e) {
-            yield reply_null_async (id, client, method);
-            return;
-        }
-
         Vala.SourceFile doc = results[0].first;
         Compilation compilation = results[0].second;
         Vala.CodeContext.push (compilation.code_context);
@@ -1906,6 +1885,14 @@ class Vls.Server : Jsonrpc.Server {
     }
     
     async void text_document_prepare_rename_async (Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        // we cannot think of renaming things until everything is up-to-date
+        try {
+            yield wait_for_context_update_async (id, method);
+        } catch (Error e) {
+            yield reply_null_async (id, client, method);
+            return;
+        }
+
         var p = Util.parse_variant<TextDocumentPositionParams> (@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
@@ -1928,13 +1915,6 @@ class Vls.Server : Jsonrpc.Server {
         }
 
         Position pos = p.position;
-        try {
-            yield wait_for_context_update_async (id, method);
-        } catch (Error e) {
-            yield reply_null_async (id, client, method);
-            return;
-        }
-
         Vala.SourceFile doc = results[0].first;
         Compilation compilation = results[0].second;
         Vala.CodeContext.push (compilation.code_context);
@@ -2048,6 +2028,13 @@ class Vls.Server : Jsonrpc.Server {
 
         if (document == null || uri == null) {
             warning ("[%s] `textDocument` or `uri` not provided as expected", method);
+            yield reply_null_async (id, client, method);
+            return;
+        }
+
+        try {
+            yield wait_for_context_update_async (id, method);
+        } catch (Error e) {
             yield reply_null_async (id, client, method);
             return;
         }
