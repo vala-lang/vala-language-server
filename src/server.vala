@@ -1988,7 +1988,6 @@ class Vls.Server : Jsonrpc.Server {
             if (!(btarget_w_sym.second.source_reference.file is TextDocument)) {
                 // This means we have found references in a file that was added automatically,
                 // which should not be modified.
-                // TODO: rewrite all code to use async
                 string? pkg = btarget_w_sym.second.source_reference.file.package_name;
                 Vala.CodeContext.pop ();
                 try {
