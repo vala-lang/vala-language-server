@@ -135,12 +135,6 @@ class Vls.Server : Jsonrpc.Server {
 
         accept_io_stream (new SimpleIOStream (input_stream, output_stream));
 
-#if WITH_JSONRPC_GLIB_3_30
-        client_closed_event_id = client_closed.connect (client => {
-            shutdown ();
-        });
-#endif
-
         pending_requests = new HashSet<Request> (Request.hash, Request.equal);
 
         this.projects = new HashTable<Project, ulong> (GLib.direct_hash, GLib.direct_equal);
@@ -240,6 +234,12 @@ class Vls.Server : Jsonrpc.Server {
 
         warning ("unhandled notification %s", method);
     }
+
+#if WITH_JSONRPC_GLIB_3_30
+    public override void client_closed (Jsonrpc.Client client) {
+        shutdown ();
+    }
+#endif
 
     // a{sv} only
     public Variant build_dict (...) {
