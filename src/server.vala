@@ -562,7 +562,6 @@ class Vls.Server : Jsonrpc.Server {
     Jsonrpc.Client? update_context_client = null;
     int64 update_context_requests = 0;
     int64 update_context_time_us = 0;
-    bool updating_context = false;
 
     void text_document_did_change (Jsonrpc.Client client, Variant @params) {
         var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
@@ -643,10 +642,9 @@ class Vls.Server : Jsonrpc.Server {
     async void check_update_context_async () {
         while (!shutting_down && !cancellable.is_cancelled ()) {
             if (update_context_requests > 0 && get_monotonic_time () >= update_context_time_us) {
-                update_context_requests = 0;
+                int64 old_requests = update_context_requests;
                 update_context_time_us = 0;
                 debug ("updating contexts and publishing diagnostics...");
-                updating_context = true;
 
                 Project[] all_projects = projects.get_keys_as_array ();
                 all_projects += default_project;
@@ -729,7 +727,10 @@ class Vls.Server : Jsonrpc.Server {
 
                 // rebuild the documentation
                 documentation.rebuild_if_stale ();
-                updating_context = false;
+
+                // remove old requests only as it's possible new requests could
+                // have been generated while we were suspended
+                update_context_requests -= old_requests;
             }
 
             // schedule ourselves
@@ -763,7 +764,7 @@ class Vls.Server : Jsonrpc.Server {
         RequestError? err = null;
 
         Timeout.add (wait_for_context_update_delay_ms, () => {
-            if (initialized && update_context_requests == 0 && !updating_context) {
+            if (initialized && update_context_requests == 0) {
                 // context was updated
                 // if [req] is still present, it hasn't been cancelled
                 if (!pending_requests.remove (req))
