@@ -15,6 +15,7 @@ vls_src = files([
   'documentation/cnamemapper.vala',
   'documentation/doccomment.vala',
   'documentation/girdocumentation.vala',
+  'formatter/formatter.vala',
   'projects/buildtarget.vala',
   'projects/buildtask.vala',
   'projects/ccproject.vala',

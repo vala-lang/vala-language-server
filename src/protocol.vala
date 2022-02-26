@@ -954,4 +954,17 @@ namespace Lsp {
          */
         public Command? command { get; set; }
     }
+    
+    class DocumentFormattingParams : Object {
+        public TextDocumentIdentifier textDocument { get; set; }
+        public FormattingOptions options { get; set; }
+    }
+
+    class FormattingOptions : Object {
+        public uint tabSize { get; set; }
+        public bool insertSpaces { get; set; }
+        public bool trimTrailingWhitespace { get; set; }
+        public bool insertFinalNewline { get; set; }
+        public bool trimFinalNewlines { get; set; }
+    }
 }
