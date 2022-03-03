@@ -57,12 +57,6 @@ class Vls.Server : Jsonrpc.Server {
      */
     public static Cancellable cancellable = new Cancellable ();
 
-    [CCode (has_target = false)]
-    delegate void NotificationHandler (Vls.Server self, Jsonrpc.Client client, Variant @params);
-
-    [CCode (has_target = false)]
-    delegate void CallHandler (Vls.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params);
-
     ulong client_closed_event_id;
     HashTable<Project, ulong> projects;
     DefaultProject default_project;
