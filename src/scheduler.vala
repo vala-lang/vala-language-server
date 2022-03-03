@@ -41,6 +41,7 @@ namespace Vls.Scheduler {
                 (int) get_num_processors (),
                 false
             );
+            debug ("created a thread pool for tasks");
         }
         
         SourceFunc callback = run_async.callback;

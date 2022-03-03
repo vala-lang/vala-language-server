@@ -405,6 +405,10 @@ class Vls.Compilation : BuildTarget {
             source_file.get_nodes ().clear ();
         }
 
+        old_context.get_c_source_files ().clear ();
+        old_context.get_source_files ().clear ();
+        old_context.get_packages ().clear ();
+
         last_updated = new DateTime.now ();
         _completed_first_compile = true;
         Vala.CodeContext.pop ();

@@ -46,7 +46,7 @@ class Vls.CcProject : Project {
         }
 
         var parser = new Json.Parser.immutable_new ();
-        parser.load_from_stream (cc_json_file.read (cancellable), cancellable);
+        yield parser.load_from_stream_async (yield cc_json_file.read_async (GLib.Priority.DEFAULT, cancellable), cancellable);
         Json.Node? cc_json_root = parser.get_root ();
 
         if (cc_json_root == null)

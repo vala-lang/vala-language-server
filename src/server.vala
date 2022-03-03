@@ -976,13 +976,6 @@ class Vls.Server : Jsonrpc.Server {
             return;
         }
 
-        try {
-            yield wait_for_context_update_async (id, method);
-        } catch (Error e) {
-            yield reply_null_async (id, client, method);
-            return;
-        }
-
         // ignore multiple results
         Vala.SourceFile file = results[0].first;
         Compilation compilation = results[0].second;
@@ -1671,13 +1664,6 @@ class Vls.Server : Jsonrpc.Server {
 
     async void workspace_symbol_async (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var query = (string) @params.lookup_value ("query", VariantType.STRING);
-
-        try {
-            yield wait_for_context_update_async (id, method);
-        } catch (Error e) {
-            yield reply_null_async (id, client, method);
-            return;
-        }
 
         var json_array = new Json.Array ();
         Project[] all_projects = projects.get_keys_as_array ();
