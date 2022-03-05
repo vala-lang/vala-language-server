@@ -30,14 +30,19 @@ class Vls.Formatter : Object {
         string serr;
         int exit;
         try {
-            // The path in the flatpak GNOME-Builder is really really small
-            // (Just /usr/bin:/bin), but what if uncrustify is in /usr/local?
-            // We have to patch the path in a platform dependent way
-            var spawn_args = new string[] { "/usr/local/bin/uncrustify", "-c", cfg.get_path (), "--replace", "--no-backup", new_file.get_path () };
+            var env_vars = Environ.get ();
+            for (var i = 0; i < env_vars.length; i++) {
+                var env = env_vars[i];
+                // Patch the PATH variable to include some other "standard paths"
+                if (env.has_prefix ("PATH=") && env.contains ("/usr/bin")) {
+                    env_vars[i] = env + ":/usr/local/bin";
+                }
+            }
+            var spawn_args = new string[] { "uncrustify", "-c", cfg.get_path (), "--replace", "--no-backup", new_file.get_path () };
             Process.spawn_sync (Environment.get_current_dir (),
                                 spawn_args,
-                                Environ.get (),
-                                SpawnFlags.SEARCH_PATH,
+                                env_vars,
+                                SpawnFlags.SEARCH_PATH_FROM_ENVP,
                                 null,
                                 out sout,
                                 out serr,
