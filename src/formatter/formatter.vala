@@ -18,11 +18,11 @@ class Vls.Formatter : Object {
         } catch (Error e) {
             return "Error creating config: %s".printf (e.message);
         }
-        var original = File.new_for_path(this.input.first.filename);
-        var time = new DateTime.now_local().to_unix();
-        var new_file = File.new_build_filename(Environment.get_tmp_dir(), "vls-format%lld.vala".printf(time));
+        var original = File.new_for_path (this.input.first.filename);
+        var time = new DateTime.now_local ().to_unix ();
+        var new_file = File.new_build_filename (Environment.get_tmp_dir (), "vls-format%lld.vala".printf (time));
         try {
-            original.copy(new_file, FileCopyFlags.ALL_METADATA| FileCopyFlags.OVERWRITE, null, null);
+            original.copy (new_file, FileCopyFlags.ALL_METADATA | FileCopyFlags.OVERWRITE, null, null);
         } catch (Error e) {
             return "Error copying file: %s".printf (e.message);
         }
@@ -30,9 +30,20 @@ class Vls.Formatter : Object {
         string serr;
         int exit;
         try {
-            Process.spawn_command_line_sync ("/usr/local/bin/uncrustify -c %s --replace --no-backup %s".printf (cfg.get_path (), new_file.get_path ()), out sout, out serr, out exit);
+            // The path in the flatpak GNOME-Builder is really really small
+            // (Just /usr/bin:/bin), but what if uncrustify is in /usr/local?
+            // We have to patch the path in a platform dependent way
+            var spawn_args = new string[] { "/usr/local/bin/uncrustify", "-c", cfg.get_path (), "--replace", "--no-backup", new_file.get_path () };
+            Process.spawn_sync (Environment.get_current_dir (),
+                                spawn_args,
+                                Environ.get (),
+                                SpawnFlags.SEARCH_PATH,
+                                null,
+                                out sout,
+                                out serr,
+                                out exit);
         } catch (SpawnError e) {
-            return "Error spawning uncrustify: %s".printf (e.message);
+            return "Error spawning uncrustify: %s (PATH=%s)".printf (e.message, Environment.get_variable ("PATH"));
         }
         if (exit != 0) {
             return "Uncrustify failed: %s".printf (serr);
@@ -40,14 +51,14 @@ class Vls.Formatter : Object {
         var str = "";
         var n = 0;
         try {
-            var reopened = File.new_for_path(new_file.get_path ());
+            var reopened = File.new_for_path (new_file.get_path ());
             var iostream = reopened.open_readwrite ();
             var distream = new DataInputStream (iostream.input_stream);
             var sb = new StringBuilder ();
             string tmp = null;
             size_t len;
             while ((tmp = distream.read_line (out len)) != null) {
-                sb.append (tmp).append_c('\n');
+                sb.append (tmp).append_c ('\n');
                 n++;
             }
             str = sb.str;
@@ -70,21 +81,21 @@ class Vls.Formatter : Object {
             newText = str
         };
         try {
-            new_file.@delete();
-            cfg.@delete();
+            new_file.@delete ();
+            cfg.@delete ();
         } catch (Error e) {
             warning ("Error cleaning up: %s", e.message);
         }
         return null;
     }
-    
+
     File generate_uncrustify_config () throws Error {
         var conf = new Gee.HashMap<string, string>();
         // https://github.com/uncrustify/uncrustify/blob/master/documentation/htdocs/default.cfg
-        conf["indent_with_tabs"] = "%d".printf(options.insertSpaces ? 0 : 1);
+        conf["indent_with_tabs"] = "%d".printf (options.insertSpaces ? 0 : 1);
         conf["nl_end_of_file"] = options.insertFinalNewline ? "force" : "remove";
-        conf["nl_end_of_file_min"] = "%d".printf(options.trimFinalNewlines ? 1 : 0);
-        conf["output_tab_size"] = "%u".printf(options.tabSize);
+        conf["nl_end_of_file_min"] = "%d".printf (options.trimFinalNewlines ? 1 : 0);
+        conf["output_tab_size"] = "%u".printf (options.tabSize);
         conf["indent_columns"] = "4";
         conf["indent_align_string"] = "true";
         conf["indent_xml_string"] = "4";
@@ -170,7 +181,7 @@ class Vls.Formatter : Object {
         conf["sp_func_call_paren"] = "force";
         conf["sp_func_call_paren_empty"] = "force";
         // It is really "set func_call_user _"
-        conf["set func_call_user"] = "_";
+        conf["set func_call_user"] = "C_ NC_ N_ Q_ _";
         conf["sp_func_class_paren"] = "force";
         conf["sp_return_paren"] = "force";
         conf["sp_attribute_paren"] = "force";
@@ -250,7 +261,7 @@ class Vls.Formatter : Object {
         conf["pp_indent_count"] = "0";
         var sb = new StringBuilder ();
         foreach (var entry in conf.entries) {
-            sb.append(entry.key).append(" = ").append(entry.value).append("\n");
+            sb.append (entry.key).append (" = ").append (entry.value).append ("\n");
         }
         FileIOStream ios;
         var file = File.new_tmp ("vls-uncrustify-XXXXXX.cfg", out ios);
@@ -259,3 +270,4 @@ class Vls.Formatter : Object {
         return file;
     }
 }
+
