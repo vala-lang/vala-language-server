@@ -70,6 +70,20 @@ namespace Vls.CodeHelp {
         } catch (Error e) {
             throw new FormattingError.FORMATTING_ERROR ("Formatting: " + e.message);
         }
+        var status = subprocess.get_exit_status ();
+        if (status != 0) {
+            try {
+                var dis = new DataInputStream (subprocess.get_stderr_pipe ());
+                string tmp = null;
+                size_t len;
+                while ((tmp = dis.read_line (out len)) != null) {
+                    warning ("[Uncrustify stderr]: %s", tmp);
+                }
+            } catch (Error e) {
+                throw new FormattingError.FORMATTING_ERROR ("Error while gathering error data as uncrustify failed: %s", e.message);
+            }
+            throw new FormattingError.FORMATTING_ERROR ("uncrustify failed with code %d", status);
+        }
         return new Lsp.TextEdit () {
             range = new Lsp.Range () {
                 start = new Lsp.Position () {
