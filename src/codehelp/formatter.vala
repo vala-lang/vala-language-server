@@ -21,62 +21,24 @@
 using Gee;
 
 errordomain FormattingError {
-    SPAWN_ERROR,
     FORMATTING_ERROR,
     READ_ERROR
 }
 
 namespace Vls.Formatter {
-    Lsp.TextEdit format (Lsp.FormattingOptions options, Vala.SourceFile source) throws FormattingError {
+    Lsp.TextEdit format (Lsp.FormattingOptions options, Vala.SourceFile source) throws FormattingError, Error {
         // SEARCH_PATH_FROM_ENVP does not seem to be available even in quite fast distros like Fedora 35
         var launcher = new SubprocessLauncher (SubprocessFlags.STDERR_PIPE | SubprocessFlags.STDOUT_PIPE | SubprocessFlags.STDIN_PIPE);
         launcher.set_environ (Environ.get ());
-        Subprocess subprocess;
-        try {
-            subprocess = launcher.spawnv (get_uncrustify_args (options));
-        } catch (Error e) {
-            throw new FormattingError.SPAWN_ERROR ("Could not spawn subprocess: %s", e.message);
-        }
-        try {
-            subprocess.get_stdin_pipe ().write_all (source.content.data, null);
-            subprocess.get_stdin_pipe ().close ();
-            subprocess.wait ();
-        } catch (Error e) {
-            throw new FormattingError.READ_ERROR ("Could not communicate with subprocess: %s", e.message);
-        }
-        var str = "";
-        var n = 0;
-        try {
-            var dis = new DataInputStream (subprocess.get_stdout_pipe ());
-            var sb = new StringBuilder ();
-            string tmp = null;
-            size_t len;
-            while ((tmp = dis.read_line (out len)) != null) {
-                sb.append (tmp).append_c ('\n');
-                n++;
+        string? stdout_buf, stderr_buf;
+        Subprocess subprocess = launcher.spawnv (get_uncrustify_args (options));
+        subprocess.communicate_utf8 (source.content, null, out stdout_buf, out stderr_buf);
+        if (stdout_buf == null) {
+            if (stderr_buf != null) {
+                throw new FormattingError.FORMATTING_ERROR ("%s", stderr_buf);
+            } else {
+                throw new FormattingError.READ_ERROR ("uncrustify failed with error code %d", subprocess.get_exit_status ());
             }
-            str = sb.str;
-        } catch (Error e) {
-            throw new FormattingError.READ_ERROR ("Could not communicate with subprocess: %s", e.message);
-        }
-        var status = subprocess.get_exit_status ();
-        if (status != 0) {
-            var dis = new DataInputStream (subprocess.get_stderr_pipe ());
-            string? tmp = null;
-            var errsb = new StringBuilder ();
-            size_t len;
-            try {
-                while ((tmp = dis.read_line (out len)) != null) {
-                    errsb.append (tmp);
-                    errsb.append_c ('\n');
-                }
-            } catch (Error e) {
-                throw new FormattingError.READ_ERROR ("Could not communicate with subprocess: %s", e.message);
-            }
-            if (errsb.len > 0) {
-                throw new FormattingError.FORMATTING_ERROR ("%s", errsb.str);
-            }
-            throw new FormattingError.READ_ERROR ("uncrustify failed with code %d", status);
         }
         return new Lsp.TextEdit () {
             range = new Lsp.Range () {
@@ -85,12 +47,12 @@ namespace Vls.Formatter {
                     character = 0
                 },
                 end = new Lsp.Position () {
-                    line = n + 1,
+                    line = Util.count_chars_in_string (stdout_buf, '\n') + 1,
                     // Just for the trailing newline
                     character = 1
                 }
             },
-            newText = str
+            newText = stdout_buf
         };
     }
 
