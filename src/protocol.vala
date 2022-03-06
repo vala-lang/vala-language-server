@@ -966,5 +966,18 @@ namespace Lsp {
         public bool trimTrailingWhitespace { get; set; }
         public bool insertFinalNewline { get; set; }
         public bool trimFinalNewlines { get; set; }
+
+        public uint64 hash_code () {
+            return tabSize | this.pack_bools ();
+        }
+
+        public uint64 pack_bools () {
+            var b1 = this.insertSpaces ? 1 : 0;
+            var b2 = this.trimTrailingWhitespace ? 1 : 0;
+            var b3 = this.insertFinalNewline ? 1 : 0;
+            var b4 = this.trimFinalNewlines ? 1 : 0;
+            var hash = (uint64) (b1 | (b2 << 1) | (b3 << 2) | (b4 << 3));
+            return (hash << 32);
+        }
     }
 }

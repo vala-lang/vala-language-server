@@ -1607,16 +1607,16 @@ class Vls.Server : Object {
         }
         var json_array = new Json.Array ();
         foreach (var file in results) {
-            var formatter = new Vls.Formatter (p.options, file);
             TextEdit edited;
-            Jsonrpc.ClientError error_code = 0;
-            var error_string = formatter.format (out edited, out error_code);
-            if(error_string != null) {
+            try {
+                edited = CodeHelp.format (p.options, file.first);
+            } catch (CodeHelp.FormattingError e) {
                 client.reply_error_async.begin (
                     id,
-                    error_code,
-                    error_string,
+                    Jsonrpc.ClientError.INTERNAL_ERROR,
+                    e.message,
                 cancellable);
+                warning ("Formatting failed: %s", e.message);
                 return;
             }
             json_array.add_element (Json.gobject_serialize (edited));
