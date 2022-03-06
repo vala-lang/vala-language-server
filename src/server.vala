@@ -1609,8 +1609,8 @@ class Vls.Server : Object {
         foreach (var file in results) {
             TextEdit edited;
             try {
-                edited = CodeHelp.format (p.options, file.first);
-            } catch (CodeHelp.FormattingError e) {
+                edited = Formatter.format (p.options, file.first);
+            } catch (Formatter.FormattingError e) {
                 client.reply_error_async.begin (
                     id,
                     Jsonrpc.ClientError.INTERNAL_ERROR,

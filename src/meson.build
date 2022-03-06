@@ -8,6 +8,7 @@ vls_src = files([
   'codehelp/completionengine.vala',
   'codehelp/find_scope.vala',
   'codehelp/find_symbol.vala',
+  'codehelp/formatter.vala',
   'codehelp/signaturehelpengine.vala',
   'codehelp/symbolextractor.vala',
   'codehelp/symbolreferences.vala',
