@@ -20,7 +20,6 @@
  * Code help utilities that don't belong to any specific class
  */
 namespace Vls.CodeHelp {
-
     /**
      * see `vala/valamemberaccess.vala`
      * This determines whether we can access a symbol in the current scope.

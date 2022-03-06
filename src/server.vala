@@ -1610,7 +1610,7 @@ class Vls.Server : Object {
             TextEdit edited;
             try {
                 edited = Formatter.format (p.options, file.first);
-            } catch (Formatter.FormattingError e) {
+            } catch (FormattingError e) {
                 client.reply_error_async.begin (
                     id,
                     Jsonrpc.ClientError.INTERNAL_ERROR,

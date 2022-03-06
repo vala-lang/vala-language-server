@@ -18,38 +18,31 @@
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
 
-namespace Vls.Formatter {
-    errordomain FormattingError {
-        CONFIGURATION, SPAWN_ERROR, FORMATTING_ERROR
-    }
+using Gee;
 
+errordomain FormattingError {
+    SPAWN_ERROR,
+    FORMATTING_ERROR,
+    READ_ERROR
+}
+
+namespace Vls.Formatter {
     Lsp.TextEdit format (Lsp.FormattingOptions options, Vala.SourceFile source) throws FormattingError {
-        File config;
-        try {
-            config = Formatter.get_uncrustify_config (options);
-        } catch (Error e) {
-            throw new FormattingError.CONFIGURATION ("Configuration: " + e.message);
-        }
         // SEARCH_PATH_FROM_ENVP does not seem to be available even in quite fast distros like Fedora 35
         var launcher = new SubprocessLauncher (SubprocessFlags.STDERR_PIPE | SubprocessFlags.STDOUT_PIPE | SubprocessFlags.STDIN_PIPE);
-        var env_vars = Environ.get ();
-        for (var i = 0; i < env_vars.length; i++) {
-            var env = env_vars[i];
-            // Patch the PATH variable to include some other "standard paths"
-            if (env.has_prefix ("PATH=") && env.contains ("/usr/bin")) {
-                env_vars[i] = env + ":/usr/local/bin";
-            }
-        }
-        launcher.set_environ (env_vars);
+        launcher.set_environ (Environ.get ());
         Subprocess subprocess;
         try {
-            subprocess = launcher.spawn ("uncrustify", "-c", config.get_path (), "-l", "vala", null);
-            var contents = source.content;
-            size_t bytes_written;
-            subprocess.get_stdin_pipe ().write_all (contents.data, out bytes_written);
-            subprocess.get_stdin_pipe ().close ();
+            subprocess = launcher.spawnv (get_uncrustify_args (options));
         } catch (Error e) {
-            throw new FormattingError.SPAWN_ERROR ("Spawning: " + e.message);
+            throw new FormattingError.SPAWN_ERROR ("Could not spawn subprocess: %s", e.message);
+        }
+        try {
+            subprocess.get_stdin_pipe ().write_all (source.content.data, null);
+            subprocess.get_stdin_pipe ().close ();
+            subprocess.wait ();
+        } catch (Error e) {
+            throw new FormattingError.READ_ERROR ("Could not communicate with subprocess: %s", e.message);
         }
         var str = "";
         var n = 0;
@@ -63,23 +56,27 @@ namespace Vls.Formatter {
                 n++;
             }
             str = sb.str;
-            subprocess.wait ();
         } catch (Error e) {
-            throw new FormattingError.FORMATTING_ERROR ("Formatting: " + e.message);
+            throw new FormattingError.READ_ERROR ("Could not communicate with subprocess: %s", e.message);
         }
         var status = subprocess.get_exit_status ();
         if (status != 0) {
+            var dis = new DataInputStream (subprocess.get_stderr_pipe ());
+            string? tmp = null;
+            var errsb = new StringBuilder ();
+            size_t len;
             try {
-                var dis = new DataInputStream (subprocess.get_stderr_pipe ());
-                string tmp = null;
-                size_t len;
                 while ((tmp = dis.read_line (out len)) != null) {
-                    warning ("[Uncrustify stderr]: %s", tmp);
+                    errsb.append (tmp);
+                    errsb.append_c ('\n');
                 }
             } catch (Error e) {
-                throw new FormattingError.FORMATTING_ERROR ("Error while gathering error data as uncrustify failed: %s", e.message);
+                throw new FormattingError.READ_ERROR ("Could not communicate with subprocess: %s", e.message);
             }
-            throw new FormattingError.FORMATTING_ERROR ("uncrustify failed with code %d", status);
+            if (errsb.len > 0) {
+                throw new FormattingError.FORMATTING_ERROR ("%s", errsb.str);
+            }
+            throw new FormattingError.READ_ERROR ("uncrustify failed with code %d", status);
         }
         return new Lsp.TextEdit () {
             range = new Lsp.Range () {
@@ -97,14 +94,8 @@ namespace Vls.Formatter {
         };
     }
 
-    private File get_uncrustify_config (Lsp.FormattingOptions options) throws Error {
-        var hash = options.hash_code ();
-        var filename = ("uncrustify-vala%" + uint64.FORMAT + "-vls-1.0.cfg").printf (hash);
-        var file = File.new_build_filename (Environment.get_user_cache_dir (), filename);
-        if (file.query_exists ()) {
-            return file;
-        }
-        var conf = new Gee.HashMap<string, string>();
+    string[] get_uncrustify_args (Lsp.FormattingOptions options) {
+        var conf = new HashMap<string, string> ();
         // https://github.com/uncrustify/uncrustify/blob/master/documentation/htdocs/default.cfg
         conf["indent_with_tabs"] = "%d".printf (options.insertSpaces ? 0 : 1);
         conf["nl_end_of_file"] = options.insertFinalNewline ? "force" : "remove";
@@ -195,7 +186,7 @@ namespace Vls.Formatter {
         conf["sp_func_call_paren"] = "force";
         conf["sp_func_call_paren_empty"] = "force";
         // It is really "set func_call_user _"
-        conf["set func_call_user"] = "C_ NC_ N_ Q_ _";
+        // conf["set func_call_user"] = "C_ NC_ N_ Q_ _";
         conf["sp_func_class_paren"] = "force";
         conf["sp_return_paren"] = "force";
         conf["sp_attribute_paren"] = "force";
@@ -273,13 +264,11 @@ namespace Vls.Formatter {
         conf["nl_after_func_body_class"] = "2";
         conf["eat_blanks_before_close_brace"] = "true";
         conf["pp_indent_count"] = "0";
-        var sb = new StringBuilder ("# Uncrustify config for Vls\n");
+        string[] args = {"uncrustify", "-c", "-", "-l", "vala"};
         foreach (var entry in conf.entries) {
-            sb.append (entry.key).append (" = ").append (entry.value).append ("\n");
+            args += "--set";
+            args += @"$(entry.key)=$(entry.value)";
         }
-        var ios = file.create_readwrite (FileCreateFlags.REPLACE_DESTINATION);
-        var dostream = new DataOutputStream (ios.output_stream);
-        dostream.put_string (sb.str);
-        return file;
+        return args;
     }
 }
