@@ -1606,10 +1606,13 @@ class Vls.Server : Object {
             return;
         }
         var json_array = new Json.Array ();
-        foreach (var file in results) {
+        foreach (var pair in results) {
             TextEdit edited;
+            Vala.SourceFile source_file = pair.first;
+            Compilation compilation = pair.second;
+            var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (source_file) as CodeStyleAnalyzer;
             try {
-                edited = Formatter.format (p.options, file.first);
+                edited = Formatter.format (p.options, code_style, source_file);
             } catch (Error e) {
                 client.reply_error_async.begin (
                     id,

@@ -19,6 +19,7 @@
  */
 
 using Gee;
+using Lsp;
 
 errordomain FormattingError {
     FORMATTING_ERROR,
@@ -26,19 +27,17 @@ errordomain FormattingError {
 }
 
 namespace Vls.Formatter {
-    Lsp.TextEdit format (Lsp.FormattingOptions options, Vala.SourceFile source) throws FormattingError, Error {
+    TextEdit format (FormattingOptions options, CodeStyleAnalyzer analyzed_style, Vala.SourceFile source) throws FormattingError, Error {
         // SEARCH_PATH_FROM_ENVP does not seem to be available even in quite fast distros like Fedora 35
         var launcher = new SubprocessLauncher (SubprocessFlags.STDERR_PIPE | SubprocessFlags.STDOUT_PIPE | SubprocessFlags.STDIN_PIPE);
         launcher.set_environ (Environ.get ());
         string? stdout_buf, stderr_buf;
-        Subprocess subprocess = launcher.spawnv (get_uncrustify_args (options));
+        Subprocess subprocess = launcher.spawnv (get_uncrustify_args (options, analyzed_style));
         subprocess.communicate_utf8 (source.content, null, out stdout_buf, out stderr_buf);
-        if (stdout_buf == null) {
-            if (stderr_buf != null) {
-                throw new FormattingError.FORMATTING_ERROR ("%s", stderr_buf);
-            } else {
-                throw new FormattingError.READ_ERROR ("uncrustify failed with error code %d", subprocess.get_exit_status ());
-            }
+        if (stderr_buf != null) {
+            throw new FormattingError.FORMATTING_ERROR ("%s", stderr_buf);
+        } else if (stdout_buf == null || !subprocess.get_successful ()) {
+            throw new FormattingError.READ_ERROR ("uncrustify failed with error code %d", subprocess.get_exit_status ());
         }
         return new Lsp.TextEdit () {
             range = new Lsp.Range () {
@@ -56,7 +55,7 @@ namespace Vls.Formatter {
         };
     }
 
-    string[] get_uncrustify_args (Lsp.FormattingOptions options) {
+    string[] get_uncrustify_args (FormattingOptions options, CodeStyleAnalyzer analyzed_style) {
         var conf = new HashMap<string, string> ();
         // https://github.com/uncrustify/uncrustify/blob/master/documentation/htdocs/default.cfg
         conf["indent_with_tabs"] = "%d".printf (options.insertSpaces ? 0 : 1);
@@ -137,19 +136,26 @@ namespace Vls.Formatter {
         conf["sp_inside_braces"] = "force";
         conf["sp_inside_braces_empty"] = "remove";
         conf["sp_type_func"] = "remove";
-        conf["sp_func_proto_paren"] = "force";
-        conf["sp_func_def_paren"] = "force";
         conf["sp_inside_fparens"] = "remove";
         conf["sp_inside_fparen"] = "remove";
         conf["sp_inside_tparen"] = "remove";
         conf["sp_after_tparen_close"] = "remove";
         conf["sp_square_fparen"] = "force";
         conf["sp_fparen_brace"] = "force";
-        conf["sp_func_call_paren"] = "force";
-        conf["sp_func_call_paren_empty"] = "force";
+        if (analyzed_style.average_spacing_before_parens > 0) {
+            conf["sp_func_proto_paren"] = "force";
+            conf["sp_func_def_paren"] = "force";
+            conf["sp_func_class_paren"] = "force";
+            conf["sp_func_call_paren"] = "force";
+        } else {
+            conf["sp_func_proto_paren"] = "remove";
+            conf["sp_func_def_paren"] = "remove";
+            conf["sp_func_class_paren"] = "remove";
+            conf["sp_func_call_paren"] = "remove";
+        }
+        conf["sp_func_call_paren_empty"] = "ignore";
         // It is really "set func_call_user _"
         // conf["set func_call_user"] = "C_ NC_ N_ Q_ _";
-        conf["sp_func_class_paren"] = "force";
         conf["sp_return_paren"] = "force";
         conf["sp_attribute_paren"] = "force";
         conf["sp_defined_paren"] = "force";
