@@ -60,7 +60,7 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
     - for implementing abstract methods/properties
 - [x] code lenses
 - [ ] code actions
-- [ ] code formatting
+- [x] code formatting
 - [ ] workspaces
 - [ ] supported projects
     - [x] meson
@@ -78,6 +78,8 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 - `jsonrpc-glib-1.0 >= 3.28`
 - `libvala >= 0.48.12`
 - you also need the `posix` VAPI, which should come preinstalled
+
+[Uncrustify](http://uncrustify.sourceforge.net/) is required for formatting.
 
 #### Install dependencies with Guix
 
