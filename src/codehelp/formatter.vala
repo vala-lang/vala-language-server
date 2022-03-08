@@ -27,39 +27,34 @@ errordomain FormattingError {
 }
 
 namespace Vls.Formatter {
-    TextEdit format (FormattingOptions options, CodeStyleAnalyzer analyzed_style, Vala.SourceFile source) throws FormattingError, Error {
-        // SEARCH_PATH_FROM_ENVP does not seem to be available even in quite fast distros like Fedora 35
+    TextEdit format (FormattingOptions options, CodeStyleAnalyzer analyzed_style, Vala.SourceFile source, Cancellable? cancellable = null) throws FormattingError, Error {
+        // SEARCH_PATH_FROM_ENVP does not seem to be available even in quite fast distros like Fedora 35,
+        // so we have to use a SubprocessLauncher and call set_environ()
         var launcher = new SubprocessLauncher (SubprocessFlags.STDERR_PIPE | SubprocessFlags.STDOUT_PIPE | SubprocessFlags.STDIN_PIPE);
         launcher.set_environ (Environ.get ());
-        string? stdout_buf, stderr_buf;
-        Subprocess subprocess;
-        var argv = get_uncrustify_args (options, analyzed_style);
-        try {
-            subprocess = launcher.spawnv (argv);
-        } catch (Error e) {
-            // FIXME!!! This is a workaround until the flag "SEARCH_PATH_FROM_ENVP" is widely available
-            argv[0] = "/usr/local/bin/uncrustify";
-            subprocess = launcher.spawnv (argv);
+        Subprocess subprocess = launcher.spawnv (get_uncrustify_args (options, analyzed_style));
+        string? stdout_buf = null, stderr_buf = null;
+        subprocess.communicate_utf8 (source.content, cancellable, out stdout_buf, out stderr_buf);
+        if (!subprocess.get_successful ()) {
+            if (stderr_buf != null && stderr_buf.strip ().length > 0) {
+                throw new FormattingError.FORMATTING_ERROR ("%s", stderr_buf);
+            } else {
+                throw new FormattingError.READ_ERROR ("uncrustify failed with error code %d", subprocess.get_exit_status ());
+            }
         }
-        subprocess.communicate_utf8 (source.content, null, out stdout_buf, out stderr_buf);
-        if (stderr_buf != null && stderr_buf.strip ().length > 0) {
-            throw new FormattingError.FORMATTING_ERROR ("%s", stderr_buf);
-        } else if (stdout_buf == null || !subprocess.get_successful ()) {
-            throw new FormattingError.READ_ERROR ("uncrustify failed with error code %d", subprocess.get_exit_status ());
-        }
-        return new Lsp.TextEdit () {
-                   range = new Lsp.Range () {
-                       start = new Lsp.Position () {
-                           line = 0,
-                           character = 0
-                       },
-                       end = new Lsp.Position () {
-                           line = Util.count_chars_in_string (stdout_buf, '\n') + 1,
-                           // Just for the trailing newline
-                           character = 1
-                       }
-                   },
-                   newText = stdout_buf
+        return new TextEdit () {
+            range = new Range () {
+                start = new Position () {
+                    line = 0,
+                    character = 0
+                },
+                end = new Position () {
+                    line = Util.count_chars_in_string (stdout_buf, '\n') + 1,
+                    // Just for the trailing newline
+                    character = 1
+                }
+            },
+            newText = stdout_buf
         };
     }
 

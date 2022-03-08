@@ -1612,7 +1612,7 @@ class Vls.Server : Object {
             Compilation compilation = pair.second;
             var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (source_file) as CodeStyleAnalyzer;
             try {
-                edited = Formatter.format (p.options, code_style, source_file);
+                edited = Formatter.format (p.options, code_style, source_file, cancellable);
             } catch (Error e) {
                 client.reply_error_async.begin (
                     id,
