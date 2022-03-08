@@ -49,7 +49,7 @@ namespace Vls.Formatter {
                     character = 0
                 },
                 end = new Position () {
-                    line = Util.count_chars_in_string (stdout_buf, '\n') + 1,
+                    line = Util.count_chars_in_string (source.content, '\n') + 1,
                     // Just for the trailing newline
                     character = 1
                 }
