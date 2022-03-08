@@ -251,5 +251,14 @@ class Vls.DocComment {
                 result.append ("`");
                 return false;
             });
+
+        // block taglets: @since
+        body = /^@since[\t\f ]+((?'ident'\S+)(\.(?&ident))*?)$/m
+            .replace_eval (body, body.length, 0, 0, (match_info, result) => {
+                string version = match_info.fetch (1);
+                result.append ("\n---\n\n**Since** ");
+                result.append (version);
+                return false;
+            });
     }
 }
