@@ -32,26 +32,34 @@ namespace Vls.Formatter {
         var launcher = new SubprocessLauncher (SubprocessFlags.STDERR_PIPE | SubprocessFlags.STDOUT_PIPE | SubprocessFlags.STDIN_PIPE);
         launcher.set_environ (Environ.get ());
         string? stdout_buf, stderr_buf;
-        Subprocess subprocess = launcher.spawnv (get_uncrustify_args (options, analyzed_style));
+        Subprocess subprocess;
+        var argv = get_uncrustify_args (options, analyzed_style);
+        try {
+            subprocess = launcher.spawnv (argv);
+        } catch (Error e) {
+            // FIXME!!! This is a workaround until the flag "SEARCH_PATH_FROM_ENVP" is widely available
+            argv[0] = "/usr/local/bin/uncrustify";
+            subprocess = launcher.spawnv (argv);
+        }
         subprocess.communicate_utf8 (source.content, null, out stdout_buf, out stderr_buf);
-        if (stderr_buf != null) {
+        if (stderr_buf != null && stderr_buf.strip ().length > 0) {
             throw new FormattingError.FORMATTING_ERROR ("%s", stderr_buf);
         } else if (stdout_buf == null || !subprocess.get_successful ()) {
             throw new FormattingError.READ_ERROR ("uncrustify failed with error code %d", subprocess.get_exit_status ());
         }
         return new Lsp.TextEdit () {
-            range = new Lsp.Range () {
-                start = new Lsp.Position () {
-                    line = 0,
-                    character = 0
-                },
-                end = new Lsp.Position () {
-                    line = Util.count_chars_in_string (stdout_buf, '\n') + 1,
-                    // Just for the trailing newline
-                    character = 1
-                }
-            },
-            newText = stdout_buf
+                   range = new Lsp.Range () {
+                       start = new Lsp.Position () {
+                           line = 0,
+                           character = 0
+                       },
+                       end = new Lsp.Position () {
+                           line = Util.count_chars_in_string (stdout_buf, '\n') + 1,
+                           // Just for the trailing newline
+                           character = 1
+                       }
+                   },
+                   newText = stdout_buf
         };
     }
 
@@ -232,7 +240,7 @@ namespace Vls.Formatter {
         conf["nl_after_func_body_class"] = "2";
         conf["eat_blanks_before_close_brace"] = "true";
         conf["pp_indent_count"] = "0";
-        string[] args = {"uncrustify", "-c", "-", "-l", "vala"};
+        string[] args = { "uncrustify", "-c", "-", "-l", "vala", "-q" };
         foreach (var entry in conf.entries) {
             args += "--set";
             args += @"$(entry.key)=$(entry.value)";
