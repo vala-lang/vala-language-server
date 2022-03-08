@@ -22,8 +22,8 @@ using Gee;
 using Lsp;
 
 errordomain FormattingError {
-    FORMATTING_ERROR,
-    READ_ERROR
+    FORMAT,
+    READ
 }
 
 namespace Vls.Formatter {
@@ -32,16 +32,18 @@ namespace Vls.Formatter {
         // so we have to use a SubprocessLauncher and call set_environ()
         var launcher = new SubprocessLauncher (SubprocessFlags.STDERR_PIPE | SubprocessFlags.STDOUT_PIPE | SubprocessFlags.STDIN_PIPE);
         launcher.set_environ (Environ.get ());
-        Subprocess subprocess = launcher.spawnv (get_uncrustify_args (options, analyzed_style));
+        Subprocess subprocess = launcher.spawnv (get_uncrustify_args (source, options, analyzed_style));
         string? stdout_buf = null, stderr_buf = null;
         subprocess.communicate_utf8 (source.content, cancellable, out stdout_buf, out stderr_buf);
         if (!subprocess.get_successful ()) {
             if (stderr_buf != null && stderr_buf.strip ().length > 0) {
-                throw new FormattingError.FORMATTING_ERROR ("%s", stderr_buf);
+                throw new FormattingError.FORMAT ("%s", stderr_buf);
             } else {
-                throw new FormattingError.READ_ERROR ("uncrustify failed with error code %d", subprocess.get_exit_status ());
+                throw new FormattingError.READ ("uncrustify failed with error code %d", subprocess.get_exit_status ());
             }
         }
+        int last_nl_pos;
+        uint nl_count = Util.count_chars_in_string (source.content, '\n', out last_nl_pos);
         return new TextEdit () {
             range = new Range () {
                 start = new Position () {
@@ -49,16 +51,16 @@ namespace Vls.Formatter {
                     character = 0
                 },
                 end = new Position () {
-                    line = Util.count_chars_in_string (source.content, '\n') + 1,
-                    // Just for the trailing newline
-                    character = 1
+                    line = nl_count + 1,
+                    // handle trailing newline
+                    character = last_nl_pos == source.content.length - 1 ? 1 : 0
                 }
             },
             newText = stdout_buf
         };
     }
 
-    string[] get_uncrustify_args (FormattingOptions options, CodeStyleAnalyzer analyzed_style) {
+    string[] get_uncrustify_args (Vala.SourceFile source, FormattingOptions options, CodeStyleAnalyzer analyzed_style) {
         var conf = new HashMap<string, string> ();
         // https://github.com/uncrustify/uncrustify/blob/master/documentation/htdocs/default.cfg
         conf["indent_with_tabs"] = "%d".printf (options.insertSpaces ? 0 : 1);
@@ -235,7 +237,7 @@ namespace Vls.Formatter {
         conf["nl_after_func_body_class"] = "2";
         conf["eat_blanks_before_close_brace"] = "true";
         conf["pp_indent_count"] = "0";
-        string[] args = { "uncrustify", "-c", "-", "-l", "vala", "-q" };
+        string[] args = { "uncrustify", "-c", "-", "--assume", source.filename, "-q" };
         foreach (var entry in conf.entries) {
             args += "--set";
             args += @"$(entry.key)=$(entry.value)";
