@@ -3,6 +3,7 @@ vls_src = files([
   'analysis/codelensanalyzer.vala',
   'analysis/codestyleanalyzer.vala',
   'analysis/symbolenumerator.vala',
+  'codehelp/codeaction.vala',
   'codehelp/codehelp.vala',
   'codehelp/codelensengine.vala',
   'codehelp/completionengine.vala',

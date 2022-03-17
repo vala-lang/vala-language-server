@@ -967,4 +967,31 @@ namespace Lsp {
         public bool insertFinalNewline { get; set; }
         public bool trimFinalNewlines { get; set; }
     }
+
+    class CodeActionParams : Object {
+        public TextDocumentIdentifier textDocument { get; set; }
+        public Range range { get; set; }
+        public CodeActionContext context { get; set; }
+    }
+
+    class CodeActionContext : Object {
+        public Array<Diagnostic> diagnostics { get; set; }
+        public string[]? only { get; set; }
+        public int triggerKind { get; set; }
+    }
+
+    class CodeAction : Object {
+        public string title { get; set; }
+        public string kind { get; set; }
+        public Array<Diagnostic> diagnostics { get; set; }
+        public bool isPreferred { get; set; }
+        // disabled is skipped
+        public WorkspaceEdit edit { get; set; }
+        public Command command { get; set; }
+        public Object data { get; set; }
+    }
+
+    class WorkspaceEdit : Object {
+        public Array<TextDocumentEdit> documentChanges { get; set; }
+    }
 }
