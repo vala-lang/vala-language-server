@@ -326,7 +326,11 @@ namespace Lsp.CodeActionExtractor {
             stmt.accept_children (this);
         }
 
+#if VALA_0_52
         public override void visit_loop_statement (Vala.LoopStatement stmt) {
+#else
+        public override void visit_loop (Vala.Loop stmt) {
+#endif
             stmt.accept_children (this);
         }
 
@@ -470,9 +474,12 @@ namespace Lsp.CodeActionExtractor {
             stmt.accept_children (this);
         }
 
+#if VALA_0_50
         public override void visit_with_statement (Vala.WithStatement stmt) {
             stmt.accept_children (this);
         }
+
+#endif
 
         public override void visit_yield_statement (Vala.YieldStatement y) {
             y.accept_children (this);
