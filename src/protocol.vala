@@ -983,15 +983,28 @@ namespace Lsp {
     class CodeAction : Object {
         public string title { get; set; }
         public string kind { get; set; }
-        public Array<Diagnostic> diagnostics { get; set; }
+        // diagnostics is skipped
         public bool isPreferred { get; set; }
         // disabled is skipped
-        public WorkspaceEdit edit { get; set; }
-        public Command command { get; set; }
+        public WorkspaceEdit? edit { get; set; }
+        public Command? command { get; set; }
         public Object data { get; set; }
     }
 
-    class WorkspaceEdit : Object {
-        public Array<TextDocumentEdit> documentChanges { get; set; }
+    class WorkspaceEdit : Object, Json.Serializable {
+        public Gee.List<TextDocumentEdit> documentChanges { get; set; default = new Gee.ArrayList<TextDocumentEdit>(); }
+
+        public Json.Node serialize_property (string property_name, GLib.Value value, GLib.ParamSpec pspec) {
+            if (property_name != "documentChanges")
+                return default_serialize_property (property_name, value, pspec);
+
+            var node = new Json.Node (Json.NodeType.ARRAY);
+            node.init_array (new Json.Array ());
+            var array = node.get_array ();
+            foreach (var text_edit in this.documentChanges) {
+                array.add_element (Json.gobject_serialize (text_edit));
+            }
+            return node;
+        }
     }
 }
