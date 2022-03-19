@@ -975,7 +975,6 @@ namespace Lsp {
     }
 
     class CodeActionContext : Object {
-        public Array<Diagnostic> diagnostics { get; set; }
         public string[]? only { get; set; }
         public int triggerKind { get; set; }
     }
@@ -983,9 +982,7 @@ namespace Lsp {
     class CodeAction : Object {
         public string title { get; set; }
         public string kind { get; set; }
-        // diagnostics is skipped
         public bool isPreferred { get; set; }
-        // disabled is skipped
         public WorkspaceEdit? edit { get; set; }
         public Command? command { get; set; }
         public Object data { get; set; }

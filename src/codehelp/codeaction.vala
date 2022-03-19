@@ -24,16 +24,10 @@ using Lsp;
 namespace Lsp.CodeActionExtractor {
     CodeAction[] extract (Vala.SourceFile file, CodeActionParams request) {
         var visitor = new CodeActionVisitor (request.range, request.textDocument);
-        Vala.CodeContext.push (new Vala.CodeContext ());
         file.accept (visitor);
-        Vala.CodeContext.pop ();
         return visitor.code_actions.to_array ();
     }
 
-    // Implement all abstract methods?
-    // Extract "Generate hash_code"
-    // Extract "Generate to_string"
-    // Numbers to alternate formats
     // In case this has to be redone:
     // export IFS=$'\n'
     // for i in $(cat libvala-0.56.vapi |grep class.CodeVisitor -A83|tail -n 82|head -n 81|sed s/.*public/public/g|sed s/virtual/override/g|sed "s/;/{/g"); do
@@ -230,19 +224,18 @@ namespace Lsp.CodeActionExtractor {
                 var offset = ibase == 8 ? 1 : (ibase == 10 ? 0 : 2);
                 var raw_value_without_base = val.substring (offset);
                 var supported_bases = new int[] { 8, 10, 16 };
-                var base_prefixes = new string[] { "0", "", "0x" };
                 if (lit.type_suffix.down ().has_prefix ("u")) {
                     var int_value = uint64.parse (raw_value_without_base, ibase);
                     for (var i = 0; i < supported_bases.length; i++) {
                         if (ibase != supported_bases[i]) {
-                            this.add_unsigned_base_converter (supported_bases[i], base_prefixes[i], int_value, lit);
+                            this.add_unsigned_base_converter (supported_bases[i], int_value, lit);
                         }
                     }
                 } else {
                     var int_value = int64.parse (raw_value_without_base, ibase);
                     for (var i = 0; i < supported_bases.length; i++) {
                         if (ibase != supported_bases[i]) {
-                            this.add_base_converter (supported_bases[i], base_prefixes[i], int_value, lit, negative);
+                            this.add_base_converter (supported_bases[i], int_value, lit, negative);
                         }
                     }
                 }
@@ -250,7 +243,7 @@ namespace Lsp.CodeActionExtractor {
             lit.accept_children (this);
         }
 
-        private void add_unsigned_base_converter (int target, string prefix, uint64 int_value, Vala.IntegerLiteral lit) {
+        private void add_unsigned_base_converter (int target, uint64 int_value, Vala.IntegerLiteral lit) {
             var new_text = "";
             switch (target) {
             case 8:
@@ -259,7 +252,7 @@ namespace Lsp.CodeActionExtractor {
             case 10:
                 new_text = "%llu".printf (int_value);
                 break;
-            case 16:
+            case -16:
                 new_text = "0x%llx".printf (int_value);
                 break;
             }
@@ -293,7 +286,7 @@ namespace Lsp.CodeActionExtractor {
             this.code_actions.add (action);
         }
 
-        private void add_base_converter (int target, string prefix, int64 int_value, Vala.IntegerLiteral lit, bool negative) {
+        private void add_base_converter (int target, int64 int_value, Vala.IntegerLiteral lit, bool negative) {
             var new_text = "";
             var minus = negative ? "-" : "";
             switch (target) {

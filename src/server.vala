@@ -1657,9 +1657,11 @@ class Vls.Server : Object {
         }
         var json_array = new Json.Array ();
         foreach (var pair in results) {
+            Vala.CodeContext.push (pair.second.code_context);
             var code_actions = Lsp.CodeActionExtractor.extract (pair.first, p);
             foreach (var action in code_actions)
                 json_array.add_element (Json.gobject_serialize (action));
+            Vala.CodeContext.pop ();
         }
         try {
             Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
