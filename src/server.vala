@@ -1657,8 +1657,10 @@ class Vls.Server : Object {
         }
         var json_array = new Json.Array ();
         foreach (var pair in results) {
+            if (!(pair.first is TextDocument))
+                continue;
             Vala.CodeContext.push (pair.second.code_context);
-            var code_actions = Lsp.CodeActionExtractor.extract (pair.first, p);
+            var code_actions = CodeActionExtractor.extract ((TextDocument) pair.first, p.range, Uri.unescape_string (p.textDocument.uri));
             foreach (var action in code_actions)
                 json_array.add_element (Json.gobject_serialize (action));
             Vala.CodeContext.pop ();

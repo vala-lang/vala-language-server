@@ -21,9 +21,9 @@
 using Gee;
 using Lsp;
 
-namespace Lsp.CodeActionExtractor {
-    CodeAction[] extract (Vala.SourceFile file, CodeActionParams request) {
-        var visitor = new CodeActionVisitor (request.range, request.textDocument);
+namespace Vls.CodeActionExtractor {
+    CodeAction[] extract (TextDocument file, Range range, string uri) {
+        var visitor = new CodeActionVisitor (file, range, uri);
         file.accept (visitor);
         return visitor.code_actions.to_array ();
     }
@@ -37,13 +37,15 @@ namespace Lsp.CodeActionExtractor {
     // echo "}";
     // done
     class CodeActionVisitor : Vala.CodeVisitor {
+        private TextDocument doc;
         private string uri;
         private Range range;
         private Set<Vala.CodeNode> visited_nodes;
 
-        internal CodeActionVisitor (Range range, TextDocumentIdentifier identifier) {
+        internal CodeActionVisitor (TextDocument doc, Range range, string uri) {
+            this.doc = doc;
+            this.uri = uri;
             this.range = range;
-            this.uri = identifier.uri;
             this.visited_nodes = new Gee.HashSet<Vala.CodeNode>();
         }
 
@@ -260,29 +262,23 @@ namespace Lsp.CodeActionExtractor {
         }
 
         private void add_base_converter_action (string title, string new_text, Vala.IntegerLiteral lit) {
-            var action = new CodeAction ();
-            action.title = title;
-            action.kind = "";
-            var loc = lit.source_reference;
-            action.edit = new WorkspaceEdit ();
-            var edit = new TextEdit ();
-            edit.range = new Range () {
-                start = new Position () {
-                    line = loc.begin.line - 1,
-                    character = loc.begin.column - 1
-                },
-                end = new Position () {
-                    line = loc.end.line - 1,
-                    character = loc.end.column
+            var workspace_edit = new WorkspaceEdit ();
+            var document_edit = new TextDocumentEdit () {
+                textDocument = new VersionedTextDocumentIdentifier () {
+                    version = doc.version,
+                    uri = this.uri
                 },
             };
-            edit.newText = new_text;
-            var docEdit = new TextDocumentEdit ();
-            docEdit.edits.add (edit);
-            docEdit.textDocument = new VersionedTextDocumentIdentifier () {
-                uri = this.uri
+            document_edit.edits.add (new TextEdit () {
+                range = new Range.from_sourceref (lit.source_reference),
+                newText = new_text
+            });
+            workspace_edit.documentChanges.add (document_edit);
+            var action = new CodeAction () {
+                title = title,
+                kind = "",
+                edit = workspace_edit
             };
-            action.edit.documentChanges.add (docEdit);
             this.code_actions.add (action);
         }
 
