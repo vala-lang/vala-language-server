@@ -420,7 +420,6 @@ namespace Lsp {
         public bool deserialize_property (string property_name, out Value value, ParamSpec pspec, Json.Node property_node) {
             error ("deserialization not supported");
         }
-
     }
 
     [CCode (default_value = "LSP_COMPLETION_TRIGGER_KIND_Invoked")]
@@ -603,7 +602,6 @@ namespace Lsp {
         public bool deserialize_property (string property_name, out Value value, ParamSpec pspec, Json.Node property_node) {
             error ("deserialization not supported");
         }
-
     }
 
     class MarkupContent : Object {
@@ -974,9 +972,24 @@ namespace Lsp {
         public CodeActionContext context { get; set; }
     }
 
-    class CodeActionContext : Object {
+    class CodeActionContext : Object, Json.Serializable {
+        public Gee.List<Diagnostic> diagnostics { get; set; default = new Gee.ArrayList<Diagnostic> (); }
         public string[]? only { get; set; }
-        public int triggerKind { get; set; }
+
+        public bool deserialize_property (string property_name, out Value value, ParamSpec pspec, Json.Node property_node) {
+            if (property_name != "diagnostics")
+                return default_deserialize_property (property_name, out value, pspec, property_node);
+            var diags = new Gee.ArrayList<Diagnostic> ();
+            property_node.get_array ().foreach_element ((array, index, element) => {
+                try {
+                    diags.add (Vls.Util.parse_variant<Diagnostic> (Json.gvariant_deserialize (element, null)));
+                } catch (Error e) {
+                    warning ("argument %u could not be deserialized: %s", index, e.message);
+                }
+            });
+            value = diags;
+            return true;
+        }
     }
 
     class CodeAction : Object {
@@ -989,7 +1002,7 @@ namespace Lsp {
     }
 
     class WorkspaceEdit : Object, Json.Serializable {
-        public Gee.List<TextDocumentEdit> documentChanges { get; set; default = new Gee.ArrayList<TextDocumentEdit>(); }
+        public Gee.List<TextDocumentEdit> documentChanges { get; set; default = new Gee.ArrayList<TextDocumentEdit> (); }
 
         public Json.Node serialize_property (string property_name, GLib.Value value, GLib.ParamSpec pspec) {
             if (property_name != "documentChanges")
