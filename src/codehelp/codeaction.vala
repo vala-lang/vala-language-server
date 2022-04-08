@@ -21,117 +21,29 @@
 using Gee;
 using Lsp;
 
-namespace Vls.CodeActionExtractor {
+namespace Vls.CodeActions {
+    /**
+     * Extracts a list of code actions for the given document and range.
+     */
     CodeAction[] extract (TextDocument file, Range range, string uri) {
-        var visitor = new CodeActionVisitor (file, range, uri);
+        var visitor = new Visitor (file, range, uri);
         file.accept (visitor);
         return visitor.code_actions.to_array ();
     }
 
-    class BaseConverterAction : Lsp.CodeAction {
-        private VersionedTextDocumentIdentifier document;
-
-        internal BaseConverterAction (Vala.IntegerLiteral lit, VersionedTextDocumentIdentifier document) {
-            var val = lit.value;
-            this.document = document;
-            var negative = val.has_prefix ("-");
-            if (negative)
-                val = val.substring (1);
-            var ibase = 10;
-            if (val.has_prefix ("0x"))
-                ibase = 16;
-            else if (val.has_prefix ("0") && val != "0")
-                ibase = 8;
-            var offset = ibase == 8 ? 1 : (ibase == 10 ? 0 : 2);
-            var raw_value_without_base = val.substring (offset);
-            var supported_bases = new int[] { 8, 10, 16 };
-            if (lit.type_suffix.down ().has_prefix ("u")) {
-                var int_value = uint64.parse (raw_value_without_base, ibase);
-                for (var i = 0; i < supported_bases.length; i++) {
-                    if (ibase != supported_bases[i]) {
-                        this.init_as_unsigned (supported_bases[i], int_value, lit);
-                    }
-                }
-            } else {
-                var int_value = int64.parse (raw_value_without_base, ibase);
-                for (var i = 0; i < supported_bases.length; i++) {
-                    if (ibase != supported_bases[i]) {
-                        this.init_as_signed (supported_bases[i], int_value, lit, negative);
-                    }
-                }
-            }
-        }
-
-        private void init_as_unsigned (int target, uint64 int_value, Vala.IntegerLiteral lit) {
-            var new_text = "";
-            switch (target) {
-            case 8:
-                new_text = "0%llo".printf (int_value);
-                break;
-            case 10:
-                new_text = "%llu".printf (int_value);
-                break;
-            case 16:
-                new_text = "0x%llx".printf (int_value);
-                break;
-            }
-            this.init_with_data ("Convert %s%s to base %d".printf (lit.value, lit.type_suffix, target), new_text + lit.type_suffix, lit);
-        }
-
-        private void init_with_data (string title, string new_text, Vala.IntegerLiteral lit) {
-            var workspace_edit = new WorkspaceEdit ();
-            var document_edit = new TextDocumentEdit () {
-                textDocument = this.document,
-            };
-            document_edit.edits.add (new TextEdit () {
-                range = new Range.from_sourceref (lit.source_reference),
-                newText = new_text
-            });
-            workspace_edit.documentChanges.add (document_edit);
-            this.title = title;
-            this.kind = "";
-            this.edit = workspace_edit;
-        }
-
-        private void init_as_signed (int target, int64 int_value, Vala.IntegerLiteral lit, bool negative) {
-            var new_text = "";
-            var minus = negative ? "-" : "";
-            switch (target) {
-            case 8:
-                new_text = "%s0%llo".printf (minus, int_value);
-                break;
-            case 10:
-                new_text = "%s%lld".printf (minus, int_value);
-                break;
-            case 16:
-                new_text = "%s0x%llx".printf (minus, int_value);
-                break;
-            }
-            this.init_with_data ("Convert %s%s to base %d".printf (lit.value, lit.type_suffix, target), new_text + lit.type_suffix, lit);
-        }
-    }
-
-    // In case this has to be redone:
-    // export IFS=$'\n'
-    // for i in $(cat libvala-0.56.vapi |grep class.CodeVisitor -A83|tail -n 82|head -n 81|sed s/.*public/public/g|sed s/virtual/override/g|sed "s/;/{/g"); do
-    // echo $i;
-    // param_name=$(echo $i|sed s/.*\(//g|sed s/\)\{//g|cut -d ' ' -f2);
-    // echo $param_name".accept_children(this);";
-    // echo "}";
-    // done
-    class CodeActionVisitor : Vala.CodeVisitor {
+    class Visitor : Vala.CodeVisitor {
         private TextDocument doc;
         private string uri;
         private Range range;
-        private Set<Vala.CodeNode> visited_nodes;
+        private Set<Vala.CodeNode> seen;
         private VersionedTextDocumentIdentifier document;
         internal Gee.List<CodeAction> code_actions { get; set; default = new Gee.ArrayList<CodeAction> (); }
 
-        internal CodeActionVisitor (TextDocument doc, Range range, string uri) {
+        internal Visitor (TextDocument doc, Range range, string uri) {
             this.doc = doc;
             this.uri = uri;
             this.range = range;
-            this.visited_nodes = new Gee.HashSet<Vala.CodeNode>();
+            this.seen = new HashSet<Vala.CodeNode>();
             this.document = new VersionedTextDocumentIdentifier () {
                 version = doc.version,
                 uri = this.uri
@@ -139,187 +51,265 @@ namespace Vls.CodeActionExtractor {
         }
 
         public override void visit_addressof_expression (Vala.AddressofExpression expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_array_creation_expression (Vala.ArrayCreationExpression expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_assignment (Vala.Assignment a) {
+            if (!seen.add (a))
+                return;
             a.accept_children (this);
         }
 
         public override void visit_base_access (Vala.BaseAccess expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_binary_expression (Vala.BinaryExpression expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_block (Vala.Block b) {
+            if (!seen.add (b))
+                return;
             b.accept_children (this);
         }
 
         public override void visit_boolean_literal (Vala.BooleanLiteral lit) {
+            if (!seen.add (lit))
+                return;
             lit.accept_children (this);
         }
 
         public override void visit_break_statement (Vala.BreakStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
         public override void visit_cast_expression (Vala.CastExpression expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_catch_clause (Vala.CatchClause clause) {
+            if (!seen.add (clause))
+                return;
             clause.accept_children (this);
         }
 
         public override void visit_character_literal (Vala.CharacterLiteral lit) {
+            if (!seen.add (lit))
+                return;
             lit.accept_children (this);
         }
 
         public override void visit_class (Vala.Class cl) {
+            if (!seen.add (cl))
+                return;
             cl.accept_children (this);
         }
 
         public override void visit_conditional_expression (Vala.ConditionalExpression expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_constant (Vala.Constant c) {
+            if (!seen.add (c))
+                return;
             c.accept_children (this);
         }
 
         public override void visit_constructor (Vala.Constructor c) {
+            if (!seen.add (c))
+                return;
             c.accept_children (this);
         }
 
         public override void visit_continue_statement (Vala.ContinueStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
         public override void visit_creation_method (Vala.CreationMethod m) {
+            if (!seen.add (m))
+                return;
             m.accept_children (this);
         }
 
         public override void visit_data_type (Vala.DataType type) {
+            if (!seen.add (type))
+                return;
             type.accept_children (this);
         }
 
         public override void visit_declaration_statement (Vala.DeclarationStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
         public override void visit_delegate (Vala.Delegate d) {
+            if (!seen.add (d))
+                return;
             d.accept_children (this);
         }
 
         public override void visit_delete_statement (Vala.DeleteStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
         public override void visit_destructor (Vala.Destructor d) {
+            if (!seen.add (d))
+                return;
             d.accept_children (this);
         }
 
         public override void visit_do_statement (Vala.DoStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
         public override void visit_element_access (Vala.ElementAccess expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_empty_statement (Vala.EmptyStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
         public override void visit_end_full_expression (Vala.Expression expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_enum (Vala.Enum en) {
+            if (!seen.add (en))
+                return;
             en.accept_children (this);
         }
 
         public override void visit_enum_value (Vala.EnumValue ev) {
+            if (!seen.add (ev))
+                return;
             ev.accept_children (this);
         }
 
         public override void visit_error_code (Vala.ErrorCode ecode) {
+            if (!seen.add (ecode))
+                return;
             ecode.accept_children (this);
         }
 
         public override void visit_error_domain (Vala.ErrorDomain edomain) {
+            if (!seen.add (edomain))
+                return;
             edomain.accept_children (this);
         }
 
         public override void visit_expression (Vala.Expression expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_expression_statement (Vala.ExpressionStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
         public override void visit_field (Vala.Field f) {
+            if (!seen.add (f))
+                return;
             f.accept_children (this);
         }
 
         public override void visit_for_statement (Vala.ForStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
         public override void visit_foreach_statement (Vala.ForeachStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
         public override void visit_formal_parameter (Vala.Parameter p) {
+            if (!seen.add (p))
+                return;
             p.accept_children (this);
         }
 
         public override void visit_if_statement (Vala.IfStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
         public override void visit_initializer_list (Vala.InitializerList list) {
+            if (!seen.add (list))
+                return;
             list.accept_children (this);
         }
 
         public override void visit_integer_literal (Vala.IntegerLiteral lit) {
-            var location = lit.source_reference;
-            if (location != null && !this.visited_nodes.contains (lit)) {
-                this.visited_nodes.add (lit);
-                var start = location.begin.line - 1;
-                var end = location.end.line - 1;
-                var contains_start = start >= this.range.start.line && start <= this.range.end.line;
-                var contains_end = end <= this.range.end.line && end >= this.range.start.line;
-                if (!contains_start && !contains_end) {
-                    lit.accept_children (this);
-                    return;
-                }
-                this.code_actions.add (new BaseConverterAction (lit, this.document));
+            if (!seen.add (lit))
+                return;
+            if (lit.source_reference != null) {
+                var lit_range = new Range.from_sourceref (lit.source_reference);
+                if (lit_range.contains (this.range.start) && lit_range.contains (this.range.end))
+                    code_actions.add (new BaseConverterAction (lit, document));
             }
             lit.accept_children (this);
         }
 
         public override void visit_interface (Vala.Interface iface) {
+            if (!seen.add (iface))
+                return;
             iface.accept_children (this);
         }
 
         public override void visit_lambda_expression (Vala.LambdaExpression expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_local_variable (Vala.LocalVariable local) {
+            if (!seen.add (local))
+                return;
             local.accept_children (this);
         }
 
         public override void visit_lock_statement (Vala.LockStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
@@ -328,78 +318,116 @@ namespace Vls.CodeActionExtractor {
 #else
         public override void visit_loop (Vala.Loop stmt) {
 #endif
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
         public override void visit_member_access (Vala.MemberAccess expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_method (Vala.Method m) {
+            if (!seen.add (m))
+                return;
             m.accept_children (this);
         }
 
         public override void visit_method_call (Vala.MethodCall expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_named_argument (Vala.NamedArgument expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_namespace (Vala.Namespace ns) {
+            if (!seen.add (ns))
+                return;
             ns.accept_children (this);
         }
 
         public override void visit_null_literal (Vala.NullLiteral lit) {
+            if (!seen.add (lit))
+                return;
             lit.accept_children (this);
         }
 
         public override void visit_object_creation_expression (Vala.ObjectCreationExpression expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_pointer_indirection (Vala.PointerIndirection expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_postfix_expression (Vala.PostfixExpression expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_property (Vala.Property prop) {
+            if (!seen.add (prop))
+                return;
             prop.accept_children (this);
         }
 
         public override void visit_property_accessor (Vala.PropertyAccessor acc) {
+            if (!seen.add (acc))
+                return;
             acc.accept_children (this);
         }
 
         public override void visit_real_literal (Vala.RealLiteral lit) {
+            if (!seen.add (lit))
+                return;
             lit.accept_children (this);
         }
 
         public override void visit_reference_transfer_expression (Vala.ReferenceTransferExpression expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_regex_literal (Vala.RegexLiteral lit) {
+            if (!seen.add (lit))
+                return;
             lit.accept_children (this);
         }
 
         public override void visit_return_statement (Vala.ReturnStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
         public override void visit_signal (Vala.Signal sig) {
+            if (!seen.add (sig))
+                return;
             sig.accept_children (this);
         }
 
         public override void visit_sizeof_expression (Vala.SizeofExpression expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_slice_expression (Vala.SliceExpression expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
@@ -408,77 +436,112 @@ namespace Vls.CodeActionExtractor {
         }
 
         public override void visit_string_literal (Vala.StringLiteral lit) {
+            if (!seen.add (lit))
+                return;
             lit.accept_children (this);
         }
 
         public override void visit_struct (Vala.Struct st) {
+            if (!seen.add (st))
+                return;
             st.accept_children (this);
         }
 
         public override void visit_switch_label (Vala.SwitchLabel label) {
+            if (!seen.add (label))
+                return;
             label.accept_children (this);
         }
 
         public override void visit_switch_section (Vala.SwitchSection section) {
+            if (!seen.add (section))
+                return;
             section.accept_children (this);
         }
 
         public override void visit_switch_statement (Vala.SwitchStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
         public override void visit_template (Vala.Template tmpl) {
+            if (!seen.add (tmpl))
+                return;
             tmpl.accept_children (this);
         }
 
         public override void visit_throw_statement (Vala.ThrowStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
         public override void visit_try_statement (Vala.TryStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
         public override void visit_tuple (Vala.Tuple tuple) {
+            if (!seen.add (tuple))
+                return;
             tuple.accept_children (this);
         }
 
         public override void visit_type_check (Vala.TypeCheck expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_type_parameter (Vala.TypeParameter p) {
+            if (!seen.add (p))
+                return;
             p.accept_children (this);
         }
 
         public override void visit_typeof_expression (Vala.TypeofExpression expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_unary_expression (Vala.UnaryExpression expr) {
+            if (!seen.add (expr))
+                return;
             expr.accept_children (this);
         }
 
         public override void visit_unlock_statement (Vala.UnlockStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
         public override void visit_using_directive (Vala.UsingDirective ns) {
+            if (!seen.add (ns))
+                return;
             ns.accept_children (this);
         }
 
         public override void visit_while_statement (Vala.WhileStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
 
 #if VALA_0_50
         public override void visit_with_statement (Vala.WithStatement stmt) {
+            if (!seen.add (stmt))
+                return;
             stmt.accept_children (this);
         }
-
 #endif
 
         public override void visit_yield_statement (Vala.YieldStatement y) {
+            if (!seen.add (y))
+                return;
             y.accept_children (this);
         }
     }
