@@ -115,9 +115,9 @@ namespace Lsp {
          */
         public Position end { get; set; }
 
-        private string filename;
+        private string? filename;
 
-        public string to_string () { return @"$filename: $start -> $end"; }
+        public string to_string () { return (filename != null ? @"$filename:" : "") + @"$start -> $end"; }
 
         public Range.from_sourceref (Vala.SourceReference sref) {
             this.start = new Position.from_libvala (sref.begin);
