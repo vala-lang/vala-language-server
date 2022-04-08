@@ -1635,7 +1635,7 @@ class Vls.Server : Object {
     }
 
     void textDocumentCodeAction (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var p = Util.parse_variant<Lsp.CodeActionParams>(@params);
+        var p = Util.parse_variant<CodeActionParams> (@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {

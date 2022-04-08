@@ -998,7 +998,7 @@ namespace Lsp {
         public bool isPreferred { get; set; }
         public WorkspaceEdit? edit { get; set; }
         public Command? command { get; set; }
-        public Object data { get; set; }
+        public Object? data { get; set; }
     }
 
     class WorkspaceEdit : Object, Json.Serializable {
