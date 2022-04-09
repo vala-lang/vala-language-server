@@ -37,7 +37,7 @@ namespace Vls.CodeActions {
         private Range range;
         private Set<Vala.CodeNode> seen;
         private VersionedTextDocumentIdentifier document;
-        internal Gee.List<CodeAction> code_actions { get; set; default = new Gee.ArrayList<CodeAction> (); }
+        public Gee.List<CodeAction> code_actions { get; set; default = new Gee.ArrayList<CodeAction> (); }
 
         public Visitor (TextDocument doc, Range range, string uri) {
             this.doc = doc;
