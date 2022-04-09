@@ -39,14 +39,14 @@ namespace Vls.CodeActions {
         private VersionedTextDocumentIdentifier document;
         internal Gee.List<CodeAction> code_actions { get; set; default = new Gee.ArrayList<CodeAction> (); }
 
-        internal Visitor (TextDocument doc, Range range, string uri) {
+        public Visitor (TextDocument doc, Range range, string uri) {
             this.doc = doc;
             this.uri = uri;
             this.range = range;
             this.seen = new HashSet<Vala.CodeNode>();
             this.document = new VersionedTextDocumentIdentifier () {
                 version = doc.version,
-                uri = this.uri
+                uri = uri
             };
         }
 
