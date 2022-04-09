@@ -199,6 +199,10 @@ class VlsHoverProvider(Ide.LspHoverProvider):
         self.props.priority = 100
         VlsService.bind_client(self)
 
+class VlsCodeActionProvider(Ide.LspCodeActionProvider):
+    def do_load(self):
+        VlsService.bind_client(self)
+
 if hasattr(Ide, 'LspSearchProvider'):       # for earlier versions of Builder
     class VlsSearchProvider(Ide.LspSearchProvider):
         def do_load(self, context):

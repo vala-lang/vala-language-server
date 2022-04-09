@@ -6,6 +6,7 @@ Copyright=Copyright © 2020
 
 Loader=python3
 Module=vala_langserv
+X-Code-Action-Languages=vala
 X-Completion-Provider-Languages=vala
 X-Diagnostic-Provider-Languages=vala
 X-Formatter-Languages=vala

@@ -174,6 +174,7 @@ class Vls.Server : Object {
         call_handlers["textDocument/signatureHelp"] = this.textDocumentSignatureHelp;
         call_handlers["textDocument/hover"] = this.textDocumentHover;
         call_handlers["textDocument/formatting"] = this.textDocumentFormatting;
+        call_handlers["textDocument/codeAction"] = this.textDocumentCodeAction;
         call_handlers["textDocument/references"] = this.textDocumentReferences;
         call_handlers["textDocument/documentHighlight"] = this.textDocumentReferences;
         call_handlers["textDocument/implementation"] = this.textDocumentImplementation;
@@ -244,6 +245,7 @@ class Vls.Server : Object {
                     signatureHelpProvider: buildDict(
                         triggerCharacters: new Variant.strv (new string[] {"(", "[", ","})
                     ),
+                    codeActionProvider: new Variant.boolean (true),
                     hoverProvider: new Variant.boolean (true),
                     referencesProvider: new Variant.boolean (true),
                     documentHighlightProvider: new Variant.boolean (true),
@@ -1623,6 +1625,45 @@ class Vls.Server : Object {
                 return;
             }
             json_array.add_element (Json.gobject_serialize (edited));
+        }
+        try {
+            Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
+            client.reply (id, variant_array, cancellable);
+        } catch (Error e) {
+            debug (@"[$method] failed to reply to client: $(e.message)");
+        }
+    }
+
+    void textDocumentCodeAction (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        var p = Util.parse_variant<CodeActionParams> (@params);
+        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
+        Project selected_project = null;
+        foreach (var project in projects.get_keys_as_array ()) {
+            results = project.lookup_compile_input_source_file (p.textDocument.uri);
+            if (!results.is_empty) {
+                selected_project = project;
+                break;
+            }
+        }
+        // fallback to default project
+        if (selected_project == null) {
+            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
+            selected_project = default_project;
+        }
+        if (results.is_empty) {
+            debug (@"file `$(Uri.unescape_string (p.textDocument.uri))' not found");
+            reply_null (id, client, method);
+            return;
+        }
+        var json_array = new Json.Array ();
+        foreach (var pair in results) {
+            if (!(pair.first is TextDocument))
+                continue;
+            Vala.CodeContext.push (pair.second.code_context);
+            var code_actions = CodeActions.extract ((TextDocument) pair.first, p.range, Uri.unescape_string (p.textDocument.uri));
+            foreach (var action in code_actions)
+                json_array.add_element (Json.gobject_serialize (action));
+            Vala.CodeContext.pop ();
         }
         try {
             Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);

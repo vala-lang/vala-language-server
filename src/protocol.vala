@@ -115,9 +115,9 @@ namespace Lsp {
          */
         public Position end { get; set; }
 
-        private string filename;
+        private string? filename;
 
-        public string to_string () { return @"$filename: $start -> $end"; }
+        public string to_string () { return (filename != null ? @"$filename:" : "") + @"$start -> $end"; }
 
         public Range.from_sourceref (Vala.SourceReference sref) {
             this.start = new Position.from_libvala (sref.begin);
@@ -420,7 +420,6 @@ namespace Lsp {
         public bool deserialize_property (string property_name, out Value value, ParamSpec pspec, Json.Node property_node) {
             error ("deserialization not supported");
         }
-
     }
 
     [CCode (default_value = "LSP_COMPLETION_TRIGGER_KIND_Invoked")]
@@ -603,7 +602,6 @@ namespace Lsp {
         public bool deserialize_property (string property_name, out Value value, ParamSpec pspec, Json.Node property_node) {
             error ("deserialization not supported");
         }
-
     }
 
     class MarkupContent : Object {
@@ -966,5 +964,75 @@ namespace Lsp {
         public bool trimTrailingWhitespace { get; set; }
         public bool insertFinalNewline { get; set; }
         public bool trimFinalNewlines { get; set; }
+    }
+
+    class CodeActionParams : Object {
+        public TextDocumentIdentifier textDocument { get; set; }
+        public Range range { get; set; }
+        public CodeActionContext context { get; set; }
+    }
+
+    class CodeActionContext : Object, Json.Serializable {
+        public Gee.List<Diagnostic> diagnostics { get; set; default = new Gee.ArrayList<Diagnostic> (); }
+        public string[]? only { get; set; }
+
+        public bool deserialize_property (string property_name, out Value value, ParamSpec pspec, Json.Node property_node) {
+            if (property_name != "diagnostics")
+                return default_deserialize_property (property_name, out value, pspec, property_node);
+            var diags = new Gee.ArrayList<Diagnostic> ();
+            property_node.get_array ().foreach_element ((array, index, element) => {
+                try {
+                    diags.add (Vls.Util.parse_variant<Diagnostic> (Json.gvariant_deserialize (element, null)));
+                } catch (Error e) {
+                    warning ("argument %u could not be deserialized: %s", index, e.message);
+                }
+            });
+            value = diags;
+            return true;
+        }
+    }
+
+    class CodeAction : Object, Json.Serializable {
+        public string title { get; set; }
+        public string? kind { get; set; }
+        public Gee.List<Diagnostic>? diagnostics { get; set; }
+        public bool isPreferred { get; set; }
+        public WorkspaceEdit? edit { get; set; }
+        public Command? command { get; set; }
+        public Object? data { get; set; }
+
+        public override Json.Node serialize_property (string property_name, GLib.Value value, GLib.ParamSpec pspec) {
+            if (property_name != "diagnostics")
+                return default_serialize_property (property_name, value, pspec);
+
+            var node = new Json.Node (Json.NodeType.ARRAY);
+            node.init_array (new Json.Array ());
+            if (diagnostics != null) {
+                var array = node.get_array ();
+                foreach (var text_edit in diagnostics) {
+                    array.add_element (Json.gobject_serialize (text_edit));
+                }
+            }
+            return node;
+        }
+    }
+
+    class WorkspaceEdit : Object, Json.Serializable {
+        public Gee.List<TextDocumentEdit>? documentChanges { get; set; }
+
+        public Json.Node serialize_property (string property_name, GLib.Value value, GLib.ParamSpec pspec) {
+            if (property_name != "documentChanges")
+                return default_serialize_property (property_name, value, pspec);
+
+            var node = new Json.Node (Json.NodeType.ARRAY);
+            node.init_array (new Json.Array ());
+            if (documentChanges != null) {
+                var array = node.get_array ();
+                foreach (var text_edit in documentChanges) {
+                    array.add_element (Json.gobject_serialize (text_edit));
+                }
+            }
+            return node;
+        }
     }
 }
