@@ -19,6 +19,7 @@
  */
 
 using Lsp;
+using Gee;
 
 /**
  * The base converter code action allows to convert a constant to a different base.
@@ -59,6 +60,7 @@ class Vls.BaseConverterAction : CodeAction {
             this.title = "Convert decimal value to hexadecimal";
         }
         document_edit.edits.add (text_edit);
+        workspace_edit.documentChanges = new ArrayList<TextDocumentEdit> ();
         workspace_edit.documentChanges.add (document_edit);
         this.kind = "";
         this.edit = workspace_edit;

@@ -992,17 +992,33 @@ namespace Lsp {
         }
     }
 
-    class CodeAction : Object {
+    class CodeAction : Object, Json.Serializable {
         public string title { get; set; }
         public string kind { get; set; }
+        public Gee.List<Diagnostic>? diagnostics { get; set; }
         public bool isPreferred { get; set; }
         public WorkspaceEdit? edit { get; set; }
         public Command? command { get; set; }
         public Object? data { get; set; }
+
+        public override Json.Node serialize_property (string property_name, GLib.Value value, GLib.ParamSpec pspec) {
+            if (property_name != "diagnostics")
+                return default_serialize_property (property_name, value, pspec);
+
+            var node = new Json.Node (Json.NodeType.ARRAY);
+            node.init_array (new Json.Array ());
+            if (diagnostics != null) {
+                var array = node.get_array ();
+                foreach (var text_edit in diagnostics) {
+                    array.add_element (Json.gobject_serialize (text_edit));
+                }
+            }
+            return node;
+        }
     }
 
     class WorkspaceEdit : Object, Json.Serializable {
-        public Gee.List<TextDocumentEdit> documentChanges { get; set; default = new Gee.ArrayList<TextDocumentEdit> (); }
+        public Gee.List<TextDocumentEdit>? documentChanges { get; set; }
 
         public Json.Node serialize_property (string property_name, GLib.Value value, GLib.ParamSpec pspec) {
             if (property_name != "documentChanges")
@@ -1010,9 +1026,11 @@ namespace Lsp {
 
             var node = new Json.Node (Json.NodeType.ARRAY);
             node.init_array (new Json.Array ());
-            var array = node.get_array ();
-            foreach (var text_edit in this.documentChanges) {
-                array.add_element (Json.gobject_serialize (text_edit));
+            if (documentChanges != null) {
+                var array = node.get_array ();
+                foreach (var text_edit in documentChanges) {
+                    array.add_element (Json.gobject_serialize (text_edit));
+                }
             }
             return node;
         }
