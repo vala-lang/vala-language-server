@@ -25,10 +25,10 @@ namespace Vls.CodeActions {
     /**
      * Extracts a list of code actions for the given document and range.
      */
-    CodeAction[] extract (TextDocument file, Range range, string uri) {
+    Collection<CodeAction> extract (TextDocument file, Range range, string uri) {
         var visitor = new Visitor (file, range, uri);
         file.accept (visitor);
-        return visitor.code_actions.to_array ();
+        return visitor.code_actions;
     }
 
     class Visitor : Vala.CodeVisitor {
