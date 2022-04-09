@@ -28,84 +28,37 @@ using Lsp;
  * ```
  */
 class Vls.BaseConverterAction : CodeAction {
-    private VersionedTextDocumentIdentifier document;
-
     public BaseConverterAction (Vala.IntegerLiteral lit, VersionedTextDocumentIdentifier document) {
-        var val = lit.value;
-        this.document = document;
-        var negative = val.has_prefix ("-");
-        if (negative)
-            val = val.substring (1);
-        var ibase = 10;
-        if (val.has_prefix ("0x"))
-            ibase = 16;
-        else if (val.has_prefix ("0") && val != "0")
-            ibase = 8;
-        var offset = ibase == 8 ? 1 : (ibase == 10 ? 0 : 2);
-        var raw_value_without_base = val.substring (offset);
-        var supported_bases = new int[] { 8, 10, 16 };
-        if (lit.type_suffix.down ().has_prefix ("u")) {
-            var int_value = uint64.parse (raw_value_without_base, ibase);
-            for (var i = 0; i < supported_bases.length; i++) {
-                if (ibase != supported_bases[i]) {
-                    this.init_as_unsigned (supported_bases[i], int_value, lit);
-                }
-            }
-        } else {
-            var int_value = int64.parse (raw_value_without_base, ibase);
-            for (var i = 0; i < supported_bases.length; i++) {
-                if (ibase != supported_bases[i]) {
-                    this.init_as_signed (supported_bases[i], int_value, lit, negative);
-                }
-            }
+        string val = lit.value;
+        // bool signed = lit.type_suffix[0] == 'u' || lit.type_suffix[0] == 'U';
+        bool negative = false;
+        if (val[0] == '-') {
+            negative = true;
+            val = val[1:];
         }
-    }
-
-    private void init_as_unsigned (int target, uint64 int_value, Vala.IntegerLiteral lit) {
-        var new_text = "";
-        switch (target) {
-            case 8:
-                new_text = "0%llo".printf (int_value);
-                break;
-            case 10:
-                new_text = "%llu".printf (int_value);
-                break;
-            case 16:
-                new_text = "0x%llx".printf (int_value);
-                break;
-        }
-        this.init_with_data ("Convert %s%s to base %d".printf (lit.value, lit.type_suffix, target), new_text + lit.type_suffix, lit);
-    }
-
-    private void init_with_data (string title, string new_text, Vala.IntegerLiteral lit) {
         var workspace_edit = new WorkspaceEdit ();
         var document_edit = new TextDocumentEdit () {
-            textDocument = this.document,
+            textDocument = document
         };
-        document_edit.edits.add (new TextEdit () {
-            range = new Range.from_sourceref (lit.source_reference),
-            newText = new_text
-        });
+        var text_edit = new TextEdit () { range = new Range.from_sourceref (lit.source_reference) };
+        if (val.has_prefix ("0x")) {
+            // base 16  -> base 8
+            val = val[2:];
+            text_edit.newText = "%s%#llo".printf (negative ? "-" : "", ulong.parse (val, 16));
+            this.title = "Convert hexadecimal value to octal";
+        } else if (val[0] == '0') {
+            // base 8   -> base 10
+            val = val[1:];
+            text_edit.newText = "%s%#lld".printf (negative ? "-" : "", ulong.parse (val, 8));
+            this.title = "Convert octal value to decimal";
+        } else {
+            // base 10  -> base 16
+            text_edit.newText = "%s%#llx".printf (negative ? "-" : "", ulong.parse (val));
+            this.title = "Convert decimal value to hexadecimal";
+        }
+        document_edit.edits.add (text_edit);
         workspace_edit.documentChanges.add (document_edit);
-        this.title = title;
         this.kind = "";
         this.edit = workspace_edit;
-    }
-
-    private void init_as_signed (int target, int64 int_value, Vala.IntegerLiteral lit, bool negative) {
-        var new_text = "";
-        var minus = negative ? "-" : "";
-        switch (target) {
-            case 8:
-                new_text = "%s0%llo".printf (minus, int_value);
-                break;
-            case 10:
-                new_text = "%s%lld".printf (minus, int_value);
-                break;
-            case 16:
-                new_text = "%s0x%llx".printf (minus, int_value);
-                break;
-        }
-        this.init_with_data ("Convert %s%s to base %d".printf (lit.value, lit.type_suffix, target), new_text + lit.type_suffix, lit);
     }
 }
