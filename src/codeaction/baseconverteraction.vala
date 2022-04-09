@@ -62,7 +62,6 @@ class Vls.BaseConverterAction : CodeAction {
         document_edit.edits.add (text_edit);
         workspace_edit.documentChanges = new ArrayList<TextDocumentEdit> ();
         workspace_edit.documentChanges.add (document_edit);
-        this.kind = "";
         this.edit = workspace_edit;
     }
 }

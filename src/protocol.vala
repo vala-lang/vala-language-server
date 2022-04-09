@@ -994,7 +994,7 @@ namespace Lsp {
 
     class CodeAction : Object, Json.Serializable {
         public string title { get; set; }
-        public string kind { get; set; }
+        public string? kind { get; set; }
         public Gee.List<Diagnostic>? diagnostics { get; set; }
         public bool isPreferred { get; set; }
         public WorkspaceEdit? edit { get; set; }
