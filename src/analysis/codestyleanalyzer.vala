@@ -51,7 +51,8 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
                  && !Util.is_newline (symbol.source_reference.file.content[(long)offset]); offset--) {
                 prefix.prepend_c (symbol.source_reference.file.content[(long)offset]);
             }
-            _indentation = prefix.str;
+            if (prefix.len > 0)
+                _indentation = prefix.str;
         }
     }
 
