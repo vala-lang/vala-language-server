@@ -60,7 +60,7 @@ namespace Vls.Formatter {
         );
     }
 
-    string[] get_uncrustify_args (Vala.SourceFile source, FormattingOptions options, CodeStyleAnalyzer analyzed_style) {
+    string[] get_uncrustify_args (Vala.SourceFile source, FormattingOptions options, CodeStyleAnalyzer? analyzed_style) {
         var conf = new HashMap<string, string> ();
         // https://github.com/uncrustify/uncrustify/blob/master/documentation/htdocs/default.cfg
         conf["indent_with_tabs"] = "%d".printf (options.insertSpaces ? 0 : 1);
@@ -147,7 +147,7 @@ namespace Vls.Formatter {
         conf["sp_after_tparen_close"] = "remove";
         conf["sp_square_fparen"] = "force";
         conf["sp_fparen_brace"] = "force";
-        if (analyzed_style.average_spacing_before_parens > 0) {
+        if (analyzed_style != null && analyzed_style.average_spacing_before_parens > 0) {
             conf["sp_func_proto_paren"] = "force";
             conf["sp_func_def_paren"] = "force";
             conf["sp_func_class_paren"] = "force";

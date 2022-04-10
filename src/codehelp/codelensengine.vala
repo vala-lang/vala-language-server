@@ -129,7 +129,7 @@ namespace Vls.CodeLensEngine {
             }
 
             Vala.CodeContext.push (compilation.code_context);
-            var collected_symbols = compilation.get_analysis_for_file<CodeLensAnalyzer> (doc) as CodeLensAnalyzer;
+            var collected_symbols = compilation.get_analysis_for_file<CodeLensAnalyzer> (doc);
             Vala.CodeContext.pop ();
 
             var lenses = new ArrayList<CodeLens> ();

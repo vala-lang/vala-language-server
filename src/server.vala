@@ -1026,7 +1026,7 @@ class Vls.Server : Object {
             Vala.CodeContext.push (compilation.code_context);
 
             var array = new Json.Array ();
-            var syms = compilation.get_analysis_for_file<SymbolEnumerator> (file) as SymbolEnumerator;
+            var syms = compilation.get_analysis_for_file<SymbolEnumerator> (file);
             if (init_params.capabilities.textDocument.documentSymbol.hierarchicalDocumentSymbolSupport)
                 foreach (var dsym in syms) {
                     // debug(@"found $(dsym.name)");
@@ -1612,7 +1612,7 @@ class Vls.Server : Object {
             TextEdit edited;
             Vala.SourceFile source_file = pair.first;
             Compilation compilation = pair.second;
-            var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (source_file) as CodeStyleAnalyzer;
+            var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (source_file);
             try {
                 edited = Formatter.format (p.options, code_style, source_file, cancellable);
             } catch (Error e) {
@@ -1690,7 +1690,7 @@ class Vls.Server : Object {
                     var text_document = source_pair.key;
                     var compilation = source_pair.value;
                     Vala.CodeContext.push (compilation.code_context);
-                    var symbol_enumerator = compilation.get_analysis_for_file<SymbolEnumerator> (text_document) as SymbolEnumerator;
+                    var symbol_enumerator = compilation.get_analysis_for_file<SymbolEnumerator> (text_document);
                     if (symbol_enumerator != null) {
                         symbol_enumerator
                             .flattened ()

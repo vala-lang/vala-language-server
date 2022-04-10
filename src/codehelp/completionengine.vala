@@ -224,7 +224,7 @@ namespace Vls.CompletionEngine {
                        Set<CompletionItem> completions,
                        bool in_oce) {
         string method = "textDocument/completion";
-        var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (doc) as CodeStyleAnalyzer;
+        var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (doc);
         bool in_instance = false;
         bool inside_static_or_class_construct_block = false;
         var seen_props = new HashSet<string> ();
@@ -425,7 +425,7 @@ namespace Vls.CompletionEngine {
                                      Vala.SourceFile doc, Vala.TypeSymbol type_symbol, Vala.Scope scope,
                                      Vala.List<Pair<Vala.DataType?, Vala.Symbol>> missing_symbols,
                                      Set<CompletionItem> completions) {
-        var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (doc) as CodeStyleAnalyzer;
+        var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (doc);
         string spaces = " ";
 
         if (code_style != null)
