@@ -24,7 +24,8 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
     private SourceFile? current_file;
 
     public override DateTime last_updated { get; set; }
-    public string indentation { get; private set; default = ""; }
+    private string? _indentation;
+    public string indentation { get { return _indentation ?? "    "; } }
 
     /**
      * Average spacing before parentheses in method and delegate declarations.
@@ -42,7 +43,7 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
     }
 
     private void update_prefix (Symbol symbol) {
-        if (CodeHelp.get_decl_nesting_level (symbol) == 3 && symbol.source_reference != null) {
+        if (CodeHelp.get_decl_nesting_level (symbol) == 3 && symbol.source_reference != null && _indentation == null) {
             var prefix = new StringBuilder ();
             var offset = (symbol.source_reference.begin.pos - (char *)symbol.source_reference.file.content) - 1;
             for (; offset > 0
@@ -50,8 +51,7 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
                  && !Util.is_newline (symbol.source_reference.file.content[(long)offset]); offset--) {
                 prefix.prepend_c (symbol.source_reference.file.content[(long)offset]);
             }
-            if (prefix.len > indentation.length)
-                indentation = prefix.str;
+            _indentation = prefix.str;
         }
     }
 
