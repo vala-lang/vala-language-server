@@ -35,19 +35,19 @@ class Vls.BaseConverterAction : CodeAction {
         bool negative = false;
         if (val[0] == '-') {
             negative = true;
-            val = val[1:];
+            val = val.substring (1);
         }
         var workspace_edit = new WorkspaceEdit ();
         var document_edit = new TextDocumentEdit (document);
         var text_edit = new TextEdit (new Range.from_sourceref (lit.source_reference));
         if (val.has_prefix ("0x")) {
             // base 16  -> base 8
-            val = val[2:];
+            val = val.substring (2);
             text_edit.newText = "%s%#llo".printf (negative ? "-" : "", ulong.parse (val, 16));
             this.title = "Convert hexadecimal value to octal";
         } else if (val[0] == '0') {
             // base 8   -> base 10
-            val = val[1:];
+            val = val.substring (1);
             text_edit.newText = "%s%#lld".printf (negative ? "-" : "", ulong.parse (val, 8));
             this.title = "Convert octal value to decimal";
         } else {
