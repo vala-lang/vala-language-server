@@ -259,6 +259,21 @@ class Vls.GirDocumentation {
     }
 
     /**
+     * Gets the prefix of a ValaDoc file for a given symbol
+     */
+    string get_symbol_valadoc_full_name (Vala.Symbol symbol) {
+        if (symbol is Vala.CreationMethod && symbol.parent_symbol != null) {
+            var builder = new StringBuilder ();
+            builder.append_printf ("%s.%s", symbol.parent_symbol.get_full_name (), symbol.parent_symbol.name);
+            if (symbol.name != ".new")
+                builder.append_printf (".%s", symbol.name);
+            return builder.str;
+        } else {
+            return symbol.get_full_name ();
+        }
+    }
+
+    /**
      * Renders a GTK-Doc formatted comment into Markdown, after it has already
      * been processed.
      *
@@ -457,11 +472,11 @@ class Vls.GirDocumentation {
                         sym_sb.append (vala_member.name);
                         if (vala_member.source_reference != null)
                             package_name = vala_member.source_reference.file.package_name;
-                        full_name = vala_member.get_full_name ();
+                        full_name = get_symbol_valadoc_full_name (vala_member);
                     } else {
                         if (vala_symbol.source_reference != null)
                             package_name = vala_symbol.source_reference.file.package_name;
-                        full_name = vala_symbol.get_full_name ();
+                        full_name = get_symbol_valadoc_full_name (vala_symbol);
                     }
                     if (package_name != null)
                         result.append_c ('[');
@@ -523,7 +538,7 @@ class Vls.GirDocumentation {
                         result.append ("https://valadoc.org/");
                         result.append (package_name);
                         result.append_c ('/');
-                        result.append (method_sym.get_full_name ());
+                        result.append (get_symbol_valadoc_full_name (method_sym));
                         result.append (".html");
                         result.append_c (')');
                     }
@@ -554,7 +569,7 @@ class Vls.GirDocumentation {
                         result.append ("https://valadoc.org/");
                         result.append (package_name);
                         result.append_c ('/');
-                        result.append (sym.get_full_name ());
+                        result.append (get_symbol_valadoc_full_name (sym));
                         result.append (".html");
                         result.append_c (')');
                     }

@@ -43,7 +43,7 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
     }
 
     private void update_prefix (Symbol symbol) {
-        if (CodeHelp.get_decl_nesting_level (symbol) == 3 && symbol.source_reference != null && _indentation == null) {
+        if (_indentation == null && symbol.source_reference != null && CodeHelp.get_decl_nesting_level (symbol) == 3) {
             var prefix = new StringBuilder ();
             var offset = (symbol.source_reference.begin.pos - (char *)symbol.source_reference.file.content) - 1;
             for (; offset > 0
