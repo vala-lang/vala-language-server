@@ -27,14 +27,25 @@ errordomain FormattingError {
 }
 
 namespace Vls.Formatter {
-    TextEdit format (FormattingOptions options, CodeStyleAnalyzer analyzed_style, Vala.SourceFile source, Cancellable? cancellable = null) throws FormattingError, Error {
+    TextEdit format (FormattingOptions options,
+                     CodeStyleAnalyzer? analyzed_style,
+                     Vala.SourceFile source, Range? range = null,
+                     Cancellable? cancellable = null) throws FormattingError, Error {
         // SEARCH_PATH_FROM_ENVP does not seem to be available even in quite fast distros like Fedora 35,
         // so we have to use a SubprocessLauncher and call set_environ()
         var launcher = new SubprocessLauncher (SubprocessFlags.STDERR_PIPE | SubprocessFlags.STDOUT_PIPE | SubprocessFlags.STDIN_PIPE);
         launcher.set_environ (Environ.get ());
         Subprocess subprocess = launcher.spawnv (get_uncrustify_args (source, options, analyzed_style));
+        string stdin_buf;
+        if (range == null) {
+            stdin_buf = source.content;
+        } else {
+            var from = (long)Util.get_string_pos (source.content, range.start.line, range.start.character);
+            var to = (long)Util.get_string_pos (source.content, range.end.line, range.end.character);
+            stdin_buf = source.content[from:to];
+        }
         string? stdout_buf = null, stderr_buf = null;
-        subprocess.communicate_utf8 (source.content, cancellable, out stdout_buf, out stderr_buf);
+        subprocess.communicate_utf8 (stdin_buf, cancellable, out stdout_buf, out stderr_buf);
         if (!subprocess.get_successful ()) {
             if (stderr_buf != null && stderr_buf.strip ().length > 0) {
                 throw new FormattingError.FORMAT ("%s", stderr_buf);
@@ -42,10 +53,13 @@ namespace Vls.Formatter {
                 throw new FormattingError.READ ("uncrustify failed with error code %d", subprocess.get_exit_status ());
             }
         }
-        int last_nl_pos;
-        uint nl_count = Util.count_chars_in_string (source.content, '\n', out last_nl_pos);
-        return new TextEdit (
-            new Range () {
+        Range edit_range;
+        if (range != null) {
+            edit_range = range;
+        } else {
+            int last_nl_pos;
+            uint nl_count = Util.count_chars_in_string (stdin_buf, '\n', out last_nl_pos);
+            edit_range = new Range () {
                 start = new Position () {
                     line = 0,
                     character = 0
@@ -53,11 +67,11 @@ namespace Vls.Formatter {
                 end = new Position () {
                     line = nl_count + 1,
                     // handle trailing newline
-                    character = last_nl_pos == source.content.length - 1 ? 1 : 0
+                    character = last_nl_pos == stdin_buf.length - 1 ? 1 : 0
                 }
-            },
-            stdout_buf
-        );
+            };
+        }
+        return new TextEdit (edit_range, stdout_buf);
     }
 
     string[] get_uncrustify_args (Vala.SourceFile source, FormattingOptions options, CodeStyleAnalyzer? analyzed_style) {

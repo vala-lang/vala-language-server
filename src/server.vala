@@ -174,6 +174,7 @@ class Vls.Server : Object {
         call_handlers["textDocument/signatureHelp"] = this.textDocumentSignatureHelp;
         call_handlers["textDocument/hover"] = this.textDocumentHover;
         call_handlers["textDocument/formatting"] = this.textDocumentFormatting;
+        call_handlers["textDocument/rangeFormatting"] = this.textDocumentFormatting;
         call_handlers["textDocument/codeAction"] = this.textDocumentCodeAction;
         call_handlers["textDocument/references"] = this.textDocumentReferences;
         call_handlers["textDocument/documentHighlight"] = this.textDocumentReferences;
@@ -250,6 +251,7 @@ class Vls.Server : Object {
                     referencesProvider: new Variant.boolean (true),
                     documentHighlightProvider: new Variant.boolean (true),
                     documentFormattingProvider: new Variant.boolean (true),
+                    documentRangeFormattingProvider: new Variant.boolean (true),
                     implementationProvider: new Variant.boolean (true),
                     workspaceSymbolProvider: new Variant.boolean (true),
                     renameProvider: buildDict (prepareProvider: new Variant.boolean (true)),
@@ -1587,7 +1589,7 @@ class Vls.Server : Object {
     }
     
     void textDocumentFormatting (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        var p = Util.parse_variant<Lsp.DocumentFormattingParams>(@params);
+        var p = Util.parse_variant<DocumentRangeFormattingParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
         foreach (var project in projects.get_keys_as_array ()) {
@@ -1614,7 +1616,7 @@ class Vls.Server : Object {
             Compilation compilation = pair.second;
             var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (source_file);
             try {
-                edited = Formatter.format (p.options, code_style, source_file, cancellable);
+                edited = Formatter.format (p.options, code_style, source_file, p.range, cancellable);
             } catch (Error e) {
                 client.reply_error_async.begin (
                     id,

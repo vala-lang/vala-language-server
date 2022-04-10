@@ -962,8 +962,9 @@ namespace Lsp {
         public Command? command { get; set; }
     }
     
-    class DocumentFormattingParams : Object {
+    class DocumentRangeFormattingParams : Object {
         public TextDocumentIdentifier textDocument { get; set; }
+        public Range? range { get; set; }
         public FormattingOptions options { get; set; }
     }
 
