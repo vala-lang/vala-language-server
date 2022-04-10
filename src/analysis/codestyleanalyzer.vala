@@ -24,6 +24,7 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
     private SourceFile? current_file;
 
     public override DateTime last_updated { get; set; }
+    public string indentation { get; private set; default = ""; }
 
     /**
      * Average spacing before parentheses in method and delegate declarations.
@@ -36,8 +37,22 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
         }
     }
 
-    public CodeStyleAnalyzer (Vala.SourceFile source_file) {
+    public CodeStyleAnalyzer (SourceFile source_file) {
         this.visit_source_file (source_file);
+    }
+
+    private void update_prefix (Symbol symbol) {
+        if (CodeHelp.get_decl_nesting_level (symbol) == 3 && symbol.source_reference != null) {
+            var prefix = new StringBuilder ();
+            var offset = (symbol.source_reference.begin.pos - (char *)symbol.source_reference.file.content) - 1;
+            for (; offset > 0
+                 && symbol.source_reference.file.content[(long)offset].isspace ()
+                 && !Util.is_newline (symbol.source_reference.file.content[(long)offset]); offset--) {
+                prefix.prepend_c (symbol.source_reference.file.content[(long)offset]);
+            }
+            if (prefix.len > indentation.length)
+                indentation = prefix.str;
+        }
     }
 
     public override void visit_source_file (SourceFile source_file) {
@@ -49,30 +64,35 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
     public override void visit_namespace (Namespace ns) {
         if (ns.source_reference != null && ns.source_reference.file != current_file)
             return;
+        update_prefix (ns);
         ns.accept_children (this);
     }
 
     public override void visit_class (Class cl) {
         if (cl.source_reference == null || cl.source_reference.file != current_file)
             return;
+        update_prefix (cl);
         cl.accept_children (this);
     }
 
     public override void visit_interface (Interface iface) {
         if (iface.source_reference == null || iface.source_reference.file != current_file)
             return;
+        update_prefix (iface);
         iface.accept_children (this);
     }
 
     public override void visit_enum (Enum en) {
         if (en.source_reference == null || en.source_reference.file != current_file)
             return;
+        update_prefix (en);
         en.accept_children (this);
     }
 
     public override void visit_struct (Struct st) {
         if (st.source_reference == null || st.source_reference.file != current_file)
             return;
+        update_prefix (st);
         st.accept_children (this);
     }
 
@@ -100,12 +120,14 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
         if (d.source_reference == null || d.source_reference.file != current_file ||
             d.source_reference.begin.pos == null)
             return;
+        update_prefix (d);
         analyze_callable (d);
     }
 
     public override void visit_method (Method m) {
         if (m.source_reference == null || m.source_reference.begin.pos == null)
             return;
+        update_prefix (m);
         analyze_callable (m);
     }
 }

@@ -44,8 +44,8 @@ namespace Vls.Formatter {
         }
         int last_nl_pos;
         uint nl_count = Util.count_chars_in_string (source.content, '\n', out last_nl_pos);
-        return new TextEdit () {
-            range = new Range () {
+        return new TextEdit (
+            new Range () {
                 start = new Position () {
                     line = 0,
                     character = 0
@@ -56,8 +56,8 @@ namespace Vls.Formatter {
                     character = last_nl_pos == source.content.length - 1 ? 1 : 0
                 }
             },
-            newText = stdout_buf
-        };
+            stdout_buf
+        );
     }
 
     string[] get_uncrustify_args (Vala.SourceFile source, FormattingOptions options, CodeStyleAnalyzer analyzed_style) {

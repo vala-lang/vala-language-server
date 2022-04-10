@@ -813,6 +813,11 @@ namespace Lsp {
          * empty string.
          */
         public string newText { get; set; }
+
+        public TextEdit (Range range, string new_text = "") {
+            this.range = range;
+            this.newText = new_text;
+        }
     }
 
     /** 
@@ -834,6 +839,10 @@ namespace Lsp {
          * The edits to be applied.
          */
         public Gee.ArrayList<TextEdit> edits { get; set; default = new Gee.ArrayList<TextEdit> (); }
+
+        public TextDocumentEdit (VersionedTextDocumentIdentifier text_document) {
+            this.textDocument = text_document;
+        }
 
         public Json.Node serialize_property (string property_name, GLib.Value value, GLib.ParamSpec pspec) {
             if (property_name != "edits")

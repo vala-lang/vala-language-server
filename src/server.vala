@@ -843,7 +843,7 @@ class Vls.Server : Object {
         }
     }
 
-    public static Vala.CodeNode get_best (FindSymbol fs, Vala.SourceFile file) {
+    public static Vala.CodeNode get_best (NodeSearch fs, Vala.SourceFile file) {
         Vala.CodeNode? best = null;
 
         foreach (var node in fs.result) {
@@ -914,7 +914,7 @@ class Vls.Server : Object {
             Compilation compilation = results[0].second;
 
             Vala.CodeContext.push (compilation.code_context);
-            var fs = new FindSymbol (file, p.position, true);
+            var fs = new NodeSearch (file, p.position, true);
 
             if (fs.result.size == 0) {
                 debug ("[%s] find symbol is empty", method);
@@ -1187,7 +1187,7 @@ class Vls.Server : Object {
             Compilation compilation = results[0].second;
             Vala.CodeContext.push (compilation.code_context);
 
-            var fs = new FindSymbol (doc, pos, true);
+            var fs = new NodeSearch (doc, pos, true);
 
             if (fs.result.size == 0) {
                 // debug ("[textDocument/hover] no results found");
@@ -1390,7 +1390,7 @@ class Vls.Server : Object {
             Compilation compilation = results[0].second;
             Vala.CodeContext.push (compilation.code_context);
 
-            var fs = new FindSymbol (doc, pos, true);
+            var fs = new NodeSearch (doc, pos, true);
 
             if (fs.result.size == 0) {
                 debug (@"[$method] no results found");
@@ -1500,7 +1500,7 @@ class Vls.Server : Object {
             Compilation compilation = results[0].second;
             Vala.CodeContext.push (compilation.code_context);
 
-            var fs = new FindSymbol (doc, pos, true);
+            var fs = new NodeSearch (doc, pos, true);
 
             if (fs.result.size == 0) {
                 debug (@"[$method] no results found");
@@ -1546,18 +1546,18 @@ class Vls.Server : Object {
                     if (gfile in generated_vapis || gfile in shown_files)
                         continue;
 
-                    FindSymbol fs2;
+                    NodeSearch fs2;
                     if (is_abstract_type) {
-                        fs2 = new FindSymbol.with_filter (file, btarget_w_sym.second,
+                        fs2 = new NodeSearch.with_filter (file, btarget_w_sym.second,
                         (needle, node) => node is Vala.ObjectTypeSymbol && 
                             ((Vala.ObjectTypeSymbol)node).is_subtype_of ((Vala.ObjectTypeSymbol) needle), false);
                     } else if (is_abstract_or_virtual_method) {
-                        fs2 = new FindSymbol.with_filter (file, btarget_w_sym.second,
+                        fs2 = new NodeSearch.with_filter (file, btarget_w_sym.second,
                         (needle, node) => needle != node && (node is Vala.Method) && 
                             (((Vala.Method)node).base_method == needle ||
                             ((Vala.Method)node).base_interface_method == needle), false);
                     } else {
-                        fs2 = new FindSymbol.with_filter (file, symbol,
+                        fs2 = new NodeSearch.with_filter (file, symbol,
                         (needle, node) => needle != node && (node is Vala.Property) &&
                             (((Vala.Property)node).base_property == needle ||
                             ((Vala.Property)node).base_interface_property == needle), false);
@@ -1660,7 +1660,7 @@ class Vls.Server : Object {
             if (!(pair.first is TextDocument))
                 continue;
             Vala.CodeContext.push (pair.second.code_context);
-            var code_actions = CodeActions.extract ((TextDocument) pair.first, p.range, Uri.unescape_string (p.textDocument.uri));
+            var code_actions = CodeActions.extract (pair.second, (TextDocument) pair.first, p.range, Uri.unescape_string (p.textDocument.uri));
             foreach (var action in code_actions)
                 json_array.add_element (Json.gobject_serialize (action));
             Vala.CodeContext.pop ();
@@ -1761,7 +1761,7 @@ class Vls.Server : Object {
             Compilation compilation = results[0].second;
             Vala.CodeContext.push (compilation.code_context);
 
-            var fs = new FindSymbol (doc, pos, true);
+            var fs = new NodeSearch (doc, pos, true);
 
             if (fs.result.size == 0) {
                 debug (@"[$method] no results found");
@@ -1841,28 +1841,25 @@ class Vls.Server : Object {
                 var source_range = entry.key;
                 debug ("[%s] editing reference %s @ %s ...", 
                     method, 
-                    CodeHelp.get_expression_representation (code_node), 
+                    CodeHelp.get_code_node_source (code_node), 
                     code_node.source_reference.to_string ());
                 var file = File.new_for_commandline_arg (code_node.source_reference.file.filename);
                 if (!edits.has_key (file.get_uri ()))
                     edits[file.get_uri ()] = new ArrayList<TextEdit> ();
                 var file_edits = edits[file.get_uri ()];
                 // if this is a using directive, we want to only replace the part after the 'using' keyword
-                file_edits.add (new TextEdit () {
-                    range = source_range,
-                    newText = new_name
-                });
+                file_edits.add (new TextEdit (source_range, new_name));
                 source_files[file.get_uri ()] = code_node.source_reference.file;
             }
 
             // TODO: determine support for TextDocumentEdit
             var text_document_edits_json = new Json.Array ();
             foreach (var uri in edits.keys) {
-                text_document_edits_json.add_element (Json.gobject_serialize (new TextDocumentEdit () {
-                    textDocument = new VersionedTextDocumentIdentifier () {
-                        version = ((TextDocument) source_files[uri]).version,
-                        uri = uri
-                    },
+                var document_id = new VersionedTextDocumentIdentifier () {
+                    version = ((TextDocument) source_files[uri]).version,
+                    uri = uri
+                };
+                text_document_edits_json.add_element (Json.gobject_serialize (new TextDocumentEdit (document_id) {
                     edits = edits[uri]
                 }));
             }
@@ -1916,7 +1913,7 @@ class Vls.Server : Object {
             Compilation compilation = results[0].second;
             Vala.CodeContext.push (compilation.code_context);
 
-            var fs = new FindSymbol (doc, pos, true);
+            var fs = new NodeSearch (doc, pos, true);
 
             if (fs.result.size == 0) {
                 client.reply_error_async.begin (

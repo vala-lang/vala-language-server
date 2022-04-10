@@ -134,7 +134,7 @@ namespace Vls.SymbolReferences {
      * @return                      The replacement range, or ``null`` if ``symbol.name`` is not inside it
      */
     Range? get_replacement_range (Vala.CodeNode code_node, Vala.Symbol symbol) {
-        string representation = CodeHelp.get_expression_representation (code_node);
+        string representation = CodeHelp.get_code_node_source (code_node);
         int index_of_symbol;
         MatchInfo match_info;
 
@@ -291,7 +291,7 @@ namespace Vls.SymbolReferences {
             symbol = ((Vala.MemberAccess)code_node).symbol_reference;
 
         if (code_node.source_reference != null && symbol != null) {
-            string representation = CodeHelp.get_expression_representation (code_node);
+            string representation = CodeHelp.get_code_node_source (code_node);
             int end = representation.length;
 
             // debug ("got representation for (%s) %s @ %s => %s", code_node.type_name, code_node.to_string (), code_node.source_reference.to_string (), representation);
@@ -469,7 +469,7 @@ namespace Vls.SymbolReferences {
 
             if (is_implementation && node.source_reference != null) {
                 MatchInfo match_info;
-                string representation = CodeHelp.get_expression_representation (node);
+                string representation = CodeHelp.get_code_node_source (node);
                 if (/.+?([A-Za-z+]\w*)\s*$/.match (representation, 0, out match_info)) {
                     int begin, end;
                     if (match_info.fetch_pos (1, out begin, out end)) {

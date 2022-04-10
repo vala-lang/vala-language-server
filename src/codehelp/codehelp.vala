@@ -63,12 +63,12 @@ namespace Vls.CodeHelp {
         return true;
     }
 
-    public string get_expression_representation (Vala.CodeNode expr) {
-        if (expr is Vala.Literal)
-            return expr.to_string ();
-        var sr = expr.source_reference;
+    public string get_code_node_source (Vala.CodeNode node) {
+        if (node is Vala.Literal)
+            return node.to_string ();
+        var sr = node.source_reference;
         if (sr == null)
-            return @"(error - $(expr.type_name) does not have source ref!)";
+            return @"(error - $(node.type_name) does not have source ref!)";
         var file = sr.file;
         unowned string content;
         if (file.content == null)
@@ -81,8 +81,8 @@ namespace Vls.CodeHelp {
         var from = (long) Util.get_string_pos (content, sr.begin.line-1, sr.begin.column-1);
         var to = (long) Util.get_string_pos (content, sr.end.line-1, sr.end.column);
         if (from > to) {
-            warning ("expression %s has bad source reference %s", expr.to_string (), expr.source_reference.to_string ());
-            return expr.to_string ();
+            warning ("expression %s has bad source reference %s", node.to_string (), node.source_reference.to_string ());
+            return node.to_string ();
         }
         return file.content[from:to];
     }
@@ -96,14 +96,20 @@ namespace Vls.CodeHelp {
             if (found_sym != null)
                 return found_sym;
         }
-        // if (scope.owner.source_reference != null) {
-        //     var file = scope.owner.source_reference.file;
-        //     foreach (var using_directive in file.current_using_directives) {
-        //         var found_sym = using_directive.namespace_symbol.scope.lookup (name);
-        //         if (found_sym != null)
-        //             return found_sym;
-        //     }
-        // }
+        return null;
+    }
+
+    /**
+     * Find a symbol that is imported.
+     */
+    public Vala.Symbol? find_imported_symbol_in_scope (Vala.Scope scope, string name) {
+        if (scope.owner.source_reference != null) {
+            foreach (Vala.UsingDirective ud in scope.owner.source_reference.file.current_using_directives) {
+                var found_sym = ud.namespace_symbol.scope.lookup (name);
+                if (found_sym != null)
+                    return found_sym;
+            }
+        }
         return null;
     }
 
@@ -125,15 +131,31 @@ namespace Vls.CodeHelp {
     }
 
     /**
-     * Displays a symbol in a format that's contextualized in the current scope.
+     * Represent a symbol's full name in a format that's contextualized in the current scope.
+     *
+     * @param symbol                            the data type to represent
+     * @param scope                             the current scope
+     * @param hide_imported_namespace_parent    whether to not print a parent symbol if it is an imported namespace
      */
-    private string get_symbol_name_representation (Vala.Symbol symbol, Vala.Scope? scope) {
-        var components = new Queue<string> ();
+    string get_symbol_name_representation (Vala.Symbol symbol, Vala.Scope? scope, bool hide_imported_namespace_parent = false) {
+        var components = new GLib.Queue<string> ();
         for (var current_symbol = symbol; current_symbol != null && current_symbol.name != null; current_symbol = current_symbol.parent_symbol) {
             components.push_head (current_symbol.name);
             if (scope != null && lookup_in_scope_and_ancestors (scope, current_symbol.name) == current_symbol) {
-                // add the 
                 break;
+            }
+            if (hide_imported_namespace_parent && scope != null
+                && find_imported_symbol_in_scope (scope, current_symbol.name) == current_symbol) {
+                bool symbol_ambiguity = false;
+                foreach (Vala.UsingDirective ud in scope.owner.source_reference.using_directives) {
+                    if (ud.namespace_symbol != current_symbol.parent_symbol && ud.namespace_symbol.scope.lookup (current_symbol.name) != null) {
+                        symbol_ambiguity = true;
+                        break;
+                    }
+                }
+                // don't break if another imported namespace contains the same symbol
+                if (!symbol_ambiguity)
+                    break;
             }
         }
 
@@ -149,14 +171,18 @@ namespace Vls.CodeHelp {
 
     /**
      * Represent a data type in a format that's contextualized in the current scope.
+     *
+     * @param data_type                         the data type to represent
+     * @param scope                             the current scope
+     * @param hide_imported_namespace_parent    whether to not print a parent symbol if it is an imported namespace
      */
-    private string get_data_type_representation (Vala.DataType data_type, Vala.Scope? scope) {
+    string get_data_type_representation (Vala.DataType data_type, Vala.Scope? scope, bool hide_imported_namespace_parent = false) {
         var builder = new StringBuilder ();
 
         if (data_type is Vala.ArrayType) {  // ArrayType is a ReferenceType
             // see ArrayType.to_qualified_string()
             var array_type = (Vala.ArrayType) data_type;
-            var elem_str = get_data_type_representation (array_type.element_type, scope);
+            var elem_str = get_data_type_representation (array_type.element_type, scope, hide_imported_namespace_parent);
             if (array_type.element_type.is_weak () && !(array_type.parent_node is Vala.Constant)) {
                 elem_str = "(unowned %s)".printf (elem_str);
             }
@@ -166,7 +192,7 @@ namespace Vls.CodeHelp {
             return elem_str;
         } else if (data_type is Vala.ReferenceType && data_type.symbol != null) {
             var reference_type = (Vala.ReferenceType) data_type;
-            builder.append (get_symbol_name_representation (reference_type.symbol, scope));
+            builder.append (get_symbol_name_representation (reference_type.symbol, scope, hide_imported_namespace_parent));
             var type_arguments = reference_type.get_type_arguments ();
             if (!type_arguments.is_empty)
                 builder.append_c ('<');
@@ -177,7 +203,7 @@ namespace Vls.CodeHelp {
                 }
                 if (type_argument.is_weak ())
                     builder.append ("weak ");
-                builder.append (get_data_type_representation (type_argument, scope));
+                builder.append (get_data_type_representation (type_argument, scope, hide_imported_namespace_parent));
                 i++;
             }
             if (!type_arguments.is_empty)
@@ -218,7 +244,7 @@ namespace Vls.CodeHelp {
      * type symbol that does not belong to the hierarchy.
      */
     private Vala.List<Vala.DataType>? get_actual_type_arguments_for_parent_symbol (Vala.DataType instance_type, Vala.TypeSymbol parent_symbol) {
-        var search = new Queue<Vala.DataType> ();
+        var search = new GLib.Queue<Vala.DataType> ();
         search.push_tail (instance_type);
 
         while (!search.is_empty ()) {
@@ -439,7 +465,7 @@ namespace Vls.CodeHelp {
 
                 if (param.initializer != null && show_initializers) {
                     builder.append (" = ");
-                    builder.append (get_expression_representation (param.initializer));
+                    builder.append (get_code_node_source (param.initializer));
                 }
 
                 i++;
@@ -535,10 +561,10 @@ namespace Vls.CodeHelp {
             }
             if (foreach_statement != null && variable_sym.name == foreach_statement.variable_name) {
                 builder.append (" in ");
-                builder.append (get_expression_representation (foreach_statement.collection));
+                builder.append (get_code_node_source (foreach_statement.collection));
             } else {
                 builder.append (" = ");
-                builder.append (get_expression_representation (variable_sym.initializer));
+                builder.append (get_code_node_source (variable_sym.initializer));
             }
         }
         return builder.str;       
@@ -615,7 +641,7 @@ namespace Vls.CodeHelp {
         }
         if (property_sym.initializer != null && show_initializer) {
             builder.append (" default = ");
-            builder.append (get_expression_representation (property_sym.initializer));
+            builder.append (get_code_node_source (property_sym.initializer));
             builder.append_c (';');
         }
         builder.append (" }");
@@ -639,7 +665,7 @@ namespace Vls.CodeHelp {
         builder.append (get_symbol_name_representation (constant_sym, scope));
         if (constant_sym.value != null && show_initializer) {
             builder.append (" = ");
-            builder.append (get_expression_representation (constant_sym.value));
+            builder.append (get_code_node_source (constant_sym.value));
         }
         return builder.str;
     }
@@ -903,5 +929,262 @@ namespace Vls.CodeHelp {
 
     static bool base_property_requires_override (Vala.Property p) {
         return p.is_virtual || p.is_abstract && p.parent_symbol is Vala.Class && ((Vala.Class)p.parent_symbol).is_abstract;
+    }
+
+    /**
+     * also taken from `Vala.Class` in `vala/valaclass.vala`
+     */
+    void get_all_prerequisites (Vala.DataType iface_type, Vala.Collection<Vala.DataType> prereqs)
+        requires (iface_type.type_symbol is Vala.Interface) {
+        foreach (Vala.DataType prereq in ((Vala.Interface)iface_type.type_symbol).get_prerequisites ()) {
+            Vala.TypeSymbol? type_symbol = prereq.type_symbol;
+            /* skip on previous errors */
+            if (type_symbol == null) {
+                continue;
+            }
+
+            var prereq_actual = prereq.get_actual_type (iface_type, null, null);
+            if (!prereqs.contains (prereq_actual))
+                prereqs.add (prereq_actual);
+
+            if (type_symbol is Vala.Interface) {
+                get_all_prerequisites (prereq_actual, prereqs);
+            }
+        }
+    }
+
+    Vala.List<Vala.Symbol> get_virtual_symbols (Vala.ObjectTypeSymbol tsym) {
+        var symbols = new Vala.ArrayList<Vala.Symbol> ();
+
+        if (tsym is Vala.Class) {
+            foreach (var method in ((Vala.Class)tsym).get_methods ()) {
+                if (method.is_virtual)
+                    symbols.add (method);
+            }
+            foreach (var property in ((Vala.Class)tsym).get_properties ()) {
+                if (property.is_virtual)
+                    symbols.add (property);
+            }
+        } else if (tsym is Vala.Interface) {
+            foreach (var method in ((Vala.Interface)tsym).get_methods ()) {
+                if (method.is_virtual)
+                    symbols.add (method);
+            }
+            foreach (var property in ((Vala.Interface)tsym).get_properties ()) {
+                if (property.is_virtual)
+                    symbols.add (property);
+            }
+        }
+
+        return symbols;
+    }
+
+    /**
+     * Get base virtual/abstract methods and properties that haven't been overridden.
+     */
+    Vala.List<Pair<Vala.DataType?,Vala.Symbol>> gather_base_virtual_symbols_not_overridden (Vala.ObjectTypeSymbol tsym) {
+        var implemented_symbols = new Vala.ArrayList<Vala.Symbol> ();
+        var virtual_symbols = new Vala.ArrayList<Pair<Vala.DataType?,Vala.Symbol>> ();
+        var base_types = new Vala.ArrayList<Vala.DataType> ();
+
+        if (tsym is Vala.Class) {
+            base_types.add_all (((Vala.Class) tsym).get_base_types ());
+        } else if (tsym is Vala.Interface) {
+            base_types.add_all (((Vala.Interface) tsym).get_prerequisites ());
+        }
+
+        foreach (var method in tsym.get_methods ())
+            if (method.base_method != null && method.base_method != method ||
+                method.base_interface_method != null && method.base_interface_method != method)
+                implemented_symbols.add (method.base_method ?? method.base_interface_method);
+
+        foreach (var property in tsym.get_properties ())
+            if (property.base_property != null && property.base_property != property ||
+                property.base_interface_property != null && property.base_interface_property != property)
+                implemented_symbols.add (property.base_property ?? property.base_interface_property);
+
+        // look for all virtual symbols in each base_type that have not been overridden
+        foreach (var type in base_types)
+            if (type.type_symbol is Vala.ObjectTypeSymbol) {
+                foreach (var symbol in get_virtual_symbols ((Vala.ObjectTypeSymbol)type.type_symbol))
+                    if (!(symbol in implemented_symbols)) {
+                        virtual_symbols.add (new Pair<Vala.DataType?,Vala.Symbol> (type, symbol));
+                    }
+            }
+
+        return virtual_symbols;
+    }
+
+    Vala.DataType? get_base_class_type (Vala.Class csym) {
+        foreach (Vala.DataType base_type in csym.get_base_types ()) {
+            if (base_type.type_symbol == csym.base_class)
+                return base_type;
+        }
+        return null;
+    }
+
+    /**
+     * Gets the symbol that is hidden by this symbol.
+     */
+    Vala.Symbol? get_hidden_symbol (Vala.Symbol symbol) {
+        if (symbol.parent_symbol is Vala.Class) {
+            var parent_class = (Vala.Class)symbol.parent_symbol;
+            foreach (var base_type in parent_class.get_base_types ()) {
+                var base_member = base_type.type_symbol.scope.lookup (symbol.name);
+                if (base_member != null && base_member.type_name == symbol.type_name)
+                    return base_member;
+            }
+        } else if (symbol.parent_symbol is Vala.Interface) {
+            var parent_iface = (Vala.Interface)symbol.parent_symbol;
+            foreach (var base_type in parent_iface.get_prerequisites ()) {
+                var base_member = base_type.type_symbol.scope.lookup (symbol.name);
+                if (base_member != null && base_member.type_name == symbol.type_name)
+                    return base_member;
+            }
+        } else if (symbol.parent_symbol is Vala.Struct) {
+            return symbol.get_hidden_member ();
+        }
+        return null;
+    }
+
+    /**
+     * Taken from `Vala.Class.check ()` in `vala/valaclass.vala`
+     * @param doc the current document 
+     * @param csym the class symbol
+     */
+    Pair<Vala.List<Vala.DataType>, Vala.List<Pair<Vala.DataType, Vala.Symbol>>> gather_missing_prereqs_and_unimplemented_symbols (Vala.Class csym) {
+        /* gather all prerequisites */
+        var prerequisites = new Vala.ArrayList<Vala.DataType> ((dt1, dt2) => dt1.equals (dt2));
+        foreach (Vala.DataType base_type in csym.get_base_types ()) {
+            // compact classes cannot implement interfaces
+            if (base_type.type_symbol is Vala.Interface && !csym.is_compact) {
+                get_all_prerequisites (base_type, prerequisites);
+            }
+        }
+        /* check whether all prerequisites are met */
+        var missing_prereqs = new Vala.ArrayList<Vala.DataType> ();
+        foreach (Vala.DataType prereq in prerequisites) {
+            if (!csym.is_a ((Vala.ObjectTypeSymbol) prereq.type_symbol)) {
+                missing_prereqs.add (prereq);
+            }
+        }
+
+        var missing_symbols = new Vala.ArrayList<Pair<Vala.DataType, Vala.Symbol>> ();
+        /* VAPI classes don't have to specify overridden methods */
+        if (csym.source_type == Vala.SourceFileType.SOURCE) {
+            /* all abstract symbols defined in base types have to be at least defined (or implemented) also in this type */
+            var base_types = new Vala.ArrayList<Vala.DataType> (Vala.DataType.equals);
+            base_types.add_all (csym.get_base_types ());
+            base_types.add_all (missing_prereqs);
+            base_types.sort ((dt1, dt2) => {
+                if (dt1.compatible (dt2))
+                    return -1;
+                if (dt2.compatible (dt1))
+                    return 1;
+                return 0;       // incomparable or equal
+            });
+            var hidden_symbols = new Vala.HashSet<Vala.Symbol> ();
+            foreach (Vala.DataType base_type in base_types) {
+                if (base_type.type_symbol is Vala.Interface && !csym.is_compact) {
+                    unowned Vala.Interface iface = (Vala.Interface) base_type.type_symbol;
+
+                    if (csym.base_class != null && csym.base_class.is_subtype_of (iface)) {
+                        // reimplementation of interface, class is not required to reimplement all methods
+                        break;
+                    }
+
+                    /* We do not need to do expensive equality checking here since this is done
+                     * already. We only need to guarantee the symbols are present.
+                     */
+
+                    /* check methods */
+                    foreach (Vala.Method m in iface.get_methods ()) {
+                        if (m.is_abstract && !(m in hidden_symbols)) {
+                            var implemented = false;
+                            unowned Vala.Class? base_class = csym;
+                            while (base_class != null && !implemented) {
+                                foreach (var impl in base_class.get_methods ()) {
+                                    if (impl.base_interface_method == m || (base_class != csym
+                                                                            && impl.base_interface_method == null && impl.name == m.name
+                                                                            && (impl.base_interface_type == null || impl.base_interface_type.type_symbol == iface)
+                                                                            && impl.compatible_no_error (m))) {
+                                        implemented = true;
+                                        break;
+                                    }
+                                }
+                                base_class = base_class.base_class;
+                            }
+                            if (!implemented) {
+                                missing_symbols.add (new Pair<Vala.DataType,Vala.Symbol> (base_type, m));
+                                var hidden = get_hidden_symbol (m);
+                                if (hidden != null)
+                                    hidden_symbols.add (hidden);
+                            }
+                        }
+                    }
+
+                    /* check properties */
+                    foreach (Vala.Property prop in iface.get_properties ()) {
+                        if (prop.is_abstract && !(prop in hidden_symbols)) {
+                            Vala.Symbol sym = null;
+                            unowned Vala.Class? base_class = csym;
+                            while (base_class != null && !(sym is Vala.Property)) {
+                                sym = base_class.scope.lookup (prop.name);
+                                base_class = base_class.base_class;
+                            }
+                            if (!(sym is Vala.Property)) {
+                                missing_symbols.add (new Pair<Vala.DataType,Vala.Symbol> (base_type, prop));
+                                var hidden = get_hidden_symbol (prop);
+                                if (hidden != null)
+                                    hidden_symbols.add (hidden);
+                            }
+                        }
+                    }
+                }
+            }
+
+            /* all abstract symbols defined in base classes have to be implemented in non-abstract classes */
+            if (!csym.is_abstract) {
+                unowned Vala.Class? base_class = csym.base_class;
+                while (base_class != null && base_class.is_abstract) {
+                    var base_type = get_base_class_type (csym);
+                    foreach (Vala.Method base_method in base_class.get_methods ()) {
+                        if (base_method.is_abstract && !(base_method in hidden_symbols)) {
+                            var override_method = Vala.SemanticAnalyzer.symbol_lookup_inherited (csym, base_method.name) as Vala.Method;
+                            if (override_method == null || !override_method.overrides) {
+                                missing_symbols.add (new Pair<Vala.DataType, Vala.Symbol> (base_type, base_method));
+                                var hidden = get_hidden_symbol (base_method);
+                                if (hidden != null)
+                                    hidden_symbols.add (hidden);
+                            }
+                        }
+                    }
+                    foreach (Vala.Property base_property in base_class.get_properties ()) {
+                        if (base_property.is_abstract && !(base_property in hidden_symbols)) {
+                            var override_property = Vala.SemanticAnalyzer.symbol_lookup_inherited (csym, base_property.name) as Vala.Property;
+                            if (override_property == null || !override_property.overrides) {
+                                missing_symbols.add (new Pair<Vala.DataType, Vala.Symbol> (base_type, base_property));
+                                var hidden = get_hidden_symbol (base_property);
+                                if (hidden != null)
+                                    hidden_symbols.add (hidden);
+                            }
+                        }
+                    }
+                    base_class = base_class.base_class;
+                }
+            }
+        }
+
+        return new Pair<Vala.List<Vala.DataType>, Vala.List<Pair<Vala.DataType, Vala.Symbol>>> (missing_prereqs, missing_symbols);
+    }
+
+    /**
+     * Gets the nesting level of a declaration.
+     */
+    public uint get_decl_nesting_level (Vala.Symbol symbol) {
+        uint level = 0;
+        for (var current_sym = symbol; current_sym != null; current_sym = current_sym.parent_symbol)
+            level++;
+        return level;
     }
 }

@@ -264,7 +264,7 @@ namespace Vls.SignatureHelpEngine {
                                          Vala.SourceFile doc, Compilation compilation,
                                          Position pos,
                                          Collection<SignatureInformation> signatures, ref int active_param) {
-        var fs = new FindSymbol (doc, pos, true);
+        var fs = new NodeSearch (doc, pos, true);
 
         // filter the results for MethodCall's and ExpressionStatements
         var fs_results = fs.result;

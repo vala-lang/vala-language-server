@@ -38,12 +38,8 @@ class Vls.BaseConverterAction : CodeAction {
             val = val[1:];
         }
         var workspace_edit = new WorkspaceEdit ();
-        var document_edit = new TextDocumentEdit () {
-            textDocument = document
-        };
-        var text_edit = new TextEdit () {
-            range = new Range.from_sourceref (lit.source_reference)
-        };
+        var document_edit = new TextDocumentEdit (document);
+        var text_edit = new TextEdit (new Range.from_sourceref (lit.source_reference));
         if (val.has_prefix ("0x")) {
             // base 16  -> base 8
             val = val[2:];

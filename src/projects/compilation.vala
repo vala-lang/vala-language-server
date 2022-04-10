@@ -424,7 +424,7 @@ class Vls.Compilation : BuildTarget {
     /**
      * Get the analysis for the source file
      */
-    public CodeAnalyzer? get_analysis_for_file<T> (Vala.SourceFile source) {
+    public T? get_analysis_for_file<T> (Vala.SourceFile source) {
         var analyses = _source_analyzers[source];
         if (analyses == null) {
             analyses = new HashMap<Type, CodeAnalyzer> ();
