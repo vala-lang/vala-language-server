@@ -59,8 +59,9 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 - [x] snippets
     - for implementing abstract methods/properties
 - [x] code lenses
-- [ ] code actions
+- [x] code actions / quick fixes
 - [x] code formatting
+- [x] call hierarchy
 - [ ] workspaces
 - [ ] supported projects
     - [x] meson
