@@ -183,6 +183,9 @@ class Vls.Server : Object {
         call_handlers["textDocument/rename"] = this.textDocumentRename;
         call_handlers["textDocument/prepareRename"] = this.textDocumentPrepareRename;
         call_handlers["textDocument/codeLens"] = this.handle_code_lens_request;
+        call_handlers["textDocument/prepareCallHierarchy"] = this.prepare_call_hierarchy;
+        call_handlers["callHierarchy/incomingCalls"] = this.call_hierarchy_incoming_calls;
+        call_handlers["callHierarchy/outgoingCalls"] = this.call_hierarchy_outgoing_calls;
         notif_handlers["$/cancelRequest"] = this.cancelRequest;
 
         debug ("Finished constructing");
@@ -255,7 +258,8 @@ class Vls.Server : Object {
                     implementationProvider: new Variant.boolean (true),
                     workspaceSymbolProvider: new Variant.boolean (true),
                     renameProvider: buildDict (prepareProvider: new Variant.boolean (true)),
-                    codeLensProvider: buildDict (resolveProvider: new Variant.boolean (false))
+                    codeLensProvider: buildDict (resolveProvider: new Variant.boolean (false)),
+                    callHierarchyProvider: new Variant.boolean (true)
                 ),
                 serverInfo: buildDict (
                     name: new Variant.string ("Vala Language Server"),
@@ -2033,6 +2037,166 @@ class Vls.Server : Object {
         CodeLensEngine.begin_response (this, selected_project,
                                        client, id, method,
                                        results[0].first, results[0].second);
+    }
+
+    void prepare_call_hierarchy (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        var p = Util.parse_variant<TextDocumentPositionParams> (@params);
+        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
+        Project selected_project = null;
+        foreach (var project in projects.get_keys_as_array ()) {
+            results = project.lookup_compile_input_source_file (p.textDocument.uri);
+            if (!results.is_empty) {
+                selected_project = project;
+                break;
+            }
+        }
+        // fallback to default project
+        if (selected_project == null) {
+            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
+            selected_project = default_project;
+        }
+        if (results.is_empty) {
+            debug (@"file `$(Uri.unescape_string (p.textDocument.uri))' not found");
+            reply_null (id, client, method);
+            return;
+        }
+
+        Vala.SourceFile doc = results[0].first;
+        Compilation compilation = results[0].second;
+        Vala.CodeContext.push (compilation.code_context);
+
+        var fs = new NodeSearch (doc, p.position);
+
+        if (fs.result.size == 0) {
+            debug (@"[$method] no results found");
+            reply_null (id, client, method);
+            Vala.CodeContext.pop ();
+            return;
+        }
+
+        Vala.CodeNode result = get_best (fs, doc);
+        Vala.CodeContext.pop ();
+
+        Vala.Method method_sym;
+
+        if (result is Vala.Method) {
+            method_sym = (Vala.Method)result;
+        } else if (result is Vala.MethodCall) {
+            var call_method = ((Vala.MethodCall)result).call.symbol_reference as Vala.Method;
+            if (call_method == null) {
+                reply_null (id, client, method);
+                return;
+            }
+            method_sym = call_method;
+        } else if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference is Vala.Method) {
+            method_sym = (Vala.Method) ((Vala.Expression)result).symbol_reference;
+        } else {
+            reply_null (id, client, method);
+            return;
+        }
+
+        try {
+            var array = new Variant.array (null, {
+                Util.object_to_variant (new CallHierarchyItem.from_symbol (method_sym))
+            });
+            client.reply (id, array, cancellable);
+        } catch (Error e) {
+            debug (@"[$method] failed to reply to client: $(e.message)");
+        }
+    }
+
+    void call_hierarchy_incoming_calls (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        var itemv = @params.lookup_value ("item", VariantType.VARDICT);
+        var item = Util.parse_variant<CallHierarchyItem> (itemv);
+
+        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
+        Project selected_project = null;
+        foreach (var project in projects.get_keys_as_array ()) {
+            results = project.lookup_compile_input_source_file (item.uri);
+            if (!results.is_empty) {
+                selected_project = project;
+                break;
+            }
+        }
+        // fallback to default project
+        if (selected_project == null) {
+            results = default_project.lookup_compile_input_source_file (item.uri);
+            selected_project = default_project;
+        }
+        if (results.is_empty) {
+            debug (@"file `$(Uri.unescape_string (item.uri))' not found");
+            reply_null (id, client, method);
+            return;
+        }
+
+        // Vala.SourceFile doc = results[0].first;
+        Compilation compilation = results[0].second;
+        Vala.CodeContext.push (compilation.code_context);
+
+        var symbol = CodeHelp.lookup_symbol_full_name (item.name, compilation.code_context.root.scope);
+        if (!(symbol is Vala.Callable || symbol is Vala.Subroutine)) {
+            Vala.CodeContext.pop ();
+            reply_null (id, client, method);
+            return;
+        }
+
+        // get all methods that call this method
+        try {
+            Variant[] incoming_va = {};
+            foreach (var incoming_call in CallHierarchy.get_incoming_calls (selected_project, symbol))
+                incoming_va += Util.object_to_variant (incoming_call);
+            Vala.CodeContext.pop ();
+            client.reply (id, new Variant.array (VariantType.VARDICT, incoming_va), cancellable);
+        } catch (Error e) {
+            debug (@"[$method] failed to reply to client: $(e.message)");
+        }
+    }
+
+    void call_hierarchy_outgoing_calls (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        var itemv = @params.lookup_value ("item", VariantType.VARDICT);
+        var item = Util.parse_variant<CallHierarchyItem> (itemv);
+
+        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
+        Project selected_project = null;
+        foreach (var project in projects.get_keys_as_array ()) {
+            results = project.lookup_compile_input_source_file (item.uri);
+            if (!results.is_empty) {
+                selected_project = project;
+                break;
+            }
+        }
+        // fallback to default project
+        if (selected_project == null) {
+            results = default_project.lookup_compile_input_source_file (item.uri);
+            selected_project = default_project;
+        }
+        if (results.is_empty) {
+            debug (@"file `$(Uri.unescape_string (item.uri))' not found");
+            reply_null (id, client, method);
+            return;
+        }
+
+        // Vala.SourceFile doc = results[0].first;
+        Compilation compilation = results[0].second;
+        Vala.CodeContext.push (compilation.code_context);
+
+        var subroutine = CodeHelp.lookup_symbol_full_name (item.name, compilation.code_context.root.scope) as Vala.Subroutine;
+        if (subroutine == null) {
+            Vala.CodeContext.pop ();
+            reply_null (id, client, method);
+            return;
+        }
+
+        // get all methods called by this method
+        try {
+            Variant[] outgoing_va = {};
+            foreach (var outgoing_call in CallHierarchy.get_outgoing_calls (selected_project, subroutine))
+                outgoing_va += Util.object_to_variant (outgoing_call);
+            Vala.CodeContext.pop ();
+            client.reply (id, new Variant.array (VariantType.VARDICT, outgoing_va), cancellable);
+        } catch (Error e) {
+            debug (@"[$method] failed to reply to client: $(e.message)");
+        }
     }
 
     void shutdown (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {

@@ -1045,4 +1045,99 @@ namespace Lsp {
             return node;
         }
     }
+
+    [Flags]
+    enum SymbolTags {
+        NONE,
+        DEPRECATED
+    }
+
+    class CallHierarchyItem : Object, Json.Serializable {
+        public string name { get; set; }
+        public SymbolKind kind { get; set; }
+        public SymbolTags tags { get; set; }
+        public string? detail { get; set; }
+        public string uri { get; set; }
+        public Range range { get; set; }
+        public Range selectionRange { get; set; }
+
+        public override Json.Node serialize_property (string property_name, GLib.Value value, GLib.ParamSpec pspec) {
+            if (property_name != "tags")
+                return default_serialize_property (property_name, value, pspec);
+            var array = new Json.Array ();
+            if (SymbolTags.DEPRECATED in tags)
+                array.add_int_element (SymbolTags.DEPRECATED);
+            return new Json.Node.alloc ().init_array (array);
+        }
+
+        public CallHierarchyItem.from_symbol (Vala.Symbol symbol) {
+            this.name = symbol.get_full_name ();
+            if (symbol is Vala.Method) {
+                if (symbol.parent_symbol is Vala.Namespace)
+                    this.kind = SymbolKind.Function;
+                else
+                    this.kind = SymbolKind.Method;
+            } else if (symbol is Vala.Signal) {
+                this.kind = SymbolKind.Event;
+            } else if (symbol is Vala.Constructor) {
+                this.kind = SymbolKind.Constructor;
+            } else {
+                this.kind = SymbolKind.Method;
+            }
+            var version = symbol.get_attribute ("Version");
+            if (version != null && (version.get_bool ("deprecated") || version.get_string ("deprecated_since") != null)) {
+                this.tags |= SymbolTags.DEPRECATED;
+            }
+            this.detail = Vls.CodeHelp.get_symbol_representation (null, symbol, null, true);
+            this.uri = File.new_for_commandline_arg (symbol.source_reference.file.filename).get_uri ();
+            this.range = new Range.from_sourceref (symbol.source_reference);
+            if (symbol.comment != null)
+                this.range = new Range.from_sourceref (symbol.comment.source_reference).union (this.range);
+            if (symbol is Vala.Subroutine && ((Vala.Subroutine)symbol).body != null)
+                this.range = new Range.from_sourceref (((Vala.Subroutine)symbol).body.source_reference).union (this.range);
+            this.selectionRange = new Range.from_sourceref (symbol.source_reference);
+        }
+    }
+
+    class CallHierarchyIncomingCall : Json.Serializable, Object {
+        /**
+         * The method that calls the query method.
+         */
+        public CallHierarchyItem from { get; set; }
+
+        /**
+         * The ranges at which the query method is called by `from`.
+         */
+        public Gee.ArrayList<Range> fromRanges { get; set; default = new Gee.ArrayList<Range> (); }
+
+        public override Json.Node serialize_property (string property_name, GLib.Value value, GLib.ParamSpec pspec) {
+            if (property_name == "from")
+                return default_serialize_property (property_name, value, pspec);
+            var array = new Json.Array ();
+            foreach (var range in fromRanges)
+                array.add_element (Json.gobject_serialize (range));
+            return new Json.Node.alloc ().init_array (array);
+        }
+    }
+
+    class CallHierarchyOutgoingCall : Json.Serializable, Object {
+        /**
+         * The method that the query method calls.
+         */
+        public CallHierarchyItem to { get; set; }
+
+        /**
+         * The ranges at which the method is called by the query method.
+         */
+        public Gee.ArrayList<Range> fromRanges { get; set; default = new Gee.ArrayList<Range> (); }
+
+        public override Json.Node serialize_property (string property_name, GLib.Value value, GLib.ParamSpec pspec) {
+            if (property_name == "to")
+                return default_serialize_property (property_name, value, pspec);
+            var array = new Json.Array ();
+            foreach (var range in fromRanges)
+                array.add_element (Json.gobject_serialize (range));
+            return new Json.Node.alloc ().init_array (array);
+        }
+    }
 }
