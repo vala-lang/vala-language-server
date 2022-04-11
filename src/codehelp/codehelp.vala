@@ -122,9 +122,16 @@ namespace Vls.CodeHelp {
             components.add (current_symbol);
 
         for (int i = 1; i < symbol_names.length && current_symbol != null; i++) {
-            current_symbol = current_symbol.scope.lookup (symbol_names[i]);
-            if (current_symbol != null)
+            var found_symbol = current_symbol.scope.lookup (symbol_names[i]);
+            if (found_symbol == null && symbol_names[i] == "new") {
+                if (current_symbol is Vala.Class)
+                    found_symbol = (((Vala.Class)current_symbol).default_construction_method as Vala.Symbol) ?? ((Vala.Class)current_symbol).constructor;
+                else if (current_symbol is Vala.Struct)
+                    found_symbol = ((Vala.Struct)current_symbol).default_construction_method;
+            }
+            if (found_symbol != null)
                 components.add (current_symbol);
+            current_symbol = found_symbol;
         }
 
         return current_symbol;
