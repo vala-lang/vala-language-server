@@ -47,7 +47,7 @@ namespace Vls.CallHierarchy {
                     var references = new Gee.HashMap<Range, CodeNode> ();
                     SymbolReferences.list_in_file (file, callable, false, references);
                     foreach (var reference in references) {
-                        if (!(reference.value.parent_node is MethodCall))
+                        if (!(reference.value.parent_node is MethodCall || reference.value.parent_node is ObjectCreationExpression))
                             continue;
                         var container = get_containing_sub_or_callable (reference.value);
                         if (container != null) {
@@ -91,15 +91,15 @@ namespace Vls.CallHierarchy {
         // find all methods that are called in this method
         if (subroutine.source_reference != null && subroutine.body != null) {
             var finder = new NodeSearch.with_filter (subroutine.source_reference.file, subroutine,
-                                                     (needle, node) => node is MethodCall
+                                                     (needle, node) => (node is MethodCall || node is ObjectCreationExpression)
                                                                     && get_containing_sub_or_callable (node) == needle);
             var result = new Gee.ArrayList<Vala.CodeNode> ();
             result.add_all (finder.result);
             foreach (var node in result) {
-                var mc = (MethodCall)node;
-                if (mc.source_reference == null || mc.call.symbol_reference.source_reference == null)
+                var call = (node is MethodCall) ? ((MethodCall)node).call : ((ObjectCreationExpression)node).call;
+                if (node.source_reference == null || call.symbol_reference.source_reference == null)
                     continue;
-                var called_item = mc.call.symbol_reference;
+                var called_item = call.symbol_reference;
                 Gee.ArrayList<Range> ranges;
                 if (!outgoing_calls.has_key (called_item)) {
                     ranges = new Gee.ArrayList<Range> ();
@@ -107,7 +107,7 @@ namespace Vls.CallHierarchy {
                 } else {
                     ranges = outgoing_calls[called_item];
                 }
-                ranges.add (new Range.from_sourceref (mc.source_reference));
+                ranges.add (new Range.from_sourceref (node.source_reference));
             }
         }
         CallHierarchyOutgoingCall[] outgoing = {};
