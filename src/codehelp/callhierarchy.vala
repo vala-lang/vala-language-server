@@ -96,7 +96,7 @@ namespace Vls.CallHierarchy {
             var result = new Gee.ArrayList<Vala.CodeNode> ();
             result.add_all (finder.result);
             foreach (var node in result) {
-                var call = (node is MethodCall) ? ((MethodCall)node).call : ((ObjectCreationExpression)node).call;
+                var call = (node is MethodCall) ? ((MethodCall)node).call : ((ObjectCreationExpression)node).member_name;
                 if (node.source_reference == null || call.symbol_reference.source_reference == null)
                     continue;
                 var called_item = call.symbol_reference;
