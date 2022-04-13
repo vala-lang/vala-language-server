@@ -31,8 +31,8 @@ vls_src = files([
   'projects/types.vala',
   'protocol.vala',
   'reporter.vala',
+  'request.vala',
   'server.vala',
-  'servertypes.vala',
 ])
 
 if get_option('active_parameter')

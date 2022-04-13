@@ -20,13 +20,10 @@
 using Lsp;
 using Gee;
 
-class Vls.Server : Object {
+class Vls.Server : Jsonrpc.Server {
     private static bool received_signal = false;
-    Jsonrpc.Server server;
     MainLoop loop;
 
-    HashTable<string, NotificationHandler> notif_handlers;
-    HashTable<string, CallHandler> call_handlers;
     InitializeParams init_params;
 
     const uint check_update_context_period_ms = 100;
@@ -47,12 +44,6 @@ class Vls.Server : Object {
      * The global cancellable object
      */
     public static Cancellable cancellable = new Cancellable ();
-
-    [CCode (has_target = false)]
-    delegate void NotificationHandler (Vls.Server self, Jsonrpc.Client client, Variant @params);
-
-    [CCode (has_target = false)]
-    delegate void CallHandler (Vls.Server self, Jsonrpc.Server server, Jsonrpc.Client client, string method, Variant id, Variant @params);
 
     uint[] g_sources = {};
     ulong client_closed_event_id;
@@ -82,7 +73,6 @@ class Vls.Server : Object {
 
     public Server (MainLoop loop) {
         this.loop = loop;
-        this.server = new Jsonrpc.Server ();
 
         // hack to prevent other things from corrupting JSON-RPC pipe:
         // create a new handle to stdout, and close the old one (or move it to stderr)
@@ -111,7 +101,7 @@ class Vls.Server : Object {
              || !Unix.set_fd_nonblocking (new_stdout_fd, true))
              error ("could not set pipes to nonblocking.\n");
         } catch (Error e) {
-            debug ("failed to set FDs to nonblocking");
+            warning ("failed to set FDs to nonblocking");
             loop.quit ();
             return;
         }
@@ -120,79 +110,147 @@ class Vls.Server : Object {
         // shutdown if/when we get a signal
         g_sources += Timeout.add (1 * 1000, () => {
             if (Server.received_signal) {
-                shutdown_real ();
+                shutdown ();
+                exit ();
                 return Source.REMOVE;
             }
             return !this.shutting_down;
         });
 
-        server.accept_io_stream (new SimpleIOStream (input_stream, output_stream));
-
-#if WITH_JSONRPC_GLIB_3_30
-        client_closed_event_id = server.client_closed.connect (client => {
-            shutdown_real ();
-        });
-#endif
-
-        notif_handlers = new HashTable<string, NotificationHandler> (str_hash, str_equal);
-        call_handlers = new HashTable<string, CallHandler> (str_hash, str_equal);
+        accept_io_stream (new SimpleIOStream (input_stream, output_stream));
 
         pending_requests = new HashSet<Request> (Request.hash, Request.equal);
 
-        server.notification.connect ((client, method, @params) => {
-            // debug (@"Got notification! $method");
-            if (notif_handlers.contains (method))
-                ((NotificationHandler) notif_handlers[method]) (this, client, @params);
-            else
-                warning (@"no notification handler for $method");
-        });
-
-        server.handle_call.connect ((client, method, id, @params) => {
-            // debug (@"Got call! $method");
-            if (call_handlers.contains (method)) {
-                ((CallHandler) call_handlers[method]) (this, server, client, method, id, @params);
-                return true;
-            } else {
-                warning (@"no call handler for $method");
-                return false;
-            }
-        });
-
         this.projects = new HashTable<Project, ulong> (GLib.direct_hash, GLib.direct_equal);
-
-        call_handlers["initialize"] = this.initialize;
-        call_handlers["shutdown"] = this.shutdown;
-        notif_handlers["exit"] = this.exit;
-
-        call_handlers["textDocument/definition"] = this.textDocumentDefinition;
-        notif_handlers["textDocument/didOpen"] = this.textDocumentDidOpen;
-        notif_handlers["textDocument/didSave"] = this.textDocumentDidSave;
-        notif_handlers["textDocument/didClose"] = this.textDocumentDidClose;
-        notif_handlers["textDocument/didChange"] = this.textDocumentDidChange;
-        call_handlers["textDocument/documentSymbol"] = this.textDocumentDocumentSymbol;
-        call_handlers["textDocument/completion"] = this.textDocumentCompletion;
-        call_handlers["textDocument/signatureHelp"] = this.textDocumentSignatureHelp;
-        call_handlers["textDocument/hover"] = this.textDocumentHover;
-        call_handlers["textDocument/formatting"] = this.textDocumentFormatting;
-        call_handlers["textDocument/rangeFormatting"] = this.textDocumentFormatting;
-        call_handlers["textDocument/codeAction"] = this.textDocumentCodeAction;
-        call_handlers["textDocument/references"] = this.textDocumentReferences;
-        call_handlers["textDocument/documentHighlight"] = this.textDocumentReferences;
-        call_handlers["textDocument/implementation"] = this.textDocumentImplementation;
-        call_handlers["workspace/symbol"] = this.handle_workspace_symbol_request;
-        call_handlers["textDocument/rename"] = this.textDocumentRename;
-        call_handlers["textDocument/prepareRename"] = this.textDocumentPrepareRename;
-        call_handlers["textDocument/codeLens"] = this.handle_code_lens_request;
-        call_handlers["textDocument/prepareCallHierarchy"] = this.prepare_call_hierarchy;
-        call_handlers["callHierarchy/incomingCalls"] = this.call_hierarchy_incoming_calls;
-        call_handlers["callHierarchy/outgoingCalls"] = this.call_hierarchy_outgoing_calls;
-        notif_handlers["$/cancelRequest"] = this.cancelRequest;
 
         debug ("Finished constructing");
     }
 
+    protected override void notification (Jsonrpc.Client client, string method, Variant parameters) {
+        switch (method) {
+            case "exit":
+                exit ();
+                break;
+
+            case "$/cancelRequest":
+                cancel_request (client, parameters);
+                break;
+
+            case "textDocument/didOpen":
+                text_document_did_open (client, parameters);
+                break;
+
+            case "textDocument/didSave":
+                text_document_did_save (client, parameters);
+                break;
+
+            case "textDocument/didClose":
+                text_document_did_close (client, parameters);
+                break;
+
+            case "textDocument/didChange":
+                text_document_did_change (client, parameters);
+                break;
+
+            default:
+                warning ("unhandled notification `%s'", method);
+                break;
+        }
+    }
+
+    protected override bool handle_call (Jsonrpc.Client client, string method, Variant id, Variant parameters) {
+        switch (method) {
+            case "initialize":
+                initialize (client, method, id, parameters);
+                break;
+
+            case "shutdown":
+                shutdown ();
+                reply_null (id, client, method);
+                break;
+
+            case "textDocument/definition":
+                goto_definition (client, method, id, parameters);
+                break;
+
+            case "textDocument/documentSymbol":
+                document_symbol_outline (client, method, id, parameters);
+                break;
+
+            case "textDocument/completion":
+                show_completion (client, method, id, parameters);
+                break;
+
+            case "textDocument/signatureHelp":
+                show_signature_help (client, method, id, parameters);
+                break;
+
+            case "textDocument/hover":
+                hover (client, method, id, parameters);
+                break;
+
+            case "textDocument/formatting":
+            case "textDocument/rangeFormatting":
+                format (client, method, id, parameters);
+                break;
+
+            case "textDocument/codeAction":
+                code_action (client, method, id, parameters);
+                break;
+
+            case "textDocument/references":
+            case "textDocument/documentHighlight":
+                show_references (client, method, id, parameters);
+                break;
+                
+            case "textDocument/implementation":
+                show_implementations (client, method, id, parameters);
+                break;
+
+            case "workspace/symbol":
+                search_workspace_symbols (client, method, id, parameters);
+                break;
+
+            case "textDocument/rename":
+                rename_symbol (client, method, id, parameters);
+                break;
+
+            case "textDocument/prepareRename":
+                prepare_rename_symbol (client, method, id, parameters);
+                break;
+
+            case "textDocument/codeLens":
+                code_lens (client, method, id, parameters);
+                break;
+
+            case "textDocument/prepareCallHierarchy":
+                prepare_call_hierarchy (client, method, id, parameters);
+                break;
+
+            case "callHierarchy/incomingCalls":
+                call_hierarchy_incoming_calls (client, method, id, parameters);
+                break;
+
+            case "callHierarchy/outgoingCalls":
+                call_hierarchy_outgoing_calls (client, method, id, parameters);
+                break;
+
+            default:
+                warning ("unhandled call `%s'", method);
+                return false;
+        }
+        return true;
+    }
+
+#if WITH_JSONRPC_GLIB_3_30
+    protected override void client_closed (Jsonrpc.Client client) {
+        shutdown ();
+        exit ();
+    }
+#endif
+
     // a{sv} only
-    public Variant buildDict (...) {
+    public Variant build_dict (...) {
         var builder = new VariantBuilder (new VariantType ("a{sv}"));
         var l = va_list ();
         while (true) {
@@ -206,11 +264,11 @@ class Vls.Server : Object {
         return builder.end ();
     }
 
-    void showMessage (Jsonrpc.Client client, string message, MessageType type) {
+    void show_message (Jsonrpc.Client client, string message, MessageType type) {
         if (type == MessageType.Error)
             warning (message);
         try {
-            client.send_notification ("window/showMessage", buildDict (
+            client.send_notification ("window/showMessage", build_dict (
                 type: new Variant.int16 (type),
                 message: new Variant.string (message)
             ), cancellable);
@@ -219,7 +277,7 @@ class Vls.Server : Object {
         }
     }
 
-    void initialize (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void initialize (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         init_params = Util.parse_variant<InitializeParams> (@params);
 
         File root_dir;
@@ -230,7 +288,7 @@ class Vls.Server : Object {
         else
             root_dir = File.new_for_path (Environment.get_current_dir ());
         if (!root_dir.is_native ()) {
-            showMessage (client, "Non-native files not supported", MessageType.Error);
+            show_message (client, "Non-native files not supported", MessageType.Error);
             error ("Non-native files not supported");
         }
         string root_path = Util.realpath ((!) root_dir.get_path ());
@@ -238,15 +296,15 @@ class Vls.Server : Object {
 
         // respond
         try {
-            client.reply (id, buildDict (
-                capabilities: buildDict (
+            client.reply (id, build_dict (
+                capabilities: build_dict (
                     textDocumentSync: new Variant.int16 (TextDocumentSyncKind.Incremental),
                     definitionProvider: new Variant.boolean (true),
                     documentSymbolProvider: new Variant.boolean (true),
-                    completionProvider: buildDict(
+                    completionProvider: build_dict(
                         triggerCharacters: new Variant.strv (new string[] {".", ">"})
                     ),
-                    signatureHelpProvider: buildDict(
+                    signatureHelpProvider: build_dict(
                         triggerCharacters: new Variant.strv (new string[] {"(", "[", ","})
                     ),
                     codeActionProvider: new Variant.boolean (true),
@@ -257,11 +315,11 @@ class Vls.Server : Object {
                     documentRangeFormattingProvider: new Variant.boolean (true),
                     implementationProvider: new Variant.boolean (true),
                     workspaceSymbolProvider: new Variant.boolean (true),
-                    renameProvider: buildDict (prepareProvider: new Variant.boolean (true)),
-                    codeLensProvider: buildDict (resolveProvider: new Variant.boolean (false)),
+                    renameProvider: build_dict (prepareProvider: new Variant.boolean (true)),
+                    codeLensProvider: build_dict (resolveProvider: new Variant.boolean (false)),
                     callHierarchyProvider: new Variant.boolean (true)
                 ),
-                serverInfo: buildDict (
+                serverInfo: build_dict (
                     name: new Variant.string ("Vala Language Server"),
                     version: new Variant.string (Config.PROJECT_VERSION)
                 )
@@ -286,7 +344,7 @@ class Vls.Server : Object {
                 backend_project = new MesonProject (root_path, cancellable);
             } catch (Error e) {
                 if (!(e is ProjectError.VERSION_UNSUPPORTED)) {
-                    showMessage (client, @"Failed to initialize Meson project - $(e.message)", MessageType.Error);
+                    show_message (client, @"Failed to initialize Meson project - $(e.message)", MessageType.Error);
                 }
             }
         }
@@ -312,9 +370,9 @@ class Vls.Server : Object {
             var autogen_sh = root_dir.get_child ("autogen.sh");
 
             if (cmake_file.query_exists (cancellable))
-                showMessage (client, @"CMake build system is not currently supported. Only Meson is. See https://github.com/benwaffle/vala-language-server/issues/73", MessageType.Warning);
+                show_message (client, @"CMake build system is not currently supported. Only Meson is. See https://github.com/benwaffle/vala-language-server/issues/73", MessageType.Warning);
             if (autogen_sh.query_exists (cancellable))
-                showMessage (client, @"Autotools build system is not currently supported. Consider switching to Meson.", MessageType.Warning);
+                show_message (client, @"Autotools build system is not currently supported. Consider switching to Meson.", MessageType.Warning);
         } else {
             new_projects.add (backend_project);
         }
@@ -329,9 +387,9 @@ class Vls.Server : Object {
                 project.build_if_stale ();
                 debug ("Publishing diagnostics ...");
                 foreach (var compilation in project.get_compilations ())
-                    publishDiagnostics (project, compilation, client);
+                    publish_diagnostics (project, compilation, client);
             } catch (Error e) {
-                showMessage (client, @"Failed to build project - $(e.message)", MessageType.Error);
+                show_message (client, @"Failed to build project - $(e.message)", MessageType.Error);
             }
         }
 
@@ -361,7 +419,7 @@ class Vls.Server : Object {
         debug ("requested context update for project change event");
     }
 
-    void cancelRequest (Jsonrpc.Client client, Variant @params) {
+    void cancel_request (Jsonrpc.Client client, Variant @params) {
         Variant? id = @params.lookup_value ("id", null);
         if (id == null)
             return;
@@ -382,7 +440,7 @@ class Vls.Server : Object {
         }
     }
 
-    void textDocumentDidOpen (Jsonrpc.Client client, Variant @params) {
+    void text_document_did_open (Jsonrpc.Client client, Variant @params) {
         var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
 
         string? uri         = (string) document.lookup_value ("uri",        VariantType.STRING);
@@ -454,7 +512,7 @@ class Vls.Server : Object {
         open_files.add (uri);
     }
 
-    void textDocumentDidSave (Jsonrpc.Client client, Variant @params) {
+    void text_document_did_save (Jsonrpc.Client client, Variant @params) {
         var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
 
         string? uri = (string) document.lookup_value ("uri", VariantType.STRING);
@@ -482,7 +540,7 @@ class Vls.Server : Object {
         }
     }
 
-    void textDocumentDidClose (Jsonrpc.Client client, Variant @params) {
+    void text_document_did_close (Jsonrpc.Client client, Variant @params) {
         var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
         string? uri         = (string) document.lookup_value ("uri",        VariantType.STRING);
 
@@ -513,7 +571,7 @@ class Vls.Server : Object {
     int64 update_context_requests = 0;
     int64 update_context_time_us = 0;
 
-    void textDocumentDidChange (Jsonrpc.Client client, Variant @params) {
+    void text_document_did_change (Jsonrpc.Client client, Variant @params) {
         var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
         var changes = @params.lookup_value ("contentChanges", VariantType.ARRAY);
 
@@ -630,10 +688,10 @@ class Vls.Server : Object {
                         * one of our JSON-RPC callbacks through g_main_context_iteration (),
                         * if we get a new message while sending the textDocument/publishDiagnostics
                         * notifications. */
-                        publishDiagnostics (project, compilation, update_context_client);
+                        publish_diagnostics (project, compilation, update_context_client);
                 } catch (Error e) {
                     warning ("Failed to rebuild and/or reconfigure project: %s", e.message);
-                    showMessage (update_context_client, @"Failed to rebuild/reconfigure project: $(e.message)", MessageType.Error);
+                    show_message (update_context_client, @"Failed to rebuild/reconfigure project: $(e.message)", MessageType.Error);
                 }
             }
 
@@ -658,14 +716,14 @@ class Vls.Server : Object {
                             doc.get_mapped_contents ();
                         if (doc is TextDocument)
                             ((TextDocument)doc).last_saved_content = doc.content;
-                        publishDiagnostics (default_project, opened.second, update_context_client);
+                        publish_diagnostics (default_project, opened.second, update_context_client);
                     } catch (Error e) {
                         warning ("Failed to reopen in default project %s - %s", uri, e.message);
                         // clear the diagnostics for the file
                         try {
                             update_context_client.send_notification (
                                 "textDocument/publishDiagnostics",
-                                buildDict (
+                                build_dict (
                                     uri: new Variant.string (uri),
                                     diagnostics: new Variant.array (VariantType.VARIANT, {})
                                 )
@@ -729,7 +787,7 @@ class Vls.Server : Object {
         }
     }
 
-    void publishDiagnostics (Project project, Compilation target, Jsonrpc.Client client) {
+    void publish_diagnostics (Project project, Compilation target, Jsonrpc.Client client) {
         var diags_without_source = new Json.Array ();
 
         debug ("publishing diagnostics for Compilation target %s", target.id);
@@ -789,7 +847,7 @@ class Vls.Server : Object {
             try {
                 client.send_notification (
                     "textDocument/publishDiagnostics",
-                    buildDict (
+                    build_dict (
                         uri: new Variant.string (discarded_uri),
                         diagnostics: new Variant.array (VariantType.VARIANT, {})
                     )
@@ -822,7 +880,7 @@ class Vls.Server : Object {
             try {
                 client.send_notification (
                     "textDocument/publishDiagnostics",
-                    buildDict (
+                    build_dict (
                         uri: new Variant.string (gfile.get_uri ()),
                         diagnostics: diags_variant_array
                     ),
@@ -838,7 +896,7 @@ class Vls.Server : Object {
                 null);
             client.send_notification (
                 "textDocument/publishDiagnostics",
-                buildDict (
+                build_dict (
                     // use the project root as the URI if the diagnostic is not associated with a file
                     uri: new Variant.string (File.new_for_path(project.root_path).get_uri ()),
                     diagnostics: diags_wo_src_variant_array
@@ -887,7 +945,7 @@ class Vls.Server : Object {
         return (!) best;
     }
 
-    void textDocumentDefinition (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void goto_definition (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<Lsp.TextDocumentPositionParams> (@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
@@ -985,7 +1043,7 @@ class Vls.Server : Object {
         });
     }
 
-    void textDocumentDocumentSymbol (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void document_symbol_outline (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<Lsp.TextDocumentPositionParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
@@ -1104,7 +1162,7 @@ class Vls.Server : Object {
         return doc_comment;
     }
 
-    void textDocumentCompletion (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void show_completion (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<Lsp.CompletionParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
@@ -1132,7 +1190,7 @@ class Vls.Server : Object {
                                          p.position, p.context);
     }
 
-    void textDocumentSignatureHelp (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void show_signature_help (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<Lsp.TextDocumentPositionParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
@@ -1160,7 +1218,7 @@ class Vls.Server : Object {
                                             p.position);
     }
 
-    void textDocumentHover (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void hover (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<Lsp.TextDocumentPositionParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
@@ -1361,7 +1419,7 @@ class Vls.Server : Object {
         return DocumentHighlightKind.Text;
     }
 
-    void textDocumentReferences (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void show_references (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<ReferenceParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
@@ -1473,7 +1531,7 @@ class Vls.Server : Object {
         });
     }
 
-    void textDocumentImplementation (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void show_implementations (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<Lsp.TextDocumentPositionParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
@@ -1592,7 +1650,7 @@ class Vls.Server : Object {
         });
     }
     
-    void textDocumentFormatting (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void format (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<DocumentRangeFormattingParams>(@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
@@ -1640,7 +1698,7 @@ class Vls.Server : Object {
         }
     }
 
-    void textDocumentCodeAction (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void code_action (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<CodeActionParams> (@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
@@ -1679,7 +1737,7 @@ class Vls.Server : Object {
         }
     }
 
-    void handle_workspace_symbol_request (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void search_workspace_symbols (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var query = (string) @params.lookup_value ("query", VariantType.STRING);
 
         wait_for_context_update (id, request_cancelled => {
@@ -1722,7 +1780,7 @@ class Vls.Server : Object {
         });
     }
 
-    void textDocumentRename (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void rename_symbol (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         string new_name = (string) @params.lookup_value ("newName", VariantType.STRING);
 
         // before anything, sanity-check the new symbol name
@@ -1874,7 +1932,7 @@ class Vls.Server : Object {
                 Variant changes = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (text_document_edits_json), null);
                 client.reply (
                     id, 
-                    buildDict (
+                    build_dict (
                         documentChanges: changes
                     ),
                     cancellable);
@@ -1886,7 +1944,7 @@ class Vls.Server : Object {
         });
     }
     
-    void textDocumentPrepareRename (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void prepare_rename_symbol (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<TextDocumentPositionParams> (@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
@@ -1989,7 +2047,7 @@ class Vls.Server : Object {
             try {
                 client.reply (
                     id,
-                    buildDict (
+                    build_dict (
                         range: Util.object_to_variant (replacement_range),
                         placeholder: new Variant.string (symbol.name)
                     ),
@@ -2004,7 +2062,7 @@ class Vls.Server : Object {
     /**
      * handle an incoming `textDocument/codeLens` request
      */
-    void handle_code_lens_request (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void code_lens (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var document = @params.lookup_value ("textDocument", VariantType.VARDICT);
         string? uri = document != null ? (string?) document.lookup_value ("uri", VariantType.STRING) : null;
 
@@ -2039,7 +2097,7 @@ class Vls.Server : Object {
                                        results[0].first, results[0].second);
     }
 
-    void prepare_call_hierarchy (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void prepare_call_hierarchy (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<TextDocumentPositionParams> (@params);
         var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
         Project selected_project = null;
@@ -2105,7 +2163,7 @@ class Vls.Server : Object {
         }
     }
 
-    void call_hierarchy_incoming_calls (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void call_hierarchy_incoming_calls (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var itemv = @params.lookup_value ("item", VariantType.VARDICT);
         var item = Util.parse_variant<CallHierarchyItem> (itemv);
 
@@ -2152,7 +2210,7 @@ class Vls.Server : Object {
         }
     }
 
-    void call_hierarchy_outgoing_calls (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
+    void call_hierarchy_outgoing_calls (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var itemv = @params.lookup_value ("item", VariantType.VARDICT);
         var item = Util.parse_variant<CallHierarchyItem> (itemv);
 
@@ -2199,26 +2257,20 @@ class Vls.Server : Object {
         }
     }
 
-    void shutdown (Jsonrpc.Server self, Jsonrpc.Client client, string method, Variant id, Variant @params) {
-        reply_null (id, client, "shutdown");
-        shutdown_real ();
-    }
-
-    void exit (Jsonrpc.Client client, Variant @params) {
-        shutdown_real ();
-    }
-
-    void shutdown_real () {
+    void shutdown () {
         debug ("shutting down...");
         this.shutting_down = true;
         cancellable.cancel ();
         if (client_closed_event_id != 0)
-            server.disconnect (client_closed_event_id);
+            this.disconnect (client_closed_event_id);
         foreach (var project in projects.get_keys_as_array ())
             project.disconnect (projects[project]);
+        foreach (uint source_id in g_sources)
+            Source.remove (source_id);
+    }
+
+    void exit () {
         loop.quit ();
-        foreach (uint id in g_sources)
-            Source.remove (id);
     }
 }
 
