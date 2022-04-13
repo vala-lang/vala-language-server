@@ -48,12 +48,13 @@ namespace Vls.CodeActions {
                     code_actions.add (new BaseConverterAction (lit, document));
             } else if (code_node is Class) {
                 var csym = (Class)code_node;
-                var cls_range = compute_class_range (csym, class_ranges);
+                var clsdef_range = compute_class_def_range (csym, class_ranges);
+                var cls_range = new Range.from_sourceref (csym.source_reference);
                 if (cls_range.contains (range.start) && cls_range.contains (range.end)) {
                     var missing = CodeHelp.gather_missing_prereqs_and_unimplemented_symbols (csym);
                     if (!missing.first.is_empty || !missing.second.is_empty) {
                         var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (file);
-                        code_actions.add (new ImplementMissingPrereqsAction (csym, missing.first, missing.second, cls_range.end, code_style, document));
+                        code_actions.add (new ImplementMissingPrereqsAction (csym, missing.first, missing.second, clsdef_range.end, code_style, document));
                     }
                 }
             }
@@ -62,7 +63,10 @@ namespace Vls.CodeActions {
         return code_actions;
     }
 
-    Range compute_class_range (Class csym, Map<TypeSymbol, Range> class_ranges) {
+    /**
+     * Compute the full range of a class definition.
+     */
+    Range compute_class_def_range (Class csym, Map<TypeSymbol, Range> class_ranges) {
         if (csym in class_ranges)
             return class_ranges[csym];
         // otherwise compute the result and cache it
