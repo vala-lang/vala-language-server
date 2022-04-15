@@ -266,6 +266,38 @@ class Vls.Server : Jsonrpc.Server {
         return builder.end ();
     }
 
+    /**
+     * Find a file with a URI. Will pick the first match.
+     *
+     * @param uri the URI of the file. may contain escape characters
+     */
+    Vala.SourceFile? find_file (string uri, out Compilation? compilation = null, out Project? project = null) {
+        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
+        Project? selected_project = null;
+        foreach (var p in projects.get_keys_as_array ()) {
+            results = p.lookup_compile_input_source_file (uri);
+            if (!results.is_empty) {
+                selected_project = p;
+                break;
+            }
+        }
+        // fallback to default project
+        if (selected_project == null) {
+            results = default_project.lookup_compile_input_source_file (uri);
+            selected_project = default_project;
+        }
+
+        if (selected_project != null) {
+            project = selected_project;
+            compilation = results[0].second;
+            return results[0].first;
+        }
+
+        project = null;
+        compilation = null;
+        return null;
+    }
+
     void show_message (Jsonrpc.Client client, string message, MessageType type) {
         if (type == MessageType.Error)
             warning (message);
@@ -947,25 +979,6 @@ class Vls.Server : Jsonrpc.Server {
 
     void goto_definition (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<Lsp.TextDocumentPositionParams> (@params);
-        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
-        Project selected_project = null;
-        foreach (var project in projects.get_keys_as_array ()) {
-            results = project.lookup_compile_input_source_file (p.textDocument.uri);
-            if (!results.is_empty) {
-                selected_project = project;
-                break;
-            }
-        }
-        // fallback to default project
-        if (selected_project == null) {
-            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
-            selected_project = default_project;
-        }
-        if (results.is_empty) {
-            debug (@"[$method] file `$(p.textDocument.uri)' not found");
-            reply_null (id, client, method);
-            return;
-        }
 
         wait_for_context_update (id, request_cancelled => {
             if (request_cancelled) {
@@ -973,9 +986,14 @@ class Vls.Server : Jsonrpc.Server {
                 return;
             }
 
-            // ignore multiple results
-            Vala.SourceFile file = results[0].first;
-            Compilation compilation = results[0].second;
+            Compilation compilation;
+            Project project;
+            Vala.SourceFile? file = find_file (p.textDocument.uri, out compilation, out project);
+            if (file == null) {
+                debug ("[%s] file `%s' not found", method, p.textDocument.uri);
+                reply_null (id, client, method);
+                return;
+            }
 
             Vala.CodeContext.push (compilation.code_context);
             var fs = new NodeSearch (file, p.position, true);
@@ -1030,7 +1048,7 @@ class Vls.Server : Jsonrpc.Server {
             }
 
             if (best is Vala.Symbol)
-                best = SymbolReferences.find_real_symbol (selected_project, (Vala.Symbol) best);
+                best = SymbolReferences.find_real_symbol (project, (Vala.Symbol) best);
 
             var location = new Location.from_sourceref (best.source_reference);
             debug ("[textDocument/definition] found location ... %s", location.uri);
@@ -1045,25 +1063,6 @@ class Vls.Server : Jsonrpc.Server {
 
     void document_symbol_outline (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<Lsp.TextDocumentPositionParams>(@params);
-        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
-        Project selected_project = null;
-        foreach (var project in projects.get_keys_as_array ()) {
-            results = project.lookup_compile_input_source_file (p.textDocument.uri);
-            if (!results.is_empty) {
-                selected_project = project;
-                break;
-            }
-        }
-        // fallback to default project
-        if (selected_project == null) {
-            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
-            selected_project = default_project;
-        }
-        if (results.is_empty) {
-            debug (@"[$method] file `$(p.textDocument.uri)' not found");
-            reply_null (id, client, method);
-            return;
-        }
 
         wait_for_context_update (id, request_cancelled => {
             if (request_cancelled) {
@@ -1071,19 +1070,12 @@ class Vls.Server : Jsonrpc.Server {
                 return;
             }
 
-            // ignore multiple results
-            Vala.SourceFile file = results[0].first;
-            Compilation compilation = results[0].second;
-
-            if (compilation.code_context != file.context) {
-                // This means the file was probably deleted from the current code context,
-                // and so it's no longer valid. This is often the case for system files 
-                // that are added automatically in Vala.CodeContext
-                // This seems to be especially a problem on GNOME Builder, which runs
-                // this query on all files right after the user updates a file, but before
-                // the code context is updated.
-                debug ("[%s] file (%s) context != compilation.code_context; not proceeding further",
-                    method, p.textDocument.uri);
+            Compilation compilation;
+            Project project;
+            Vala.SourceFile? file = find_file (p.textDocument.uri, out compilation, out project);
+            if (file == null) {
+                debug ("[%s] file `%s' not found", method, p.textDocument.uri);
+                reply_null (id, client, method);
                 return;
             }
 
@@ -1164,98 +1156,65 @@ class Vls.Server : Jsonrpc.Server {
 
     void show_completion (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<Lsp.CompletionParams>(@params);
-        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
-        Project selected_project = null;
-        foreach (var project in projects.get_keys_as_array ()) {
-            results = project.lookup_compile_input_source_file (p.textDocument.uri);
-            if (!results.is_empty) {
-                selected_project = project;
-                break;
-            }
-        }
-        // fallback to default project
-        if (selected_project == null) {
-            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
-            selected_project = default_project;
-        }
-        if (results.is_empty) {
-            debug (@"[$method] failed to find file $(p.textDocument.uri)");
+
+        Compilation compilation;
+        Project project;
+        Vala.SourceFile? file = find_file (p.textDocument.uri, out compilation, out project);
+        if (file == null) {
+            debug ("[%s] file `%s' not found", method, p.textDocument.uri);
             reply_null (id, client, method);
             return;
         }
 
-        CompletionEngine.begin_response (this, selected_project,
+        CompletionEngine.begin_response (this, project,
                                          client, id, method,
-                                         results[0].first, results[0].second,
+                                         file, compilation,
                                          p.position, p.context);
     }
 
     void show_signature_help (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<Lsp.TextDocumentPositionParams>(@params);
-        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
-        Project selected_project = null;
-        foreach (var project in projects.get_keys_as_array ()) {
-            results = project.lookup_compile_input_source_file (p.textDocument.uri);
-            if (!results.is_empty) {
-                selected_project = project;
-                break;
-            }
-        }
-        // fallback to default project
-        if (selected_project == null) {
-            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
-            selected_project = default_project;
-        }
-        if (results.is_empty) {
-            debug ("unknown file %s", p.textDocument.uri);
-            reply_null (id, client, "textDocument/signatureHelp");
+
+        Compilation compilation;
+        Project project;
+        Vala.SourceFile file = find_file (p.textDocument.uri, out compilation, out project);
+        if (file == null) {
+            debug ("[%s] file `%s' not found", method, p.textDocument.uri);
+            reply_null (id, client, method);
             return;
         }
 
-        SignatureHelpEngine.begin_response (this, selected_project,
+        SignatureHelpEngine.begin_response (this, project,
                                             client, id, method,
-                                            results[0].first, results[0].second,
+                                            file, compilation,
                                             p.position);
     }
 
     void hover (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<Lsp.TextDocumentPositionParams>(@params);
-        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
-        Project selected_project = null;
-        foreach (var project in projects.get_keys_as_array ()) {
-            results = project.lookup_compile_input_source_file (p.textDocument.uri);
-            if (!results.is_empty) {
-                selected_project = project;
-                break;
-            }
-        }
-        // fallback to default project
-        if (selected_project == null) {
-            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
-            selected_project = default_project;
-        }
-        if (results.is_empty) {
-            debug (@"file `$(Uri.unescape_string (p.textDocument.uri))' not found");
-            reply_null (id, client, "textDocument/hover");
-            return;
-        }
 
-        Position pos = p.position;
         wait_for_context_update (id, request_cancelled => {
             if (request_cancelled) {
                 reply_null (id, client, "textDocument/hover");
                 return;
             }
 
-            Vala.SourceFile doc = results[0].first;
-            Compilation compilation = results[0].second;
+            Position pos = p.position;
+            Compilation compilation;
+            Project project;
+            Vala.SourceFile? doc = find_file (p.textDocument.uri, out compilation, out project);
+            if (doc == null) {
+                debug ("[%s] file `%s' not found", method, p.textDocument.uri);
+                reply_null (id, client, method);
+                return;
+            }
+
             Vala.CodeContext.push (compilation.code_context);
 
             var fs = new NodeSearch (doc, pos, true);
 
             if (fs.result.size == 0) {
-                // debug ("[textDocument/hover] no results found");
-                reply_null (id, client, "textDocument/hover");
+                reply_null (id, client, method);
                 Vala.CodeContext.pop ();
                 return;
             }
@@ -1356,7 +1315,7 @@ class Vls.Server : Jsonrpc.Server {
                 });
                 
                 if (symbol != null) {
-                    var comment = get_symbol_documentation (selected_project, symbol);
+                    var comment = get_symbol_documentation (project, symbol);
                     if (comment != null) {
                         hoverInfo.contents.add (new MarkedString () {
                             value = comment.body
@@ -1385,7 +1344,7 @@ class Vls.Server : Jsonrpc.Server {
             try {
                 client.reply (id, Util.object_to_variant (hoverInfo), cancellable);
             } catch (Error e) {
-                warning ("[textDocument/hover] failed to reply to client: %s", e.message);
+                warning ("[%s] failed to reply to client: %s", method, e.message);
             }
 
             Vala.CodeContext.pop ();
@@ -1421,37 +1380,26 @@ class Vls.Server : Jsonrpc.Server {
 
     void show_references (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<ReferenceParams>(@params);
-        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
-        Project selected_project = null;
-        foreach (var project in projects.get_keys_as_array ()) {
-            results = project.lookup_compile_input_source_file (p.textDocument.uri);
-            if (!results.is_empty) {
-                selected_project = project;
-                break;
-            }
-        }
-        // fallback to default project
-        if (selected_project == null) {
-            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
-            selected_project = default_project;
-        }
-        if (results.is_empty) {
-            debug (@"file `$(Uri.unescape_string (p.textDocument.uri))' not found");
-            reply_null (id, client, method);
-            return;
-        }
 
-        Position pos = p.position;
-        bool is_highlight = method == "textDocument/documentHighlight";
-        bool include_declaration = p.context != null ? p.context.includeDeclaration : true;
         wait_for_context_update (id, request_cancelled => {
             if (request_cancelled) {
                 reply_null (id, client, method);
                 return;
             }
 
-            Vala.SourceFile doc = results[0].first;
-            Compilation compilation = results[0].second;
+            bool is_highlight = method == "textDocument/documentHighlight";
+            bool include_declaration = p.context != null ? p.context.includeDeclaration : true;
+            Position pos = p.position;
+
+            Compilation compilation;
+            Project project;
+            Vala.SourceFile? doc = find_file (p.textDocument.uri, out compilation, out project);
+            if (doc == null) {
+                debug ("[%s] file `%s' not found", method, p.textDocument.uri);
+                reply_null (id, client, method);
+                return;
+            }
+
             Vala.CodeContext.push (compilation.code_context);
 
             var fs = new NodeSearch (doc, pos, true);
@@ -1494,10 +1442,10 @@ class Vls.Server : Jsonrpc.Server {
             } else {
                 // show references in all files
                 var generated_vapis = new HashSet<File> (Util.file_hash, Util.file_equal);
-                foreach (var btarget in selected_project.get_compilations ())
+                foreach (var btarget in project.get_compilations ())
                     generated_vapis.add_all (btarget.output);
                 var shown_files = new HashSet<File> (Util.file_hash, Util.file_equal);
-                foreach (var btarget_w_sym in SymbolReferences.get_compilations_using_symbol (selected_project, symbol))
+                foreach (var btarget_w_sym in SymbolReferences.get_compilations_using_symbol (project, symbol))
                     foreach (Vala.SourceFile project_file in btarget_w_sym.first.code_context.get_source_files ()) {
                         // don't show symbol from generated VAPI
                         var file = File.new_for_commandline_arg (project_file.filename);
@@ -1533,35 +1481,24 @@ class Vls.Server : Jsonrpc.Server {
 
     void show_implementations (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<Lsp.TextDocumentPositionParams>(@params);
-        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
-        Project selected_project = null;
-        foreach (var project in projects.get_keys_as_array ()) {
-            results = project.lookup_compile_input_source_file (p.textDocument.uri);
-            if (!results.is_empty) {
-                selected_project = project;
-                break;
-            }
-        }
-        // fallback to default project
-        if (selected_project == null) {
-            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
-            selected_project = default_project;
-        }
-        if (results.is_empty) {
-            debug (@"file `$(Uri.unescape_string (p.textDocument.uri))' not found");
-            reply_null (id, client, method);
-            return;
-        }
 
-        Position pos = p.position;
         wait_for_context_update (id, request_cancelled => {
             if (request_cancelled) {
                 reply_null (id, client, method);
                 return;
             }
 
-            Vala.SourceFile doc = results[0].first;
-            Compilation compilation = results[0].second;
+            Position pos = p.position;
+
+            Compilation compilation;
+            Project project;
+            Vala.SourceFile? doc = find_file (p.textDocument.uri, out compilation, out project);
+            if (doc == null) {
+                debug ("[%s] file `%s' not found", method, p.textDocument.uri);
+                reply_null (id, client, method);
+                return;
+            }
+
             Vala.CodeContext.push (compilation.code_context);
 
             var fs = new NodeSearch (doc, pos, true);
@@ -1600,10 +1537,10 @@ class Vls.Server : Jsonrpc.Server {
 
             // show references in all files
             var generated_vapis = new HashSet<File> (Util.file_hash, Util.file_equal);
-            foreach (var btarget in selected_project.get_compilations ())
+            foreach (var btarget in project.get_compilations ())
                 generated_vapis.add_all (btarget.output);
             var shown_files = new HashSet<File> (Util.file_hash, Util.file_equal);
-            foreach (var btarget_w_sym in SymbolReferences.get_compilations_using_symbol (selected_project, symbol)) {
+            foreach (var btarget_w_sym in SymbolReferences.get_compilations_using_symbol (project, symbol)) {
                 foreach (var file in btarget_w_sym.first.code_context.get_source_files ()) {
                     var gfile = File.new_for_commandline_arg (file.filename);
                     // don't show symbol from generated VAPI
@@ -1635,7 +1572,7 @@ class Vls.Server : Jsonrpc.Server {
             foreach (var node in references) {
                 Vala.CodeNode real_node = node;
                 if (node is Vala.Symbol)
-                    real_node = SymbolReferences.find_real_symbol (selected_project, (Vala.Symbol) node);
+                    real_node = SymbolReferences.find_real_symbol (project, (Vala.Symbol) node);
                 json_array.add_element (Json.gobject_serialize (new Location.from_sourceref (real_node.source_reference)));
             }
 
@@ -1652,44 +1589,30 @@ class Vls.Server : Jsonrpc.Server {
     
     void format (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<DocumentRangeFormattingParams>(@params);
-        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
-        Project selected_project = null;
-        foreach (var project in projects.get_keys_as_array ()) {
-            results = project.lookup_compile_input_source_file (p.textDocument.uri);
-            if (!results.is_empty) {
-                selected_project = project;
-                break;
-            }
-        }
-        // fallback to default project
-        if (selected_project == null) {
-            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
-            selected_project = default_project;
-        }
-        if (results.is_empty) {
-            debug (@"file `$(Uri.unescape_string (p.textDocument.uri))' not found");
+
+        Compilation compilation;
+        Vala.SourceFile? source_file = find_file (p.textDocument.uri, out compilation);
+        if (source_file == null) {
+            debug ("[%s] file `%s' not found", method, p.textDocument.uri);
             reply_null (id, client, method);
             return;
         }
+
         var json_array = new Json.Array ();
-        foreach (var pair in results) {
-            TextEdit edited;
-            Vala.SourceFile source_file = pair.first;
-            Compilation compilation = pair.second;
-            var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (source_file);
-            try {
-                edited = Formatter.format (p.options, code_style, source_file, p.range, cancellable);
-            } catch (Error e) {
-                client.reply_error_async.begin (
-                    id,
-                    Jsonrpc.ClientError.INTERNAL_ERROR,
-                    e.message,
-                cancellable);
-                warning ("Formatting failed: %s", e.message);
-                return;
-            }
-            json_array.add_element (Json.gobject_serialize (edited));
+        TextEdit edited;
+        var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (source_file);
+        try {
+            edited = Formatter.format (p.options, code_style, source_file, p.range, cancellable);
+        } catch (Error e) {
+            client.reply_error_async.begin (
+                id,
+                Jsonrpc.ClientError.INTERNAL_ERROR,
+                e.message,
+            cancellable);
+            warning ("Formatting failed: %s", e.message);
+            return;
         }
+        json_array.add_element (Json.gobject_serialize (edited));
         try {
             Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
             client.reply (id, variant_array, cancellable);
@@ -1700,35 +1623,26 @@ class Vls.Server : Jsonrpc.Server {
 
     void code_action (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<CodeActionParams> (@params);
-        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
-        Project selected_project = null;
-        foreach (var project in projects.get_keys_as_array ()) {
-            results = project.lookup_compile_input_source_file (p.textDocument.uri);
-            if (!results.is_empty) {
-                selected_project = project;
-                break;
-            }
+
+        Compilation compilation;
+        Vala.SourceFile? source_file = find_file (p.textDocument.uri, out compilation);
+        if (source_file == null) {
+            debug ("[%s] file `%s' not found", method, p.textDocument.uri);
+            reply_null (id, client, method);
+            return;
         }
-        // fallback to default project
-        if (selected_project == null) {
-            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
-            selected_project = default_project;
-        }
-        if (results.is_empty) {
-            debug (@"file `$(Uri.unescape_string (p.textDocument.uri))' not found");
+
+        if (!(source_file is TextDocument)) {
             reply_null (id, client, method);
             return;
         }
         var json_array = new Json.Array ();
-        foreach (var pair in results) {
-            if (!(pair.first is TextDocument))
-                continue;
-            Vala.CodeContext.push (pair.second.code_context);
-            var code_actions = CodeActions.extract (pair.second, (TextDocument) pair.first, p.range, Uri.unescape_string (p.textDocument.uri));
-            foreach (var action in code_actions)
-                json_array.add_element (Json.gobject_serialize (action));
-            Vala.CodeContext.pop ();
-        }
+
+        Vala.CodeContext.push (compilation.code_context);
+        var code_actions = CodeActions.extract (compilation, (TextDocument) source_file, p.range, Uri.unescape_string (p.textDocument.uri));
+        foreach (var action in code_actions)
+            json_array.add_element (Json.gobject_serialize (action));
+        Vala.CodeContext.pop ();
         try {
             Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
             client.reply (id, variant_array, cancellable);
@@ -1794,35 +1708,23 @@ class Vls.Server : Jsonrpc.Server {
         }
 
         var p = Util.parse_variant<TextDocumentPositionParams> (@params);
-        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
-        Project selected_project = null;
-        foreach (var project in projects.get_keys_as_array ()) {
-            results = project.lookup_compile_input_source_file (p.textDocument.uri);
-            if (!results.is_empty) {
-                selected_project = project;
-                break;
-            }
-        }
-        // fallback to default project
-        if (selected_project == null) {
-            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
-            selected_project = default_project;
-        }
-        if (results.is_empty) {
-            debug (@"file `$(Uri.unescape_string (p.textDocument.uri))' not found");
-            reply_null (id, client, method);
-            return;
-        }
 
-        Position pos = p.position;
         wait_for_context_update (id, request_cancelled => {
             if (request_cancelled) {
                 reply_null (id, client, method);
                 return;
             }
 
-            Vala.SourceFile doc = results[0].first;
-            Compilation compilation = results[0].second;
+            Position pos = p.position;
+            Project project;
+            Compilation compilation;
+            Vala.SourceFile? doc = find_file (p.textDocument.uri, out compilation, out project);
+            if (doc == null) {
+                debug ("[%s] file `%s' not found", method, p.textDocument.uri);
+                reply_null (id, client, method);
+                return;
+            }
+
             Vala.CodeContext.push (compilation.code_context);
 
             var fs = new NodeSearch (doc, pos, true);
@@ -1860,14 +1762,14 @@ class Vls.Server : Jsonrpc.Server {
 
             // get references in all files
             var generated_vapis = new HashSet<File> (Util.file_hash, Util.file_equal);
-            foreach (var btarget in selected_project.get_compilations ())
+            foreach (var btarget in project.get_compilations ())
                 generated_vapis.add_all (btarget.output);
             var shown_files = new HashSet<File> (Util.file_hash, Util.file_equal);
             bool is_abstract_or_virtual = 
                 symbol is Vala.Property && (((Vala.Property)symbol).is_virtual || ((Vala.Property)symbol).is_abstract) ||
                 symbol is Vala.Method && (((Vala.Method)symbol).is_virtual || ((Vala.Method)symbol).is_abstract) ||
                 symbol is Vala.Signal && ((Vala.Signal)symbol).is_virtual;
-            foreach (var btarget_w_sym in SymbolReferences.get_compilations_using_symbol (selected_project, symbol))
+            foreach (var btarget_w_sym in SymbolReferences.get_compilations_using_symbol (project, symbol))
                 foreach (Vala.SourceFile project_file in btarget_w_sym.first.code_context.get_source_files ()) {
                     // don't show symbol from generated VAPI
                     var file = File.new_for_commandline_arg (project_file.filename);
@@ -1946,35 +1848,23 @@ class Vls.Server : Jsonrpc.Server {
     
     void prepare_rename_symbol (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<TextDocumentPositionParams> (@params);
-        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
-        Project selected_project = null;
-        foreach (var project in projects.get_keys_as_array ()) {
-            results = project.lookup_compile_input_source_file (p.textDocument.uri);
-            if (!results.is_empty) {
-                selected_project = project;
-                break;
-            }
-        }
-        // fallback to default project
-        if (selected_project == null) {
-            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
-            selected_project = default_project;
-        }
-        if (results.is_empty) {
-            debug (@"file `$(Uri.unescape_string (p.textDocument.uri))' not found");
-            reply_null (id, client, method);
-            return;
-        }
 
-        Position pos = p.position;
         wait_for_context_update (id, request_cancelled => {
             if (request_cancelled) {
                 reply_null (id, client, method);
                 return;
             }
+
+            Position pos = p.position;
+            Project project;
+            Compilation compilation;
+            Vala.SourceFile? doc = find_file (p.textDocument.uri, out compilation, out project);
+            if (doc == null) {
+                debug ("[%s] file `%s' not found", method, p.textDocument.uri);
+                reply_null (id, client, method);
+                return;
+            }
             
-            Vala.SourceFile doc = results[0].first;
-            Compilation compilation = results[0].second;
             Vala.CodeContext.push (compilation.code_context);
 
             var fs = new NodeSearch (doc, pos, true);
@@ -2028,7 +1918,7 @@ class Vls.Server : Jsonrpc.Server {
                 return;
             }
 
-            foreach (var btarget_w_sym in SymbolReferences.get_compilations_using_symbol (selected_project, symbol)) {
+            foreach (var btarget_w_sym in SymbolReferences.get_compilations_using_symbol (project, symbol)) {
                 if (!(btarget_w_sym.second.source_reference.file is TextDocument)) {
                     // This means we have found references in a file that was added automatically,
                     // which should not be modified.
@@ -2072,55 +1962,30 @@ class Vls.Server : Jsonrpc.Server {
             return;
         }
 
-        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
-        Project selected_project = null;
-        foreach (var project in projects.get_keys_as_array ()) {
-            results = project.lookup_compile_input_source_file (uri);
-            if (!results.is_empty) {
-                selected_project = project;
-                break;
-            }
-        }
-        // fallback to default project
-        if (selected_project == null) {
-            results = default_project.lookup_compile_input_source_file (uri);
-            selected_project = default_project;
-        }
-        if (results.is_empty) {
-            debug (@"file `$(Uri.unescape_string (uri))' not found");
+        Project project;
+        Compilation compilation;
+        Vala.SourceFile? file = find_file (uri, out compilation, out project);
+        if (file == null) {
+            debug ("[%s] file `%s' not found", method, uri);
             reply_null (id, client, method);
             return;
         }
 
-        CodeLensEngine.begin_response (this, selected_project,
-                                       client, id, method,
-                                       results[0].first, results[0].second);
+        CodeLensEngine.begin_response (this, project, client, id, method, file, compilation);
     }
 
     void prepare_call_hierarchy (Jsonrpc.Client client, string method, Variant id, Variant @params) {
         var p = Util.parse_variant<TextDocumentPositionParams> (@params);
-        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
-        Project selected_project = null;
-        foreach (var project in projects.get_keys_as_array ()) {
-            results = project.lookup_compile_input_source_file (p.textDocument.uri);
-            if (!results.is_empty) {
-                selected_project = project;
-                break;
-            }
-        }
-        // fallback to default project
-        if (selected_project == null) {
-            results = default_project.lookup_compile_input_source_file (p.textDocument.uri);
-            selected_project = default_project;
-        }
-        if (results.is_empty) {
-            debug (@"file `$(Uri.unescape_string (p.textDocument.uri))' not found");
+
+        Project project;
+        Compilation compilation;
+        Vala.SourceFile? doc = find_file (p.textDocument.uri, out compilation, out project);
+        if (doc == null) {
+            debug ("[%s] file `%s' not found", method, p.textDocument.uri);
             reply_null (id, client, method);
             return;
         }
 
-        Vala.SourceFile doc = results[0].first;
-        Compilation compilation = results[0].second;
         Vala.CodeContext.push (compilation.code_context);
 
         var fs = new NodeSearch (doc, p.position);
@@ -2167,28 +2032,15 @@ class Vls.Server : Jsonrpc.Server {
         var itemv = @params.lookup_value ("item", VariantType.VARDICT);
         var item = Util.parse_variant<CallHierarchyItem> (itemv);
 
-        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
-        Project selected_project = null;
-        foreach (var project in projects.get_keys_as_array ()) {
-            results = project.lookup_compile_input_source_file (item.uri);
-            if (!results.is_empty) {
-                selected_project = project;
-                break;
-            }
-        }
-        // fallback to default project
-        if (selected_project == null) {
-            results = default_project.lookup_compile_input_source_file (item.uri);
-            selected_project = default_project;
-        }
-        if (results.is_empty) {
-            debug (@"file `$(Uri.unescape_string (item.uri))' not found");
+        Project project;
+        Compilation compilation;
+        Vala.SourceFile? doc = find_file (item.uri, out compilation, out project);
+        if (doc == null) {
+            debug ("[%s] file `%s' not found", method, item.uri);
             reply_null (id, client, method);
             return;
         }
 
-        // Vala.SourceFile doc = results[0].first;
-        Compilation compilation = results[0].second;
         Vala.CodeContext.push (compilation.code_context);
 
         var symbol = CodeHelp.lookup_symbol_full_name (item.name, compilation.code_context.root.scope);
@@ -2201,7 +2053,7 @@ class Vls.Server : Jsonrpc.Server {
         // get all methods that call this method
         try {
             Variant[] incoming_va = {};
-            foreach (var incoming_call in CallHierarchy.get_incoming_calls (selected_project, symbol))
+            foreach (var incoming_call in CallHierarchy.get_incoming_calls (project, symbol))
                 incoming_va += Util.object_to_variant (incoming_call);
             Vala.CodeContext.pop ();
             client.reply (id, new Variant.array (VariantType.VARDICT, incoming_va), cancellable);
@@ -2214,28 +2066,15 @@ class Vls.Server : Jsonrpc.Server {
         var itemv = @params.lookup_value ("item", VariantType.VARDICT);
         var item = Util.parse_variant<CallHierarchyItem> (itemv);
 
-        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
-        Project selected_project = null;
-        foreach (var project in projects.get_keys_as_array ()) {
-            results = project.lookup_compile_input_source_file (item.uri);
-            if (!results.is_empty) {
-                selected_project = project;
-                break;
-            }
-        }
-        // fallback to default project
-        if (selected_project == null) {
-            results = default_project.lookup_compile_input_source_file (item.uri);
-            selected_project = default_project;
-        }
-        if (results.is_empty) {
-            debug (@"file `$(Uri.unescape_string (item.uri))' not found");
+        Project project;
+        Compilation compilation;
+        Vala.SourceFile? doc = find_file (item.uri, out compilation, out project);
+        if (doc == null) {
+            debug ("[%s] file `%s' not found", method, item.uri);
             reply_null (id, client, method);
             return;
         }
 
-        // Vala.SourceFile doc = results[0].first;
-        Compilation compilation = results[0].second;
         Vala.CodeContext.push (compilation.code_context);
 
         var subroutine = CodeHelp.lookup_symbol_full_name (item.name, compilation.code_context.root.scope) as Vala.Subroutine;
@@ -2248,7 +2087,7 @@ class Vls.Server : Jsonrpc.Server {
         // get all methods called by this method
         try {
             Variant[] outgoing_va = {};
-            foreach (var outgoing_call in CallHierarchy.get_outgoing_calls (selected_project, subroutine))
+            foreach (var outgoing_call in CallHierarchy.get_outgoing_calls (project, subroutine))
                 outgoing_va += Util.object_to_variant (outgoing_call);
             Vala.CodeContext.pop ();
             client.reply (id, new Variant.array (VariantType.VARDICT, outgoing_va), cancellable);
