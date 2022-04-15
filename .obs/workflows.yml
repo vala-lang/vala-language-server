@@ -1,5 +1,0 @@
-workflow:
-  steps:
-    - branch_package:
-      source_project: home:Prince781
-      source_package: vala-language-server

@@ -22,7 +22,7 @@ vala-language-server to enable debugging output.
 
 # BUGS
 
-Please file bugs at https://github.com/benwaffle/vala-language-server
+Please file bugs at https://github.com/vala-lang/vala-language-server
 
 # AUTHOR
 

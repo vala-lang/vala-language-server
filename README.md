@@ -172,7 +172,7 @@ endif
 ## Contributing
 Want to help out? Here are some helpful resources:
 
-- [Help is wanted on these issues](https://github.com/Prince781/vala-language-server/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
+- [Help is wanted on these issues](https://github.com/vala-lang/vala-language-server/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
 - [`#vala` on gimpnet/IRC](irc://irc.gnome.org/vala) is for general discussions about Vala and collaboration with upstream
 - [Discord server](https://discord.gg/YFAzjSVHt7) is for general discussions about Vala, discussions about this project, and support
 - Gitter room is also for project discussions and support, but is less active: https://gitter.im/vala-language-server/community

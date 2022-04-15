@@ -42,7 +42,7 @@ endif
 
 conf = configuration_data()
 conf.set('LIBVALA_VERSION', libvala.version())
-conf.set('PROJECT_BUGSITE', 'https://github.com/Prince781/vala-language-server/issues')
+conf.set('PROJECT_BUGSITE', 'https://github.com/vala-lang/vala-language-server/issues')
 conf.set('PROJECT_NAME', meson.project_name())
 
 conf_file = configure_file(input: 'config.vala.in',

@@ -370,7 +370,7 @@ class Vls.Server : Jsonrpc.Server {
             var autogen_sh = root_dir.get_child ("autogen.sh");
 
             if (cmake_file.query_exists (cancellable))
-                show_message (client, @"CMake build system is not currently supported. Only Meson is. See https://github.com/benwaffle/vala-language-server/issues/73", MessageType.Warning);
+                show_message (client, @"CMake build system is not currently supported. Only Meson is. See https://github.com/vala-lang/vala-language-server/issues/73", MessageType.Warning);
             if (autogen_sh.query_exists (cancellable))
                 show_message (client, @"Autotools build system is not currently supported. Consider switching to Meson.", MessageType.Warning);
         } else {
