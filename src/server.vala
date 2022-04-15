@@ -108,14 +108,7 @@ class Vls.Server : Jsonrpc.Server {
 #endif
 
         // shutdown if/when we get a signal
-        g_sources += Timeout.add (1 * 1000, () => {
-            if (Server.received_signal) {
-                shutdown ();
-                exit ();
-                return Source.REMOVE;
-            }
-            return !this.shutting_down;
-        });
+        g_sources += Timeout.add (1000, check_signal);
 
         accept_io_stream (new SimpleIOStream (input_stream, output_stream));
 
@@ -248,6 +241,15 @@ class Vls.Server : Jsonrpc.Server {
         exit ();
     }
 #endif
+
+    bool check_signal () {
+        if (Server.received_signal) {
+            shutdown ();
+            exit ();
+            return Source.REMOVE;
+        }
+        return !this.shutting_down;
+    }
 
     // a{sv} only
     public Variant build_dict (...) {
@@ -404,10 +406,7 @@ class Vls.Server : Jsonrpc.Server {
 
         // listen for context update requests
         update_context_client = client;
-        g_sources += Timeout.add (check_update_context_period_ms, () => {
-            check_update_context ();
-            return !this.shutting_down;
-        });
+        g_sources += Timeout.add (check_update_context_period_ms, check_update_context);
 
         // listen for project changed events
         foreach (Project project in new_projects)
@@ -646,7 +645,7 @@ class Vls.Server : Jsonrpc.Server {
      * Reconfigure the project if needed, and check whether we need to rebuild
      * the project and documentation engine if we have context update requests.
      */
-    void check_update_context () {
+    bool check_update_context () {
         if (update_context_requests > 0 && get_monotonic_time () >= update_context_time_us) {
             debug ("updating contexts and publishing diagnostics...");
             update_context_requests = 0;
@@ -738,6 +737,7 @@ class Vls.Server : Jsonrpc.Server {
             // rebuild the documentation
             documentation.rebuild_if_stale ();
         }
+        return !this.shutting_down;
     }
 
     public delegate void OnContextUpdatedFunc (bool request_cancelled);
