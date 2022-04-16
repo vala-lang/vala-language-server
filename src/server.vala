@@ -23,6 +23,7 @@ using Gee;
 class Vls.Server : Jsonrpc.Server {
     private static bool received_signal = false;
     MainLoop loop;
+    Scheduler scheduler;
 
     InitializeParams init_params;
 
@@ -71,8 +72,9 @@ class Vls.Server : Jsonrpc.Server {
         });
     }
 
-    public Server (MainLoop loop) {
+    public Server (MainLoop loop) throws ThreadError {
         this.loop = loop;
+        this.scheduler = new Scheduler ();
 
         // hack to prevent other things from corrupting JSON-RPC pipe:
         // create a new handle to stdout, and close the old one (or move it to stderr)
@@ -2143,8 +2145,12 @@ int main (string[] args) {
     }
 
     // otherwise
-    var loop = new MainLoop ();
-    new Vls.Server (loop);
-    loop.run ();
+    try {
+        var loop = new MainLoop ();
+        new Vls.Server (loop);
+        loop.run ();
+    } catch (ThreadError e) {
+        error ("failed to create thread pool: %s", e.message);
+    }
     return 0;
 }
