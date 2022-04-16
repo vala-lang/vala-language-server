@@ -97,6 +97,13 @@ namespace Vls.SymbolReferences {
     }
 
     /**
+     * Extract a new range based on offsets into a string with a given source reference.
+     *
+     * @param source_reference the source reference for the string
+     * @param representation   the string
+     * @param start            where to begin extraction
+     * @param end              where to end extraction
+     *
      * @return      a new {@link Lsp.Range} narrowed from the source reference
      */
     Range get_narrowed_source_reference (Vala.SourceReference source_reference, string representation, int start, int end) {

@@ -2,6 +2,7 @@ vls_src = files([
   'analysis/codeanalyzer.vala',
   'analysis/codelensanalyzer.vala',
   'analysis/codestyleanalyzer.vala',
+  'analysis/inlayhintnodes.vala',
   'analysis/symbolenumerator.vala',
   'codeaction/baseconverteraction.vala',
   'codeaction/implementmissingprereqsaction.vala',
