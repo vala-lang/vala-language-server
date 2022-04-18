@@ -37,7 +37,7 @@ class Vls.Server : Jsonrpc.Server {
      */
     GirDocumentation documentation;
 
-    HashSet<Request> pending_requests;
+    ConcurrentSet<Request> pending_requests;
 
     bool shutting_down = false;
 
@@ -114,9 +114,7 @@ class Vls.Server : Jsonrpc.Server {
 
         accept_io_stream (new SimpleIOStream (input_stream, output_stream));
 
-        pending_requests = new HashSet<Request> (Request.hash, Request.equal);
-
-        this.projects = new HashTable<Project, ulong> (GLib.direct_hash, GLib.direct_equal);
+        pending_requests = new ConcurrentSet<Request> ();
 
         debug ("Finished constructing");
     }
@@ -443,6 +441,7 @@ class Vls.Server : Jsonrpc.Server {
         g_sources += Timeout.add (check_update_context_period_ms, check_update_context);
 
         // listen for project changed events
+        this.projects = new HashTable<Project, ulong> (GLib.direct_hash, GLib.direct_equal);
         foreach (Project project in new_projects)
             projects[project] = project.changed.connect (project_changed_event);
     }
@@ -777,48 +776,53 @@ class Vls.Server : Jsonrpc.Server {
     public delegate void OnContextUpdatedFunc (bool request_cancelled);
 
     /**
-     * Rather than satisfying all requests in `check_update_context ()`,
-     * to avoid race conditions, we have to spawn a timeout to check for 
-     * the right conditions to call `on_context_updated_func ()`.
+     * Waits for the code context to be refreshed.
+     *
+     * @param id        an identifier for the pending request
+     * @param method    the name of the method, for debugging purposes
+     *
+     * @throws RequestError if the request was cancelled or some failure happened
      */
-    public void wait_for_context_update (Variant id, owned OnContextUpdatedFunc on_context_updated_func) {
-        // we've already updated the context
-        if (update_context_requests == 0)
-            on_context_updated_func (false);
-        else {
-            var req = new Request (id);
-            if (!pending_requests.add (req))
-                warning (@"Request ($req): request already in pending requests, this should not happen");
-            /* else
-                debug (@"Request ($req): added request to pending requests"); */
-            wait_for_context_update_aux (req, (owned) on_context_updated_func);
-        }
-    }
+    async void wait_for_context_update_async (Variant id, string? method = null) throws RequestError {
+        if (projects != null && update_context_requests == 0)
+            return;     // there's nothing to wait for
 
-    /**
-     * Execute `on_context_updated_func ()` or wait.
-     */
-    void wait_for_context_update_aux (Request req, owned OnContextUpdatedFunc on_context_updated_func) {
-        // we've already updated the context
-        if (update_context_requests == 0) {
-            if (!pending_requests.remove (req)) {
-                // debug (@"Request ($req): context updated but request cancelled");
-                on_context_updated_func (true);
-            } else {
-                // debug (@"Request ($req): context updated");
-                on_context_updated_func (false);
-            }
-        } else {
-            Timeout.add (wait_for_context_update_delay_ms, () => {
-                if (pending_requests.contains (req))
-                    wait_for_context_update_aux (req, (owned) on_context_updated_func);
-                else {
-                    // debug (@"Request ($req): cancelled before context update");
-                    on_context_updated_func (true);
-                }
+        var req = new Request (id, method);
+
+        if (!pending_requests.add (req))
+            warning (@"Request($req): request already in pending requests, this should not happen");
+
+        SourceFunc callback = wait_for_context_update_async.callback;
+        RequestError? err = null;
+
+        Timeout.add (wait_for_context_update_delay_ms, () => {
+            if (projects != null && update_context_requests == 0) {
+                // context was updated
+                // if [req] is still present, it hasn't been cancelled
+                if (!pending_requests.remove (req))
+                    err = new RequestError.CANCELLED (@"Request($req) already cancelled by the time context was updated");
+                callback ();
                 return Source.REMOVE;
-            });
-        }
+            }
+
+            // context hasn't been updated yet
+
+            if (!pending_requests.contains (req)) {
+                // request has been cancelled before context was updated
+                err = new RequestError.CANCELLED (@"Request($req) cancelled before context has been updated");
+                callback ();
+                return Source.REMOVE;
+            }
+
+            // otherwise just continue waiting...
+            // debug (@"Request($req): waiting for context update ...");
+            return Source.CONTINUE;
+        });
+
+        yield;  // wait for invocation of callback
+
+        if (err != null)
+            throw err;
     }
 
     void publish_diagnostics (Project project, Compilation target, Jsonrpc.Client client) {

@@ -19,7 +19,7 @@
 /**
  * Represents a cancellable request from the client to the server.
  */
-class Vls.Request : Object {
+class Vls.Request : Gee.Comparable<Request>, Object {
     private int64? int_value;
     private string? string_value;
     private string? method;
@@ -34,24 +34,29 @@ class Vls.Request : Object {
     }
 
     public string to_string () {
-        string id_string = int_value != null ? int_value.to_string () : string_value;
-        return id_string + (method != null ? @":$method" : "");
+        return value + (method != null ? @":$method" : "");
     }
 
-    public static uint hash (Request req) {
-        if (req.int_value != null)
-            return GLib.int64_hash (req.int_value);
-        else
-            return GLib.str_hash (req.string_value);
-    }
-
-    public static bool equal (Request reqA, Request reqB) {
-        if (reqA.int_value != null) {
-            assert (reqB.int_value != null);
-            return reqA.int_value == reqB.int_value;
-        } else {
-            assert (reqB.string_value != null);
-            return reqA.string_value == reqB.string_value;
+    string value {
+        owned get {
+            return int_value != null ? int_value.to_string () : string_value;
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int compare_to (Request other) {
+        return strcmp (this.value, other.value);
+    }
+}
+
+/**
+ * Errors occuring while servicing requests.
+ */
+errordomain Vls.RequestError {
+    /**
+     * The request was cancelled before or while the context was being updated.
+     */
+    CANCELLED
 }

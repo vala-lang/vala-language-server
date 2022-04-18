@@ -21,11 +21,11 @@
  */
 namespace Vls {
     /**
-     * A cancellable task that may throw an error.
+     * A task that may throw an error.
      */
-    delegate T TaskFunc<T> (Cancellable? cancellable = null) throws Error;
+    delegate T TaskFunc<T> () throws Error;
 
-    class Scheduler : Object {
+    class Scheduler {
         ThreadPool<Worker> _thread_pool;
 
         /**
@@ -39,8 +39,8 @@ namespace Vls {
          * Schedules a task to be run on a worker thread. If the task throws an
          * error, it will be propagated to the caller.
          */
-        public async T run<T> (owned TaskFunc<T> task, Cancellable? cancellable = null) throws Error {
-            SourceFunc callback = run<T>.callback; // create a callback to ourselves
+        public async T run_async<T> (owned TaskFunc<T> task, Cancellable? cancellable = null) throws Error {
+            SourceFunc callback = run_async<T>.callback; // create a callback to ourselves
 
             var worker = new Worker<T> ((owned) task, (owned) callback, cancellable);
             _thread_pool.add (worker);
@@ -85,7 +85,7 @@ namespace Vls {
             try {
                 if (_cancellable != null)
                     _cancellable.set_error_if_cancelled ();
-                result = _task (_cancellable);
+                result = _task ();
             } catch (Error e) {
                 error = e;
             }
