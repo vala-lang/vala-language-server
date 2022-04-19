@@ -23,13 +23,13 @@ using Vala;
 
 namespace Vls.CodeActions {
     /**
-     * Extracts a list of code actions for the given document and range.
+     * Extracts a list of code actions for the given document and range using the AST and the diagnostics.
      *
      * @param file      the current document
      * @param range     the range to show code actions for
      * @param uri       the document URI
      */
-    Collection<CodeAction> extract (Compilation compilation, TextDocument file, Range range, string uri) {
+    Collection<CodeAction> generate_codeactions (Compilation compilation, TextDocument file, Range range, string uri, Reporter reporter) {
         // search for nodes containing the query range
         var finder = new NodeSearch (file, range.start, true, range.end);
         var code_actions = new ArrayList<CodeAction> ();
@@ -41,13 +41,14 @@ namespace Vls.CodeActions {
 
         // add code actions
         foreach (CodeNode code_node in finder.result) {
+            critical ("%s", code_node.type_name);
             if (code_node is IntegerLiteral) {
-                var lit = (IntegerLiteral)code_node;
+                var lit = (IntegerLiteral) code_node;
                 var lit_range = new Range.from_sourceref (lit.source_reference);
                 if (lit_range.contains (range.start) && lit_range.contains (range.end))
                     code_actions.add (new BaseConverterAction (lit, document));
             } else if (code_node is Class) {
-                var csym = (Class)code_node;
+                var csym = (Class) code_node;
                 var clsdef_range = compute_class_def_range (csym, class_ranges);
                 var cls_range = new Range.from_sourceref (csym.source_reference);
                 if (cls_range.contains (range.start) && cls_range.contains (range.end)) {
@@ -55,6 +56,29 @@ namespace Vls.CodeActions {
                     if (!missing.first.is_empty || !missing.second.is_empty) {
                         var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (file);
                         code_actions.add (new ImplementMissingPrereqsAction (csym, missing.first, missing.second, clsdef_range.end, code_style, document));
+                    }
+                }
+            } else if (code_node is ObjectCreationExpression) {
+                var oce = (ObjectCreationExpression) code_node;
+                foreach (var diag in reporter.messages) {
+                    if (file.filename != diag.loc.file.filename)
+                        continue;
+                    if (!(oce.source_reference.contains (diag.loc.begin) || oce.source_reference.contains (diag.loc.end)))
+                        continue;
+                    if (diag.message.contains (" extra arguments for ")) {
+                        var to_be_created = oce.type_reference.symbol;
+                        if (!(to_be_created is Vala.Class)) {
+                            continue;
+                        }
+                        var constr = ((Vala.Class) to_be_created).constructor;
+                        if (constr != null) {
+                            continue;
+                        }
+                        var target_file = to_be_created.source_reference.file;
+                        // We can't just edit, e.g. some external vapi
+                        if (!compilation.get_project_files ().contains (target_file))
+                            continue;
+                        code_actions.add (new ImplementConstructorAction (oce, to_be_created));
                     }
                 }
             }
@@ -72,11 +96,11 @@ namespace Vls.CodeActions {
         // otherwise compute the result and cache it
         // csym.source_reference must be non-null otherwise NodeSearch wouldn't have found csym
         var pos = new Position.from_libvala (csym.source_reference.end);
-        var offset = csym.source_reference.end.pos - (char *)csym.source_reference.file.content;
+        var offset = csym.source_reference.end.pos - (char*) csym.source_reference.file.content;
         var dl = 0;
         var dc = 0;
-        while (offset < csym.source_reference.file.content.length && csym.source_reference.file.content[(long)offset] != '{') {
-            if (Util.is_newline (csym.source_reference.file.content[(long)offset])) {
+        while (offset < csym.source_reference.file.content.length && csym.source_reference.file.content[(long) offset] != '{') {
+            if (Util.is_newline (csym.source_reference.file.content[(long) offset])) {
                 dl++;
                 dc = 0;
             } else {
@@ -93,8 +117,8 @@ namespace Vls.CodeActions {
             if (member.source_reference == null)
                 continue;
             range = range.union (new Range.from_sourceref (member.source_reference));
-            if (member is Method && ((Method)member).body != null && ((Method)member).body.source_reference != null)
-                range = range.union (new Range.from_sourceref (((Method)member).body.source_reference));
+            if (member is Method && ((Method) member).body != null && ((Method) member).body.source_reference != null)
+                range = range.union (new Range.from_sourceref (((Method) member).body.source_reference));
         }
         class_ranges[csym] = range;
         return range;
