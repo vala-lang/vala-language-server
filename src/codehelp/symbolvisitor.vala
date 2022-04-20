@@ -25,30 +25,25 @@ using Vala;
  * knowledge of a symbol to compare, custom user data, and the code
  * node we are presently exploring.
  */
-class Vls.SymbolVisitor<G> : CodeVisitor {
-    [CCode (has_target = false)]
-    public delegate void Func<G> (CodeNode code_node, Symbol symbol, G user_data);
+class Vls.SymbolVisitor : CodeVisitor {
+    public delegate void Func (CodeNode code_node);
 
     private SourceFile file;
-    private Symbol symbol;
-    private G data;
     private Gee.HashSet<CodeNode> seen;
     private bool include_declaration;
-    private Func<G> func;
+    private Func func;
 
-    public SymbolVisitor (SourceFile file, Symbol symbol, G data, bool include_declaration, Func<G> func) {
+    public SymbolVisitor (SourceFile file, Symbol symbol, bool include_declaration, owned Func func) {
         this.file = file;
-        this.symbol = symbol;
-        this.data = data;
         this.seen = new Gee.HashSet<CodeNode> ();
         this.include_declaration = include_declaration;
-        this.func = func;
+        this.func = (owned) func;
         visit_source_file (file);
 
         // XXX: sometimes the CodeVisitor does not see a local variable,
         // especially if it is declared as part of a foreach statement
         if (symbol is LocalVariable && filter (symbol))
-            func (symbol, symbol, data);
+            func (symbol);
     }
 
     private bool filter (CodeNode node) {
@@ -75,7 +70,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -84,7 +79,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -93,7 +88,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (a);
         if (filter (a))
-            func (a, symbol, data);
+            func (a);
         a.accept_children (this);
     }
 
@@ -102,7 +97,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -111,7 +106,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -120,7 +115,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (b);
         if (filter (b))
-            func (b, symbol, data);
+            func (b);
         b.accept_children (this);
     }
 
@@ -129,7 +124,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (lit);
         if (filter (lit))
-            func (lit, symbol, data);
+            func (lit);
         lit.accept_children (this);
     }
 
@@ -138,7 +133,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 
@@ -147,7 +142,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -156,7 +151,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (clause);
         if (filter (clause))
-            func (clause, symbol, data);
+            func (clause);
         clause.accept_children (this);
     }
 
@@ -165,7 +160,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (lit);
         if (filter (lit))
-            func (lit, symbol, data);
+            func (lit);
         lit.accept_children (this);
     }
 
@@ -174,7 +169,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (cl);
         if (filter (cl) && include_declaration)
-            func (cl, symbol, data);
+            func (cl);
         cl.accept_children (this);
     }
 
@@ -183,7 +178,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -192,7 +187,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (c);
         if (filter (c) && include_declaration)
-            func (c, symbol, data);
+            func (c);
         c.accept_children (this);
     }
 
@@ -201,7 +196,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (c);
         if (filter (c) && include_declaration)
-            func (c, symbol, data);
+            func (c);
         c.accept_children (this);
     }
 
@@ -210,7 +205,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 
@@ -219,7 +214,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (m);
         if (filter (m) && include_declaration)
-            func (m, symbol, data);
+            func (m);
         m.accept_children (this);
     }
 
@@ -228,7 +223,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (type);
         if (filter (type))
-            func (type, symbol, data);
+            func (type);
         type.accept_children (this);
     }
 
@@ -237,7 +232,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 
@@ -246,7 +241,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (cb);
         if (filter (cb) && include_declaration)
-            func (cb, symbol, data);
+            func (cb);
         cb.accept_children (this);
     }
 
@@ -255,7 +250,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
     
@@ -264,7 +259,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (dtor);
         if (filter (dtor) && include_declaration)
-            func (dtor, symbol, data);
+            func (dtor);
         dtor.accept_children (this);
     }
 
@@ -273,7 +268,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 
@@ -282,7 +277,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -291,7 +286,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 
@@ -300,7 +295,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (en);
         if (filter (en) && include_declaration)
-            func (en, symbol, data);
+            func (en);
         en.accept_children (this);
     }
 
@@ -309,7 +304,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (ev);
         if (filter (ev) && include_declaration)
-            func (ev, symbol, data);
+            func (ev);
         ev.accept_children (this);
     }
 
@@ -318,7 +313,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (ecode);
         if (filter (ecode) && include_declaration)
-            func (ecode, symbol, data);
+            func (ecode);
         ecode.accept_children (this);
     }
 
@@ -327,7 +322,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (edomain);
         if (filter (edomain) && include_declaration)
-            func (edomain, symbol, data);
+            func (edomain);
         edomain.accept_children (this);
     }
 
@@ -339,7 +334,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -348,7 +343,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 
@@ -357,7 +352,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (f);
         if (filter (f) && include_declaration)
-            func (f, symbol, data);
+            func (f);
         f.accept_children (this);
     }
 
@@ -366,7 +361,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 
@@ -375,7 +370,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 
@@ -384,7 +379,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (p);
         if (filter (p) && include_declaration)
-            func (p, symbol, data);
+            func (p);
         p.accept_children (this);
     }
 
@@ -393,7 +388,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 
@@ -402,7 +397,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (list);
         if (filter (list))
-            func (list, symbol, data);
+            func (list);
         list.accept_children (this);
     }
 
@@ -411,7 +406,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (lit);
         if (filter (lit))
-            func (lit, symbol, data);
+            func (lit);
         lit.accept_children (this);
     }
 
@@ -420,7 +415,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (iface);
         if (filter (iface) && include_declaration)
-            func (iface, symbol, data);
+            func (iface);
         iface.accept_children (this);
     }
 
@@ -429,7 +424,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -438,7 +433,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (local);
         if (filter (local) && (include_declaration || !(local.parent_node is DeclarationStatement)))
-            func (local, symbol, data);
+            func (local);
         local.accept_children (this);
     }
 
@@ -447,7 +442,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 
@@ -460,7 +455,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 
@@ -469,7 +464,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -478,7 +473,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (m);
         if (filter (m) && include_declaration)
-            func (m, symbol, data);
+            func (m);
         m.accept_children (this);
     }
 
@@ -487,7 +482,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -496,7 +491,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (ns);
         if (filter (ns))
-            func (ns, symbol, data);
+            func (ns);
         ns.accept_children (this);
     }
 
@@ -505,7 +500,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (lit);
         if (filter (lit))
-            func (lit, symbol, data);
+            func (lit);
         lit.accept_children (this);
     }
 
@@ -514,7 +509,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -523,7 +518,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -532,7 +527,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -541,7 +536,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (prop);
         if (filter (prop) && include_declaration)
-            func (prop, symbol, data);
+            func (prop);
         prop.accept_children (this);
     }
 
@@ -550,7 +545,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (acc);
         if (filter (acc) && include_declaration)
-            func (acc, symbol, data);
+            func (acc);
         acc.accept_children (this);
     }
 
@@ -559,7 +554,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (lit);
         if (filter (lit))
-            func (lit, symbol, data);
+            func (lit);
         lit.accept_children (this);
     }
 
@@ -568,7 +563,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -577,7 +572,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (lit);
         if (filter (lit))
-            func (lit, symbol, data);
+            func (lit);
         lit.accept_children (this);
     }
 
@@ -586,7 +581,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 
@@ -595,7 +590,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (sig);
         if (filter (sig) && include_declaration)
-            func (sig, symbol, data);
+            func (sig);
         sig.accept_children (this);
     }
 
@@ -604,7 +599,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -613,7 +608,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -622,7 +617,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (lit);
         if (filter (lit))
-            func (lit, symbol, data);
+            func (lit);
         lit.accept_children (this);
     }
 
@@ -631,7 +626,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (st);
         if (filter (st) && include_declaration)
-            func (st, symbol, data);
+            func (st);
         st.accept_children (this);
     }
 
@@ -640,7 +635,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (label);
         if (filter (label))
-            func (label, symbol, data);
+            func (label);
         label.accept_children (this);
     }
 
@@ -649,7 +644,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (section);
         if (filter (section))
-            func (section, symbol, data);
+            func (section);
         section.accept_children (this);
     }
 
@@ -658,7 +653,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 
@@ -667,7 +662,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (tmpl);
         if (filter (tmpl))
-            func (tmpl, symbol, data);
+            func (tmpl);
         tmpl.accept_children (this);
     }
 
@@ -676,7 +671,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 
@@ -685,7 +680,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 
@@ -694,7 +689,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -703,7 +698,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (p);
         if (filter (p))
-            func (p, symbol, data);
+            func (p);
         p.accept_children (this);
     }
 
@@ -712,7 +707,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -721,7 +716,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (expr);
         if (filter (expr))
-            func (expr, symbol, data);
+            func (expr);
         expr.accept_children (this);
     }
 
@@ -730,7 +725,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 
@@ -739,7 +734,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (ud);
         if (filter (ud))
-            func (ud, symbol, data);
+            func (ud);
         ud.accept_children (this);
     }
 
@@ -748,7 +743,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 
@@ -758,7 +753,7 @@ class Vls.SymbolVisitor<G> : CodeVisitor {
             return;
         seen.add (stmt);
         if (filter (stmt))
-            func (stmt, symbol, data);
+            func (stmt);
         stmt.accept_children (this);
     }
 #endif

@@ -41,27 +41,25 @@ namespace Vls.CallHierarchy {
                 symbols += method.base_method;
         }
         // find all references to this callable
-        foreach (var symbol in symbols) {
-            foreach (var pair in SymbolReferences.get_compilations_using_symbol (project, symbol)) {
-                foreach (SourceFile file in pair.first.code_context.get_source_files ()) {
-                    var references = new Gee.HashMap<Range, CodeNode> ();
-                    SymbolReferences.list_in_file (file, callable, false, references);
-                    foreach (var reference in references) {
-                        if (!(reference.value.parent_node is MethodCall || reference.value.parent_node is ObjectCreationExpression))
-                            continue;
-                        var container = get_containing_sub_or_callable (reference.value);
-                        if (container != null) {
-                            Gee.ArrayList<Range> ranges;
-                            if (!incoming_calls.has_key (container)) {
-                                ranges = new Gee.ArrayList<Range> ();
-                                incoming_calls[container] = ranges;
-                            } else {
-                                ranges = incoming_calls[container];
-                            }
-                            ranges.add (reference.key);
-                        }
-                    }
+        var references = new Gee.HashMap<Range, CodeNode> ();
+        foreach (var symbol in symbols)
+            foreach (var pair in SymbolReferences.get_compilations_using_symbol (project, symbol))
+                foreach (SourceFile file in pair.first.code_context.get_source_files ())
+                    SymbolReferences.list_in_file (file, pair.second, false, true, references);
+        debug ("got %d references as incoming calls to %s (%s)", references.size, callable.to_string (), callable.type_name);
+        foreach (var reference in references) {
+            if (!(reference.value.parent_node is MethodCall || reference.value.parent_node is ObjectCreationExpression))
+                continue;
+            var container = get_containing_sub_or_callable (reference.value);
+            if (container != null) {
+                Gee.ArrayList<Range> ranges;
+                if (!incoming_calls.has_key (container)) {
+                    ranges = new Gee.ArrayList<Range> ();
+                    incoming_calls[container] = ranges;
+                } else {
+                    ranges = incoming_calls[container];
                 }
+                ranges.add (reference.key);
             }
         }
         if (callable is Constructor) {

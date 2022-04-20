@@ -1438,7 +1438,7 @@ class Vls.Server : Jsonrpc.Server {
                 // if highlight, show references in current file
                 // otherwise, we may also do this if it's a local variable, since
                 // Server.get_compilations_using_symbol() only works for global symbols
-                SymbolReferences.list_in_file (doc, symbol, include_declaration, references);
+                SymbolReferences.list_in_file (doc, symbol, include_declaration, true, references);
             } else {
                 // show references in all files
                 var generated_vapis = new HashSet<File> (Util.file_hash, Util.file_equal);
@@ -1451,7 +1451,7 @@ class Vls.Server : Jsonrpc.Server {
                         var file = File.new_for_commandline_arg (project_file.filename);
                         if (file in generated_vapis || file in shown_files)
                             continue;
-                        SymbolReferences.list_in_file (project_file, btarget_w_sym.second, include_declaration, references);
+                        SymbolReferences.list_in_file (project_file, btarget_w_sym.second, include_declaration, true, references);
                         shown_files.add (file);
                     }
             }
@@ -1777,7 +1777,7 @@ class Vls.Server : Jsonrpc.Server {
                         continue;
                     var file_references = new HashMap<Range, Vala.CodeNode> ();
                     debug ("[%s] looking for references in %s ...", method, file.get_uri ());
-                    SymbolReferences.list_in_file (project_file, btarget_w_sym.second, true, file_references);
+                    SymbolReferences.list_in_file (project_file, btarget_w_sym.second, true, false, file_references);
                     if (is_abstract_or_virtual) {
                         debug ("[%s] looking for implementations of abstract/virtual symbol in %s ...", method, file.get_uri ());
                         SymbolReferences.list_implementations_of_virtual_symbol (project_file, btarget_w_sym.second, file_references);
