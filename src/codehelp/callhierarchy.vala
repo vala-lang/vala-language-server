@@ -97,7 +97,7 @@ namespace Vls.CallHierarchy {
                 var call = (node is MethodCall) ? ((MethodCall)node).call : ((ObjectCreationExpression)node).member_name;
                 if (node.source_reference == null || call.symbol_reference.source_reference == null)
                     continue;
-                var called_item = call.symbol_reference;
+                var called_item = SymbolReferences.find_real_symbol (project, call.symbol_reference);
                 Gee.ArrayList<Range> ranges;
                 if (!outgoing_calls.has_key (called_item)) {
                     ranges = new Gee.ArrayList<Range> ();
