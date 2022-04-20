@@ -86,26 +86,38 @@ namespace Vls.CallHierarchy {
 
     CallHierarchyOutgoingCall[] get_outgoing_calls (Project project, Subroutine subroutine) {
         var outgoing_calls = new Gee.HashMap<Symbol, Gee.ArrayList<Range>> ();
+        Subroutine[] subroutines = {subroutine};
+        // add all implementing symbols
+        foreach (var pair in SymbolReferences.get_compilations_using_symbol (project, subroutine)) {
+            var references = new Gee.HashMap<Range, Vala.CodeNode> ();
+            foreach (SourceFile file in pair.first.code_context.get_source_files ())
+                SymbolReferences.list_implementations_of_virtual_symbol (file, pair.second, references);
+            foreach (var node in references.values)
+                if (node is Vala.Method)
+                    subroutines += (Vala.Method)node;
+        }
         // find all methods that are called in this method
-        if (subroutine.source_reference != null && subroutine.body != null) {
-            var finder = new NodeSearch.with_filter (subroutine.source_reference.file, subroutine,
-                                                     (needle, node) => (node is MethodCall || node is ObjectCreationExpression)
-                                                                    && get_containing_sub_or_callable (node) == needle);
-            var result = new Gee.ArrayList<Vala.CodeNode> ();
-            result.add_all (finder.result);
-            foreach (var node in result) {
-                var call = (node is MethodCall) ? ((MethodCall)node).call : ((ObjectCreationExpression)node).member_name;
-                if (node.source_reference == null || call.symbol_reference.source_reference == null)
-                    continue;
-                var called_item = SymbolReferences.find_real_symbol (project, call.symbol_reference);
-                Gee.ArrayList<Range> ranges;
-                if (!outgoing_calls.has_key (called_item)) {
-                    ranges = new Gee.ArrayList<Range> ();
-                    outgoing_calls[called_item] = ranges;
-                } else {
-                    ranges = outgoing_calls[called_item];
+        foreach (var current_sub in subroutines) {
+            if (current_sub.source_reference != null && current_sub.body != null) {
+                var finder = new NodeSearch.with_filter (current_sub.source_reference.file, current_sub,
+                                                         (needle, node) => (node is MethodCall || node is ObjectCreationExpression)
+                                                                        && get_containing_sub_or_callable (node) == needle);
+                var result = new Gee.ArrayList<Vala.CodeNode> ();
+                result.add_all (finder.result);
+                foreach (var node in result) {
+                    var call = (node is MethodCall) ? ((MethodCall)node).call : ((ObjectCreationExpression)node).member_name;
+                    if (node.source_reference == null || call.symbol_reference.source_reference == null)
+                        continue;
+                    var called_item = SymbolReferences.find_real_symbol (project, call.symbol_reference);
+                    Gee.ArrayList<Range> ranges;
+                    if (!outgoing_calls.has_key (called_item)) {
+                        ranges = new Gee.ArrayList<Range> ();
+                        outgoing_calls[called_item] = ranges;
+                    } else {
+                        ranges = outgoing_calls[called_item];
+                    }
+                    ranges.add (new Range.from_sourceref (node.source_reference));
                 }
-                ranges.add (new Range.from_sourceref (node.source_reference));
             }
         }
         CallHierarchyOutgoingCall[] outgoing = {};
