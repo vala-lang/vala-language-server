@@ -31,7 +31,7 @@ class Vls.InvalidExpression : Vala.Expression {
         return false;
     }
 
-    public override bool check (Vala.CodeContext context) {
+    public override bool check (Vala.SemanticAnalyzer analyzer) {
         return false;
     }
 }
@@ -455,7 +455,7 @@ class Vls.SymbolExtractor : Object {
             var fake_at = (FakeArrayType) fake_type;
             return new Vala.ArrayType (resolve_fake_data_type (fake_at.element_type), fake_at.rank) {
                 value_owned = fake_at.is_owned,
-                length_type = context.analyzer.int_type.copy ()
+                length_type = context.int_type.copy ()
             };
         } else if (fake_type is FakeSymbolDataType) {
             var fake_st = (FakeSymbolDataType) fake_type;
@@ -679,32 +679,32 @@ class Vls.SymbolExtractor : Object {
             if (fake_expr is FakeStringLiteral) {
                 var fake_str = (FakeStringLiteral) fake_expr;
                 var expr = new Vala.StringLiteral (fake_str.value);
-                expr.value_type = context.analyzer.string_type;
+                expr.value_type = context.string_type;
                 return expr;
             } else if (fake_expr is FakeRealLiteral) {
                 var fake_real = (FakeRealLiteral) fake_expr;
                 var expr = new Vala.RealLiteral (fake_real.value);
-                expr.value_type = context.analyzer.double_type;
+                expr.value_type = context.double_type;
                 return expr;
             } else if (fake_expr is FakeIntegerLiteral) {
                 var fake_int = (FakeIntegerLiteral) fake_expr;
                 var expr = new Vala.IntegerLiteral (fake_int.value);
-                expr.value_type = context.analyzer.int_type;
+                expr.value_type = context.int_type;
                 return expr;
             } else if (fake_expr is FakeBooleanLiteral) {
                 var fake_bool = (FakeBooleanLiteral) fake_expr;
                 var expr = new Vala.BooleanLiteral (fake_bool.bool_value);
-                expr.value_type = context.analyzer.bool_type;
+                expr.value_type = context.bool_type;
                 return expr;
             } else if (fake_expr is FakeCharacterLiteral) {
                 var fake_char = (FakeCharacterLiteral) fake_expr;
                 var expr = new Vala.CharacterLiteral (fake_char.value);
-                expr.value_type = context.analyzer.char_type;
+                expr.value_type = context.char_type;
                 return expr;
             } else if (fake_expr is FakeRegexLiteral) {
                 var fake_regex = (FakeRegexLiteral) fake_expr;
                 var expr = new Vala.RegexLiteral (fake_regex.value);
-                expr.value_type = context.analyzer.regex_type;
+                expr.value_type = context.regex_type;
                 return expr;
             } else if (fake_expr is FakeNullLiteral) {
                 var expr = new Vala.NullLiteral ();

@@ -401,36 +401,36 @@ namespace Vls.SignatureHelpEngine {
             if (format_char == 'd' || format_char == 'i' || format_char == 'c') {
                 // integer
                 if (length == -2) {
-                    param_type = context.analyzer.int8_type;
+                    param_type = context.int8_type;
                 } else if (length == -1) {
-                    param_type = context.analyzer.short_type;
+                    param_type = context.short_type;
                 } else if (length == 0) {
-                    param_type = context.analyzer.int_type;
+                    param_type = context.int_type;
                 } else if (length == 1) {
-                    param_type = context.analyzer.long_type;
+                    param_type = context.long_type;
                 } else if (length == 2) {
-                    param_type = context.analyzer.ssize_t_type;
+                    param_type = context.ssize_t_type;
                 }
             } else if (format_char == 'o' || format_char == 'u' || format_char == 'x' || format_char == 'X') {
                 // unsigned integer
                 if (length == -2) {
-                    param_type = context.analyzer.uchar_type;
+                    param_type = context.uchar_type;
                 } else if (length == -1) {
-                    param_type = context.analyzer.ushort_type;
+                    param_type = context.ushort_type;
                 } else if (length == 0) {
-                    param_type = context.analyzer.uint_type;
+                    param_type = context.uint_type;
                 } else if (length == 1) {
-                    param_type = context.analyzer.ulong_type;
+                    param_type = context.ulong_type;
                 } else if (length == 2) {
-                    param_type = context.analyzer.size_t_type;
+                    param_type = context.size_t_type;
                 }
             } else if (format_char == 'e' || format_char == 'E' || format_char == 'f' || format_char == 'F'
                        || format_char == 'g' || format_char == 'G' || format_char == 'a' || format_char == 'A') {
                 // double
-                param_type = context.analyzer.double_type;
+                param_type = context.double_type;
             } else if (format_char == 's') {
                 // string
-                param_type = context.analyzer.string_type;
+                param_type = context.string_type;
             } else if (format_char == 'p') {
                 // pointer
                 param_type = new Vala.PointerType (new Vala.VoidType ());

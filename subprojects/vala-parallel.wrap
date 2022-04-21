@@ -1,0 +1,7 @@
+[wrap-git]
+directory = vala-parallel
+url = https://gitlab.gnome.org/Prince781/vala
+revision = prince781/meson/parallelize
+
+[provide]
+libvala-parallel = valacore_dep
