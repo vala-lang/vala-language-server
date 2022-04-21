@@ -43,7 +43,7 @@ class Vls.SymbolVisitor : CodeVisitor {
         // XXX: sometimes the CodeVisitor does not see a local variable,
         // especially if it is declared as part of a foreach statement
         if (symbol is LocalVariable && filter (symbol))
-            func (symbol);
+            this.func (symbol);
     }
 
     private bool filter (CodeNode node) {
