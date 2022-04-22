@@ -38,28 +38,39 @@ class Vls.SourceMessage {
 
 class Vls.Reporter : Vala.Report {
     public bool fatal_warnings { get; private set; }
-    public GenericArray<SourceMessage> messages = new GenericArray<SourceMessage> ();
-    private HashMap<string, HashMap<string, uint>> messages_by_srcref = new HashMap<string, HashMap<string, uint>> ();
+    public ConcurrentList<SourceMessage> messages = new ConcurrentList<SourceMessage> ();
+    private ConcurrentList<Vala.SourceReference?> cache = new ConcurrentList<Vala.SourceReference?> (compare_sourcerefs);
+    private int consecutive_cache_hits = 0;
 
     public Reporter (bool fatal_warnings = false) {
         this.fatal_warnings = fatal_warnings;
     }
 
+    static bool compare_sourcerefs (Vala.SourceReference? src1, Vala.SourceReference? src2) {
+        if (src1 == src2)
+            return true;
+        if (src1 != null && src2 != null) {
+            return src1.begin.line == src2.begin.line && src1.begin.column == src2.begin.column
+                && src1.end.line == src2.end.line && src2.end.column == src2.end.column;
+        }
+        return false;
+    }
+
     public void add_message (Vala.SourceReference? source, string message, DiagnosticSeverity severity) {
         // mitigate potential infinite loop bugs in Vala parser
-        HashMap<string, uint>? messages_count = null;
-        if ((messages_count = messages_by_srcref[source.to_string ()]) == null) {
-            messages_count = new HashMap<string, uint> ();
-            messages_by_srcref[source.to_string ()] = messages_count;
+        if (source in cache)
+            AtomicInt.inc (ref consecutive_cache_hits);
+        else {
+            AtomicInt.set (ref consecutive_cache_hits, 0);
+            if (cache.size > 20)
+                cache.remove_at (0);
+            cache.add (source);
         }
-        if (!messages_count.has_key (message))
-            messages_count[message] = 0;
-        messages_count[message] = messages_count[message] + 1;
 
-        if (source != null && messages_count[message] >= 100) {
-            GLib.error ("parser infinite loop detected! (seen \"%s\" @ %s at least %u times)\n"
+        if (source != null && consecutive_cache_hits >= 100) {
+            GLib.error ("parser infinite loop detected! (seen \"%s\" @ %s at least %u times in a row)\n"
                         + "note: please report this bug with the source code that causes this error at https://gitlab.gnome.org/GNOME/vala", 
-                         message, source.to_string (), messages_count[message]);
+                         message, source.to_string (), consecutive_cache_hits);
         }
         messages.add (new SourceMessage (source, message, severity));
     }
@@ -69,7 +80,7 @@ class Vls.Reporter : Vala.Report {
             err (source, message);
         else {
             add_message (source, message, DiagnosticSeverity.Warning);
-            ++warnings;
+            AtomicInt.inc (ref warnings);
         }
     }
     public override void err (Vala.SourceReference? source, string message) {
@@ -77,7 +88,7 @@ class Vls.Reporter : Vala.Report {
             stderr.printf ("Error: %s\n", message);
         } else {
             add_message (source, message, DiagnosticSeverity.Error);
-            ++errors;
+            AtomicInt.inc (ref errors);
         }
     }
     public override void note (Vala.SourceReference? source, string message) {
@@ -85,7 +96,7 @@ class Vls.Reporter : Vala.Report {
             err (source, message);
         else {
             add_message (source, message, DiagnosticSeverity.Information);
-            ++warnings;
+            AtomicInt.inc (ref warnings);
         }
     }
     public override void warn (Vala.SourceReference? source, string message) {
@@ -93,7 +104,7 @@ class Vls.Reporter : Vala.Report {
             err (source, message);
         else {
             add_message (source, message, DiagnosticSeverity.Warning);
-            ++warnings;
+            AtomicInt.inc (ref warnings);
         }
     }
 }

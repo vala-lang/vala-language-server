@@ -30,7 +30,7 @@ abstract class Vls.Project : Object {
     /**
      * This collection must be topologically sorted.
      */
-    protected ArrayList<BuildTarget> build_targets = new ArrayList<BuildTarget> (); 
+    protected ConcurrentList<BuildTarget> build_targets = new ConcurrentList<BuildTarget> (); 
 
     /** 
      * Directories of additional files (mainly C sources) that have to be
@@ -44,9 +44,15 @@ abstract class Vls.Project : Object {
      */
     protected FileCache file_cache;
 
+    /**
+     * The worker to schedule all operations through.
+     */
+    public ProjectWorker worker { get; private set; }
+
     protected Project (string root_path, FileCache file_cache) {
         this.root_path = root_path;
         this.file_cache = file_cache;
+        this.worker = new ProjectWorker (root_path);
     }
 
     /** 
@@ -232,15 +238,15 @@ abstract class Vls.Project : Object {
             return;
 
         if (FileMonitorEvent.ATTRIBUTE_CHANGED in event_type) {
-            debug ("Project: watched file %s had an attribute changed", src.get_path ());
+            // debug ("Project: watched file %s had an attribute changed", src.get_path ());
             changed ();
         }
         if (FileMonitorEvent.CHANGED in event_type) {
-            debug ("Project: watched file %s was changed", src.get_path ());
+            // debug ("Project: watched file %s was changed", src.get_path ());
             changed ();
         }
         if (FileMonitorEvent.DELETED in event_type) {
-            debug ("Project: watched file %s was deleted", src.get_path ());
+            // debug ("Project: watched file %s was deleted", src.get_path ());
             // remove this file monitor since the file was deleted
             FileMonitor file_monitor;
             if (monitored_files.unset (src, out file_monitor)) {
@@ -275,42 +281,39 @@ abstract class Vls.Project : Object {
     /**
      * Find all source files matching `escaped_uri`
      */
-    public ArrayList<Pair<Vala.SourceFile, Compilation>> lookup_compile_input_source_file (string escaped_uri) {
-        var results = new ArrayList<Pair<Vala.SourceFile, Compilation>> ();
+    public ArrayList<Pair<SourceFileWorker, Compilation>> lookup_compile_input_source_file (string escaped_uri) {
+        var results = new ArrayList<Pair<SourceFileWorker, Compilation>> ();
         var file = File.new_for_uri (Uri.unescape_string (escaped_uri));
-        foreach (var btarget in build_targets) {
-            if (!(btarget is Compilation))
-                continue;
-            Vala.SourceFile input_source;
-            if (((Compilation)btarget).lookup_input_source_file (file, out input_source))
-                results.add (new Pair<Vala.SourceFile, Compilation> (input_source, (Compilation)btarget));
+        var path = file.get_path ();
+        if (path != null) {
+            var filename = Util.realpath (path);
+            foreach (var target in this) {
+                foreach (var worker in target) {
+                    if (Util.realpath (worker.source_file.filename) == filename)
+                        results.add (new Pair<SourceFileWorker, Compilation> (worker, target));
+                }
+            }
         }
         return results;
     }
 
     /**
      * Determine the Compilation that outputs `filename`
-     * Return true if found, false otherwise.
+     * Return the compilation if found, otherwise null.
      */
-    public bool lookup_compilation_for_output_file (string filename, out Compilation compilation) {
+    public Compilation? lookup_compilation_for_output_file (string filename) {
         var file = File.new_for_commandline_arg_and_cwd (filename, root_path);
-        foreach (var btarget in build_targets) {
-            if (!(btarget is Compilation))
-                continue;
-            if (btarget.output.contains (file)) {
-                compilation = (Compilation)btarget;
-                return true;
-            }
-        }
-        compilation = null;
-        return false;
+        foreach (var target in this)
+            if (target.output.contains (file))
+                return target;
+        return null;
     }
 
     /**
      * Open the file. Is guaranteed to return a non-empty result, or will
      * throw an error.
      */
-    public virtual ArrayList<Pair<Vala.SourceFile, Compilation>> open (string escaped_uri, string? content = null, Cancellable? cancellable = null) throws Error {
+    public virtual ArrayList<Pair<SourceFileWorker, Compilation>> open (string escaped_uri, string? content = null, Cancellable? cancellable = null) throws Error {
         var results = lookup_compile_input_source_file (escaped_uri);
         if (results.is_empty)
             throw new ProjectError.NOT_FOUND ("cannot open %s - file cannot be created for this type of project", escaped_uri);
@@ -322,23 +325,26 @@ abstract class Vls.Project : Object {
      * The default implementation of this method is to restore the text document to 
      * its last save point.
      */
-    public virtual bool close (string escaped_uri) throws Error {
+    public virtual bool close (string escaped_uri, Cancellable? cancellable) throws Error {
         var results = lookup_compile_input_source_file (escaped_uri);
         if (results.is_empty)
             return false;
         bool modified = false;
         foreach (var pair in results) {
-            var text_document = pair.first as TextDocument;
+            var worker = pair.first;
+            var text_document = worker.source_file as TextDocument;
             if (text_document == null)
                 continue;
             // If we're closing this document, but the last saved version 
             // is not the same as the current version, then we need to 
             // restore our last checkpoint.
             if (text_document.last_saved_version != text_document.version) {
+                worker.acquire (cancellable);
                 text_document.content = text_document.last_saved_content;
                 text_document.version = text_document.last_saved_version;
                 text_document.last_updated = new DateTime.now ();
                 modified = true;
+                worker.release (cancellable);
             }
         }
         return modified;
@@ -349,14 +355,10 @@ abstract class Vls.Project : Object {
      */
     public Collection<Vala.SourceFile> get_packages () {
         var results = new HashSet<Vala.SourceFile> (Util.source_file_hash, Util.source_file_equal);
-        foreach (var btarget in build_targets) {
-            if (!(btarget is Compilation))
-                continue;
-            var compilation = (Compilation) btarget;
-            foreach (var source_file in compilation.code_context.get_source_files ())
-                if (source_file.file_type == Vala.SourceFileType.PACKAGE)
-                    results.add (source_file);
-        }
+        foreach (var compilation in this)
+            foreach (var worker in compilation)
+                if (worker.source_file.file_type == Vala.SourceFileType.PACKAGE)
+                    results.add (worker.source_file);
         return results;
     }
     
@@ -379,25 +381,14 @@ abstract class Vls.Project : Object {
     }
 
     /**
-     * Get all source files used in this project.
+     * Iterate over all compilations.
      */
-    public Iterable<Map.Entry<Vala.SourceFile, Compilation>> get_project_source_files () {
-        var results = new HashMap<Vala.SourceFile, Compilation> ();
-        foreach (var btarget in build_targets) {
-            if (!(btarget is Compilation))
-                continue;
-            foreach (var file in ((Compilation)btarget).get_project_files ())
-                results[file] = (Compilation)btarget;
-        }
-        return results;
+    public Iterator<Compilation> iterator () {
+        return build_targets.filter (t => t is Compilation).map<Compilation> (t => (Compilation)t);
     }
 
-    public ArrayList<Compilation> get_compilations () {
-        var results = new ArrayList<Compilation> ();
-        foreach (var btarget in build_targets)
-            if (btarget is Compilation)
-                results.add ((Compilation) btarget);
-        return results;
+    public string to_string () {
+        return "%s@%s".printf (get_type ().name (), root_path);
     }
 }
 

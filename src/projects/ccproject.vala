@@ -102,17 +102,17 @@ class Vls.CcProject : Project {
 
     private void file_changed_event (File src, File? dest, FileMonitorEvent event_type) {
         if (FileMonitorEvent.ATTRIBUTE_CHANGED in event_type) {
-            debug ("CcProject: watched file %s had an attribute changed", src.get_path ());
+            // debug ("CcProject: watched file %s had an attribute changed", src.get_path ());
             build_files_have_changed = true;
             changed ();
         }
         if (FileMonitorEvent.CHANGED in event_type) {
-            debug ("CcProject: watched file %s was changed", src.get_path ());
+            // debug ("CcProject: watched file %s was changed", src.get_path ());
             build_files_have_changed = true;
             changed ();
         }
         if (FileMonitorEvent.DELETED in event_type) {
-            debug ("CcProject: watched file %s was deleted", src.get_path ());
+            // debug ("CcProject: watched file %s was deleted", src.get_path ());
             // remove this file monitor since the file was deleted
             FileMonitor file_monitor;
             if (build_files.unset (src, out file_monitor)) {

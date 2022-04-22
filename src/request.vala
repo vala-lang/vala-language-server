@@ -19,18 +19,30 @@
 /**
  * Represents a cancellable request from the client to the server.
  */
-class Vls.Request : Object {
+class Vls.Request : Cancellable {
     private int64? int_value;
     private string? string_value;
     private string? method;
 
-    public Request (Variant id, string? method = null) {
+    /**
+     * Creates a new cancellable request.
+     *
+     * @param id                the id of the JSON-RPC request
+     * @param cancellable       a cancellable to chain
+     * @param method            the method called by JSON-RPC
+     */
+    public Request (Variant id, Cancellable? cancellable, string? method = null) {
         assert (id.is_of_type (VariantType.INT64) || id.is_of_type (VariantType.STRING));
         if (id.is_of_type (VariantType.INT64))
             int_value = (int64) id;
         else
             string_value = (string) id;
         this.method = method;
+        cancellable.connect (on_cancellable_cancelled);
+    }
+
+    private void on_cancellable_cancelled () {
+        this.cancel ();
     }
 
     public string to_string () {
@@ -38,20 +50,18 @@ class Vls.Request : Object {
         return id_string + (method != null ? @":$method" : "");
     }
 
-    public static uint hash (Request req) {
-        if (req.int_value != null)
-            return GLib.int64_hash (req.int_value);
+    public static uint variant_id_hash (Variant id) {
+        if (id.is_of_type (VariantType.INT64))
+            return GLib.int64_hash ((int64)id);
         else
-            return GLib.str_hash (req.string_value);
+            return GLib.str_hash ((string)id);
     }
 
-    public static bool equal (Request reqA, Request reqB) {
-        if (reqA.int_value != null) {
-            assert (reqB.int_value != null);
-            return reqA.int_value == reqB.int_value;
+    public static bool variant_id_equal (Variant id1, Variant id2) {
+        if (id1.is_of_type (VariantType.INT64)) {
+            return (int64)id1 == (int64)id2;
         } else {
-            assert (reqB.string_value != null);
-            return reqA.string_value == reqB.string_value;
+            return (string)id1 == (string)id2;
         }
     }
 }

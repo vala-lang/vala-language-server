@@ -20,10 +20,16 @@ using Gee;
 using Lsp;
 
 namespace Vls.SignatureHelpEngine {
-    void begin_response (Server lang_serv, Project project,
-                         Jsonrpc.Client client, Variant id, string method,
-                         Vala.SourceFile doc, Compilation compilation,
-                         Position pos) {
+    /**
+     * Extract signature information at the current position.
+     */
+    Collection<SignatureInformation> extract (Server lang_serv, Project project,
+                                              Jsonrpc.Client client, Variant id, string method,
+                                              Vala.SourceFile doc, Compilation compilation,
+                                              Position pos, out int active_parameter,
+                                              Cancellable? cancellable) throws Error {
+        cancellable.set_error_if_cancelled ();
+
         // long idx = (long) Util.get_string_pos (doc.content, pos.line, pos.character);
 
         // if (idx >= 2 && doc.content[idx-1:idx] == "(") {
@@ -35,9 +41,9 @@ namespace Vls.SignatureHelpEngine {
         var signatures = new ArrayList<SignatureInformation> ();
         int active_param = -1;
 
-        Vala.CodeContext.push (compilation.code_context);
+        Vala.CodeContext.push (compilation.context);
         // debug ("[%s] extracting expression ...", method);
-        var se = new SymbolExtractor (pos, doc, compilation.code_context);
+        var se = new SymbolExtractor (pos, doc, Vala.CodeContext.get ());
         if (se.extracted_expression != null) {
 #if !VALA_FEATURE_INITIAL_ARGUMENT_COUNT
             active_param = se.method_arguments - 1;
@@ -51,28 +57,16 @@ namespace Vls.SignatureHelpEngine {
         }
         
         if (signatures.is_empty) {
-            lang_serv.wait_for_context_update (id, request_cancelled => {
-                if (request_cancelled) {
-                    Server.reply_null (id, client, method);
-                    return;
-                }
-
-                Vala.CodeContext.push (compilation.code_context);
-                show_help_with_updated_context (lang_serv, project,
-                                                method,
-                                                doc, compilation, pos, 
-                                                signatures, ref active_param);
-                
-                if (!signatures.is_empty)
-                    finish (client, id, signatures, active_param);
-                else
-                    Server.reply_null (id, client, method);
-                Vala.CodeContext.pop ();
-            });
-        } else {
-            finish (client, id, signatures, active_param);
+            // fall back to the incomplete AST
+            show_help_with_updated_context (lang_serv, project,
+                                            method,
+                                            doc, compilation, pos, 
+                                            signatures, ref active_param);
+            
         }
         Vala.CodeContext.pop ();
+        active_parameter = active_param;
+        return signatures;
     }
 
     void show_help (Server lang_serv, Project project,
@@ -154,7 +148,7 @@ namespace Vls.SignatureHelpEngine {
                 var mt = (Vala.MethodType) data_type;
 
                 if (mt.method_symbol.printf_format || mt.method_symbol.scanf_format) {
-                    ellipsis_override_params = generate_parameters_for_printf_method (mt.method_symbol, mc, compilation.code_context,
+                    ellipsis_override_params = generate_parameters_for_printf_method (mt.method_symbol, mc, Vala.CodeContext.get (),
                                                                                       param_list != null ? param_list.size - 1 : 0);
                     if (ellipsis_override_params != null) {
                         var new_param_list = new Vala.ArrayList<Vala.Parameter> ();
@@ -300,18 +294,6 @@ namespace Vls.SignatureHelpEngine {
         // debug (@"[$method] got best: $(result.type_name) @ $(result.source_reference)");
 
         show_help (lang_serv, project, method, result, scope, compilation, signatures, ref active_param);
-    }
-
-    void finish (Jsonrpc.Client client, Variant id, Collection<SignatureInformation> signatures, int active_param) {
-        try {
-            // debug ("sending with active_param = %d", active_param);
-            client.reply (id, Util.object_to_variant (new SignatureHelp () {
-                signatures = signatures,
-                activeParameter = active_param
-            }), Server.cancellable);
-        } catch (Error e) {
-            warning (@"[textDocument/signatureHelp] failed to reply to client: $(e.message)");
-        }
     }
 
     Vala.List<Vala.Parameter>? generate_parameters_for_printf_method (Vala.Method method,

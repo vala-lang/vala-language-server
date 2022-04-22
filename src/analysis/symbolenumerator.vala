@@ -22,19 +22,18 @@ using Lsp;
  * Used to list all symbols defined in a document, usually for outlining.
  */
 class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
-    private Vala.SourceFile file;
-    private Gee.Deque<DocumentSymbol> containers;
+    private Vala.SourceFile? file;
+    private Gee.Deque<DocumentSymbol>? containers;
     private Gee.List<DocumentSymbol> top_level_syms;
-    private Gee.TreeMap<Range, DocumentSymbol> syms_flat;
+    private Gee.TreeMap<Range, DocumentSymbol>? syms_flat;
     private Gee.List<DocumentSymbol> all_syms;
-    private Gee.List<SymbolInformation>? all_sym_infos;
-    private Gee.HashMap<string, DocumentSymbol> ns_name_to_dsym;
+    private Gee.HashMap<string, DocumentSymbol>? ns_name_to_dsym;
     Vala.TypeSymbol? str_sym; 
     string uri;
 
     public DateTime last_updated { get; set; }
 
-    public SymbolEnumerator (Vala.SourceFile file) {
+    public override void visit_source_file (Vala.SourceFile file) {
         this.file = file;
         this.top_level_syms = new Gee.LinkedList<DocumentSymbol> ();
         this.containers = new Gee.LinkedList<DocumentSymbol> ();
@@ -43,32 +42,32 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
         this.ns_name_to_dsym = new Gee.HashMap<string, DocumentSymbol> ();
 
         try {
-            uri = Filename.to_uri (file.filename);
+            this.uri = Filename.to_uri (file.filename);
         } catch (Error e) {
             warning ("%s is not a URI!", file.filename);
+            this.file = null;
             return;
         }
 
-        str_sym = file.context.root.scope.lookup ("string") as Vala.TypeSymbol;
-        this.visit_source_file (file);
-        str_sym = null;
+        this.str_sym = file.context.root.scope.lookup ("string") as Vala.TypeSymbol;
+        this.file.accept_children (this);
+        this.str_sym = null;
+        this.ns_name_to_dsym = null;
+        this.syms_flat = null;
+        this.containers = null;
+        this.file = null;
+        last_updated = new DateTime.now ();
     }
 
     public Gee.Iterator<DocumentSymbol> iterator () {
         return top_level_syms.iterator ();
     }
 
-    public Gee.Iterable<SymbolInformation> flattened () {
-        if (all_sym_infos == null) {
-            all_sym_infos = new Gee.LinkedList<SymbolInformation> ();
-            all_sym_infos.add_all_iterator (
-                all_syms
-                .map<SymbolInformation> (s => new SymbolInformation.from_document_symbol (s, uri)));
-        }
-        return all_sym_infos;
+    public Gee.Iterator<SymbolInformation> flattened () {
+        return all_syms.map<SymbolInformation> (s => new SymbolInformation.from_document_symbol (s, uri));
     }
 
-    public DocumentSymbol? add_symbol (Vala.Symbol sym, SymbolKind kind, bool adding_parent = false) {
+    DocumentSymbol? add_symbol (Vala.Symbol sym, SymbolKind kind, bool adding_parent = false) {
         var current_sym = (containers.is_empty || adding_parent) ? null : containers.peek_head ();
         DocumentSymbol? dsym;
         string sym_full_name = sym.get_full_name ();
@@ -159,10 +158,6 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
         }
 
         return dsym;
-    }
-
-    public override void visit_source_file (Vala.SourceFile file) {
-        file.accept_children (this);
     }
 
     public override void visit_addressof_expression (Vala.AddressofExpression expr) {

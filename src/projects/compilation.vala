@@ -36,7 +36,7 @@ class Vls.Compilation : BuildTarget {
     /**
      * These are files that are part of the project.
      */
-    private HashMap<File, TextDocument> _project_sources = new HashMap<File, TextDocument> (Util.file_hash, Util.file_equal);
+    private HashMap<File, SourceFileWorker> _project_sources = new HashMap<File, SourceFileWorker> (Util.file_hash, Util.file_equal);
 
     /**
      * This is the list of initial content for project source files.
@@ -54,7 +54,16 @@ class Vls.Compilation : BuildTarget {
      */
     private HashMap<Vala.SourceFile, HashMap<Type, CodeAnalyzer>> _source_analyzers = new HashMap<Vala.SourceFile, HashMap<Type, CodeAnalyzer>> ();
 
-    public Vala.CodeContext code_context { get; private set; default = new Vala.CodeContext (); }
+    /**
+     * List of source file workers for all source files, including
+     * automatically-added sources.
+     */
+    private ConcurrentList<SourceFileWorker> _all_sources = new ConcurrentList<SourceFileWorker> ();
+
+    private Vala.CodeContext _context;
+    public Vala.CodeContext context {
+        get { return _context; }
+    }
 
     // CodeContext arguments:
     private bool _deprecated;
@@ -93,8 +102,8 @@ class Vls.Compilation : BuildTarget {
      */
     public Reporter reporter {
         get {
-            assert (code_context.report is Reporter);
-            return (Reporter) code_context.report;
+            assert (_context.report is Reporter);
+            return (Reporter) _context.report;
         }
     }
 
@@ -104,7 +113,8 @@ class Vls.Compilation : BuildTarget {
      */
     public HashMap<string, Vala.Symbol> cname_to_sym { get; private set; default = new HashMap<string, Vala.Symbol> (); }
 
-    public Compilation (FileCache file_cache, string output_dir, string name, string id, int no,
+    public Compilation (FileCache file_cache,
+                        string output_dir, string name, string id, int no,
                         string[] compiler, string[] args, string[] sources, string[] generated_sources,
                         string?[] target_output_files,
                         string[]? sources_content = null) throws Error {
@@ -232,8 +242,24 @@ class Vls.Compilation : BuildTarget {
     }
 
     private void configure (Cancellable? cancellable = null) throws Error {
-        // 1. recreate code context
-        code_context = new Vala.CodeContext () {
+        cancellable.set_error_if_cancelled ();
+
+        // 0. remove source file workers from old sources and clear cname mapper
+        var old_workers = new ArrayList<SourceFileWorker> ();
+        old_workers.add_all (_all_sources);
+        cname_to_sym.clear ();
+        foreach (var old_worker in old_workers) {
+            old_worker.update (SourceFileWorker.Status.NOT_PARSED);
+            // we're using this to wait for threads to terminate that depend on
+            // the source file being parsed
+            old_worker.acquire (cancellable);
+            if (!(old_worker.source_file is TextDocument))
+                _all_sources.remove (old_worker);
+            old_worker.release (cancellable);
+        }
+
+        // 1. (re)create code context
+        _context = new Vala.CodeContext () {
             deprecated = _deprecated,
             experimental = _experimental,
             experimental_non_null = _experimental_non_null,
@@ -249,39 +275,42 @@ class Vls.Compilation : BuildTarget {
         };
 
 #if VALA_0_50
-        code_context.set_target_profile (_profile, false);
+        _context.set_target_profile (_profile, false);
 #else
-        code_context.profile = _profile;
+        _context.profile = _profile;
         switch (_profile) {
             case Vala.Profile.POSIX:
-                code_context.add_define ("POSIX");
+                context.add_define ("POSIX");
                 break;
             case Vala.Profile.GOBJECT:
-                code_context.add_define ("GOBJECT");
+                context.add_define ("GOBJECT");
                 break;
         }
 #endif
 
         // Vala compiler bug requires us to initialize things this way instead of
         // the alternative above
-        code_context.report = new Reporter (_fatal_warnings);
+        _context.report = new Reporter (_fatal_warnings);
 
         // set target GLib version if specified
         if (_target_glib != null)
-            code_context.set_target_glib_version (_target_glib);
-        Vala.CodeContext.push (code_context);
+            _context.set_target_glib_version (_target_glib);
+        Vala.CodeContext.push (_context);
 
         foreach (string define in _defines)
-            code_context.add_define (define);
+            _context.add_define (define);
 
         if (_project_sources.is_empty) {
-            debug ("Compilation(%s): will load input sources for the first time", id);
+            // debug ("Compilation(%s): will load input sources for the first time", id);
             if (input.is_empty)
                 warning ("Compilation(%s): no input sources to load!", id);
             foreach (File file in input) {
                 if (!dependencies.has_key (file)) {
                     try {
-                        _project_sources[file] = new TextDocument (code_context, file, _sources_initial_content[file], true);
+                        var text_document = new TextDocument (_context, file, _sources_initial_content[file], true);
+                        var worker = new SourceFileWorker (text_document);
+                        _project_sources[file] = worker;
+                        _all_sources.add (worker);
                     } catch (Error e) {
                         warning ("Compilation(%s): %s", id, e.message);
                         Vala.CodeContext.pop ();
@@ -294,9 +323,12 @@ class Vls.Compilation : BuildTarget {
             }
         }
 
-        foreach (TextDocument doc in _project_sources.values) {
-            doc.context = code_context;
-            code_context.add_source_file (doc);
+        foreach (SourceFileWorker worker in _project_sources.values) {
+            worker.acquire (cancellable);
+
+            var doc = (TextDocument)worker.source_file;
+            doc.context = _context;
+            _context.add_source_file (doc);
             // clear all using directives (to avoid "T ambiguous with T" errors)
             doc.current_using_directives.clear ();
             // add default using directives for the profile
@@ -304,12 +336,12 @@ class Vls.Compilation : BuildTarget {
                 // import the Posix namespace by default (namespace of backend-specific standard library)
                 var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "Posix", null));
                 doc.add_using_directive (ns_ref);
-                code_context.root.add_using_directive (ns_ref);
+                _context.root.add_using_directive (ns_ref);
             } else if (_profile == Vala.Profile.GOBJECT) {
                 // import the GLib namespace by default (namespace of backend-specific standard library)
                 var ns_ref = new Vala.UsingDirective (new Vala.UnresolvedSymbol (null, "GLib", null));
                 doc.add_using_directive (ns_ref);
-                code_context.root.add_using_directive (ns_ref);
+                _context.root.add_using_directive (ns_ref);
             }
 
             // clear all comments from file
@@ -318,19 +350,20 @@ class Vls.Compilation : BuildTarget {
             // clear all code nodes from file
             doc.get_nodes ().clear ();
 
-            cancellable.set_error_if_cancelled ();
+            worker.release (cancellable);
         }
 
         // packages (should come after in case we've wrapped any package files in TextDocuments)
         foreach (string package in _packages)
-            code_context.add_external_package (package);
+            _context.add_external_package (package);
 
         Vala.CodeContext.pop ();
     }
 
-    private void compile () throws Error {
+    private void compile (Cancellable? cancellable = null) throws Error {
+        cancellable.set_error_if_cancelled ();
+
         debug ("compiling %s ...", id);
-        Vala.CodeContext.push (code_context);
         var vala_parser = new Vala.Parser ();
         var genie_parser = new Vala.Genie.Parser ();
         var gir_parser = new Vala.GirParser ();
@@ -338,23 +371,110 @@ class Vls.Compilation : BuildTarget {
         // add all generated files before compiling
         foreach (File generated_file in _generated_sources) {
             // generated files are also part of the project, so we use TextDocument intead of Vala.SourceFile
-            try {
-                if (!generated_file.query_exists ())
-                    throw new FileError.NOENT (@"file does not exist");
-                code_context.add_source_file (new TextDocument (code_context, generated_file));
-            } catch (Error e) {
-                warning ("could not add file for %s: %s - %s", id, generated_file.get_uri (), e.message);
+            if (!generated_file.query_exists ())
+                throw new FileError.NOENT (@"file does not exist");
+            var generated_source_file = new TextDocument (_context, generated_file);
+            _context.add_source_file (generated_source_file);
+        }
 
+        // add source file workers for all the other files and map their
+        // contents
+        foreach (var file in _context.get_source_files ()) {
+            if (!(file is TextDocument)) {
+                var worker = new SourceFileWorker (file);
+                _all_sources.add (worker);
+            }
+            if (file.content == null)
+                file.content = (string)file.get_mapped_contents ();
+        }
+
+        // update status of all project workers
+        foreach (var worker in _project_sources.values)
+            worker.update (SourceFileWorker.Status.NOT_PARSED);
+
+        // acquire all workers for writing
+        foreach (var worker in _all_sources)
+            worker.acquire (cancellable);
+
+        // parse everything at once
+        vala_parser.parse (_context);
+        genie_parser.parse (_context);
+        gir_parser.parse (_context);
+
+        // TODO: parallelize parser
+        foreach (var worker in _all_sources)
+            worker.update (SourceFileWorker.Status.PARSED);
+
+        // then run the symbol analyzer
+        var resolver = new Vala.SymbolResolver ();
+        resolver.resolve (_context);
+        foreach (var worker in _all_sources)
+            worker.update (SourceFileWorker.Status.SYMBOLS_RESOLVED);
+
+
+        // then run the semantic analyzer
+        debug ("    begin semantic analysis for %s ...", id);
+        _context.init_types ();
+        var analyzer = new Vala.SemanticAnalyzer (_context);
+        analyzer.analyze_root ();
+
+        // release all the workers for writing
+        foreach (var worker in _all_sources)
+            worker.release (cancellable);
+        int num_analyses = 0;
+        foreach (var worker in _all_sources) {
+            AtomicInt.inc (ref num_analyses);
+            worker.run_symbols_resolved.begin<void> (() => {
+                Vala.CodeContext.push (_context);
+                worker.source_file.accept (new Vala.SemanticAnalyzer (_context));
                 Vala.CodeContext.pop ();
-                throw e;        // rethrow
+                AtomicInt.dec_and_test (ref num_analyses);
+            }, true, SourceFileWorker.Status.SEMANTICS_ANALYZED);
+        }
+
+        // wait for all the semantic analyses to be finished
+        while (AtomicInt.get (ref num_analyses) > 0) {
+            // TODO: a better way to handle this?
+            cancellable.set_error_if_cancelled ();
+            Thread.usleep (50000);              // wake up 20 times / second
+        }
+        debug ("    ... semantic analysis done");
+
+        // update C name map for package files
+        foreach (var worker in _all_sources) {
+            if (worker.source_file.file_type == Vala.SourceFileType.PACKAGE) {
+                worker.acquire (cancellable);
+                worker.source_file.accept (new CNameMapper (cname_to_sym));
+                worker.release (cancellable);
             }
         }
 
-        // compile everything
-        vala_parser.parse (code_context);
-        genie_parser.parse (code_context);
-        gir_parser.parse (code_context);
-        code_context.check ();
+        // only run the flow analyzer and used checkers when we have no other
+        // errors, otherwise we'll get spurious error messages
+        if (reporter.get_errors () == 0) {
+            num_analyses = 0;
+            foreach (var worker in _all_sources) {
+                AtomicInt.inc (ref num_analyses);
+                worker.run_semantics_analyzed.begin<void> (() => {
+                    Vala.CodeContext.push (_context);
+                    worker.source_file.accept (new Vala.FlowAnalyzer (_context));
+                    Vala.CodeContext.pop ();
+                    AtomicInt.dec_and_test (ref num_analyses);
+                }, true);
+            }
+
+            // wait for all the flow analyses to be finished
+            while (AtomicInt.get (ref num_analyses) > 0) {
+                // TODO: a better way to handle this?
+                cancellable.set_error_if_cancelled ();
+                Thread.usleep (50000);              // wake up 20 times / second
+            }
+
+            if (reporter.get_errors () == 0) {
+                var used_attr = new Vala.UsedAttr ();
+                used_attr.check_unused (_context);
+            }
+        }
 
         // generate output files
         // generate VAPI
@@ -362,7 +482,7 @@ class Vls.Compilation : BuildTarget {
             // create the directories if they don't exist
             DirUtils.create_with_parents (Path.get_dirname (_output_vapi), 0755);
             var interface_writer = new Vala.CodeWriter ();
-            interface_writer.write_file (code_context, _output_vapi);
+            interface_writer.write_file (_context, _output_vapi);
         }
 
         // write output GIR
@@ -375,30 +495,97 @@ class Vls.Compilation : BuildTarget {
             // create the directories if they don't exist
             DirUtils.create_with_parents (Path.get_dirname (_output_internal_vapi), 0755);
             var interface_writer = new Vala.CodeWriter (Vala.CodeWriterType.INTERNAL);
-            interface_writer.write_file (code_context, _output_internal_vapi);
-        }
-
-        // update C name map for package files
-        cname_to_sym.clear ();
-        foreach (Vala.SourceFile source_file in code_context.get_source_files ()) {
-            if (source_file.file_type == Vala.SourceFileType.PACKAGE)
-                source_file.accept (new CNameMapper (cname_to_sym));
+            interface_writer.write_file (_context, _output_internal_vapi);
         }
 
         // remove analyses for sources that are no longer a part of the code context
-        var removed_sources = new Vala.HashSet<Vala.SourceFile> ();
-        removed_sources.add_all (code_context.get_source_files ());
-        foreach (var entry in _project_sources) {
-            var text_document = entry.value;
-            text_document.last_fresh_content = text_document.content;
-            removed_sources.remove (entry.value);
+        var removed_sources = new HashSet<Vala.SourceFile> ();
+        removed_sources.add_all (_source_analyzers.keys);
+        foreach (var file in _context.get_source_files ()) {
+            var text_document = file as TextDocument;
+            if (text_document != null)
+                text_document.last_fresh_content = text_document.content;
+            removed_sources.remove (file);
         }
         foreach (var source in removed_sources)
             _source_analyzers.unset (source, null);
 
+        // update analyses for all source files
+        debug ("    begin remaining analyses for %s ...", id);
+        num_analyses = 0;
+        foreach (var worker in _all_sources) {
+            var file = worker.source_file;
+            var file_analyses = _source_analyzers[file];
+            if (file_analyses == null) {
+                file_analyses = new HashMap<Type, CodeAnalyzer> ();
+                _source_analyzers[file] = file_analyses;
+            }
+
+            // compute code lenses (if we have to)
+            CodeLensAnalyzer? code_lens_analyzer = null;
+            if (file_analyses != null)
+                code_lens_analyzer = file_analyses[typeof (CodeLensAnalyzer)] as CodeLensAnalyzer;
+            if (code_lens_analyzer == null || !(file is TextDocument)
+                || code_lens_analyzer.last_updated.compare (((TextDocument)file).last_updated) >= 0) {
+                code_lens_analyzer = new CodeLensAnalyzer ();
+                AtomicInt.inc (ref num_analyses);
+                worker.run_semantics_analyzed.begin<void> (() => {
+                    Vala.CodeContext.push (_context);
+                    code_lens_analyzer.visit_source_file (file);
+                    Vala.CodeContext.pop ();
+                    AtomicInt.dec_and_test (ref num_analyses);
+                }, false);
+            }
+            file_analyses[typeof (CodeLensAnalyzer)] = code_lens_analyzer;
+
+            // analyze code style (if we have to)
+            CodeStyleAnalyzer? code_analyzer = null;
+            if (file_analyses != null)
+                code_analyzer = file_analyses[typeof (CodeStyleAnalyzer)] as CodeStyleAnalyzer;
+            if (code_analyzer == null || !(file is TextDocument)
+                || code_analyzer.last_updated.compare (((TextDocument)file).last_updated) >= 0) {
+                code_analyzer = new CodeStyleAnalyzer ();
+                AtomicInt.inc (ref num_analyses);
+                worker.run_semantics_analyzed.begin<void> (() => {
+                    Vala.CodeContext.push (_context);
+                    code_analyzer.visit_source_file (file);
+                    Vala.CodeContext.pop ();
+                    AtomicInt.dec_and_test (ref num_analyses);
+                }, false);
+            }
+            file_analyses[typeof (CodeStyleAnalyzer)] = code_analyzer;
+
+            // analyze document symbol outline
+            SymbolEnumerator? symbol_enumerator = null;
+            if (file_analyses != null)
+                symbol_enumerator = file_analyses[typeof (SymbolEnumerator)] as SymbolEnumerator;
+            if (symbol_enumerator == null || !(file is TextDocument)
+                || symbol_enumerator.last_updated.compare (((TextDocument)file).last_updated) >= 0) {
+                symbol_enumerator = new SymbolEnumerator ();
+                AtomicInt.inc (ref num_analyses);
+                worker.run_semantics_analyzed.begin<void> (() => {
+                    Vala.CodeContext.push (_context);
+                    symbol_enumerator.visit_source_file (file);
+                    Vala.CodeContext.pop ();
+                    AtomicInt.dec_and_test (ref num_analyses);
+                }, false);
+            }
+            file_analyses[typeof (SymbolEnumerator)] = symbol_enumerator;
+        }
+
+        // wait for all the remaining analyses to be finished
+        while (AtomicInt.get (ref num_analyses) > 0) {
+            // TODO: a better way to handle this?
+            cancellable.set_error_if_cancelled ();
+            Thread.usleep (50000);              // wake up 20 times / second
+        }
+
+        debug ("    ... remaining analyses done");
+        foreach (var worker in _project_sources.values)
+            worker.update (SourceFileWorker.Status.COMPLETE);
+
         last_updated = new DateTime.now ();
         _completed_first_compile = true;
-        Vala.CodeContext.pop ();
         debug ("finished compiling %s", id);
     }
 
@@ -419,7 +606,8 @@ class Vls.Compilation : BuildTarget {
                 updated_file = true;
             }
         }
-        foreach (TextDocument doc in _project_sources.values) {
+        foreach (SourceFileWorker worker in _project_sources.values) {
+            var doc = (TextDocument)worker.source_file;
             if (doc.last_updated.compare (last_updated) > 0) {
                 stale = true;
                 break;
@@ -427,9 +615,14 @@ class Vls.Compilation : BuildTarget {
         }
         if (stale || !_completed_first_compile) {
             configure (cancellable);
-            cancellable.set_error_if_cancelled ();
-            // TODO: cancellable compilation
-            compile ();
+            Vala.CodeContext.push (_context);
+            try {
+                compile (cancellable);
+            } catch (Error e) {
+                Vala.CodeContext.pop ();
+                throw e;        // rethrow
+            }
+            Vala.CodeContext.pop ();
         } else if (updated_file) {
             // even if the files are unchanged after updates, we need to
             // silently update the last_updated property of this target at the
@@ -448,50 +641,12 @@ class Vls.Compilation : BuildTarget {
      */
     public T? get_analysis_for_file<T> (Vala.SourceFile source) {
         var analyses = _source_analyzers[source];
-        if (analyses == null) {
-            analyses = new HashMap<Type, CodeAnalyzer> ();
-            _source_analyzers[source] = analyses;
-        }
-
-        // generate the analysis on demand if it doesn't exist or it is stale
-        CodeAnalyzer? analysis = null;
-        if (!analyses.has_key (typeof (T)) || analyses[typeof (T)].last_updated.compare (last_updated) < 0) {
-            Vala.CodeContext.push (code_context);
-            if (typeof (T) == typeof (CodeStyleAnalyzer)) {
-                analysis = new CodeStyleAnalyzer (source);
-            } else if (typeof (T) == typeof (SymbolEnumerator)) {
-                analysis = new SymbolEnumerator (source);
-            } else if (typeof (T) == typeof (CodeLensAnalyzer)) {
-                analysis = new CodeLensAnalyzer (source);
-            }
-
-            if (analysis != null) {
-                analysis.last_updated = new DateTime.now ();
-                analyses[typeof (T)] = analysis;
-            }
-            Vala.CodeContext.pop ();
-        } else {
-            analysis = analyses[typeof (T)];
-        }
-
-        return analysis;
+        if (analyses == null)
+            return null;
+        return analyses[typeof (T)];
     }
 
-    public bool lookup_input_source_file (File file, out Vala.SourceFile input_source) {
-        string? path = file.get_path ();
-        string? filename = path != null ? Util.realpath (path) : null;
-        string uri = file.get_uri ();
-        foreach (var source_file in code_context.get_source_files ()) {
-            if (filename != null && Util.realpath (source_file.filename) == filename || source_file.filename == uri) {
-                input_source = source_file;
-                return true;
-            }
-        }
-        input_source = null;
-        return false;
-    }
-
-    public Collection<Vala.SourceFile> get_project_files () {
-        return _project_sources.values;
+    public Iterator<SourceFileWorker> iterator () {
+        return _all_sources.iterator ();
     }
 }

@@ -87,10 +87,10 @@ namespace Vls.SymbolReferences {
         if (symbol.source_reference == null || symbol.source_reference.file == null)
             return symbol;
 
-        Compilation alter_comp;
-        if (project.lookup_compilation_for_output_file (symbol.source_reference.file.filename, out alter_comp)) {
+        Compilation? alter_comp = project.lookup_compilation_for_output_file (symbol.source_reference.file.filename);
+        if (alter_comp != null) {
             Vala.Symbol? matching_sym;
-            if ((matching_sym = SymbolReferences.find_matching_symbol (alter_comp.code_context, symbol)) != null)
+            if ((matching_sym = SymbolReferences.find_matching_symbol (alter_comp.context, symbol)) != null)
                 return matching_sym;
         }
         return symbol;
@@ -520,8 +520,8 @@ namespace Vls.SymbolReferences {
     Collection<Pair<Compilation, Vala.Symbol>> get_compilations_using_symbol (Project project, Vala.Symbol symbol) {
         var compilations = new ArrayList<Pair<Compilation, Vala.Symbol>> ();
 
-        foreach (var compilation in project.get_compilations ()) {
-            Vala.Symbol? matching_sym = find_matching_symbol (compilation.code_context, symbol);
+        foreach (var compilation in project) {
+            Vala.Symbol? matching_sym = find_matching_symbol (compilation.context, symbol);
             if (matching_sym != null)
                 compilations.add (new Pair<Compilation, Vala.Symbol> (compilation, matching_sym));
         }
@@ -529,8 +529,8 @@ namespace Vls.SymbolReferences {
         // find_matching_symbol() isn't reliable with local variables, especially those declared
         // in lambdas, which can change names after recompilation.
         if (compilations.is_empty && (symbol is Vala.LocalVariable || symbol is Vala.Parameter)) {
-            project.get_compilations ()
-                .filter (c => symbol.source_reference.file in c.code_context.get_source_files ())
+            project.iterator ()
+                .filter (c => c.iterator ().any_match (w => symbol.source_reference.file == w.source_file))
                 .foreach (compilation => {
                     compilations.add (new Pair<Compilation, Vala.Symbol> (compilation, symbol));
                     return false;

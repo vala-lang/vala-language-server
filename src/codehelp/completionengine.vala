@@ -20,10 +20,17 @@ using Lsp;
 using Gee;
 
 namespace Vls.CompletionEngine {
-    void begin_response (Server lang_serv, Project project,
-                         Jsonrpc.Client client, Variant id, string method,
-                         Vala.SourceFile doc, Compilation compilation,
-                         Position pos, CompletionContext? completion_context) {
+    /**
+     * Get all available completions.
+     */
+    Collection<CompletionItem> complete (Server lang_serv, Project project,
+                                         Jsonrpc.Client client, Variant id, string method,
+                                         Vala.SourceFile doc, Compilation compilation,
+                                         CompletionParams completion,
+                                         Cancellable? cancellable) throws Error {
+        cancellable.set_error_if_cancelled ();
+        var pos = completion.position;
+
         bool is_pointer_access = false;
         long idx = (long) Util.get_string_pos (doc.content, pos.line, pos.character);
 
@@ -85,19 +92,16 @@ namespace Vls.CompletionEngine {
         } else {
             // The editor requested a member access completion from a '>'.
             // This is a hack since the LSP doesn't allow us to specify a trigger string ("->" in this case)
-            if (completion_context != null && completion_context.triggerKind == CompletionTriggerKind.TriggerCharacter) {
+            if (completion.context != null && completion.context.triggerKind == CompletionTriggerKind.TriggerCharacter) {
                 // completion conditions are not satisfied
-                finish (client, id, completions);
-                return;
+                return completions;
             }
             // TODO: incomplete completions
         }
 
-        Vala.CodeContext.push (compilation.code_context);
+        Vala.CodeContext.push (compilation.context);
         if (is_member_access) {
-            // attempt SymbolExtractor first, and if that fails, then wait for
-            // the next context update
-
+            // attempt the very fast and accurate symbol extractor
             var se = new SymbolExtractor (pos, doc);
             if (se.extracted_expression != null)
                 show_members (lang_serv, project, doc, compilation,
@@ -105,24 +109,12 @@ namespace Vls.CompletionEngine {
                               se.extracted_expression, se.block.scope, completions, false);
 
             if (completions.is_empty) {
-                // debug ("[%s] trying MA completion again after context update ...", method);
-                lang_serv.wait_for_context_update (id, request_cancelled => {
-                    if (request_cancelled) {
-                        Server.reply_null (id, client, method);
-                        return;
-                    }
-
-                    Vala.CodeContext.push (compilation.code_context);
-                    show_members_with_updated_context (lang_serv, project,
-                                                       client, id, 
-                                                       doc, compilation, 
-                                                       is_null_safe_access, is_pointer_access,
-                                                       pos, end_pos, completions);
-                    finish (client, id, completions);
-                    Vala.CodeContext.pop ();
-                });
-            } else {
-                finish (client, id, completions);
+                // fall back to using the incomplete AST
+                show_members_from_ast (lang_serv, project,
+                                       client, id, 
+                                       doc, compilation, 
+                                       is_null_safe_access, is_pointer_access,
+                                       pos, end_pos, completions);
             }
         } else {
             Vala.Scope best_scope;
@@ -153,22 +145,9 @@ namespace Vls.CompletionEngine {
                 list_symbols (lang_serv, project, compilation, doc, pos, best_scope, completions, (new SymbolExtractor (pos, doc)).in_oce);
                 list_keywords (lang_serv, doc, nearest_symbol, in_loop, completions);
             }
-            finish (client, id, completions);
         }
         Vala.CodeContext.pop ();
-    }
-
-    void finish (Jsonrpc.Client client, Variant id, Collection<CompletionItem> completions) {
-        var json_array = new Json.Array ();
-        foreach (CompletionItem comp in completions)
-            json_array.add_element (Json.gobject_serialize (comp));
-
-        try {
-            Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
-            client.reply (id, variant_array, Server.cancellable);
-        } catch (Error e) {
-            warning (@"[textDocument/completion] failed to reply to client: $(e.message)");
-        }
+        return completions;
     }
 
     void walk_up_current_scope (Server lang_serv, 
@@ -652,22 +631,23 @@ namespace Vls.CompletionEngine {
     }
 
     /**
-     * Use this for accurate member access completions after the code context has been updated.
+     * Use a node from the incomplete AST to generate completions, which may be
+     * less accurate than the symbol extractor, but may be more accurate in
+     * some edge cases.
      */
-    void show_members_with_updated_context (Server lang_serv, Project project,
-                                            Jsonrpc.Client client, Variant id,
-                                            Vala.SourceFile doc, Compilation compilation,
-                                            bool is_null_safe_access, bool is_pointer_access,
-                                            Position pos, Position? end_pos, Set<CompletionItem> completions) {
+    void show_members_from_ast (Server lang_serv, Project project,
+                                Jsonrpc.Client client, Variant id,
+                                Vala.SourceFile doc, Compilation compilation,
+                                bool is_null_safe_access, bool is_pointer_access,
+                                Position pos, Position? end_pos, Set<CompletionItem> completions) {
         string method = "textDocument/completion";
         // debug (@"[$method] FindSymbol @ $pos" + (end_pos != null ? @" -> $end_pos" : ""));
-        Vala.CodeContext.push (compilation.code_context);
+        Vala.CodeContext.push (compilation.context);
 
         var fs = new NodeSearch (doc, pos, true, end_pos);
 
         if (fs.result.size == 0) {
             debug (@"[$method] no results found for member access");
-            Server.reply_null (id, client, method);
             Vala.CodeContext.pop ();
             return;
         }

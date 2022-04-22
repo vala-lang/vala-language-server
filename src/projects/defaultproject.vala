@@ -31,7 +31,7 @@ class Vls.DefaultProject : Project {
         return false;
     }
 
-    public override ArrayList<Pair<Vala.SourceFile, Compilation>> open (string escaped_uri, string? content = null, Cancellable? cancellable = null) throws Error {
+    public override ArrayList<Pair<SourceFileWorker, Compilation>> open (string escaped_uri, string? content = null, Cancellable? cancellable = null) throws Error {
         // create a new compilation
         var file = File.new_for_uri (Uri.unescape_string (escaped_uri));
         Compilation btarget;
@@ -67,9 +67,9 @@ class Vls.DefaultProject : Project {
         return lookup_compile_input_source_file (escaped_uri);
     }
 
-    public override bool close (string escaped_uri) {
+    public override bool close (string escaped_uri, Cancellable? cancellable) {
         bool files_removed = false;
-        foreach (Pair<Vala.SourceFile, Compilation> result in lookup_compile_input_source_file (escaped_uri)) {
+        foreach (var result in lookup_compile_input_source_file (escaped_uri)) {
             build_targets.remove (result.second);
             files_removed = true;
         }

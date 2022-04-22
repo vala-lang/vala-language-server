@@ -62,7 +62,7 @@ version_file = vcs_tag(input: 'version.vala.in',
                        output: 'version.vala',
                        command: ['git', 'describe', '--tags', '--dirty'])
 
-add_project_arguments(['--enable-gobject-tracing', '--fatal-warnings'], language: 'vala')
+add_project_arguments(['--enable-gobject-tracing'], language: 'vala')
 
 extra_vala_sources += files([
   'src/util.vala'

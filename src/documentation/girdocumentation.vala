@@ -207,7 +207,7 @@ class Vls.GirDocumentation {
                 string? signal_or_property_name = match_info.fetch (5);
                 if (signal_or_property_name != null && signal_or_property_name.length > 0)
                     symbol_full += "." + signal_or_property_name.replace ("-", "_");
-                Vala.Symbol? vala_symbol = CodeHelp.lookup_symbol_full_name (symbol_full, compilation.code_context.root.scope);
+                Vala.Symbol? vala_symbol = CodeHelp.lookup_symbol_full_name (symbol_full, Vala.CodeContext.get ().root.scope);
 
                 if (vala_symbol == null) {
                     result.append ("**");

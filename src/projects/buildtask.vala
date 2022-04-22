@@ -255,7 +255,12 @@ class Vls.BuildTask : BuildTarget {
             foreach (File file in input) {
                 FileInfo info = file.query_info (FileAttribute.TIME_MODIFIED, FileQueryInfoFlags.NONE, cancellable);
                 DateTime? file_last_modified;
+#if GLIB_2_62
                 file_last_modified = info.get_modification_date_time ();
+#else
+                TimeVal time_last_modified = info.get_modification_time ();
+                file_last_modified = new DateTime.from_iso8601 (time_last_modified.to_iso8601 (), null);
+#endif
                 if (file_last_modified == null)
                     warning ("BuildTask(%s) could not get last modified time of %s", id, file.get_path ());
                 else if (file_last_modified.compare (last_updated) > 0) {

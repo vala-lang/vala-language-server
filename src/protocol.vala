@@ -671,6 +671,21 @@ namespace Lsp {
     }
 
     /**
+     * Errors encountered in `textDocument/prepareRename`
+     */
+    errordomain PrepareRenameError {
+        /**
+         * No symbol at cursor
+         */
+        NO_SYMBOL,
+
+        /**
+         * Will not rename this symbol
+         */
+        FORBIDDEN_SYMBOL
+    }
+
+    /**
      * Capabilities of the client/editor pertaining to language features.
      */
     class TextDocumentClientCapabilities : Object {

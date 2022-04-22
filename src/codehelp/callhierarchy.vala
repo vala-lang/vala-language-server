@@ -44,8 +44,8 @@ namespace Vls.CallHierarchy {
         var references = new Gee.HashMap<Range, CodeNode> ();
         foreach (var symbol in symbols)
             foreach (var pair in SymbolReferences.get_compilations_using_symbol (project, symbol))
-                foreach (SourceFile file in pair.first.code_context.get_source_files ())
-                    SymbolReferences.list_in_file (file, pair.second, false, true, references);
+                foreach (var w in pair.first)
+                    SymbolReferences.list_in_file (w.source_file, pair.second, false, true, references);
         debug ("got %d references as incoming calls to %s (%s)", references.size, callable.to_string (), callable.type_name);
         foreach (var reference in references) {
             if (!(reference.value.parent_node is MethodCall || reference.value.parent_node is ObjectCreationExpression))
@@ -90,8 +90,8 @@ namespace Vls.CallHierarchy {
         // add all implementing symbols
         foreach (var pair in SymbolReferences.get_compilations_using_symbol (project, subroutine)) {
             var references = new Gee.HashMap<Range, Vala.CodeNode> ();
-            foreach (SourceFile file in pair.first.code_context.get_source_files ())
-                SymbolReferences.list_implementations_of_virtual_symbol (file, pair.second, references);
+            foreach (var w in pair.first)
+                SymbolReferences.list_implementations_of_virtual_symbol (w.source_file, pair.second, references);
             foreach (var node in references.values)
                 if (node is Vala.Method)
                     subroutines += (Vala.Method)node;

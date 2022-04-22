@@ -1,4 +1,23 @@
+/* codelensanalyzer.vala
+ *
+ * Copyright 2021 Princeton Ferro <princetonferro@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 using Gee;
+using Lsp;
 
 /**
  * Collects only those symbols of interest to the code lens. Currently these are:
@@ -15,34 +34,79 @@ class Vls.CodeLensAnalyzer : Vala.CodeVisitor, CodeAnalyzer {
      *
      * Maps a symbol to the base symbol it overrides.
      */
-    public HashMap<Vala.Symbol, Vala.Symbol> found_overrides { get; private set; }
+    HashMap<Vala.Symbol, Vala.Symbol>? _found_overrides;
 
     /**
      * Collection of methods/properties that implement a base symbol.
      *
      * Maps a symbol to the abstract symbol it implements.
      */
-    public HashMap<Vala.Symbol, Vala.Symbol> found_implementations { get; private set; }
+    HashMap<Vala.Symbol, Vala.Symbol>? _found_implementations;
 
     /**
      * Collection of methods/properties that hide a base symbol.
      *
      * Maps a symbol to the symbol it hides.
      */
-    public HashMap<Vala.Symbol, Vala.Symbol> found_hides { get; private set; }
+    HashMap<Vala.Symbol, Vala.Symbol>? _found_hides;
 
-    private Vala.SourceFile file;
+    ArrayList<CodeLens> _lenses;
 
-    public CodeLensAnalyzer (Vala.SourceFile file) {
-        this.file = file;
-        this.found_overrides = new HashMap<Vala.Symbol, Vala.Symbol> ();
-        this.found_implementations = new HashMap<Vala.Symbol, Vala.Symbol> ();
-        this.found_hides = new HashMap<Vala.Symbol, Vala.Symbol> ();
-        visit_source_file (file);
+    private Vala.SourceFile? file;
+
+    public Iterator<CodeLens> iterator () {
+        return _lenses.iterator ();
     }
 
     public override void visit_source_file (Vala.SourceFile file) {
-        file.accept_children (this);
+        this.file = file;
+        _found_overrides = new HashMap<Vala.Symbol, Vala.Symbol> ();
+        _found_implementations = new HashMap<Vala.Symbol, Vala.Symbol> ();
+        _found_hides = new HashMap<Vala.Symbol, Vala.Symbol> ();
+        this.file.accept_children (this);
+
+        _lenses = new ArrayList<CodeLens> ();
+        _lenses.add_all_iterator (
+            _found_overrides
+            .map<CodeLens> (entry =>
+                            new CodeLens () {
+                                range = new Range.from_sourceref (entry.key.source_reference),
+                                command = new Lsp.Command () {
+                                    title = "overrides " + CodeLensEngine.represent_symbol (entry.key, entry.value),
+                                    command = Command.EDITOR_SHOW_BASE_SYMBOL.to_string (),
+                                    arguments = CodeLensEngine.create_arguments (entry.key, entry.value)
+                                }
+                            }));
+
+        _lenses.add_all_iterator (
+            _found_implementations
+            .map<CodeLens> (entry =>
+                            new CodeLens () {
+                                range = new Range.from_sourceref (entry.key.source_reference),
+                                command = new Lsp.Command () {
+                                    title = "implements " + CodeLensEngine.represent_symbol (entry.key, entry.value),
+                                    command = Command.EDITOR_SHOW_BASE_SYMBOL.to_string (),
+                                    arguments = CodeLensEngine.create_arguments (entry.key, entry.value)
+                                }
+                            }));
+
+        _lenses.add_all_iterator (
+            _found_hides
+            .map<CodeLens> (entry =>
+                            new CodeLens () {
+                                range = new Range.from_sourceref (entry.key.source_reference),
+                                command = new Lsp.Command () {
+                                    title = "hides " + CodeLensEngine.represent_symbol (entry.key, entry.value),
+                                    command = Command.EDITOR_SHOW_HIDDEN_SYMBOL.to_string (),
+                                    arguments = CodeLensEngine.create_arguments (entry.key, entry.value)
+                                }
+                            }));
+
+        this.file = null;
+        _found_overrides = null;
+        _found_implementations = null;
+        _found_hides = null;
+        last_updated = new DateTime.now ();
     }
 
     public override void visit_namespace (Vala.Namespace ns) {
@@ -73,19 +137,19 @@ class Vls.CodeLensAnalyzer : Vala.CodeVisitor, CodeAnalyzer {
 
         if (m.base_interface_method != null && m.base_interface_method != m) {
             if (CodeHelp.base_method_requires_override (m.base_interface_method))
-                found_overrides[m] = m.base_interface_method;
+                _found_overrides[m] = m.base_interface_method;
             else
-                found_implementations[m] = m.base_interface_method;
+                _found_implementations[m] = m.base_interface_method;
         } else if (m.base_method != null && m.base_method != m) {
             if (CodeHelp.base_method_requires_override (m.base_method))
-                found_overrides[m] = m.base_method;
+                _found_overrides[m] = m.base_method;
             else
-                found_implementations[m] = m.base_method;
+                _found_implementations[m] = m.base_method;
         }
 
         var hidden_member = m.get_hidden_member ();
         if (m.hides && hidden_member != null)
-            found_hides[m] = hidden_member;
+            _found_hides[m] = hidden_member;
     }
 
     public override void visit_property (Vala.Property prop) {
@@ -94,18 +158,18 @@ class Vls.CodeLensAnalyzer : Vala.CodeVisitor, CodeAnalyzer {
 
         if (prop.base_interface_property != null && prop.base_interface_property != prop) {
             if (CodeHelp.base_property_requires_override (prop.base_interface_property))
-                found_overrides[prop] = prop.base_interface_property;
+                _found_overrides[prop] = prop.base_interface_property;
             else
-                found_implementations[prop] = prop.base_interface_property;
+                _found_implementations[prop] = prop.base_interface_property;
         } else if (prop.base_property != null && prop.base_property != prop) {
             if (CodeHelp.base_property_requires_override (prop.base_property))
-                found_overrides[prop] = prop.base_property;
+                _found_overrides[prop] = prop.base_property;
             else
-                found_implementations[prop] = prop.base_property;
+                _found_implementations[prop] = prop.base_property;
         }
 
         var hidden_member = prop.get_hidden_member ();
         if (prop.hides && hidden_member != null)
-            found_hides[prop] = hidden_member;
+            _found_hides[prop] = hidden_member;
     }
 }

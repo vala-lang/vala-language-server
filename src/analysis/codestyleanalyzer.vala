@@ -38,10 +38,6 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
         }
     }
 
-    public CodeStyleAnalyzer (SourceFile source_file) {
-        this.visit_source_file (source_file);
-    }
-
     private void update_prefix (Symbol symbol) {
         if (_indentation == null && symbol.source_reference != null && CodeHelp.get_decl_nesting_level (symbol) == 3) {
             var prefix = new StringBuilder ();
@@ -60,6 +56,7 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
         current_file = source_file;
         source_file.accept_children (this);
         current_file = null;
+        last_updated = new DateTime.now ();
     }
 
     public override void visit_namespace (Namespace ns) {
