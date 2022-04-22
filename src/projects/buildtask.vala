@@ -40,11 +40,14 @@ class Vls.BuildTask : BuildTarget {
      */
     public ArrayList<File> candidate_inputs { get; private set; default = new ArrayList<File> (); }
 
-    public BuildTask (string build_dir, string output_dir, string name, string id, int no,
+    private FileCache _file_cache;
+
+    public BuildTask (FileCache file_cache, string build_dir, string output_dir, string name, string id, int no,
                       string[] compiler, string[] args, string[] sources, string[] generated_sources,
                       string[] target_output_files,
                       string language) throws Error {
         base (output_dir, name, id, no);
+        _file_cache = file_cache;
         // don't pipe stderr since we want to print that if something goes wrong
         this.build_dir = build_dir;
         launcher = new SubprocessLauncher (SubprocessFlags.STDOUT_PIPE);
@@ -300,6 +303,9 @@ class Vls.BuildTask : BuildTarget {
                     outfile_ostream.splice (process_output_istream, OutputStreamSpliceFlags.NONE, cancellable);
                 }
             }
+            // update the file metadata cache
+            foreach (var file in output)
+                _file_cache.update (file, cancellable);
             last_updated = new DateTime.now ();
         }
     }

@@ -38,8 +38,15 @@ abstract class Vls.Project : Object {
      */
     private HashMap<File, FileMonitor> monitored_files = new HashMap<File, FileMonitor> (Util.file_hash, Util.file_equal);
 
-    protected Project (string root_path) {
+    /**
+     * Use this in projects to keep track of target outputs and avoid
+     * rebuilding dependent targets.
+     */
+    protected FileCache file_cache;
+
+    protected Project (string root_path, FileCache file_cache) {
         this.root_path = root_path;
+        this.file_cache = file_cache;
     }
 
     /** 

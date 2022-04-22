@@ -68,11 +68,11 @@ class Vls.CcProject : Project {
             }
 
             if (cc.command[0].contains ("valac"))
-                build_targets.add (new Compilation (cc.directory, cc.file ?? @"CC#$i", @"CC#$i", i,
+                build_targets.add (new Compilation (file_cache, cc.directory, cc.file ?? @"CC#$i", @"CC#$i", i,
                                                     cc.command[0:1], cc.command[1:cc.command.length],
                                                     new string[]{}, new string[]{}, new string[]{}));
             else
-                build_targets.add (new BuildTask (cc.directory, cc.directory, cc.file ?? @"CC#$i", @"CC#$i", i,
+                build_targets.add (new BuildTask (file_cache, cc.directory, cc.directory, cc.file ?? @"CC#$i", @"CC#$i", i,
                                                   cc.command[0:1], cc.command[1:cc.command.length], 
                                                   new string[]{}, new string[]{},
                                                   new string[]{}, "unknown"));
@@ -83,8 +83,8 @@ class Vls.CcProject : Project {
         return true;
     }
 
-    public CcProject (string root_path, string cc_location, Cancellable? cancellable = null) throws Error {
-        base (root_path);
+    public CcProject (string root_path, string cc_location, FileCache file_cache, Cancellable? cancellable = null) throws Error {
+        base (root_path, file_cache);
 
         var root_dir = File.new_for_path (root_path);
         var cc_json_file = File.new_for_commandline_arg_and_cwd (cc_location, root_path);

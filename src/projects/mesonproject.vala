@@ -502,7 +502,8 @@ class Vls.MesonProject : Project {
 
             // finally, construct the build target
             if (first_source.language == "vala")
-                build_targets.add (new Compilation (target_private_output_dir,
+                build_targets.add (new Compilation (file_cache,
+                                                    target_private_output_dir,
                                                     meson_target_info.name, 
                                                     meson_target_info.id, 
                                                     elem_idx,
@@ -533,7 +534,8 @@ class Vls.MesonProject : Project {
                     executes_generated_program = true;
                 }
 
-                var added_task = new BuildTask (build_dir,
+                var added_task = new BuildTask (file_cache,
+                                                build_dir,
                                                 target_private_output_dir,
                                                 meson_target_info.name,
                                                 meson_target_info.id,
@@ -750,8 +752,8 @@ class Vls.MesonProject : Project {
         base.build_if_stale (cancellable);
     }
 
-    public MesonProject (string root_path, Cancellable? cancellable = null) throws Error {
-        base (root_path);
+    public MesonProject (string root_path, FileCache file_cache, Cancellable? cancellable = null) throws Error {
+        base (root_path, file_cache);
         this.build_dir = DirUtils.make_tmp (@"vls-meson-$(str_hash (root_path))-XXXXXX");
         reconfigure_if_stale (cancellable);
     }

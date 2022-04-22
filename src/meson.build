@@ -25,6 +25,7 @@ vls_src = files([
   'projects/ccproject.vala',
   'projects/compilation.vala',
   'projects/defaultproject.vala',
+  'projects/filecache.vala',
   'projects/mesonproject.vala',
   'projects/project.vala',
   'projects/textdocument.vala',

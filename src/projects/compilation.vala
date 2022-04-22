@@ -28,6 +28,12 @@ class Vls.Compilation : BuildTarget {
     private HashSet<string> _gresources_dirs = new HashSet<string> ();
 
     /**
+     * This helps us determine which files have remained the same after an
+     * update.
+     */
+    private FileCache _file_cache;
+
+    /**
      * These are files that are part of the project.
      */
     private HashMap<File, TextDocument> _project_sources = new HashMap<File, TextDocument> (Util.file_hash, Util.file_equal);
@@ -98,11 +104,12 @@ class Vls.Compilation : BuildTarget {
      */
     public HashMap<string, Vala.Symbol> cname_to_sym { get; private set; default = new HashMap<string, Vala.Symbol> (); }
 
-    public Compilation (string output_dir, string name, string id, int no,
+    public Compilation (FileCache file_cache, string output_dir, string name, string id, int no,
                         string[] compiler, string[] args, string[] sources, string[] generated_sources,
                         string?[] target_output_files,
                         string[]? sources_content = null) throws Error {
         base (output_dir, name, id, no);
+        _file_cache = file_cache;
         directory = output_dir;
 
         // parse arguments
@@ -401,10 +408,15 @@ class Vls.Compilation : BuildTarget {
             configure (cancellable);
 
         bool stale = false;
-        foreach (BuildTarget dep in dependencies.values) {
-            if (dep.last_updated.compare (last_updated) > 0) {
+        bool updated_file = false;
+
+        foreach (Map.Entry<File, BuildTarget> dep in dependencies) {
+            if (_file_cache[dep.key].last_updated.compare (last_updated) > 0) {
                 stale = true;
                 break;
+            } else if (dep.value.last_updated.compare (last_updated) > 0) {
+                // dep was updated but file is the same
+                updated_file = true;
             }
         }
         foreach (TextDocument doc in _project_sources.values) {
@@ -418,7 +430,17 @@ class Vls.Compilation : BuildTarget {
             cancellable.set_error_if_cancelled ();
             // TODO: cancellable compilation
             compile ();
+        } else if (updated_file) {
+            // even if the files are unchanged after updates, we need to
+            // silently update the last_updated property of this target at the
+            // very least, in order to maintain the invariant that a build
+            // target is always "last updated" after its dependencies
+            last_updated = new DateTime.now ();
         }
+
+        // update all output files
+        foreach (var file in output)
+            _file_cache.update (file, cancellable);
     }
 
     /**

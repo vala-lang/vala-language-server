@@ -62,6 +62,12 @@ class Vls.Server : Jsonrpc.Server {
      */
     HashSet<string> open_files = new HashSet<string> ();
 
+    /**
+     * Use this in projects to keep track of target outputs and avoid
+     * rebuilding dependent targets.
+     */
+    FileCache file_cache = new FileCache ();
+
     static construct {
         Process.@signal (ProcessSignal.INT, () => {
             Server.received_signal = true;
@@ -375,7 +381,7 @@ class Vls.Server : Jsonrpc.Server {
         // TODO: autotools, make(?), cmake(?)
         if (meson_file.query_exists (cancellable)) {
             try {
-                backend_project = new MesonProject (root_path, cancellable);
+                backend_project = new MesonProject (root_path, file_cache, cancellable);
             } catch (Error e) {
                 if (!(e is ProjectError.VERSION_UNSUPPORTED)) {
                     show_message (client, @"Failed to initialize Meson project - $(e.message)", MessageType.Error);
@@ -388,7 +394,7 @@ class Vls.Server : Jsonrpc.Server {
             foreach (var cc_file in cc_files) {
                 string cc_file_path = Util.realpath (cc_file.get_path ());
                 try {
-                    backend_project = new CcProject (root_path, cc_file_path, cancellable);
+                    backend_project = new CcProject (root_path, cc_file_path, file_cache, cancellable);
                     debug ("[initialize] initialized CcProject with %s", cc_file_path);
                     break;
                 } catch (Error e) {
@@ -412,7 +418,7 @@ class Vls.Server : Jsonrpc.Server {
         }
 
         // always have default project
-        default_project = new DefaultProject (root_path);
+        default_project = new DefaultProject (root_path, file_cache);
 
         // build and publish diagnostics
         foreach (var project in new_projects) {

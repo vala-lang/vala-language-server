@@ -22,8 +22,8 @@ using Gee;
  * A project without any backend. Mainly useful for editing one file.
  */
 class Vls.DefaultProject : Project {
-    public DefaultProject (string root_path) {
-        base (root_path);
+    public DefaultProject (string root_path, FileCache file_cache) {
+        base (root_path, file_cache);
     }
 
     public override bool reconfigure_if_stale (Cancellable? cancellable = null) throws Error {
@@ -53,7 +53,7 @@ class Vls.DefaultProject : Project {
                 warning ("failed to parse interpreter line");
             }
         }
-        btarget = new Compilation (root_path, uri, uri, build_targets.size,
+        btarget = new Compilation (file_cache, root_path, uri, uri, build_targets.size,
                                    {"valac"}, args, sources, {}, {}, content != null ? new string[]{content} : null);
         // build it now so that information is available immediately on
         // file open (other projects compile on LSP initialize(), so they don't
