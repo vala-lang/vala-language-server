@@ -41,6 +41,7 @@ namespace Vls.CodeActions {
 
         // add code actions
         foreach (CodeNode code_node in finder.result) {
+            critical ("%s", code_node.type_name);
             if (code_node is IntegerLiteral) {
                 var lit = (IntegerLiteral) code_node;
                 var lit_range = new Range.from_sourceref (lit.source_reference);
@@ -57,10 +58,133 @@ namespace Vls.CodeActions {
                         code_actions.add (new ImplementMissingPrereqsAction (csym, missing.first, missing.second, clsdef_range.end, code_style, document));
                     }
                 }
+            } else if (code_node is MethodCall) {
+                var mc = (MethodCall) code_node;
+                foreach (var diag in reporter.messages) {
+                    if (file.filename != diag.loc.file.filename)
+                        continue;
+                    if (!(mc.source_reference.contains (diag.loc.begin) || mc.source_reference.contains (diag.loc.end)))
+                        continue;
+                    if (diag.message.has_prefix ("The name ") && diag.message.contains ("does not exist in the context of")) {
+                        mc.call.check (CodeContext.get ());
+                        mc.check (CodeContext.get ());
+                        var m = mc.call;
+                        var failed_nodes = new Gee.LinkedList<Vala.CodeNode> ();
+                        Symbol? last_valid_symbol = null;
+                        while (true) {
+                            critical ("%s", m.type_name);
+                            m.check (CodeContext.get ());
+                            if (m.symbol_reference is Class) {
+                                var c = (Class) m.symbol_reference;
+                                last_valid_symbol = c;
+                                break;
+                            }
+                            if (m is MethodCall) {
+                                var r = (MethodCall) m;
+                                if (r.check (CodeContext.get ())) {
+                                    failed_nodes.add (r);
+                                    m = r.call as MemberAccess;
+                                    continue;
+                                }
+                                break;
+                            }
+                            if (m is ObjectCreationExpression) {
+                                var oce = (ObjectCreationExpression) m;
+                                if (oce.type_reference == null && oce.check (CodeContext.get ())) {
+                                    failed_nodes.add (oce);
+                                    break;
+                                }
+                                last_valid_symbol = oce.type_reference.type_symbol;
+                                break;
+                            }
+                            if (!(m is MemberAccess))
+                                break;
+                            m = ((MemberAccess) m).inner;
+                            if (m == null)
+                                break;
+                        }
+                        var symbol = last_valid_symbol;
+                        if (!failed_nodes.is_empty) {
+                            var sym = SemanticAnalyzer.symbol_lookup_inherited (last_valid_symbol, ((MemberAccess) ((MethodCall) failed_nodes[0]).call).member_name);
+                            var tmp = sym;
+                            for (var i = 1; i < failed_nodes.size - 1; i++) {
+                                tmp = ((Method) failed_nodes[i]).return_type.get_member (((MemberAccess) ((MethodCall) failed_nodes[i + 1]).call).member_name);
+                                if (tmp == null) {
+                                    break;
+                                }
+                            }
+                            if (tmp == null)
+                                continue;
+                            var add_method_here_type = ((Method) tmp).return_type;
+                            if (!(add_method_here_type is ObjectType))
+                                continue;
+                            symbol = ((ObjectType) add_method_here_type).object_type_symbol;
+                        }
+                        var target_file = symbol.source_reference.file;
+                        var is_static = false;
+                        {
+                            var call = (MemberAccess) mc.call;
+                            if (call != null && call.inner != null) {
+                                var inner = (MemberAccess) call.inner;
+                                is_static = inner.symbol_reference is Class;
+                            }
+                        }
+                        // We can't just edit, e.g. some external vapi
+                        if (!compilation.get_project_files ().contains (target_file))
+                            continue;
+                        var insertion_line = symbol.source_reference.end.line + 1;
+                        var sb = new StringBuilder ();
+                        // TODO: Derive return type
+                        var method_parts = mc.call.to_string ().split (".");
+                        var method_name = method_parts[method_parts.length - 1];
+                        sb.append ("public ").append (is_static ? "static " : "").append ("void ").append (method_name).append (" (");
+                        var args = mc.get_argument_list ();
+                        var idx = 0;
+                        for (var i = 0; i < args.size - 1; i++) {
+                            var arg = args[i];
+                            arg.check (CodeContext.get ());
+                            var s = arg.value_type.to_string ();
+                            sb.append ((s == null || s == "null") ? "GLib.Object" : s).append (" arg%d".printf (idx++)).append (", ");
+                        }
+                        if (args.size != 0) {
+                            var last_arg = args[args.size - 1];
+                            last_arg.check (CodeContext.get ());
+                            var s = last_arg.value_type.to_string ();
+                            sb.append ((s == null || s == "null") ? "GLib.Object" : s).append (" arg%d".printf (idx));
+                        }
+                        sb.append (") {}\n ");
+                        try {
+                            var target_uri = Filename.to_uri (target_file.filename);
+                            var target_document = new VersionedTextDocumentIdentifier () {
+                                uri = target_uri,
+                                version = 1
+                            };
+                            var workspace_edit = new WorkspaceEdit ();
+                            var document_edit = new TextDocumentEdit (target_document);
+                            var r = new Range.from_sourceref (
+                                new Vala.SourceReference (target_file,
+                                                          Vala.SourceLocation (null, insertion_line, 1),
+                                                          Vala.SourceLocation (null, insertion_line, 1)));
+                            var text_edit = new TextEdit (r);
+                            document_edit.edits.add (text_edit);
+                            workspace_edit.documentChanges = new Gee.ArrayList<TextDocumentEdit> ();
+                            workspace_edit.documentChanges.add (document_edit);
+                            var ca = new CodeAction ();
+                            ca.edit = workspace_edit;
+                            ca.title = "Create method %s in %s".printf (method_name, symbol.get_full_name ());
+                            text_edit.newText = sb.str;
+                            code_actions.add (ca);
+                        } catch (ConvertError ce) {
+                            error ("Should not happen: %s", ce.message);
+                        }
+                    }
+                }
             } else if (code_node is ObjectCreationExpression) {
                 var oce = (ObjectCreationExpression) code_node;
                 foreach (var diag in reporter.messages) {
                     if (file.filename != diag.loc.file.filename)
+                        continue;
+                    if (!(oce.source_reference.contains (diag.loc.begin) || oce.source_reference.contains (diag.loc.end)))
                         continue;
                     if (diag.message.contains (" extra arguments for ")) {
                         var to_be_created = oce.type_reference.symbol;
@@ -78,7 +202,7 @@ namespace Vls.CodeActions {
                         var insertion_line = to_be_created.source_reference.end.line + 1;
                         var sb = new StringBuilder ();
                         var indent = to_be_created.source_reference.begin.column == 1 ? "" : "\t";
-                        sb.append (indent).append (indent).append ("public ").append (oce.member_name.to_string ()).append ("(");
+                        sb.append (indent).append (indent).append ("public ").append (oce.member_name.to_string ()).append (" (");
                         var args = oce.get_argument_list ();
                         var idx = 0;
                         for (var i = 0; i < args.size - 1; i++) {
@@ -97,8 +221,64 @@ namespace Vls.CodeActions {
                             var document_edit = new TextDocumentEdit (target_document);
                             var r = new Range.from_sourceref (
                                 new Vala.SourceReference (target_file,
-                                        Vala.SourceLocation (null, insertion_line, 1),
-                                        Vala.SourceLocation (null, insertion_line, 1)));
+                                                          Vala.SourceLocation (null, insertion_line, 1),
+                                                          Vala.SourceLocation (null, insertion_line, 1)));
+                            var text_edit = new TextEdit (r);
+                            document_edit.edits.add (text_edit);
+                            workspace_edit.documentChanges = new Gee.ArrayList<TextDocumentEdit> ();
+                            workspace_edit.documentChanges.add (document_edit);
+                            var ca = new CodeAction ();
+                            ca.edit = workspace_edit;
+                            ca.title = "Add constructor";
+                            text_edit.newText = sb.str;
+                            code_actions.add (ca);
+                        } catch (ConvertError ce) {
+                            error ("Should not happen: %s", ce.message);
+                        }
+                    } else if (diag.message.contains ("The name ") && diag.message.contains ("does not exist in the context of")) {
+                        var to_be_created = oce.member_name.inner.symbol_reference;
+                        if (!(to_be_created is Vala.Class)) {
+                            continue;
+                        }
+                        var constr = ((Vala.Class) to_be_created).constructor;
+                        if (constr != null) {
+                            continue;
+                        }
+                        var target_file = to_be_created.source_reference.file;
+                        // We can't just edit, e.g. some external vapi
+                        if (!compilation.get_project_files ().contains (target_file))
+                            continue;
+                        var insertion_line = to_be_created.source_reference.end.line + 1;
+                        var sb = new StringBuilder ();
+                        var indent = to_be_created.source_reference.begin.column == 1 ? "" : "\t";
+                        sb.append (indent).append (indent).append ("public ").append (oce.member_name.to_string ()).append ("(");
+                        var args = oce.get_argument_list ();
+                        var idx = 0;
+                        for (var i = 0; i < args.size - 1; i++) {
+                            var arg = args[i];
+                            arg.check (CodeContext.get ());
+                            var s = arg.value_type.to_string ();
+                            sb.append (s == null ? "GLib.Object" : s).append (" arg%d".printf (idx++)).append (", ");
+                        }
+                        if (args.size != 0) {
+                            var last_arg = args[args.size - 1];
+                            last_arg.check (CodeContext.get ());
+                            var s = last_arg.value_type.to_string ();
+                            sb.append (s == null ? "GLib.Object" : s).append (" arg%d".printf (idx));
+                        }
+                        sb.append (") {}\n ");
+                        try {
+                            var target_uri = Filename.to_uri (target_file.filename);
+                            var target_document = new VersionedTextDocumentIdentifier () {
+                                uri = target_uri,
+                                version = 1
+                            };
+                            var workspace_edit = new WorkspaceEdit ();
+                            var document_edit = new TextDocumentEdit (target_document);
+                            var r = new Range.from_sourceref (
+                                new Vala.SourceReference (target_file,
+                                                          Vala.SourceLocation (null, insertion_line, 1),
+                                                          Vala.SourceLocation (null, insertion_line, 1)));
                             var text_edit = new TextEdit (r);
                             document_edit.edits.add (text_edit);
                             workspace_edit.documentChanges = new Gee.ArrayList<TextDocumentEdit> ();
