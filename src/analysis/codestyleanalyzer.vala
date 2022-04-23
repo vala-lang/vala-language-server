@@ -126,7 +126,7 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
     }
 
     public override void visit_method (Method m) {
-        if (m.source_reference == null || m.source_reference.begin.pos == null)
+        if (m.source_reference == null || m.source_reference.file != current_file || m.source_reference.begin.pos == null)
             return;
         update_prefix (m);
         analyze_callable (m);
