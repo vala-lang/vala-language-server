@@ -199,42 +199,7 @@ namespace Vls.CodeActions {
                         // We can't just edit, e.g. some external vapi
                         if (!compilation.get_project_files ().contains (target_file))
                             continue;
-                        var insertion_line = to_be_created.source_reference.end.line + 1;
-                        var sb = new StringBuilder ();
-                        var indent = to_be_created.source_reference.begin.column == 1 ? "" : "\t";
-                        sb.append (indent).append (indent).append ("public ").append (oce.member_name.to_string ()).append (" (");
-                        var args = oce.get_argument_list ();
-                        var idx = 0;
-                        for (var i = 0; i < args.size - 1; i++) {
-                            sb.append (args[i].value_type.to_string ()).append (" arg%d".printf (idx++)).append (", ");
-                        }
-                        if (args.size != 0)
-                            sb.append (args[args.size - 1].value_type.to_string ()).append (" arg%d".printf (idx));
-                        sb.append (") {}\n ");
-                        try {
-                            var target_uri = Filename.to_uri (target_file.filename);
-                            var target_document = new VersionedTextDocumentIdentifier () {
-                                uri = target_uri,
-                                version = 1
-                            };
-                            var workspace_edit = new WorkspaceEdit ();
-                            var document_edit = new TextDocumentEdit (target_document);
-                            var r = new Range.from_sourceref (
-                                new Vala.SourceReference (target_file,
-                                                          Vala.SourceLocation (null, insertion_line, 1),
-                                                          Vala.SourceLocation (null, insertion_line, 1)));
-                            var text_edit = new TextEdit (r);
-                            document_edit.edits.add (text_edit);
-                            workspace_edit.documentChanges = new Gee.ArrayList<TextDocumentEdit> ();
-                            workspace_edit.documentChanges.add (document_edit);
-                            var ca = new CodeAction ();
-                            ca.edit = workspace_edit;
-                            ca.title = "Add constructor";
-                            text_edit.newText = sb.str;
-                            code_actions.add (ca);
-                        } catch (ConvertError ce) {
-                            error ("Should not happen: %s", ce.message);
-                        }
+                        code_actions.add (new ImplementConstructorAction (oce, to_be_created));
                     } else if (diag.message.contains ("The name ") && diag.message.contains ("does not exist in the context of")) {
                         var to_be_created = oce.member_name.inner.symbol_reference;
                         if (!(to_be_created is Vala.Class)) {
@@ -248,49 +213,6 @@ namespace Vls.CodeActions {
                         // We can't just edit, e.g. some external vapi
                         if (!compilation.get_project_files ().contains (target_file))
                             continue;
-                        var insertion_line = to_be_created.source_reference.end.line + 1;
-                        var sb = new StringBuilder ();
-                        var indent = to_be_created.source_reference.begin.column == 1 ? "" : "\t";
-                        sb.append (indent).append (indent).append ("public ").append (oce.member_name.to_string ()).append ("(");
-                        var args = oce.get_argument_list ();
-                        var idx = 0;
-                        for (var i = 0; i < args.size - 1; i++) {
-                            var arg = args[i];
-                            arg.check (CodeContext.get ());
-                            var s = arg.value_type.to_string ();
-                            sb.append (s == null ? "GLib.Object" : s).append (" arg%d".printf (idx++)).append (", ");
-                        }
-                        if (args.size != 0) {
-                            var last_arg = args[args.size - 1];
-                            last_arg.check (CodeContext.get ());
-                            var s = last_arg.value_type.to_string ();
-                            sb.append (s == null ? "GLib.Object" : s).append (" arg%d".printf (idx));
-                        }
-                        sb.append (") {}\n ");
-                        try {
-                            var target_uri = Filename.to_uri (target_file.filename);
-                            var target_document = new VersionedTextDocumentIdentifier () {
-                                uri = target_uri,
-                                version = 1
-                            };
-                            var workspace_edit = new WorkspaceEdit ();
-                            var document_edit = new TextDocumentEdit (target_document);
-                            var r = new Range.from_sourceref (
-                                new Vala.SourceReference (target_file,
-                                                          Vala.SourceLocation (null, insertion_line, 1),
-                                                          Vala.SourceLocation (null, insertion_line, 1)));
-                            var text_edit = new TextEdit (r);
-                            document_edit.edits.add (text_edit);
-                            workspace_edit.documentChanges = new Gee.ArrayList<TextDocumentEdit> ();
-                            workspace_edit.documentChanges.add (document_edit);
-                            var ca = new CodeAction ();
-                            ca.edit = workspace_edit;
-                            ca.title = "Add constructor";
-                            text_edit.newText = sb.str;
-                            code_actions.add (ca);
-                        } catch (ConvertError ce) {
-                            error ("Should not happen: %s", ce.message);
-                        }
                     }
                 }
             }
