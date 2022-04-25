@@ -1,0 +1,6 @@
+[wrap-git]
+url = https://gitlab.gnome.org/GNOME/jsonrpc-glib
+revision = 3.42.0
+
+[provide]
+jsonrpc-glib-1.0 = libjsonrpc_glib_dep

@@ -1,0 +1,6 @@
+[wrap-git]
+url = https://gitlab.gnome.org/GNOME/libgee
+revision = wip/tintou/meson
+
+[provide]
+gee-0.8 = gee_dep

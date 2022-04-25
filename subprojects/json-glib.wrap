@@ -1,0 +1,6 @@
+[wrap-git]
+url = https://gitlab.gnome.org/GNOME/json-glib
+revision = 1.6.6
+
+[provide]
+json-glib-1.0 = json_glib_dep

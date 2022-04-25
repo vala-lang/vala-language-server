@@ -2,7 +2,8 @@ project('vala-language-server', 'vala', 'c',
   version: '0.48.4',
   license: 'LGPL2.1+',
   default_options: [
-    'default_library=static'
+    'default_library=static',
+    'c_std=gnu11'       # for C subprojects
   ]
 )
 
@@ -12,10 +13,18 @@ if not libvala_version.version_compare('>=0.48' )
   error('libvala needs to be 0.48 or above')
 endif
 
+extra_vala_sources = []
+
 libvala = dependency('libvala-@0@'.format(libvala_version), version: '>= 0.48.12')
 
 libgobject_dep = dependency('gobject-2.0')
-libjsonrpc_glib_dep = dependency('jsonrpc-glib-1.0', version: '>= 3.28')
+libjsonrpc_glib_dep = dependency('jsonrpc-glib-1.0', version: '>= 3.28', required: false)
+if not libjsonrpc_glib_dep.found()
+    # don't use introspection with static library as it requires a recent version of GIR
+    jsonrpc_glib = subproject('jsonrpc-glib', default_options: ['with_introspection=false'])
+    libjsonrpc_glib_dep = jsonrpc_glib.get_variable('libjsonrpc_glib_dep')
+    extra_vala_sources += files('vapi/jsonrpc-glib-1.0.vapi')
+endif
 
 deps = [
     dependency('glib-2.0'),
@@ -55,8 +64,8 @@ version_file = vcs_tag(input: 'version.vala.in',
 
 add_project_arguments(['--enable-gobject-tracing', '--fatal-warnings'], language: 'vala')
 
-extra_vala_sources = files([
-  'src/util.vala',
+extra_vala_sources += files([
+  'src/util.vala'
 ])
 
 if host_machine.system() == 'windows'
