@@ -75,6 +75,19 @@ namespace Vls.Formatter {
     }
 
     string[] get_uncrustify_args (Vala.SourceFile source, FormattingOptions options, CodeStyleAnalyzer? analyzed_style) {
+        // Check if the project has a local uncrustify config file
+        string cwd = Environment.get_current_dir ();
+        string[] config_paths = {
+            Path.build_path (Path.DIR_SEPARATOR_S, cwd, ".uncrustify.cfg"),
+            Path.build_path (Path.DIR_SEPARATOR_S, cwd, "uncrustify.cfg")
+        };
+        foreach (string path in config_paths) {
+            if (!File.new_for_path (path).query_exists ())
+                continue;
+            return {"uncrustify", "-c", path, "-", "--assume", source.filename, "-q"};
+        }
+
+        // No config file found... Use defaults
         var conf = new HashMap<string, string> ();
         // https://github.com/uncrustify/uncrustify/blob/master/documentation/htdocs/default.cfg
         conf["indent_with_tabs"] = "%d".printf (options.insertSpaces ? 0 : 1);
