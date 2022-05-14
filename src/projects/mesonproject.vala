@@ -224,6 +224,7 @@ class Vls.MesonProject : Project {
     }
 
     public override bool reconfigure_if_stale (Cancellable? cancellable = null) throws Error {
+        this.analyze_build_targets (null, true);
         if (!build_files_have_changed) {
             return false;
         }
@@ -500,6 +501,8 @@ class Vls.MesonProject : Project {
                 first_source.parameters = fixed_parameters.to_array ();
             }
 
+            output_names.add (meson_target_info.filename[0]);
+
             // finally, construct the build target
             if (first_source.language == "vala")
                 build_targets.add (new Compilation (file_cache,
@@ -524,7 +527,14 @@ class Vls.MesonProject : Project {
                 File? compiler_exe = null;
                 if (meson_target_info.target_type == "custom" &&
                     first_source.compiler.length > 0 && !Path.is_absolute (first_source.compiler[0])) {
-                    compiler_exe = File.new_for_commandline_arg_and_cwd (first_source.compiler[0], build_dir);
+                    string? tmp = null;
+                    foreach (var o in this.output_names) {
+                        if (o.has_suffix ("/" + first_source.compiler[0])) {
+                            tmp = o;
+                            break;
+                        }
+                    }
+                    compiler_exe = tmp == null ? File.new_for_commandline_arg_and_cwd (first_source.compiler[0], build_dir) : File.new_for_path (tmp);
                     first_source.compiler[0] = compiler_exe.get_path ();
                     // we still don't know if the entire project requires a
                     // general build because it could turn out in the end that

@@ -44,6 +44,8 @@ abstract class Vls.Project : Object {
      */
     protected FileCache file_cache;
 
+    protected HashSet<string> output_names = new HashSet<string> ();
+
     protected Project (string root_path, FileCache file_cache) {
         this.root_path = root_path;
         this.file_cache = file_cache;
@@ -54,9 +56,9 @@ abstract class Vls.Project : Object {
      * This is the final operation needed before the project is ready to be
      * built.
      */
-    protected void analyze_build_targets (Cancellable? cancellable = null) throws Error {
+    protected void analyze_build_targets (Cancellable? cancellable = null, bool dry_run = false) throws Error {
         // first, check that at least one target is a Compilation
-        if (!build_targets.any_match (t => t is Compilation))
+        if (!build_targets.any_match (t => t is Compilation) && !dry_run)
             throw new ProjectError.CONFIGURATION (@"project has no Vala targets");
 
         // there may be multiple consumers of a file
@@ -82,6 +84,7 @@ abstract class Vls.Project : Object {
                     producers_for[file_produced] = new HashSet<BuildTarget> ();
                 producers_for[file_produced].add (btarget);
                 is_consumer_or_producer = true;
+                output_names.add (file_produced.get_path ());
                 debug ("\t- %s produces %s", btarget.id, file_produced.get_path ());
             }
             if (!is_consumer_or_producer) {
@@ -123,6 +126,7 @@ abstract class Vls.Project : Object {
                     producers_for[file].add (btask);
                     btask.output.add (file);
                     files_categorized.add (file);
+                    output_names.add (file.get_path ());
                     debug ("\t- %s produces %s", btask.id, file.get_path ());
                 }
             }
@@ -147,10 +151,14 @@ abstract class Vls.Project : Object {
                 }
                 producers_for[uncategorized_file].add (btask);
                 btask.output.add (uncategorized_file);
+                output_names.add (uncategorized_file.get_path ());
                 debug ("\t- %s produces %s", btask.id, uncategorized_file.get_path ());
             }
             btask.used_files.clear ();
         }
+
+        if (dry_run)
+            return;
 
         // 3. Now check for two or more primary producers of the same file, which is not allowed.
         foreach (var entry in producers_for) {
