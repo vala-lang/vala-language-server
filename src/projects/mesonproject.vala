@@ -524,7 +524,17 @@ class Vls.MesonProject : Project {
                 File? compiler_exe = null;
                 if (meson_target_info.target_type == "custom" &&
                     first_source.compiler.length > 0 && !Path.is_absolute (first_source.compiler[0])) {
+                    // by default, assume the compiler is generated in the build root
                     compiler_exe = File.new_for_commandline_arg_and_cwd (first_source.compiler[0], build_dir);
+                    // refine our search - find the first target matching this compiler
+                    foreach (var target in build_targets) {
+                            foreach (var output in target.output) {
+                                    if (output.get_basename () == first_source.compiler[0]) {
+                                            compiler_exe = output;
+                                            break;
+                                    }
+                            }
+                    }
                     first_source.compiler[0] = compiler_exe.get_path ();
                     // we still don't know if the entire project requires a
                     // general build because it could turn out in the end that
