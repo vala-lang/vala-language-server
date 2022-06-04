@@ -35,7 +35,7 @@ namespace Vls.Formatter {
         // so we have to use a SubprocessLauncher and call set_environ()
         var launcher = new SubprocessLauncher (SubprocessFlags.STDERR_PIPE | SubprocessFlags.STDOUT_PIPE | SubprocessFlags.STDIN_PIPE);
         launcher.set_environ (Environ.get ());
-        Subprocess subprocess = launcher.spawnv (get_uncrustify_args (source, options, analyzed_style));
+        Subprocess subprocess = launcher.spawnv (get_uncrustify_args (source, options, analyzed_style, cancellable));
         string stdin_buf;
         if (range == null) {
             stdin_buf = source.content;
@@ -74,7 +74,18 @@ namespace Vls.Formatter {
         return new TextEdit (edit_range, stdout_buf);
     }
 
-    string[] get_uncrustify_args (Vala.SourceFile source, FormattingOptions options, CodeStyleAnalyzer? analyzed_style) {
+    string[] get_uncrustify_args (Vala.SourceFile source, FormattingOptions options, CodeStyleAnalyzer? analyzed_style, Cancellable? cancellable = null) {
+        // Check if the project has a local uncrustify config file and use that instead
+        var cwd = File.new_for_path (Environment.get_current_dir ());
+        string[] config_paths = { ".uncrustify.cfg", "uncrustify.cfg" };
+        foreach (string filename in config_paths) {
+            var child = cwd.get_child (filename);
+            if (child.query_exists (cancellable)) {
+                return { "uncrustify", "-c", child.get_path (), "--assume", source.filename, "-q" };
+            }
+        }
+
+        // No config file found... Use defaults
         var conf = new HashMap<string, string> ();
         // https://github.com/uncrustify/uncrustify/blob/master/documentation/htdocs/default.cfg
         conf["indent_with_tabs"] = "%d".printf (options.insertSpaces ? 0 : 1);
