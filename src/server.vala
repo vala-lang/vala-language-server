@@ -290,7 +290,8 @@ class Vls.Server : Jsonrpc.Server {
         // fallback to default project
         if (selected_project == null) {
             results = default_project.lookup_compile_input_source_file (uri);
-            selected_project = default_project;
+            if (!results.is_empty)
+                selected_project = default_project;
         }
 
         if (selected_project != null) {
