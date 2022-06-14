@@ -33,15 +33,17 @@ namespace Vls.Formatter {
                      Cancellable? cancellable = null) throws FormattingError, Error {
         // SEARCH_PATH_FROM_ENVP does not seem to be available even in quite fast distros like Fedora 35,
         // so we have to use a SubprocessLauncher and call set_environ()
-        var launcher = new SubprocessLauncher (SubprocessFlags.STDERR_PIPE | SubprocessFlags.STDOUT_PIPE | SubprocessFlags.STDIN_PIPE);
+        var launcher = new SubprocessLauncher (SubprocessFlags.STDERR_PIPE | SubprocessFlags.STDOUT_PIPE
+                                               | SubprocessFlags.STDIN_PIPE);
         launcher.set_environ (Environ.get ());
-        Subprocess subprocess = launcher.spawnv (get_uncrustify_args (source, options, analyzed_style, cancellable));
+        var args = get_uncrustify_args (source, options, analyzed_style, cancellable);
+        Subprocess subprocess = launcher.spawnv (args);
         string stdin_buf;
         if (range == null) {
             stdin_buf = source.content;
         } else {
-            var from = (long)Util.get_string_pos (source.content, range.start.line, range.start.character);
-            var to = (long)Util.get_string_pos (source.content, range.end.line, range.end.character);
+            var from = (long) Util.get_string_pos (source.content, range.start.line, range.start.character);
+            var to = (long) Util.get_string_pos (source.content, range.end.line, range.end.character);
             stdin_buf = source.content[from:to];
         }
         string? stdout_buf = null, stderr_buf = null;
@@ -50,6 +52,9 @@ namespace Vls.Formatter {
             if (stderr_buf != null && stderr_buf.strip ().length > 0) {
                 throw new FormattingError.FORMAT ("%s", stderr_buf);
             } else {
+                foreach (var arg in args)
+                    stderr.printf ("%s ", arg);
+                stderr.printf ("\n");
                 throw new FormattingError.READ ("uncrustify failed with error code %d", subprocess.get_exit_status ());
             }
         }
@@ -74,7 +79,10 @@ namespace Vls.Formatter {
         return new TextEdit (edit_range, stdout_buf);
     }
 
-    string[] get_uncrustify_args (Vala.SourceFile source, FormattingOptions options, CodeStyleAnalyzer? analyzed_style, Cancellable? cancellable = null) {
+    string[] get_uncrustify_args (Vala.SourceFile source,
+                                  FormattingOptions options,
+                                  CodeStyleAnalyzer? analyzed_style,
+                                  Cancellable? cancellable = null) {
         // Check if the project has a local uncrustify config file and use that instead
         var cwd = File.new_for_path (Environment.get_current_dir ());
         string[] config_paths = { ".uncrustify.cfg", "uncrustify.cfg" };
@@ -92,13 +100,20 @@ namespace Vls.Formatter {
         conf["nl_end_of_file"] = options.insertFinalNewline ? "force" : "remove";
         conf["nl_end_of_file_min"] = "%d".printf (options.trimFinalNewlines ? 1 : 0);
         conf["output_tab_size"] = "%u".printf (options.tabSize);
+        conf["code_width"] = "120";
+        conf["pos_arith"] = "lead";
+        conf["ls_for_split_full"] = "true";
+        conf["ls_func_split_full"] = "true";
+        conf["ls_code_width"] = "true";
+        conf["indent_paren_nl"] = "true";
+        conf["indent_comma_brace"] = "1";
         conf["indent_columns"] = "4";
         conf["indent_align_string"] = "true";
         conf["indent_xml_string"] = "4";
         conf["indent_namespace"] = "true";
         conf["indent_class"] = "true";
         conf["indent_var_def_cont"] = "true";
-        conf["indent_func_def_param"] = "true";
+        conf["indent_func_def_param"] = "false";
         conf["indent_func_proto_param"] = "true";
         conf["indent_func_class_param"] = "true";
         conf["indent_func_ctor_var_param"] = "true";
@@ -140,6 +155,7 @@ namespace Vls.Formatter {
         conf["sp_after_angle"] = "remove";
         conf["sp_angle_paren"] = "force";
         conf["sp_angle_word"] = "force";
+        conf["sp_angle_shift"] = "remove";
         conf["sp_before_sparen"] = "force";
         conf["sp_inside_sparen"] = "remove";
         conf["sp_after_sparen"] = "remove";
@@ -177,6 +193,7 @@ namespace Vls.Formatter {
             conf["sp_func_def_paren"] = "force";
             conf["sp_func_class_paren"] = "force";
             conf["sp_func_call_paren"] = "force";
+            conf["sp_vala_after_translation"] = "remove";
         } else {
             conf["sp_func_proto_paren"] = "remove";
             conf["sp_func_def_paren"] = "remove";
@@ -184,8 +201,6 @@ namespace Vls.Formatter {
             conf["sp_func_call_paren"] = "remove";
         }
         conf["sp_func_call_paren_empty"] = "ignore";
-        // It is really "set func_call_user _"
-        // conf["set func_call_user"] = "C_ NC_ N_ Q_ _";
         conf["sp_return_paren"] = "force";
         conf["sp_attribute_paren"] = "force";
         conf["sp_defined_paren"] = "force";
