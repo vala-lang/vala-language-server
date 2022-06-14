@@ -104,6 +104,17 @@ class Vls.Compilation : BuildTarget {
      */
     public HashMap<string, Vala.Symbol> cname_to_sym { get; private set; default = new HashMap<string, Vala.Symbol> (); }
 
+    /**
+     * Collects all local variables with inferred types that are not obvious in
+     * the source code.
+     */
+    public HashSet<Vala.LocalVariable> var_decls { get; private set; default = new HashSet<Vala.LocalVariable> (); }
+
+    /**
+     * Collects all method calls and object creation expressions.
+     */
+    public HashMap<Vala.CodeNode, int> method_calls { get; private set; default = new HashMap<Vala.CodeNode, int> (); }
+
     public Compilation (FileCache file_cache, string output_dir, string name, string id, int no,
                         string[] compiler, string[] args, string[] sources, string[] generated_sources,
                         string?[] target_output_files,
@@ -354,6 +365,14 @@ class Vls.Compilation : BuildTarget {
         vala_parser.parse (code_context);
         genie_parser.parse (code_context);
         gir_parser.parse (code_context);
+
+        // update var decls, which must come before the AST is rewritten in check()
+        var_decls.clear ();
+        method_calls.clear ();
+        foreach (var source_file in code_context.get_source_files ())
+            source_file.accept (new InlayHintNodes (var_decls, method_calls));
+
+        // continue compiling
         code_context.check ();
 
         // generate output files

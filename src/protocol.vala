@@ -1140,4 +1140,24 @@ namespace Lsp {
             return new Json.Node.alloc ().init_array (array);
         }
     }
+
+    class InlayHintParams : Json.Serializable, Object {
+        public TextDocumentIdentifier textDocument { get; set; }
+        public Range range { get; set; }
+    }
+
+    enum InlayHintKind {
+        UNSET,
+        TYPE,
+        PARAMETER
+    }
+
+    class InlayHint : Object {
+        public Position position { get; set; }
+        public string label { get; set; }
+        public InlayHintKind kind { get; set; }
+        public string? tooltip { get; set; }
+        public bool paddingLeft { get; set; }
+        public bool paddingRight { get; set; }
+    }
 }

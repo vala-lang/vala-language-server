@@ -28,6 +28,7 @@ class Vls.NodeSearch : Vala.CodeVisitor {
     private Vala.SourceFile file;
     public bool search_multiline { get; private set; }
     public bool must_be_symbol { get; private set; }
+    public bool inverted { get; private set; }
     public Gee.List<Vala.CodeNode> result = new Gee.ArrayList<Vala.CodeNode> ();
     private Gee.HashSet<Vala.CodeNode> seen = new Gee.HashSet<Vala.CodeNode> ();
 
@@ -61,10 +62,10 @@ class Vls.NodeSearch : Vala.CodeVisitor {
             return filter (needle, node);
         }
 
-        var range = new Range.from_sourceref (sr);
+        var sr_range = new Range.from_sourceref (sr);
 
         if (!search_multiline) {
-            if (range.start.line != range.end.line) {
+            if (sr_range.start.line != sr_range.end.line) {
                 //  var from = (long)Server.get_string_pos (file.content, sr.begin.line-1, sr.begin.column-1);
                 //  var to = (long)Server.get_string_pos (file.content, sr.end.line-1, sr.end.column);
                 //  string contents = file.content [from:to];
@@ -75,7 +76,7 @@ class Vls.NodeSearch : Vala.CodeVisitor {
                 return false;
             }
 
-            if (range.start.line != pos.line) {
+            if (sr_range.start.line != pos.line) {
                 return false;
             }
         } else if (must_be_symbol) {
@@ -83,11 +84,12 @@ class Vls.NodeSearch : Vala.CodeVisitor {
                 return false;       // we only want to find symbols
         }
 
-        if (range.contains (pos) && (end_pos == null || range.contains (end_pos))) {
-            // debug ("Got node: %s (%s) @ %s", node.type_name, node.to_string (), sr.to_string ());
-            return true;
+        if (!inverted) {
+            // check that the code node SR (range) contains the position (and possible end position)
+            return sr_range.contains (pos) && (end_pos == null || sr_range.contains (end_pos));
         } else {
-            return false;
+            // check that start of the code node is contained in [pos,end_pos]
+            return pos.compare_to (sr_range.start) <= 0 && (end_pos == null || sr_range.start.compare_to (end_pos) <= 0);
         }
     }
 
@@ -104,6 +106,19 @@ class Vls.NodeSearch : Vala.CodeVisitor {
         this.file = file;
         this.search_multiline = search_multiline;
         this.must_be_symbol = must_be_symbol;
+        this.visit_source_file (file);
+    }
+
+    /**
+     * Search for all code nodes within {@link range}.
+     */
+    public NodeSearch.within (Vala.SourceFile file, Range range, bool must_be_symbol = true) {
+        this.pos = range.start;
+        this.end_pos = range.end;
+        this.file = file;
+        this.search_multiline = true;
+        this.must_be_symbol = must_be_symbol;
+        this.inverted = true;
         this.visit_source_file (file);
     }
 

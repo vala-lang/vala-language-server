@@ -62,6 +62,7 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 - [x] code actions / quick fixes
 - [x] code formatting
 - [x] call hierarchy
+- [x] inlay hints
 - [ ] workspaces
 - [ ] supported projects
     - [x] meson
