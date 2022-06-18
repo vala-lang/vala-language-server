@@ -1160,4 +1160,114 @@ namespace Lsp {
         public bool paddingLeft { get; set; }
         public bool paddingRight { get; set; }
     }
+
+    class TypeHierarchyItem : Object, Json.Serializable {
+        /**
+         * The name of this item
+         */
+        public string name { get; set; }
+
+        /**
+         * The kind of this item
+         */
+        public SymbolKind kind { get; set; }
+
+        /**
+         * Tags for this item
+         */
+        public SymbolTags tags { get; set; }
+
+        /**
+         * More detail for this item, e.g. the signature of a function.
+         */
+        public string? detail { get; set; }
+
+        /**
+         * The resource identifier of this item.
+         */
+        public string uri { get; set; }
+
+        /**
+         * The range enclosing this symbol not including leading/trailing
+         * whitespace, but everything else, e.g. comments and code.
+         */
+        public Range range { get; set; }
+
+        /**
+         * The range that should be selected and revealed when this symbol
+         * is being picked, e.g. the name of a function. Must be contained
+         * by {@link TypeHierarchyItem.range}
+         */
+        public Range selectionRange { get; set; }
+
+        private TypeHierarchyItem () {}
+
+        public TypeHierarchyItem.from_symbol (Vala.TypeSymbol symbol) {
+            this.name = symbol.get_full_name ();
+            if (symbol is Vala.Class)
+                this.kind = SymbolKind.Class;
+            else if (symbol is Vala.Delegate)
+                this.kind = SymbolKind.Interface;
+            else if (symbol is Vala.Enum)
+                this.kind = SymbolKind.Enum;
+            else if (symbol is Vala.ErrorCode)
+                this.kind = SymbolKind.EnumMember;
+            else if (symbol is Vala.ErrorDomain)
+                this.kind = SymbolKind.Enum;
+            else if (symbol is Vala.Interface)
+                this.kind = SymbolKind.Interface;
+            else if (symbol is Vala.Struct)
+                this.kind = SymbolKind.Struct;
+            else if (symbol is Vala.TypeParameter)
+                this.kind = SymbolKind.TypeParameter;
+            else {
+                this.kind = SymbolKind.Module;
+                warning ("unexpected symbol kind in type hierarchy: `%s'", symbol.type_name);
+            }
+
+            var version = symbol.get_attribute ("Version");
+            if (version != null && (version.get_bool ("deprecated") || version.get_string ("deprecated_since") != null)) {
+                this.tags |= SymbolTags.DEPRECATED;
+            }
+            this.detail = Vls.CodeHelp.get_symbol_representation (null, symbol, null, true);
+            this.uri = File.new_for_commandline_arg (symbol.source_reference.file.filename).get_uri ();
+            this.range = new Range.from_sourceref (symbol.source_reference);
+            this.selectionRange = this.range;
+
+            // widen range to include all members
+            if (symbol is Vala.ObjectTypeSymbol) {
+                foreach (var member in ((Vala.ObjectTypeSymbol)symbol).get_members ()) {
+                    if (member.source_reference != null)
+                        this.range = this.range.union (new Range.from_sourceref (member.source_reference));
+                }
+            } else if (symbol is Vala.Enum) {
+                foreach (var member in ((Vala.Enum)symbol).get_values ()) {
+                    if (member.source_reference != null)
+                        this.range = this.range.union (new Range.from_sourceref (member.source_reference));
+                }
+                foreach (var method in ((Vala.Enum)symbol).get_methods ()) {
+                    if (method.source_reference != null)
+                        this.range = this.range.union (new Range.from_sourceref (method.source_reference));
+                }
+            } else if (symbol is Vala.ErrorDomain) {
+                foreach (var member in ((Vala.ErrorDomain)symbol).get_codes ()) {
+                    if (member.source_reference != null)
+                        this.range = this.range.union (new Range.from_sourceref (member.source_reference));
+                }
+                foreach (var method in ((Vala.ErrorDomain)symbol).get_methods ()) {
+                    if (method.source_reference != null)
+                        this.range = this.range.union (new Range.from_sourceref (method.source_reference));
+                }
+            } else if (symbol is Vala.Struct) {
+                foreach (var field in ((Vala.Struct)symbol).get_fields ()) {
+                    if (field.source_reference != null)
+                        this.range = this.range.union (new Range.from_sourceref (field.source_reference));
+                }
+                foreach (var method in ((Vala.Struct)symbol).get_methods ()) {
+                    if (method.source_reference != null)
+                        this.range = this.range.union (new Range.from_sourceref (method.source_reference));
+                }
+            }
+        }
+    }
 }

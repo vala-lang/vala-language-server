@@ -238,6 +238,18 @@ class Vls.Server : Jsonrpc.Server {
                 show_inlay_hints (client, method, id, parameters);
                 break;
 
+            case "textDocument/prepareTypeHierarchy":
+                prepare_type_hierarchy (client, method, id, parameters);
+                break;
+
+            case "typeHierarchy/supertypes":
+                show_type_hierarchy (client, method, id, parameters, true);
+                break;
+
+            case "typeHierarchy/subtypes":
+                show_type_hierarchy (client, method, id, parameters, false);
+                break;
+
             default:
                 warning ("unhandled call `%s'", method);
                 return false;
@@ -363,7 +375,8 @@ class Vls.Server : Jsonrpc.Server {
                     renameProvider: build_dict (prepareProvider: new Variant.boolean (true)),
                     codeLensProvider: build_dict (resolveProvider: new Variant.boolean (false)),
                     callHierarchyProvider: new Variant.boolean (true),
-                    inlayHintProvider: new Variant.boolean (true)
+                    inlayHintProvider: new Variant.boolean (true),
+                    typeHierarchyProvider: new Variant.boolean (true)
                 ),
                 serverInfo: build_dict (
                     name: new Variant.string ("Vala Language Server"),
@@ -2263,6 +2276,100 @@ class Vls.Server : Jsonrpc.Server {
             client.reply (id, new Variant.array (VariantType.VARDICT, array), cancellable);
         } catch (Error e) {
             debug (@"[$method] failed to reply to client: $(e.message)");
+        }
+    }
+
+    void prepare_type_hierarchy (Jsonrpc.Client client, string method, Variant id, Variant @params) {
+        var p = Util.parse_variant<TextDocumentPositionParams> (@params);
+
+        Project project;
+        Compilation compilation;
+        var doc = find_file (p.textDocument.uri, out compilation, out project);
+        if (doc == null) {
+            debug ("[%s] file `%s' not found", method, p.textDocument.uri);
+            reply_null (id, client, method);
+            return;
+        }
+
+        Vala.CodeContext.push (compilation.code_context);
+
+        var fs = new NodeSearch (doc, p.position);
+
+        if (fs.result.size == 0) {
+            debug (@"[$method] no results found");
+            reply_null (id, client, method);
+            Vala.CodeContext.pop ();
+            return;
+        }
+
+        var result = get_best (fs, doc);
+        Vala.CodeContext.pop ();
+        Vala.TypeSymbol type_symbol;
+
+        if (result is Vala.TypeSymbol) {
+            type_symbol = (Vala.TypeSymbol)result;
+        } else if (result is Vala.DataType && ((Vala.DataType)result).type_symbol != null) {
+            type_symbol = ((Vala.DataType)result).type_symbol;
+        } else if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference is Vala.TypeSymbol) {
+            type_symbol = (Vala.TypeSymbol)((Vala.Expression)result).symbol_reference;
+            // refine the symbol
+            foreach (var pair in SymbolReferences.get_visible_components_of_code_node (result)) {
+                var symbol = pair.first;
+                var range = pair.second;
+                if (symbol is Vala.TypeSymbol && range.contains (p.position)) {
+                    type_symbol = (Vala.TypeSymbol)symbol;
+                    break;
+                }
+            }
+        } else {
+            reply_null (id, client, method);
+            return;
+        }
+
+        try {
+            var array = new Variant.array (null, {
+                Util.object_to_variant (new TypeHierarchyItem.from_symbol (type_symbol))
+            });
+            client.reply (id, array, cancellable);
+        } catch (Error e) {
+            debug (@"[$method] failed to reply to client: $(e.message)");
+        }
+    }
+
+    void show_type_hierarchy (Jsonrpc.Client client, string method, Variant id, Variant @params, bool supertypes) {
+        var itemv = @params.lookup_value ("item", VariantType.VARDICT);
+        var item = Util.parse_variant<TypeHierarchyItem> (itemv);
+
+        Project project;
+        Compilation compilation;
+        Vala.SourceFile? doc = find_file (item.uri, out compilation, out project);
+        if (doc == null) {
+            debug ("[%s] file `%s' not found", method, item.uri);
+            reply_null (id, client, method);
+            return;
+        }
+
+        Vala.CodeContext.push (compilation.code_context);
+        var symbol = CodeHelp.lookup_symbol_full_name (item.name, compilation.code_context.root.scope);
+        if (!(symbol is Vala.TypeSymbol)) {
+            Vala.CodeContext.pop ();
+            reply_null (id, client, method);
+            return;
+        }
+
+        try {
+            Variant[] array = {};
+            if (supertypes) {
+                foreach (var supertype in TypeHierarchy.get_supertypes (project, (Vala.TypeSymbol)symbol))
+                    array += Util.object_to_variant (supertype);
+            } else {
+                foreach (var subtype in TypeHierarchy.get_subtypes (project, (Vala.TypeSymbol)symbol))
+                    array += Util.object_to_variant (subtype);
+            }
+            Vala.CodeContext.pop ();
+            client.reply (id, array, cancellable);
+        } catch (Error e) {
+            debug ("[%s] failed to reply to client: %s", method, e.message);
         }
     }
 

@@ -18,6 +18,7 @@ vls_src = files([
   'codehelp/symbolextractor.vala',
   'codehelp/symbolreferences.vala',
   'codehelp/symbolvisitor.vala',
+  'codehelp/typehierarchy.vala',
   'documentation/cnamemapper.vala',
   'documentation/doccomment.vala',
   'documentation/girdocumentation.vala',
