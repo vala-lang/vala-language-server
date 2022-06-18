@@ -189,4 +189,8 @@ class Vls.InlayHintNodes : Vala.CodeVisitor {
     public override void visit_unlock_statement (UnlockStatement stmt) {
         stmt.accept_children (this);
     }
+
+    public override void visit_switch_statement (SwitchStatement stmt) {
+        stmt.accept_children (this);
+    }
 }
