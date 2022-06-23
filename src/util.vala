@@ -50,6 +50,27 @@ namespace Vls.Util {
     }
 
     /**
+     * Gets the line and column of the pattern in [str]. Advances [lineno] and [charno] past the end of the pattern.
+     */
+    public static void advance_past (string str, Regex pattern, ref uint lineno, ref uint charno) {
+        MatchInfo match_info;
+        if (pattern.match (str, 0, out match_info)) {
+            int end_pos;
+            if (match_info.fetch_pos (0, null, out end_pos)) {
+                char *p;
+                for (p = str; *p != '\0' && end_pos-- >= 0; p++) {
+                    if (is_newline (*p)) {
+                        lineno++;
+                        charno = 0;
+                    } else {
+                        charno++;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Parses arguments from a command string, taking care of escaped spaces
      * and single quotations.
      */

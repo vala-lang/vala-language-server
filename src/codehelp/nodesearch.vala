@@ -50,6 +50,10 @@ class Vls.NodeSearch : Vala.CodeVisitor {
             return false;
         }
 
+        if (node is Vala.SwitchStatement && new Range.from_sourceref (sr).contains (pos)) {
+            return true;
+        }
+
         if (sr.begin.line > sr.end.line) {
             warning (@"wtf vala: $(node.type_name): $sr");
             return false;

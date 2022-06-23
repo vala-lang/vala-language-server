@@ -31,7 +31,7 @@ namespace Vls.CodeActions {
      */
     Collection<CodeAction> extract (Compilation compilation, TextDocument file, Range range, string uri) {
         // search for nodes containing the query range
-        var finder = new NodeSearch (file, range.start, true, range.end);
+        var finder = new NodeSearch (file, range.start, true, range.end, false);
         var code_actions = new ArrayList<CodeAction> ();
         var class_ranges = new HashMap<TypeSymbol, Range> ();
         var document = new VersionedTextDocumentIdentifier () {
@@ -55,6 +55,55 @@ namespace Vls.CodeActions {
                     if (!missing.first.is_empty || !missing.second.is_empty) {
                         var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (file);
                         code_actions.add (new ImplementMissingPrereqsAction (csym, missing.first, missing.second, clsdef_range.end, code_style, document));
+                    }
+                }
+            } else if (code_node is SwitchStatement) {
+                var sws = (SwitchStatement)code_node;
+                var expr = sws.expression.target_type;
+                var labels = sws.get_sections ();
+                if (expr is EnumValueType) {
+                    var consts_by_name = new Gee.HashSet<string> ();
+                    var evt = (EnumValueType)expr;
+                    var e = evt.type_symbol;
+                    if (!(e is Enum)) {
+                        warning ("enum value type doesn't have enum - %s", evt.to_string ());
+                        continue;
+                    }
+                    foreach (var ec in ((Enum)e).get_values ()) {
+                        consts_by_name.add (ec.name);
+                    }
+                    var found_default = false;
+                    foreach (var l in labels) {
+                        if (l.has_default_label ()) {
+                            found_default = true;
+                        }
+                        foreach (var a in l.get_labels ()) {
+                            var case_expression = a.expression;
+                            // Default label
+                            if (case_expression == null)
+                                continue;
+                            if (case_expression.symbol_reference is Constant)
+                                consts_by_name.remove (((Constant)case_expression.symbol_reference).name);
+                        }
+                    }
+                    if (found_default && consts_by_name.is_empty)
+                        continue;
+                    var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (file);
+                    if (!found_default && sws.source_reference != null)
+                        code_actions.add (new AddDefaultToSwitchAction (sws, document, code_style));
+                    if (!consts_by_name.is_empty && sws.source_reference != null)
+                        code_actions.add (new AddOtherConstantsToSwitchAction (sws, document, (Enum)e, consts_by_name, code_style));
+                } else {
+                    var found_default = false;
+                    foreach (var l in labels) {
+                        if (l.has_default_label ()) {
+                            found_default = true;
+                            break;
+                        }
+                    }
+                    if (!found_default && sws.source_reference != null) {
+                        var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (file);
+                        code_actions.add (new AddDefaultToSwitchAction (sws, document, code_style));
                     }
                 }
             }

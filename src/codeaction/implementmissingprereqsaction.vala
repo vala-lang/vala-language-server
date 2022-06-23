@@ -57,7 +57,7 @@ class Vls.ImplementMissingPrereqsAction : CodeAction {
         var symbols_text = new StringBuilder ();
         string indentation = "\t";
         if (code_style != null)
-            indentation = code_style.indentation;
+            indentation = code_style.get_indentation (class_sym, 1);
         foreach (var prereq_sym_pair in missing_symbols) {
             var instance_type = prereq_sym_pair.first;
             var sym = prereq_sym_pair.second;

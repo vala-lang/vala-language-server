@@ -4,6 +4,8 @@ vls_src = files([
   'analysis/codestyleanalyzer.vala',
   'analysis/inlayhintnodes.vala',
   'analysis/symbolenumerator.vala',
+  'codeaction/addotherconstantstoswitchaction.vala',
+  'codeaction/adddefaulttoswitchaction.vala',
   'codeaction/baseconverteraction.vala',
   'codeaction/implementmissingprereqsaction.vala',
   'codehelp/callhierarchy.vala',
