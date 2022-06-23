@@ -41,8 +41,8 @@ namespace Vls.Formatter {
         if (range == null) {
             stdin_buf = source.content;
         } else {
-            var from = (long) Util.get_string_pos (source.content, range.start.line, range.start.character);
-            var to = (long) Util.get_string_pos (source.content, range.end.line, range.end.character);
+            var from = (long)Util.get_string_pos (source.content, range.start.line, range.start.character);
+            var to = (long)Util.get_string_pos (source.content, range.end.line, range.end.character);
             stdin_buf = source.content[from:to];
         }
         string? stdout_buf = null, stderr_buf = null;
@@ -78,10 +78,7 @@ namespace Vls.Formatter {
         return new TextEdit (edit_range, stdout_buf);
     }
 
-    string[] get_uncrustify_args (Vala.SourceFile source,
-                                  FormattingOptions options,
-                                  CodeStyleAnalyzer? analyzed_style,
-                                  Cancellable? cancellable = null) {
+    string[] get_uncrustify_args (Vala.SourceFile source, FormattingOptions options, CodeStyleAnalyzer? analyzed_style, Cancellable? cancellable = null) {
         // Check if the project has a local uncrustify config file and use that instead
         var cwd = File.new_for_path (Environment.get_current_dir ());
         string[] config_paths = { ".uncrustify.cfg", "uncrustify.cfg" };
