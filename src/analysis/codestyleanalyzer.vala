@@ -1,6 +1,6 @@
 /* codestyleanalyzer.vala
  *
- * Copyright 2021 Princeton Ferro <princetonferro@gmail.com>
+ * Copyright 2021-2022 Princeton Ferro <princetonferro@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,14 +18,15 @@
 
 using Vala;
 
+/**
+ * Collects statistics by 
+ */
 class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
     private uint _total_spacing;
     private uint _num_callable;
     private SourceFile? current_file;
 
     public override DateTime last_updated { get; set; }
-    private string? _indentation;
-    public string indentation { get { return _indentation ?? "    "; } }
 
     /**
      * Average spacing before parentheses in method and delegate declarations.
@@ -42,18 +43,52 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
         this.visit_source_file (source_file);
     }
 
-    private void update_prefix (Symbol symbol) {
-        if (_indentation == null && symbol.source_reference != null && CodeHelp.get_decl_nesting_level (symbol) == 3) {
-            var prefix = new StringBuilder ();
-            var offset = (symbol.source_reference.begin.pos - (char *)symbol.source_reference.file.content) - 1;
-            for (; offset > 0
-                 && symbol.source_reference.file.content[(long)offset].isspace ()
-                 && !Util.is_newline (symbol.source_reference.file.content[(long)offset]); offset--) {
-                prefix.prepend_c (symbol.source_reference.file.content[(long)offset]);
-            }
-            if (prefix.len > 0)
-                _indentation = prefix.str;
+    /**
+     * Get the indentation of a statement or symbol at a given nesting level. At nesting
+     * level 0, gets the indentation of the statement. At level 1, gets the
+     * indentation of a statement inside this statement, and so on...
+     *
+     * @param stmt_or_sym       a statement or symbol
+     * @param nesting_level     the nesting level inside the statement
+     *
+     * @return an empty string if indentation couldn't be determined
+     */
+    public string get_indentation (CodeNode stmt_or_sym, uint nesting_level = 0)
+        requires (stmt_or_sym is Statement || stmt_or_sym is Symbol)
+    {
+        if (stmt_or_sym.source_reference == null)
+            return "";
+
+        var source = stmt_or_sym.source_reference;
+        var parent = stmt_or_sym.parent_node;
+
+        // refine the parent to something better
+        if (parent is Block)
+            parent = parent.parent_node;
+
+        // use the indentation within the statement's parent to determine the prefix
+        int coldiff = source.begin.column;
+        if ((parent is Statement || parent is Symbol) && parent.source_reference != null)
+            coldiff -= parent.source_reference.begin.column;
+
+        // walk back from the statement/symbol to the next newline
+        var offset = (long)((source.begin.pos - (char *)source.file.content) - 1);
+
+        // keep track of last indent and outer indent
+        var suffix = new StringBuilder ();
+        var indent = new StringBuilder ();
+        for (int col = coldiff; offset > 0; --col, --offset) {
+            char c = stmt_or_sym.source_reference.file.content[offset];
+            if (Util.is_newline (c) || !c.isspace ())
+                break;
+            if (col > 0)
+                suffix.prepend_c (c);
+            else
+                indent.prepend_c (c);
         }
+        for (uint l = 0; l <= nesting_level; ++l)
+            indent.append (suffix.str);
+        return indent.str;
     }
 
     public override void visit_source_file (SourceFile source_file) {
@@ -65,35 +100,30 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
     public override void visit_namespace (Namespace ns) {
         if (ns.source_reference != null && ns.source_reference.file != current_file)
             return;
-        update_prefix (ns);
         ns.accept_children (this);
     }
 
     public override void visit_class (Class cl) {
         if (cl.source_reference == null || cl.source_reference.file != current_file)
             return;
-        update_prefix (cl);
         cl.accept_children (this);
     }
 
     public override void visit_interface (Interface iface) {
         if (iface.source_reference == null || iface.source_reference.file != current_file)
             return;
-        update_prefix (iface);
         iface.accept_children (this);
     }
 
     public override void visit_enum (Enum en) {
         if (en.source_reference == null || en.source_reference.file != current_file)
             return;
-        update_prefix (en);
         en.accept_children (this);
     }
 
     public override void visit_struct (Struct st) {
         if (st.source_reference == null || st.source_reference.file != current_file)
             return;
-        update_prefix (st);
         st.accept_children (this);
     }
 
@@ -121,14 +151,12 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
         if (d.source_reference == null || d.source_reference.file != current_file ||
             d.source_reference.begin.pos == null)
             return;
-        update_prefix (d);
         analyze_callable (d);
     }
 
     public override void visit_method (Method m) {
         if (m.source_reference == null || m.source_reference.file != current_file || m.source_reference.begin.pos == null)
             return;
-        update_prefix (m);
         analyze_callable (m);
     }
 }
