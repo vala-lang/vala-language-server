@@ -33,8 +33,7 @@ namespace Vls.Formatter {
                      Cancellable? cancellable = null) throws FormattingError, Error {
         // SEARCH_PATH_FROM_ENVP does not seem to be available even in quite fast distros like Fedora 35,
         // so we have to use a SubprocessLauncher and call set_environ()
-        var launcher = new SubprocessLauncher (SubprocessFlags.STDERR_PIPE | SubprocessFlags.STDOUT_PIPE
-                                               | SubprocessFlags.STDIN_PIPE);
+        var launcher = new SubprocessLauncher (SubprocessFlags.STDERR_PIPE | SubprocessFlags.STDOUT_PIPE | SubprocessFlags.STDIN_PIPE);
         launcher.set_environ (Environ.get ());
         var args = get_uncrustify_args (source, options, analyzed_style, cancellable);
         Subprocess subprocess = launcher.spawnv (args);
@@ -52,10 +51,10 @@ namespace Vls.Formatter {
             if (stderr_buf != null && stderr_buf.strip ().length > 0) {
                 throw new FormattingError.FORMAT ("%s", stderr_buf);
             } else {
+                var sb = new StringBuilder ();
                 foreach (var arg in args)
-                    stderr.printf ("%s ", arg);
-                stderr.printf ("\n");
-                throw new FormattingError.READ ("uncrustify failed with error code %d", subprocess.get_exit_status ());
+                    sb.append (arg).append (" ");
+                throw new FormattingError.READ ("uncrustify failed with error code %d: %s", subprocess.get_exit_status (), sb.str.strip ());
             }
         }
         Range edit_range;
