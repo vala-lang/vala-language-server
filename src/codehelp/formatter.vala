@@ -99,11 +99,7 @@ namespace Vls.Formatter {
         conf["nl_end_of_file"] = options.insertFinalNewline ? "force" : "remove";
         conf["nl_end_of_file_min"] = "%d".printf (options.trimFinalNewlines ? 1 : 0);
         conf["output_tab_size"] = "%u".printf (options.tabSize);
-        conf["code_width"] = "120";
         conf["pos_arith"] = "lead";
-        conf["ls_for_split_full"] = "true";
-        conf["ls_func_split_full"] = "true";
-        conf["ls_code_width"] = "true";
         conf["indent_paren_nl"] = "true";
         conf["indent_comma_brace"] = "1";
         conf["indent_columns"] = "4";
