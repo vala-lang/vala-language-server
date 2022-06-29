@@ -33,7 +33,7 @@ class Vls.NodeSearch : Vala.CodeVisitor {
     private Gee.HashSet<Vala.CodeNode> seen = new Gee.HashSet<Vala.CodeNode> ();
 
     [CCode (has_target = false)]
-    public delegate bool Filter (Vala.CodeNode needle, Vala.CodeNode hay_node);
+    public delegate bool Filter (Vala.CodeNode? needle, Vala.CodeNode hay_node);
 
     private Vala.CodeNode? needle;
     private Filter? filter;
@@ -122,7 +122,7 @@ class Vls.NodeSearch : Vala.CodeVisitor {
         this.visit_source_file (file);
     }
 
-    public NodeSearch.with_filter (Vala.SourceFile file, Vala.CodeNode needle, Filter filter_func, 
+    public NodeSearch.with_filter (Vala.SourceFile file, Vala.CodeNode? needle, Filter filter_func,
                                    bool include_declaration = true) {
         this.file = file;
         this.needle = needle;

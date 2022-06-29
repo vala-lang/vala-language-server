@@ -28,8 +28,9 @@ namespace Vls.CodeActions {
      * @param file      the current document
      * @param range     the range to show code actions for
      * @param uri       the document URI
+     * @param diags     the diagnostics to use
      */
-    Collection<CodeAction> extract (Compilation compilation, TextDocument file, Range range, string uri) {
+    Collection<CodeAction> extract (Compilation compilation, TextDocument file, Range range, string uri, Gee.List<Diagnostic> diags) {
         // search for nodes containing the query range
         var finder = new NodeSearch (file, range.start, true, range.end);
         var code_actions = new ArrayList<CodeAction> ();
@@ -55,6 +56,56 @@ namespace Vls.CodeActions {
                     if (!missing.first.is_empty || !missing.second.is_empty) {
                         var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (file);
                         code_actions.add (new ImplementMissingPrereqsAction (csym, missing.first, missing.second, clsdef_range.end, code_style, document));
+                    }
+                }
+            }
+        }
+
+        finder = new NodeSearch.with_filter (file, null, (a, b) => true, true);
+        var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (file);
+        foreach (var d in diags) {
+            if (d.message.has_prefix ("unhandled error ")) {
+                foreach (var node in finder.result) {
+                    var tmp_range = new Range.from_sourceref (node.source_reference);
+                    if ((tmp_range.contains (d.range.start) && tmp_range.contains (d.range.end))
+                        && !(node is Vala.Block)) {
+                        var error_name = d.message.replace ("unhandled error `", "").replace ("'", "").strip ();
+                        if (node is DeclarationStatement) {
+                            var variables = new Vala.ArrayList<Variable> ();
+                            ((DeclarationStatement)node).get_defined_variables (variables);
+                            if (variables.size == 1)
+                                code_actions.add (new AddTryCatchAssignmentAction (document, variables, error_name, code_style.indentation, node));
+                            var parent = node.parent_node;
+                            while (parent != null) {
+                                if (parent is Vala.ForeachStatement || parent is Vala.LambdaExpression) {
+                                    parent = null;
+                                    break;
+                                }
+                                if (parent is Vala.Method || parent is Vala.Constructor)
+                                    break;
+                                parent = parent.parent_node;
+                            }
+                            if (parent != null) {
+                                code_actions.add (new AddThrowsDeclaration (document, error_name, parent));
+                            }
+                        } else if (node is ExpressionStatement && !(node.parent_node is Vala.ForeachStatement)) {
+                            var es = (ExpressionStatement) node;
+                            code_actions.add (new AddTryCatchStatementAction (document, error_name, code_style.indentation, es.expression));
+                        } else {
+                            var parent = node.parent_node;
+                            while (parent != null) {
+                                if (parent is Vala.ForeachStatement || parent is Vala.LambdaExpression) {
+                                    parent = null;
+                                    break;
+                                }
+                                if (parent is Vala.Method || parent is Vala.Constructor)
+                                    break;
+                                parent = parent.parent_node;
+                            }
+                            if (parent != null) {
+                                code_actions.add (new AddThrowsDeclaration (document, error_name, parent));
+                            }
+                        }
                     }
                 }
             }
