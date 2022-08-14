@@ -1,6 +1,6 @@
 /* mesonproject.vala
  *
- * Copyright 2020 Princeton Ferro <princetonferro@gmail.com>
+ * Copyright 2020-2022 Princeton Ferro <princetonferro@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -39,7 +39,7 @@ class Vls.MesonProject : Project {
         for (int i = 0; i < args.length; i++) {
             MatchInfo match_info;
             if (/^@([A-Za-z_]+)@$/.match (args[i], 0, out match_info)) {
-                // substitute multiple args
+                // replace the whole argument with potentially multiple arguments
                 string special_arg_name = match_info.fetch (1);
 
                 if (special_arg_name == "INPUT") {
@@ -64,12 +64,28 @@ class Vls.MesonProject : Project {
 
                     debug ("for target %s, source #0, subtituted arg #%d (%s) with %s",
                            meson_target_info.id, i, args[i], substitute);
+                } else if (special_arg_name == "OUTDIR") {
+                    string substitute;
+                    if (src_relative_path == null) {
+                        warning ("for target %s, source #0, could not substitute special arg with null source relative dir",
+                                 meson_target_info.id);
+                        substitute = build_dir;
+                    } else {
+                        substitute = Path.build_filename (build_dir, src_relative_path);
+                    }
+                    substituted_args.add (substitute);
+                    debug ("for target %s, source #0, subtituted arg #%d (%s) with %s",
+                           meson_target_info.id, i, args[i], substitute);
+                } else if (special_arg_name == "CURRENT_SOURCE_DIR") {
+                    // use the defined-in directory
+                    substituted_args.add (Path.get_dirname (meson_target_info.defined_in));
                 } else {
                     warning ("for target %s, source #0, could not substitute special arg `%s'", 
                              meson_target_info.id, special_arg_name);
                     substituted_args.add (match_info.fetch (0));
                 }
             } else {
+                // replace a substring in args[i]
                 string substitute = args[i];
                 bool replaced = false;
                 var regex1 = /@PRIVATE_OUTDIR_ABS_?(\S*)@/;
@@ -156,6 +172,9 @@ class Vls.MesonProject : Project {
                             return true;
                         }
                         result.append (Path.build_filename (build_dir, src_relative_path));
+                        replaced = true;
+                    } else if (special_arg_name == "CURRENT_SOURCE_DIR") {
+                        result.append (Path.get_dirname (meson_target_info.defined_in));
                         replaced = true;
                     } else {
                         warning ("for target %s, source #0, could not substitute special arg `%s'", 
