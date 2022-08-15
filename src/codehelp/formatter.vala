@@ -146,8 +146,10 @@ namespace Vls.Formatter {
         conf["sp_inside_angle"] = "remove";
         conf["sp_after_angle"] = "remove";
         conf["sp_angle_paren"] = "force";
+        conf["sp_angle_paren_empty"] = "force";
         conf["sp_angle_word"] = "force";
         conf["sp_angle_shift"] = "remove";
+        conf["sp_permit_cpp11_shift"] = "true";
         conf["sp_before_sparen"] = "force";
         conf["sp_inside_sparen"] = "remove";
         conf["sp_after_sparen"] = "remove";
