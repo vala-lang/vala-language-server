@@ -187,13 +187,13 @@ namespace Vls.Formatter {
             conf["sp_func_def_paren"] = "force";
             conf["sp_func_class_paren"] = "force";
             conf["sp_func_call_paren"] = "force";
-            conf["sp_vala_after_translation"] = "remove";
         } else {
             conf["sp_func_proto_paren"] = "remove";
             conf["sp_func_def_paren"] = "remove";
             conf["sp_func_class_paren"] = "remove";
             conf["sp_func_call_paren"] = "remove";
         }
+        conf["sp_vala_after_translation"] = "remove";
         conf["sp_func_call_paren_empty"] = "ignore";
         conf["sp_return_paren"] = "force";
         conf["sp_attribute_paren"] = "force";
