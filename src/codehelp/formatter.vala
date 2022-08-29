@@ -35,7 +35,8 @@ namespace Vls.Formatter {
         // so we have to use a SubprocessLauncher and call set_environ()
         var launcher = new SubprocessLauncher (SubprocessFlags.STDERR_PIPE | SubprocessFlags.STDOUT_PIPE | SubprocessFlags.STDIN_PIPE);
         launcher.set_environ (Environ.get ());
-        Subprocess subprocess = launcher.spawnv (get_uncrustify_args (source, options, analyzed_style, cancellable));
+        var args = get_uncrustify_args (source, options, analyzed_style, cancellable);
+        Subprocess subprocess = launcher.spawnv (args);
         string stdin_buf;
         if (range == null) {
             stdin_buf = source.content;
@@ -50,7 +51,10 @@ namespace Vls.Formatter {
             if (stderr_buf != null && stderr_buf.strip ().length > 0) {
                 throw new FormattingError.FORMAT ("%s", stderr_buf);
             } else {
-                throw new FormattingError.READ ("uncrustify failed with error code %d", subprocess.get_exit_status ());
+                var sb = new StringBuilder ();
+                foreach (var arg in args)
+                    sb.append (arg).append (" ");
+                throw new FormattingError.READ ("uncrustify failed with error code %d: %s", subprocess.get_exit_status (), sb.str.strip ());
             }
         }
         Range edit_range;
@@ -92,13 +96,16 @@ namespace Vls.Formatter {
         conf["nl_end_of_file"] = options.insertFinalNewline ? "force" : "remove";
         conf["nl_end_of_file_min"] = "%d".printf (options.trimFinalNewlines ? 1 : 0);
         conf["output_tab_size"] = "%u".printf (options.tabSize);
+        conf["pos_arith"] = "lead";
+        conf["indent_paren_nl"] = "true";
+        conf["indent_comma_brace"] = "1";
         conf["indent_columns"] = "4";
         conf["indent_align_string"] = "true";
         conf["indent_xml_string"] = "4";
         conf["indent_namespace"] = "true";
         conf["indent_class"] = "true";
         conf["indent_var_def_cont"] = "true";
-        conf["indent_func_def_param"] = "true";
+        conf["indent_func_def_param"] = "false";
         conf["indent_func_proto_param"] = "true";
         conf["indent_func_class_param"] = "true";
         conf["indent_func_ctor_var_param"] = "true";
@@ -139,7 +146,10 @@ namespace Vls.Formatter {
         conf["sp_inside_angle"] = "remove";
         conf["sp_after_angle"] = "remove";
         conf["sp_angle_paren"] = "force";
+        conf["sp_angle_paren_empty"] = "force";
         conf["sp_angle_word"] = "force";
+        conf["sp_angle_shift"] = "remove";
+        conf["sp_permit_cpp11_shift"] = "true";
         conf["sp_before_sparen"] = "force";
         conf["sp_inside_sparen"] = "remove";
         conf["sp_after_sparen"] = "remove";
@@ -183,9 +193,8 @@ namespace Vls.Formatter {
             conf["sp_func_class_paren"] = "remove";
             conf["sp_func_call_paren"] = "remove";
         }
+        conf["sp_vala_after_translation"] = "remove";
         conf["sp_func_call_paren_empty"] = "ignore";
-        // It is really "set func_call_user _"
-        // conf["set func_call_user"] = "C_ NC_ N_ Q_ _";
         conf["sp_return_paren"] = "force";
         conf["sp_attribute_paren"] = "force";
         conf["sp_defined_paren"] = "force";
