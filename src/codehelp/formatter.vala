@@ -99,9 +99,9 @@ namespace Vls.Formatter {
         conf["pos_arith"] = "lead";
         conf["indent_paren_nl"] = "true";
         conf["indent_comma_brace"] = "1";
-        conf["indent_columns"] = "4";
+        conf["indent_columns"] = "%u".printf (options.tabSize);
         conf["indent_align_string"] = "true";
-        conf["indent_xml_string"] = "4";
+        conf["indent_xml_string"] = "%u".printf (options.tabSize);
         conf["indent_namespace"] = "true";
         conf["indent_class"] = "true";
         conf["indent_var_def_cont"] = "true";
