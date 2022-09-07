@@ -1,0 +1,6 @@
+[wrap-git]
+url = https://github.com/Prince781/lstf
+revision = head
+
+# [provide]
+# program_names = lstf

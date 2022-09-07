@@ -1,0 +1,32 @@
+// issue: vala-language-server#153
+server_path = option('server-path');
+
+let f = file(`
+void foo (int arg1, int arg2) {
+}
+void main() {
+    foo
+}
+`);
+
+project_files = [ f ];
+
+
+
+await change(f, {
+    range: {
+        start: { line: 4, character: 7 },
+        end: { line: 4, character: 7 }
+    },
+    text: ' ('
+});
+
+assert {
+    signatures: [
+        {
+            label: 'void foo(int arg1, int arg2)',
+            parameters: [ { label: 'int arg1' } ]
+        }
+    ],
+    activeParameter: 0
+} <=> await signatureHelp(f, 4, 9);
