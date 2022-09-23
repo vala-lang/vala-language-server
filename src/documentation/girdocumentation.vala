@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+using GLib;
 
 class Vls.GirDocumentation {
     private Vala.CodeContext context;
@@ -356,7 +357,7 @@ class Vls.GirDocumentation {
         if (gtkdoc_dir != null) {
             // substitute image URLs
             // substitute relative paths in GIR comments for absolute paths to GTK-Doc resources
-            comment_data = /!\[(.*?)\]\(([~:\/\\\w-.]+)\)/
+            comment_data = new GLib.Regex("""!\[(.*?)\]\(([~:\/\\\w-.]+)\)""")
                 .replace_eval (comment_data, comment_data.length, 0, 0, (match_info, result) => {
                     string link_label = match_info.fetch (1) ?? "";
                     string link_href = match_info.fetch (2) ?? "";
@@ -386,7 +387,7 @@ class Vls.GirDocumentation {
             });
 
         // now, substitute references to sections
-        comment_data = /\[(.*?)\]\[([\w-\s]+)\]/
+        comment_data = new GLib.Regex("""\[(.*?)\]\[([\w-\s]+)\]/""")
             .replace_eval (comment_data, comment_data.length, 0, 0, (match_info, result) => {
                 string link_label = match_info.fetch (1) ?? "";
                 string section = match_info.fetch (2) ?? "";
