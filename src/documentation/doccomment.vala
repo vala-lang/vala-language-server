@@ -129,7 +129,7 @@ class Vls.DocComment {
         body = /{{{(\w+)?(.*?)}}}/s.replace (body, body.length, 0, "```\\1\\2```");
         
         // images and links
-        body = /(\[\[|{{)([~:\/\\\w-.]+)(\|(.*?))?(\]\]|}})/
+        body = /(\[\[|{{)([~:\/\\\w\-.]+)(\|(.*?))?(\]\]|}})/
             .replace_eval (body, body.length, 0, 0, (match_info, result) => {
                 string type = match_info.fetch (1) ?? "";
                 string href = match_info.fetch (2) ?? "";
