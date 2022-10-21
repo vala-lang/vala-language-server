@@ -17,6 +17,8 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 
 - Guix: `guix install vala-language-server`
 
+- Windows (vis MSYS2): `pacman -S mingw-w64-x86_64-vala-language-server`
+
 [![Packaging status](https://repology.org/badge/vertical-allrepos/vala-language-server.svg)](https://repology.org/project/vala-language-server/versions)
 
 ![VLS with VSCode](images/vls-vscode.png)
