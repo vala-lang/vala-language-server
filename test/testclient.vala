@@ -56,7 +56,12 @@ class Vls.TestClient : Jsonrpc.Server {
             launcher.setenv (env[0:p], env.substring (p+1), true);
         }
 
-        vls_subprocess = launcher.spawnv ({server_location, server_location});
+        vls_subprocess = launcher.spawnv ({server_location});
+
+        if (pause_for_debugger) {
+            print ("Attach debugger to PID %s and press enter.\n", vls_subprocess.get_identifier ());
+            stdin.read_line ();
+        }
 
         var input_stream = vls_subprocess.get_stdout_pipe ();
         var output_stream = vls_subprocess.get_stdin_pipe ();
@@ -151,11 +156,13 @@ string? server_location;
 string[]? env_vars;
 string? root_path;
 bool unset_env;
+bool pause_for_debugger = false;
 const OptionEntry[] options = {
     { "server", 's', 0, OptionArg.FILENAME, ref server_location, "Location of server binary", "FILE" },
     { "root-path", 'r', 0, OptionArg.FILENAME, ref root_path, "Root path to initialize VLS in", "DIRECTORY" },
     { "environ", 'e', 0, OptionArg.STRING_ARRAY, ref env_vars, "List of environment variables", null },
     { "unset-environment", 'u', 0, OptionArg.NONE, ref unset_env, "Don't inherit parent environment", null },
+    { "pause", 'p', 0, OptionArg.NONE, ref pause_for_debugger, "Pause before calling VLS to get a chance to attach a debugger", null },
     { null }
 };
 
