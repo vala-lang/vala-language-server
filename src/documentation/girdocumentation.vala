@@ -76,6 +76,11 @@ class Vls.GirDocumentation {
         var sr_begin = Vala.SourceLocation (null, 1, 1);
         var sr_end = sr_begin;
 
+        if (sr_file == null) {
+            warning ("Missing glib-2.0");
+            return;
+        }
+
         // ... add string
         var string_class = new Vala.Class ("string", new Vala.SourceReference (sr_file, sr_begin, sr_end));
         context.root.add_class (string_class);
