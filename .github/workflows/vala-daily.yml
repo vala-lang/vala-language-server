@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - run: sudo add-apt-repository ppa:vala-team/daily
     - run: sudo apt-get update
     - run: sudo apt-get install python3-setuptools valac libvala-0.58-dev libgee-0.8-dev libjsonrpc-glib-1.0-dev gobject-introspection libgirepository1.0-dev ninja-build
