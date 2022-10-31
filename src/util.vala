@@ -1,6 +1,6 @@
 /* util.vala
  *
- * Copyright 2020 Princeton Ferro <princetonferro@gmail.com>
+ * Copyright 2020-2022 Princeton Ferro <princetonferro@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -350,6 +350,11 @@ namespace Vls.Util {
 
     public bool source_file_equal (Vala.SourceFile source_file1, Vala.SourceFile source_file2) {
         return source_file_hash (source_file1) == source_file_hash (source_file2);
+    }
+
+    public bool source_ref_equal (Vala.SourceReference source_ref1, Vala.SourceReference source_ref2) {
+        return source_ref1.contains (source_ref2.begin) && source_ref1.contains (source_ref2.end) &&
+            source_ref2.contains (source_ref1.begin) && source_ref2.contains (source_ref1.end);
     }
 
     /**

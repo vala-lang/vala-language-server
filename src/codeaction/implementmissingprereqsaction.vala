@@ -29,7 +29,7 @@ class Vls.ImplementMissingPrereqsAction : CodeAction {
                                           Vala.Collection<Vala.DataType> missing_prereqs,
                                           Vala.Collection<Pair<Vala.DataType, Vala.Symbol>> missing_symbols,
                                           Position classdef_end,
-                                          CodeStyleAnalyzer? code_style,
+                                          CodeStyleAnalyzer code_style,
                                           VersionedTextDocumentIdentifier document) {
         this.title = "Implement missing prerequisites for class";
         this.edit = new WorkspaceEdit ();
@@ -51,13 +51,24 @@ class Vls.ImplementMissingPrereqsAction : CodeAction {
             typelist_text.append (CodeHelp.get_data_type_representation (prereq_type, class_sym.scope, true));
             prereq_i++;
         }
-        document_edit.edits.add (new TextEdit (new Range () { start = cls_endpos, end = cls_endpos }, typelist_text.str));
+        document_edit.edits.add (new TextEdit (new Range () {
+            start = cls_endpos,
+            end = cls_endpos
+        }, typelist_text.str));
 
-        // insert the methods and properties that need to be replaced
-        var symbols_text = new StringBuilder ();
-        string indentation = "\t";
-        if (code_style != null)
-            indentation = code_style.get_indentation (class_sym, 1);
+        // insert the methods and properties that need to be implemented
+        var symbols_insert_text = new StringBuilder ();
+        string symbol_indent, inner_indent;
+        var visible_members = CodeHelp.get_visible_members (class_sym);
+
+        if (visible_members.is_empty) {
+            symbol_indent = code_style.get_indentation (class_sym, 1);
+            inner_indent = code_style.get_indentation (class_sym, 2);
+        } else {
+            var last_member = visible_members.last ();
+            symbol_indent = code_style.get_indentation (last_member);
+            inner_indent = code_style.get_indentation (last_member, 1);
+        }
         foreach (var prereq_sym_pair in missing_symbols) {
             var instance_type = prereq_sym_pair.first;
             var sym = prereq_sym_pair.second;
@@ -67,16 +78,16 @@ class Vls.ImplementMissingPrereqsAction : CodeAction {
                 continue;
             }
 
-            symbols_text.append_printf ("\n%s%s ", indentation, sym.access.to_string ());
+            symbols_insert_text.append_printf ("\n%s%s ", symbol_indent, sym.access.to_string ());
 
             if (sym.hides)
-                symbols_text.append ("new ");
+                symbols_insert_text.append ("new ");
 
             if (sym is Vala.Method && ((Vala.Method)sym).coroutine)
-                symbols_text.append ("async ");
+                symbols_insert_text.append ("async ");
             if (sym is Vala.Method && CodeHelp.base_method_requires_override ((Vala.Method)sym) ||
                 sym is Vala.Property && CodeHelp.base_property_requires_override ((Vala.Property)sym))
-                symbols_text.append ("override ");
+                symbols_insert_text.append ("override ");
 
             Vala.DataType? return_type = null;
             if (sym is Vala.Callable)
@@ -86,13 +97,13 @@ class Vls.ImplementMissingPrereqsAction : CodeAction {
             
             if (return_type != null) {
                 string? return_type_representation = CodeHelp.get_data_type_representation (return_type, class_sym.scope);
-                symbols_text.append (return_type_representation);
-                symbols_text.append_c (' ');
+                symbols_insert_text.append (return_type_representation);
+                symbols_insert_text.append_c (' ');
             } else {
                 warning ("no return type for symbol %s", sym.name);
             }
 
-            symbols_text.append (sym.name);
+            symbols_insert_text.append (sym.name);
 
             if (sym is Vala.Callable) {
                 // display type arguments
@@ -103,46 +114,49 @@ class Vls.ImplementMissingPrereqsAction : CodeAction {
                     type_parameters = ((Vala.Method)sym).get_type_parameters ();
                 
                 if (type_parameters != null && !type_parameters.is_empty) {
-                    symbols_text.append_c ('<');
+                    symbols_insert_text.append_c ('<');
                     int i = 1;
                     foreach (var type_parameter in type_parameters) {
                         if (i > 1) {
-                            symbols_text.append_c (',');
+                            symbols_insert_text.append_c (',');
                         }
-                        symbols_text.append (type_parameter.name);
+                        symbols_insert_text.append (type_parameter.name);
                     }
-                    symbols_text.append_c ('>');
+                    symbols_insert_text.append_c ('>');
                 }
 
-                uint method_spaces = code_style != null ? code_style.average_spacing_before_parens : 1;
-                symbols_text.append_printf ("%*s(", method_spaces, " ");
+                symbols_insert_text.append_printf ("%*s(", code_style.average_spacing_before_parens, "");
 
                 int i = 1;
                 foreach (Vala.Parameter param in ((Vala.Callable) sym).get_parameters ()) {
                     if (i > 1) {
-                        symbols_text.append (", ");
+                        symbols_insert_text.append (", ");
                     }
-                    symbols_text.append (CodeHelp.get_symbol_representation (instance_type, param, class_sym.scope, false));
+                    symbols_insert_text.append (CodeHelp.get_symbol_representation (instance_type, param, class_sym.scope, false));
                     i++;
                 }
-                symbols_text.append_printf (") {\n%sassert_not_reached%*s();\n%s}", indentation + indentation, method_spaces, " ", indentation);
+                symbols_insert_text.append_printf (") {\n%sassert_not_reached%*s();\n%s}",
+                                                   inner_indent, code_style.average_spacing_before_parens, "", symbol_indent);
             } else if (sym is Vala.Property) {
                 var prop = (Vala.Property)sym;
-                symbols_text.append (" {");
+                symbols_insert_text.append (" {");
                 if (prop.get_accessor != null) {
                     if (prop.get_accessor.value_type is Vala.ReferenceType && prop.get_accessor.value_type.value_owned)
-                        symbols_text.append (" owned");
-                    symbols_text.append (" get;");
+                        symbols_insert_text.append (" owned");
+                    symbols_insert_text.append (" get;");
                 }
                 if (prop.set_accessor != null) {
                     if (prop.set_accessor.value_type is Vala.ReferenceType && prop.set_accessor.value_type.value_owned)
-                        symbols_text.append (" owned");
-                    symbols_text.append (" set;");
+                        symbols_insert_text.append (" owned");
+                    symbols_insert_text.append (" set;");
                 }
-                symbols_text.append (" }");
+                symbols_insert_text.append (" }");
             }
         }
-        document_edit.edits.add (new TextEdit (new Range () { start = classdef_end, end = classdef_end }, symbols_text.str));
+        document_edit.edits.add (new TextEdit (new Range () {
+            start = classdef_end,
+            end = classdef_end 
+        }, symbols_insert_text.str));
 
         this.edit.documentChanges = changes;
     }
