@@ -1186,12 +1186,58 @@ namespace Vls.CodeHelp {
     }
 
     /**
-     * Gets the nesting level of a declaration.
+     * Gets the list of visible members
+     *
+     * @param container the container type (struct, class, interface, enum, errordomain)
+     * @return the visible members. returns null if container doesn't have a source reference
      */
-    public uint get_decl_nesting_level (Vala.Symbol symbol) {
-        uint level = 0;
-        for (var current_sym = symbol; current_sym != null; current_sym = current_sym.parent_symbol)
-            level++;
-        return level;
+    Vala.ArrayList<Vala.Symbol> get_visible_members (Vala.TypeSymbol container) {
+        var visible_members = new Vala.ArrayList<Vala.Symbol> ();
+
+        if (container.source_reference == null)
+            return visible_members;
+
+        var seen = new Vala.HashSet<Vala.Symbol> (
+            sym => sym.source_reference.to_string ().hash (),
+            (sym1, sym2) => Util.source_ref_equal (sym1.source_reference, sym2.source_reference));
+
+        if (container is Vala.ObjectTypeSymbol) {
+            foreach (var member in ((Vala.Class)container).get_members ()) {
+                if (!Util.source_ref_equal (member.source_reference, container.source_reference) && !seen.contains (member))
+                    visible_members.add (member);
+            }
+        } else if (container is Vala.Struct) {
+            foreach (var field in ((Vala.Struct)container).get_fields ())
+                if (!Util.source_ref_equal (field.source_reference, container.source_reference) && !seen.contains (field))
+                    visible_members.add (field);
+            foreach (var method in ((Vala.Struct)container).get_methods ())
+                if (!Util.source_ref_equal (method.source_reference, container.source_reference) && !seen.contains (method))
+                    visible_members.add (method);
+            foreach (var constant in ((Vala.Struct)container).get_constants ())
+                if (!Util.source_ref_equal (constant.source_reference, container.source_reference) && !seen.contains (constant))
+                    visible_members.add (constant);
+            foreach (var property in ((Vala.Struct)container).get_properties ())
+                if (!Util.source_ref_equal (property.source_reference, container.source_reference) && !seen.contains (property))
+                    visible_members.add (property);
+        } else if (container is Vala.Enum) {
+            foreach (var evalue in ((Vala.Enum)container).get_values ())
+                if (!Util.source_ref_equal (evalue.source_reference, container.source_reference) && !seen.contains (evalue))
+                    visible_members.add (evalue);
+            foreach (var constant in ((Vala.Enum)container).get_constants ())
+                if (!Util.source_ref_equal (constant.source_reference, container.source_reference) && !seen.contains (constant))
+                    visible_members.add (constant);
+            foreach (var method in ((Vala.Enum)container).get_methods ())
+                if (!Util.source_ref_equal (method.source_reference, container.source_reference) && !seen.contains (method))
+                    visible_members.add (method);
+        } else if (container is Vala.ErrorDomain) {
+            foreach (var ecode in ((Vala.ErrorDomain)container).get_codes ())
+                if (!Util.source_ref_equal (ecode.source_reference, container.source_reference) && !seen.contains (ecode))
+                    visible_members.add (ecode);
+            foreach (var method in ((Vala.ErrorDomain)container).get_methods ())
+                if (!Util.source_ref_equal (method.source_reference, container.source_reference) && !seen.contains (method))
+                    visible_members.add (method);
+        }
+
+        return visible_members;
     }
 }

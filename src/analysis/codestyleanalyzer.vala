@@ -19,12 +19,12 @@
 using Vala;
 
 /**
- * Collects statistics by 
+ * Collects statistics on code style in a document.
  */
 class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
+    private SourceFile? current_file;
     private uint _total_spacing;
     private uint _num_callable;
-    private SourceFile? current_file;
 
     public override DateTime last_updated { get; set; }
 
@@ -86,8 +86,14 @@ class Vls.CodeStyleAnalyzer : CodeVisitor, CodeAnalyzer {
             else
                 indent.prepend_c (c);
         }
-        for (uint l = 0; l <= nesting_level; ++l)
-            indent.append (suffix.str);
+
+        for (uint l = 0; l <= nesting_level; ++l) {
+            if (l > 0 && suffix.len == 0)
+                // default is 4 spaces (TODO: analyze file / use uncrustify config)
+                indent.append ("    ");
+            else
+                indent.append (suffix.str);
+        }
         return indent.str;
     }
 
