@@ -280,7 +280,7 @@ class Vls.GirDocumentation {
      * see [[https://developer.gnome.org/gtk-doc-manual/stable/documenting_syntax.html.en]]
      */
     public string render_gtk_doc_content (string content, Vala.Comment comment, Compilation compilation) throws GLib.RegexError {
-        string comment_data = content;  // FIXME: workaround for valac codegen bug
+        string comment_data = content.dup();  // FIXME: workaround for valac codegen bug
 
         // replace code blocks
         comment_data = /\|\[(<!-- language="(\w+)" -->)?((.|\s)*?)\]\|/
