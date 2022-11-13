@@ -30,14 +30,20 @@ namespace Vls.CodeActions {
      * @param uri       the document URI
      */
     Collection<CodeAction> extract (Compilation compilation, TextDocument file, Range range, string uri) {
-        // search for nodes containing the query range
-        var finder = new NodeSearch (file, range.start, true, range.end, false);
         var code_actions = new ArrayList<CodeAction> ();
+
+        if (file.last_updated.compare (compilation.last_updated) > 0)
+            // don't show code actions for a stale document
+            return code_actions;
+
         var class_ranges = new HashMap<TypeSymbol, Range> ();
         var document = new VersionedTextDocumentIdentifier () {
             version = file.version,
             uri = uri
         };
+
+        // search for nodes containing the query range
+        var finder = new NodeSearch (file, range.start, true, range.end, false);
 
         // add code actions
         foreach (CodeNode code_node in finder.result) {
