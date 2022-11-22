@@ -1664,7 +1664,7 @@ class Vls.Server : Jsonrpc.Server {
         var json_array = new Json.Array ();
 
         Vala.CodeContext.push (compilation.code_context);
-        var code_actions = CodeActions.extract (compilation, (TextDocument) source_file, p.range, Uri.unescape_string (p.textDocument.uri));
+        var code_actions = CodeActions.extract (compilation, (TextDocument) source_file, p.range, Uri.unescape_string (p.textDocument.uri), p.context.diagnostics);
         foreach (var action in code_actions)
             json_array.add_element (Json.gobject_serialize (action));
         Vala.CodeContext.pop ();
