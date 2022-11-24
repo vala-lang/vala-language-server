@@ -1005,25 +1005,27 @@ namespace Lsp {
     class CodeAction : Object, Json.Serializable {
         public string title { get; set; }
         public string? kind { get; set; }
-        public Gee.List<Diagnostic>? diagnostics { get; set; }
+        public Gee.Collection<Diagnostic>? diagnostics { get; set; }
         public bool isPreferred { get; set; }
         public WorkspaceEdit? edit { get; set; }
         public Command? command { get; set; }
         public Object? data { get; set; }
 
+        protected void add_diagnostic (Diagnostic diag) {
+            if (diagnostics == null)
+                diagnostics = new Gee.ArrayList<Diagnostic> ();
+            diagnostics.add (diag);
+        }
+
         public override Json.Node serialize_property (string property_name, GLib.Value value, GLib.ParamSpec pspec) {
             if (property_name != "diagnostics")
                 return default_serialize_property (property_name, value, pspec);
 
-            var node = new Json.Node (Json.NodeType.ARRAY);
-            node.init_array (new Json.Array ());
-            if (diagnostics != null) {
-                var array = node.get_array ();
-                foreach (var text_edit in diagnostics) {
+            var array = new Json.Array ();
+            if (diagnostics != null)
+                foreach (var text_edit in diagnostics)
                     array.add_element (Json.gobject_serialize (text_edit));
-                }
-            }
-            return node;
+            return new Json.Node.alloc ().init_array (array);
         }
     }
 

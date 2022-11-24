@@ -22,11 +22,15 @@ using Gee;
 using Lsp;
 
 class Vls.AddOtherConstantsToSwitchAction : CodeAction {
-    public AddOtherConstantsToSwitchAction (Vala.SwitchStatement sws,
+    public AddOtherConstantsToSwitchAction (CodeActionContext context,
+                                            Vala.SwitchStatement sws,
                                             VersionedTextDocumentIdentifier document,
                                             Vala.Enum e,
                                             HashSet<string> missing,
                                             CodeStyleAnalyzer code_style) {
+        this.title = "Add missing constants to switch";
+        this.edit = new WorkspaceEdit ();
+
         var sections = sws.get_sections ();
         uint end_line, end_column;
         string label_indent, inner_indent;
@@ -64,8 +68,6 @@ class Vls.AddOtherConstantsToSwitchAction : CodeAction {
             }
         }
         var insert_text = sb.str;
-        this.title = "Add missing constants to switch";
-        var workspace_edit = new WorkspaceEdit ();
         var document_edit = new TextDocumentEdit (document);
         var end_pos = new Position () {
             line = end_line - 1,
@@ -76,8 +78,14 @@ class Vls.AddOtherConstantsToSwitchAction : CodeAction {
             end = end_pos
         }, insert_text);
         document_edit.edits.add (text_edit);
-        workspace_edit.documentChanges = new ArrayList<TextDocumentEdit> ();
-        workspace_edit.documentChanges.add (document_edit);
-        this.edit = workspace_edit;
+        this.edit.documentChanges = new ArrayList<TextDocumentEdit>.wrap ({document_edit});
+        // now, include all relevant diagnostics
+        foreach (var diag in context.diagnostics)
+            if (/does not implement|some prerequisites .*are not met/.match (diag.message))
+                add_diagnostic (diag);
+        if (!diagnostics.is_empty)
+            this.kind = "quickfix";
+        else
+            this.kind = "refactor.rewrite";
     }
 }
