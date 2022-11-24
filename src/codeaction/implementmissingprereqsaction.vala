@@ -25,13 +25,15 @@ using Gee;
  * Implement all missing prerequisites of a class type.
  */
 class Vls.ImplementMissingPrereqsAction : CodeAction {
-    public ImplementMissingPrereqsAction (Vala.Class class_sym,
+    public ImplementMissingPrereqsAction (CodeActionContext context,
+                                          Vala.Class class_sym,
                                           Vala.Collection<Vala.DataType> missing_prereqs,
                                           Vala.Collection<Pair<Vala.DataType, Vala.Symbol>> missing_symbols,
                                           Position classdef_end,
                                           CodeStyleAnalyzer code_style,
                                           VersionedTextDocumentIdentifier document) {
         this.title = "Implement missing prerequisites for class";
+        this.kind = "quickfix";
         this.edit = new WorkspaceEdit ();
 
         var changes = new ArrayList<TextDocumentEdit> ();
@@ -159,5 +161,10 @@ class Vls.ImplementMissingPrereqsAction : CodeAction {
         }, symbols_insert_text.str));
 
         this.edit.documentChanges = changes;
+
+        // now, include all relevant diagnostics
+        foreach (var diag in context.diagnostics)
+            if (/does not implement|some prerequisites .*are not met/.match (diag.message))
+                add_diagnostic (diag);
     }
 }

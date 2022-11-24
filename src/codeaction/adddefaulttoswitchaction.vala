@@ -22,9 +22,13 @@ using Lsp;
 using Gee;
 
 class Vls.AddDefaultToSwitchAction : CodeAction {
-    public AddDefaultToSwitchAction (Vala.SwitchStatement sws,
+    public AddDefaultToSwitchAction (CodeActionContext context,
+                                     Vala.SwitchStatement sws,
                                      VersionedTextDocumentIdentifier document,
                                      CodeStyleAnalyzer code_style) {
+        this.title = "Add default case to switch-statement";
+        this.edit = new WorkspaceEdit ();
+
         var sections = sws.get_sections ();
         uint end_line, end_column;
         string label_indent, inner_indent;
@@ -52,8 +56,6 @@ class Vls.AddDefaultToSwitchAction : CodeAction {
         };
         var insert_text = "%sdefault:\n%sassert_not_reached%*s();\n"
             .printf (label_indent, inner_indent, code_style.average_spacing_before_parens, "");
-        this.title = "Add default case to switch-statement";
-        var workspace_edit = new WorkspaceEdit ();
         var document_edit = new TextDocumentEdit (document);
         var end_pos = new Position () {
             line = end_line - 1,
@@ -64,8 +66,15 @@ class Vls.AddDefaultToSwitchAction : CodeAction {
             end = end_pos
         }, insert_text);
         document_edit.edits.add (text_edit);
-        workspace_edit.documentChanges = new ArrayList<TextDocumentEdit> ();
-        workspace_edit.documentChanges.add (document_edit);
-        this.edit = workspace_edit;
+        this.edit.documentChanges = new ArrayList<TextDocumentEdit>.wrap ({document_edit});
+
+        // now, include all relevant diagnostics
+        foreach (var diag in context.diagnostics)
+            if (diag.message.contains ("does not handle"))
+                add_diagnostic (diag);
+        if (!diagnostics.is_empty)
+            this.kind = "quickfix";
+        else
+            this.kind = "refactor.rewrite";
     }
 }

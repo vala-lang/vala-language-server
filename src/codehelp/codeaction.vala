@@ -29,7 +29,7 @@ namespace Vls.CodeActions {
      * @param range     the range to show code actions for
      * @param uri       the document URI
      */
-    Collection<CodeAction> extract (Compilation compilation, TextDocument file, Range range, string uri) {
+    Collection<CodeAction> extract (CodeActionContext context, Compilation compilation, TextDocument file, Range range, string uri) {
         var code_actions = new ArrayList<CodeAction> ();
 
         if (file.last_updated.compare (compilation.last_updated) > 0)
@@ -60,7 +60,9 @@ namespace Vls.CodeActions {
                     var missing = CodeHelp.gather_missing_prereqs_and_unimplemented_symbols (csym);
                     if (!missing.first.is_empty || !missing.second.is_empty) {
                         var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (file);
-                        code_actions.add (new ImplementMissingPrereqsAction (csym, missing.first, missing.second, clsdef_range.end, code_style, document));
+                        code_actions.add (new ImplementMissingPrereqsAction (context,
+                                                                             csym, missing.first, missing.second,
+                                                                             clsdef_range.end, code_style, document));
                     }
                 }
             } else if (code_node is SwitchStatement) {
@@ -96,9 +98,11 @@ namespace Vls.CodeActions {
                         continue;
                     var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (file);
                     if (!found_default && sws.source_reference != null)
-                        code_actions.add (new AddDefaultToSwitchAction (sws, document, code_style));
+                        code_actions.add (new AddDefaultToSwitchAction (context, sws, document, code_style));
                     if (!consts_by_name.is_empty && sws.source_reference != null)
-                        code_actions.add (new AddOtherConstantsToSwitchAction (sws, document, (Enum)e, consts_by_name, code_style));
+                        code_actions.add (new AddOtherConstantsToSwitchAction (context, 
+                                                                               sws, document,
+                                                                               (Enum)e, consts_by_name, code_style));
                 } else {
                     var found_default = false;
                     foreach (var l in labels) {
@@ -109,7 +113,7 @@ namespace Vls.CodeActions {
                     }
                     if (!found_default && sws.source_reference != null) {
                         var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (file);
-                        code_actions.add (new AddDefaultToSwitchAction (sws, document, code_style));
+                        code_actions.add (new AddDefaultToSwitchAction (context, sws, document, code_style));
                     }
                 }
             }
