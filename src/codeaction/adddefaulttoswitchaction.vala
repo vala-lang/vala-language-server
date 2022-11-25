@@ -70,9 +70,9 @@ class Vls.AddDefaultToSwitchAction : CodeAction {
 
         // now, include all relevant diagnostics
         foreach (var diag in context.diagnostics)
-            if (diag.message.contains ("does not handle"))
+            if (diag.message.contains ("Switch does not handle"))
                 add_diagnostic (diag);
-        if (!diagnostics.is_empty)
+        if (diagnostics != null && !diagnostics.is_empty)
             this.kind = "quickfix";
         else
             this.kind = "refactor.rewrite";

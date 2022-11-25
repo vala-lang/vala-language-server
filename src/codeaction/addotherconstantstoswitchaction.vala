@@ -81,9 +81,9 @@ class Vls.AddOtherConstantsToSwitchAction : CodeAction {
         this.edit.documentChanges = new ArrayList<TextDocumentEdit>.wrap ({document_edit});
         // now, include all relevant diagnostics
         foreach (var diag in context.diagnostics)
-            if (/does not implement|some prerequisites .*are not met/.match (diag.message))
+            if (diag.message.contains ("Switch does not handle"))
                 add_diagnostic (diag);
-        if (!diagnostics.is_empty)
+        if (diagnostics != null && !diagnostics.is_empty)
             this.kind = "quickfix";
         else
             this.kind = "refactor.rewrite";
