@@ -145,11 +145,15 @@ class Vls.ImplementMissingPrereqsAction : CodeAction {
                 if (prop.get_accessor != null) {
                     if (prop.get_accessor.value_type is Vala.ReferenceType && prop.get_accessor.value_type.value_owned)
                         symbols_insert_text.append (" owned");
+                    if (prop.get_accessor.access != prop.access)
+                        symbols_insert_text.append_printf (" %s", prop.get_accessor.access.to_string ());
                     symbols_insert_text.append (" get;");
                 }
                 if (prop.set_accessor != null) {
                     if (prop.set_accessor.value_type is Vala.ReferenceType && prop.set_accessor.value_type.value_owned)
                         symbols_insert_text.append (" owned");
+                    if (prop.set_accessor.access != prop.access)
+                        symbols_insert_text.append_printf (" %s", prop.set_accessor.access.to_string ());
                     symbols_insert_text.append (" set;");
                 }
                 symbols_insert_text.append (" }");
