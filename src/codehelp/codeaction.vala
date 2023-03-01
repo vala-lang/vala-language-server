@@ -55,15 +55,12 @@ namespace Vls.CodeActions {
             } else if (code_node is Class) {
                 var csym = (Class)code_node;
                 var clsdef_range = compute_class_def_range (csym, class_ranges);
-                var cls_range = new Range.from_sourceref (csym.source_reference);
-                if (cls_range.contains (range.start) && cls_range.contains (range.end)) {
-                    var missing = CodeHelp.gather_missing_prereqs_and_unimplemented_symbols (csym);
-                    if (!missing.first.is_empty || !missing.second.is_empty) {
-                        var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (file);
-                        code_actions.add (new ImplementMissingPrereqsAction (context,
-                                                                             csym, missing.first, missing.second,
-                                                                             clsdef_range.end, code_style, document));
-                    }
+                var missing = CodeHelp.gather_missing_prereqs_and_unimplemented_symbols (csym);
+                if (!missing.first.is_empty || !missing.second.is_empty) {
+                    var code_style = compilation.get_analysis_for_file<CodeStyleAnalyzer> (file);
+                    code_actions.add (new ImplementMissingPrereqsAction (context,
+                                                                         csym, missing.first, missing.second,
+                                                                         clsdef_range.end, code_style, document));
                 }
             } else if (code_node is SwitchStatement) {
                 var sws = (SwitchStatement)code_node;
@@ -122,6 +119,24 @@ namespace Vls.CodeActions {
         return code_actions;
     }
 
+    Position compute_real_symbol_end (Symbol sym, char terminator) {
+        var pos = new Position.from_libvala (sym.source_reference.end);
+        var offset = sym.source_reference.end.pos - (char *)sym.source_reference.file.content;
+        var dl = 0;
+        var dc = 0;
+        unowned string? content = sym.source_reference.file.content;
+        while (offset < content.length && content[(long)offset] != terminator) {
+            if (Util.is_newline (content[(long)offset])) {
+                dl++;
+                dc = 0;
+            } else {
+                dc++;
+            }
+            offset++;
+        }
+        return pos.translate (dl, dc + 1);
+    }
+
     /**
      * Compute the full range of a class definition.
      */
@@ -130,30 +145,17 @@ namespace Vls.CodeActions {
             return class_ranges[csym];
         // otherwise compute the result and cache it
         // csym.source_reference must be non-null otherwise NodeSearch wouldn't have found csym
-        var pos = new Position.from_libvala (csym.source_reference.end);
-        var offset = csym.source_reference.end.pos - (char *)csym.source_reference.file.content;
-        var dl = 0;
-        var dc = 0;
-        while (offset < csym.source_reference.file.content.length && csym.source_reference.file.content[(long)offset] != '{') {
-            if (Util.is_newline (csym.source_reference.file.content[(long)offset])) {
-                dl++;
-                dc = 0;
-            } else {
-                dc++;
-            }
-            offset++;
-        }
-        pos = pos.translate (dl, dc + 1);
-        var range = new Range () {
-            start = pos,
-            end = pos
-        };
+        var classdef_range = new Range.from_sourceref (csym.source_reference);
+        var range = classdef_range.union (new Range.from_pos (compute_real_symbol_end (csym, '{')));
+        // debug ("csym range: %s -> %s", csym.to_string (), classdef_range.to_string ());
         foreach (Symbol member in csym.get_members ()) {
             if (member.source_reference == null)
                 continue;
-            range = range.union (new Range.from_sourceref (member.source_reference));
+            if (member is Field)
+                range = range.union (new Range.from_pos (compute_real_symbol_end (member, ';')));
             if (member is Method && ((Method)member).body != null && ((Method)member).body.source_reference != null)
                 range = range.union (new Range.from_sourceref (((Method)member).body.source_reference));
+            // debug ("expanding range to %s", range.to_string ());
         }
         class_ranges[csym] = range;
         return range;

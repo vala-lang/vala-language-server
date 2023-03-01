@@ -119,6 +119,11 @@ namespace Lsp {
 
         public string to_string () { return (filename != null ? @"$filename:" : "") + @"$start -> $end"; }
 
+        public Range.from_pos (Position pos) {
+            this.start = pos;
+            this.end = pos.dup ();
+        }
+
         public Range.from_sourceref (Vala.SourceReference sref) {
             this.start = new Position.from_libvala (sref.begin);
             this.end = new Position.from_libvala (sref.end);
@@ -142,7 +147,8 @@ namespace Lsp {
         public Range union (Range other) {
             return new Range () {
                 start = start.compare_to (other.start) < 0 ? start : other.start,
-                end = end.compare_to (other.end) < 0 ? other.end : end
+                end = end.compare_to (other.end) < 0 ? other.end : end,
+                filename = (filename == other.filename) ? filename : null
             };
         }
 
