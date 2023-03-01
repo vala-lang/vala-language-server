@@ -145,11 +145,13 @@ namespace Lsp {
          * Return a new range that includes `this` and `other`.
          */
         public Range union (Range other) {
-            return new Range () {
+            var range = new Range () {
                 start = start.compare_to (other.start) < 0 ? start : other.start,
                 end = end.compare_to (other.end) < 0 ? other.end : end,
-                filename = (filename == other.filename) ? filename : null
             };
+            if (filename == other.filename)
+                range.filename = filename;
+            return range;
         }
 
         public bool contains (Position pos) {
