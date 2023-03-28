@@ -9,7 +9,9 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 - Arch Linux (via AUR): `yay -S vala-language-server`
   or `yay -S vala-language-server-git`
 
-- Ubuntu, Fedora, Debian, openSUSE, and Mageia: install from [the OBS repo](https://software.opensuse.org//download.html?project=home%3APrince781&package=vala-language-server)
+- Ubuntu, Fedora, Debian, openSUSE, and Mageia: install from [the OBS repo](https://software.opensuse.org//download.html?project=home%3APrince781&package=vala-language-server) [![build result](https://build.opensuse.org/projects/home:Prince781/packages/vala-language-server/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:Prince781/vala-language-server)
+
+- Fedora (official): `sudo dnf install vala-language-server`
 
 - elementaryOS: `sudo apt install vala-language-server`
 
@@ -17,7 +19,11 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 
 - Guix: `guix install vala-language-server`
 
-- Windows (vis MSYS2): `pacman -S mingw-w64-x86_64-vala-language-server`
+- Void Linux: `xbps-install vala-language-server`
+
+- Windows (via MSYS2): `pacman -S mingw-w64-x86_64-vala-language-server`
+
+...and more. See below:
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/vala-language-server.svg)](https://repology.org/project/vala-language-server/versions)
 
@@ -82,8 +88,7 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 - `jsonrpc-glib-1.0 >= 3.28`
 - `libvala >= 0.48.12`
 - you also need the `posix` VAPI, which should come preinstalled
-
-[Uncrustify](http://uncrustify.sourceforge.net/) is required for formatting.
+- [uncrustify](http://uncrustify.sourceforge.net/), for formatting (optional)
 
 #### Install dependencies with Guix
 
