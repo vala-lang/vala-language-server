@@ -2211,12 +2211,14 @@ class Vls.Server : Jsonrpc.Server {
             } else if ((item is Vala.MethodCall || item is Vala.ObjectCreationExpression) && compilation.method_calls.has_key (item)) {
                 Vala.List<Vala.Parameter>? parameters = null;
                 if (item is Vala.MethodCall) {
-                    parameters = ((Vala.MethodCall)item).call.value_type.get_parameters ();
+                    var mc = (Vala.MethodCall)item;
+                    if (mc.call.value_type != null)
+                        parameters = mc.call.value_type.get_parameters ();
                 } else {
                     var oce = (Vala.ObjectCreationExpression)item;
                     if (oce.member_name != null && oce.member_name.symbol_reference is Vala.Callable)
                         parameters = ((Vala.Callable)oce.member_name.symbol_reference).get_parameters ();
-                    else
+                    else if (oce.type_reference != null)
                         parameters = oce.type_reference.get_parameters ();
                 }
                 if (parameters != null) {
