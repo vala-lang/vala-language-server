@@ -35,18 +35,25 @@ namespace Vls.Util {
      * Both lineno and charno must be zero-indexed.
      */
     public static size_t get_string_pos (string str, uint lineno, uint charno) {
-        int linepos = -1;
+        int pos = 0;
+        unowned string curstr = str;
 
         for (uint lno = 0; lno < lineno; ++lno) {
-            int pos = str.index_of_char ('\n', linepos + 1);
-            if (pos == -1)
+            int rel_idx = curstr.index_of_char ('\n');
+            if (rel_idx == -1)
                 break;
-            linepos = pos;
+            pos += rel_idx;
+            curstr = curstr.offset (rel_idx);
+            if (curstr[1] != '\0') {
+                // skip past the newline
+                pos++;
+                curstr = curstr.offset (1);
+            } else {
+                break;
+            }
         }
 
-        string remaining_str = str.substring (linepos + 1);
-
-        return linepos + 1 + remaining_str.index_of_nth_char (charno);
+        return pos + curstr.index_of_nth_char (charno);
     }
 
     /**
