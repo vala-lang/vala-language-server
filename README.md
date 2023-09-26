@@ -143,8 +143,19 @@ endif
 ```
 
 #### nvim-lspconfig
-- [For Neovim 0.5.0](https://github.com/neovim/nvim-lspconfig)
-- see `CONFIG.md` in that project
+- For Neovim 0.5.0 or higher
+- Make sure [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) is installed
+- see [the recommended config](https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#vala_ls) in that project
+
+```lua
+require'lspconfig'.vala_ls.setup {
+  -- defaults, no need to specify these
+  cmd = { "vala-language-server" },
+  filetypes = { "vala", "genie" },
+  root_dir = root_pattern("meson.build", ".git"),
+  single_file_support = true,
+}
+```
 
 ### Visual Studio Code
 - [Official Vala plugin](https://marketplace.visualstudio.com/items?itemName=prince781.vala)
