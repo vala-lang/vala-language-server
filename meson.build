@@ -79,10 +79,6 @@ endif
 subdir('data')
 subdir('src')
 
-if get_option('plugins')
-  subdir('plugins/gnome-builder')
-endif
-
 if get_option('tests')
   subdir('test')
 endif
