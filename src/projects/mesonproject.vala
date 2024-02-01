@@ -27,9 +27,8 @@ class Vls.MesonProject : Project {
     private string build_dir;
     private bool configured_once;
     private bool requires_general_build;
-    private string[] special_args = {};
-    private string[] special_comp = {};
-    private string[] special_envp = {};
+    private string[] meson_setup_args = {};
+    private string[] meson_compile_args = {};
 
     /**
      * Substitute special arguments like `@INPUT@` and `@OUTPUT@` as they
@@ -295,14 +294,14 @@ class Vls.MesonProject : Project {
         debug ("%sconfiguring build dir %s ...", configured_once ? "re" : "", build_dir);
         if (configured_once)
             spawn_args += "--reconfigure";
-        foreach(var item in special_comp) {
+        foreach(var item in meson_setup_args) {
             warning("meson setup arg %s", item);
             spawn_args += item;
         }
         Process.spawn_sync (
             build_dir,
             spawn_args, 
-            special_envp, 
+            null, 
             SpawnFlags.SEARCH_PATH, 
             null,
             out proc_stdout,
@@ -768,15 +767,15 @@ class Vls.MesonProject : Project {
         if (requires_general_build) {
             int proc_status;
             string proc_stdout, proc_stderr;
-            string[] spwan_args = {"meson", "compile"};
-            foreach(var item in special_comp) {
+            string[] spawn_args = {"meson", "compile"};
+            foreach(var item in meson_compile_args) {
                 warning("meson compile arg %s", item);
-                spwan_args += item;
+                spawn_args += item;
             }
 
             Process.spawn_sync (build_dir,
-                                spwan_args,
-                                special_envp,
+                                spawn_args,
+                                null,
                                 SpawnFlags.SEARCH_PATH,
                                 null,
                                 out proc_stdout,
@@ -795,17 +794,8 @@ class Vls.MesonProject : Project {
 
     public MesonProject (string root_path, FileCache file_cache, Cancellable? cancellable = null) throws Error {
         base (root_path, file_cache);
-        // read system envionment;
-        string[] system_env_key = Environment.list_variables();
-        if (system_env_key != null) {
-            foreach(var item in system_env_key) {
-                var sys_env = item+"="+Environment.get_variable(item);
-                debug("system env is %s", sys_env);
-                special_envp += sys_env;
-            }
-        }
         // get config from settings.json
-        var check_path = root_path + "/.vscode/settings.json";
+        var check_path = Path.build_filename(root_path, "/.vscode/settings.json");
         warning("meson check option at %s", check_path);
         var settings_json = File.new_for_path(check_path);
         if (settings_json.query_exists()) {
@@ -817,17 +807,18 @@ class Vls.MesonProject : Project {
             var ret_options = root_object.get_array_member("mesonbuild.configureOptions");
             foreach(var option in ret_options.get_elements()) {
                 var opt = option.get_string();
-                special_args += opt;
+                meson_setup_args += opt;
             }
             var compile_options = root_object.get_array_member("mesonbuild.compileOptions");
             foreach(var option in compile_options.get_elements()) {
                 var opt = option.get_string();
-                special_comp += opt;
+                meson_compile_args += opt;
             }
             // maybe can reuse mesonbuild buildDir
-            // this.build_dir = root_object.get_string_member_with_default("mesonbuild.buildFolder", root_path +"/builddir");
+            this.build_dir = root_object.get_string_member_with_default("mesonbuild.buildFolder", root_path +"/builddir");
+        }else{
+            this.build_dir = DirUtils.make_tmp (@"vls-meson-$(str_hash (root_path))-XXXXXX");
         }
-        this.build_dir = DirUtils.make_tmp (@"vls-meson-$(str_hash (root_path))-XXXXXX");
         reconfigure_if_stale (cancellable);
     }
 
