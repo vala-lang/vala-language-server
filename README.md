@@ -177,6 +177,16 @@ endif
 ```
 - Run `Tools > LSP > Enable Language Server Globally... > vala-language-server`
 
+## Specifying dependencies
+
+If you're using meson, vala-language-server will automatically detect the packages you depend on.
+
+If you just want to write a quick script without a build system, you can add a shebang line to the top of your .vala file:
+
+```c
+#!/usr/bin/env -S vala --pkg gtk4
+```
+
 ## Contributing
 Want to help out? Here are some helpful resources:
 
