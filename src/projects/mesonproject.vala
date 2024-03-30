@@ -295,7 +295,7 @@ class Vls.MesonProject : Project {
         if (configured_once)
             spawn_args += "--reconfigure";
         foreach(var item in meson_setup_args) {
-            warning("meson setup arg %s", item);
+            debug("meson setup arg %s", item);
             spawn_args += item;
         }
         Process.spawn_sync (
