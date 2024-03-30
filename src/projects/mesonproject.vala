@@ -769,7 +769,7 @@ class Vls.MesonProject : Project {
             string proc_stdout, proc_stderr;
             string[] spawn_args = {"meson", "compile"};
             foreach(var item in meson_compile_args) {
-                warning("meson compile arg %s", item);
+                debug("meson compile arg %s", item);
                 spawn_args += item;
             }
 
@@ -795,13 +795,21 @@ class Vls.MesonProject : Project {
     public MesonProject (string root_path, FileCache file_cache, Cancellable? cancellable = null) throws Error {
         base (root_path, file_cache);
         // get config from settings.json
-        var check_path = Path.build_filename(root_path, "/.vscode/settings.json");
-        warning("meson check option at %s", check_path);
-        var settings_json = File.new_for_path(check_path);
-        if (settings_json.query_exists()) {
-            var dis = new DataInputStream(settings_json.read());
-            var settings_json_parser = new Json.Parser();
-            settings_json_parser.load_from_stream(dis);
+        var vscode_settings_json_path = Path.build_filename(root_path, "/.vscode/settings.json");
+        debug("meson check option at %s", vscode_settings_json_path);
+        var vscode_settings_json = File.new_for_path(vscode_settings_json_path);
+        var settings_json_parser = new Json.Parser();
+        var load_vscode_settings = false;
+        if (vscode_settings_json.query_exists()) {
+            try {
+                var dis = new DataInputStream(vscode_settings_json.read());
+                settings_json_parser.load_from_stream(dis);
+                load_vscode_settings = true;
+            } catch (Error e) {
+                warning ("%s", e.message);
+            }
+        }
+        if (load_vscode_settings) {
             var root_node = settings_json_parser.get_root();
             var root_object = root_node.get_object();
             var ret_options = root_object.get_array_member("mesonbuild.configureOptions");
