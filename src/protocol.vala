@@ -693,11 +693,38 @@ namespace Lsp {
         public TextDocumentClientCapabilities textDocument { get; set; default = new TextDocumentClientCapabilities (); }
     }
 
+    /**
+     * (Custom) Editor type for {@link EditorOptions}
+     */
+    enum EditorType {
+        UNKNOWN = 0,
+        VSCODE  = 1
+    }
+
+    /**
+     * (Custom) extra settings and capabilities of the editor.
+     * These may be overrides for projects. This is not LSP-specific.
+     */
+    class EditorOptions : Object {
+        public EditorType editorType { get; set; }
+        public string[] mesonConfigureOptions { get; set; }
+        public string[] mesonCompileOptions { get; set; }
+        private string? _mesonBuildDir;
+        public string? mesonBuildDir {
+            get { return _mesonBuildDir; }
+            set { 
+                if (value != null && value.length > 0)
+                    _mesonBuildDir = value; 
+            }
+        }
+    }
+
     class InitializeParams : Object {
         public int processId { get; set; }
         public string? rootPath { get; set; }
         public string? rootUri { get; set; }
         public ClientCapabilities capabilities { get; set; default = new ClientCapabilities (); }
+        public EditorOptions? initializationOptions { get; set; }
     }
 
     class SignatureInformation : Object, Json.Serializable {
