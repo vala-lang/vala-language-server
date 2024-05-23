@@ -166,6 +166,7 @@ require'lspconfig'.vala_ls.setup {
 
 ### Kate
 - officially supported in Kate git master
+- **Warning:** Kate will silently fail to find symbols when meson cannot be found in path without notifying the user.
 
 ### Emacs
 - supported with the [lsp-mode](https://github.com/emacs-lsp/lsp-mode) plugin
