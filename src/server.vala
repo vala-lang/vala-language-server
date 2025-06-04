@@ -2419,7 +2419,7 @@ int main (string[] args) {
 
     if (opt_version) {
         stdout.printf ("%s %s\n", Config.PROJECT_NAME, Config.PROJECT_VERSION);
-        return 1;
+        return 0;
     }
 
     // otherwise
