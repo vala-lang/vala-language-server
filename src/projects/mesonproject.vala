@@ -27,6 +27,8 @@ class Vls.MesonProject : Project {
     private string build_dir;
     private bool configured_once;
     private bool requires_general_build;
+    private string[] meson_setup_args = {};
+    private string[] meson_compile_args = {};
 
     /**
      * Substitute special arguments like `@INPUT@` and `@OUTPUT@` as they
@@ -292,6 +294,10 @@ class Vls.MesonProject : Project {
         debug ("%sconfiguring build dir %s ...", configured_once ? "re" : "", build_dir);
         if (configured_once)
             spawn_args += "--reconfigure";
+        foreach(var item in meson_setup_args) {
+            debug("meson setup arg %s", item);
+            spawn_args += item;
+        }
         Process.spawn_sync (
             build_dir,
             spawn_args, 
@@ -761,9 +767,14 @@ class Vls.MesonProject : Project {
         if (requires_general_build) {
             int proc_status;
             string proc_stdout, proc_stderr;
+            string[] spawn_args = {"meson", "compile"};
+            foreach(var item in meson_compile_args) {
+                debug("meson compile arg %s", item);
+                spawn_args += item;
+            }
 
             Process.spawn_sync (build_dir,
-                                {"meson", "compile"},
+                                spawn_args,
                                 null,
                                 SpawnFlags.SEARCH_PATH,
                                 null,
@@ -783,7 +794,39 @@ class Vls.MesonProject : Project {
 
     public MesonProject (string root_path, FileCache file_cache, Cancellable? cancellable = null) throws Error {
         base (root_path, file_cache);
-        this.build_dir = DirUtils.make_tmp (@"vls-meson-$(str_hash (root_path))-XXXXXX");
+        // get config from settings.json
+        var vscode_settings_json_path = Path.build_filename(root_path, "/.vscode/settings.json");
+        debug("meson check option at %s", vscode_settings_json_path);
+        var vscode_settings_json = File.new_for_path(vscode_settings_json_path);
+        var settings_json_parser = new Json.Parser();
+        var load_vscode_settings = false;
+        if (vscode_settings_json.query_exists()) {
+            try {
+                var dis = new DataInputStream(vscode_settings_json.read());
+                settings_json_parser.load_from_stream(dis);
+                load_vscode_settings = true;
+            } catch (Error e) {
+                warning ("%s", e.message);
+            }
+        }
+        if (load_vscode_settings) {
+            var root_node = settings_json_parser.get_root();
+            var root_object = root_node.get_object();
+            var ret_options = root_object.get_array_member("mesonbuild.configureOptions");
+            foreach(var option in ret_options.get_elements()) {
+                var opt = option.get_string();
+                meson_setup_args += opt;
+            }
+            var compile_options = root_object.get_array_member("mesonbuild.compileOptions");
+            foreach(var option in compile_options.get_elements()) {
+                var opt = option.get_string();
+                meson_compile_args += opt;
+            }
+            // maybe can reuse mesonbuild buildDir
+            this.build_dir = root_object.get_string_member_with_default("mesonbuild.buildFolder", root_path +"/builddir");
+        }else{
+            this.build_dir = DirUtils.make_tmp (@"vls-meson-$(str_hash (root_path))-XXXXXX");
+        }
         reconfigure_if_stale (cancellable);
     }
 
