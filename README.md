@@ -162,6 +162,7 @@ require'lspconfig'.vala_ls.setup {
 
 ### GNOME Builder
 - requires GNOME Builder >= 3.35
+- - GNOME Builder >= 3.41 comes with plugin preinstalled and enabled
 - Running `ninja -C build install` should install the third-party plugin to `$PREFIX/lib/gnome-builder/plugins`. Enable `Vala` and disable `GNOME Vala Language Server`.
 
 ### Kate
