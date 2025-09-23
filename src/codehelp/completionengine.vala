@@ -1053,6 +1053,12 @@ namespace Vls.CompletionEngine {
                     completions.add (new CompletionItem.from_symbol (type, constant_sym, current_scope, CompletionItemKind.Constant, lang_serv.get_symbol_documentation (project, constant_sym)));
                 }
             }
+
+            // get instance members of base_struct
+            if (struct_sym.base_type != null) {
+                add_completions_for_type (lang_serv, project, code_style, type, struct_sym.base_struct,
+                        completions, current_scope, in_oce, false, seen_props, seen_type_symbols);
+            }
         } else if (type_symbol is Vala.TypeParameter) {
             var typeparam_sym = (Vala.TypeParameter) type_symbol;
             var generic_type = new Vala.GenericType (typeparam_sym);
