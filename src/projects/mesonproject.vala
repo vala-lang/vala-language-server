@@ -79,6 +79,11 @@ class Vls.MesonProject : Project {
                 } else if (special_arg_name == "CURRENT_SOURCE_DIR") {
                     // use the defined-in directory
                     substituted_args.add (Path.get_dirname (meson_target_info.defined_in));
+                } else if (special_arg_name == "PRIVATE_DIR") {
+                    string substitute = meson_target_info.filename[0] + ".p";
+                    substituted_args.add (substitute);
+                    debug ("for target %s, source #0, subtituted arg #%d (%s) with %s",
+                           meson_target_info.id, i, args[i], substitute);
                 } else {
                     warning ("for target %s, source #0, could not substitute special arg `%s'", 
                              meson_target_info.id, special_arg_name);

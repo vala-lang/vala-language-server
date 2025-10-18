@@ -2201,12 +2201,14 @@ class Vls.Server : Jsonrpc.Server {
                 var lambda = (Vala.LambdaExpression)item;
                 foreach (var param in lambda.get_parameters ()) {
                     var range = new Range.from_sourceref (param.source_reference);
-                    hints += new InlayHint () {
-                        position = range.start,
-                        label = CodeHelp.get_data_type_representation (param.variable_type, null),
-                        kind = InlayHintKind.PARAMETER,
-                        paddingRight = true
-                    };
+                    if (param.variable_type != null) {
+                        hints += new InlayHint () {
+                            position = range.start,
+                            label = CodeHelp.get_data_type_representation (param.variable_type, null),
+                            kind = InlayHintKind.PARAMETER,
+                            paddingRight = true
+                        };
+                    }
                 }
             } else if ((item is Vala.MethodCall || item is Vala.ObjectCreationExpression) && compilation.method_calls.has_key (item)) {
                 Vala.List<Vala.Parameter>? parameters = null;
