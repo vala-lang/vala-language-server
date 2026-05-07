@@ -26,6 +26,8 @@ if not libjsonrpc_glib_dep.found()
     extra_vala_sources += files('vapi/jsonrpc-glib-1.0.vapi')
 endif
 
+add_project_arguments(['--pkg', 'json-glib-1.0'], language: 'vala')
+
 deps = [
     dependency('glib-2.0'),
     libgobject_dep,
