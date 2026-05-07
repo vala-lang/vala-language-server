@@ -15,6 +15,7 @@ OS and version (e.g. Ubuntu 20.04):
 Code editor (e.g. VSCode):
 Vala Language Server (e.g. git commit, or PPA/AUR version):
 Vala version (`valac --version`):
+Meson version (`meson --version`):
 
 **To Reproduce**
 Source code repo:
