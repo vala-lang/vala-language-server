@@ -27,6 +27,8 @@ class Vls.MesonProject : Project {
     private string build_dir;
     private bool configured_once;
     private bool requires_general_build;
+    private string[] extra_setup_args = {};
+    private string[] extra_compile_args = {};
 
     /**
      * Substitute special arguments like `@INPUT@` and `@OUTPUT@` as they
@@ -213,6 +215,9 @@ class Vls.MesonProject : Project {
                 string[] spawn_args = {"meson", "introspect", @"--$subst_command", "."};
                 string proc_stdout, proc_stderr;
                 int proc_status;
+
+                foreach (string arg in extra_setup_args)
+                    spawn_args += arg;
 
                 string command_str = "";
                 foreach (string part in spawn_args) {
@@ -766,9 +771,13 @@ class Vls.MesonProject : Project {
         if (requires_general_build) {
             int proc_status;
             string proc_stdout, proc_stderr;
+            string[] spawn_args = {"meson", "compile"};
+
+            foreach (string arg in extra_compile_args)
+                spawn_args += arg;
 
             Process.spawn_sync (build_dir,
-                                {"meson", "compile"},
+                                spawn_args,
                                 null,
                                 SpawnFlags.SEARCH_PATH,
                                 null,
@@ -786,9 +795,28 @@ class Vls.MesonProject : Project {
         base.build_if_stale (cancellable);
     }
 
-    public MesonProject (string root_path, FileCache file_cache, Cancellable? cancellable = null) throws Error {
+    public MesonProject (string root_path, FileCache file_cache,
+                         Lsp.EditorOptions? editor_options,
+                         Cancellable? cancellable = null) throws Error {
         base (root_path, file_cache);
-        this.build_dir = DirUtils.make_tmp (@"vls-meson-$(str_hash (root_path))-XXXXXX");
+        var default_build_dir_template = @"vls-meson-$(str_hash (root_path))-XXXXXX";
+        if (editor_options != null) {
+            debug ("overriding with VSCode Meson plugin settings: %s", 
+                   Json.gobject_to_data (editor_options, null));
+            this.extra_setup_args = editor_options.mesonConfigureOptions;
+            this.extra_compile_args = editor_options.mesonCompileOptions;
+            if (editor_options.mesonBuildDir != null) {
+                var meson_build_dir = File.new_for_path (editor_options.mesonBuildDir);
+                try {
+                    meson_build_dir.make_directory_with_parents (cancellable);
+                    this.build_dir = editor_options.mesonBuildDir;
+                } catch (IOError.EXISTS e) {
+                    // ignore whether the build folder exists
+                }
+            }
+        }
+        if (this.build_dir == null)
+            this.build_dir = DirUtils.make_tmp (default_build_dir_template);
         reconfigure_if_stale (cancellable);
     }
 

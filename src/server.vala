@@ -400,11 +400,13 @@ class Vls.Server : Jsonrpc.Server {
         // TODO: autotools, make(?), cmake(?)
         if (meson_file.query_exists (cancellable)) {
             try {
-                backend_project = new MesonProject (root_path, file_cache, cancellable);
+                backend_project = new MesonProject (root_path, file_cache,
+                                                    init_params.initializationOptions, cancellable);
+            } catch (ProjectError.VERSION_UNSUPPORTED e) {
+                // ignore and skip to the next project
+                show_message (client, @"Won't use Meson project - $(e.message)", MessageType.Warning);
             } catch (Error e) {
-                if (!(e is ProjectError.VERSION_UNSUPPORTED)) {
-                    show_message (client, @"Failed to initialize Meson project - $(e.message)", MessageType.Error);
-                }
+                show_message (client, @"Failed to initialize Meson project - $(e.message)", MessageType.Error);
             }
         }
         
