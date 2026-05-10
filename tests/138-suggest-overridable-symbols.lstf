@@ -1,0 +1,35 @@
+// issue: vala-language-server#138
+server_path = options('server-path');
+
+let f = file(`
+interface Iface {
+    public abstract void must_override();
+}
+class Sas : Iface, Object {
+    
+}
+`);
+
+project_files = [ f ];
+
+
+
+await change(f, {
+    range: {
+        start: { line: 7, character: 5 },
+        end: { line: 7, character: 5 }
+    },
+    text: '\n    p'
+});
+
+assert {
+    isIncomplete: false,
+    completions: [
+        {
+            label: 'public void must_override()',
+            kind: CompletionItemKind.Method,
+            insertText: 'public void must_override()$0',
+            insertTextFormat: InsertTextFormat.Snippet
+        }
+    ]
+} <=> await completion(f, 8, 6);

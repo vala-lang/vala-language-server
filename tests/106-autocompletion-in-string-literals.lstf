@@ -1,0 +1,25 @@
+// issue: vala-language-server#106
+server_path = option('server-path');
+
+let f = file(`
+void main() {
+    print ("this is a string");
+}
+`);
+
+project_files = [ f ];
+
+
+
+await change(f, {
+    range: {
+        start: { line: 2, character: 29 },
+        end: { line: 2, character: 29 }
+    },
+    text: '.'
+});
+
+assert {
+    isIncomplete: false,
+    items: []
+} <=> await completion(f, 2, 29);

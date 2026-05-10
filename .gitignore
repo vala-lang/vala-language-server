@@ -1,2 +1,3 @@
 build/
 *.o
+subprojects/lstf

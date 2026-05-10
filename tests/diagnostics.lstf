@@ -1,0 +1,17 @@
+server_path = option('server-path');
+let f = file(`void main(string args[]) {}`);
+project_files = [ f ];
+
+assert {
+    diagnostics: [
+        ...,
+        {
+            range: {
+                start: { line: 3, character: 5 },
+                end: { line: 3, character: 16 }
+            },
+            severity: DiagnosticSeverity.Error
+        },
+        ...
+    ]
+} <=> await diagnostics(f);

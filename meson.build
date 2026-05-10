@@ -80,5 +80,5 @@ subdir('data')
 subdir('src')
 
 if get_option('tests')
-  subdir('test')
+  subdir('tests')
 endif
