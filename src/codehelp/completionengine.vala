@@ -1033,6 +1033,11 @@ namespace Vls.CompletionEngine {
                         in_oce,
                         is_cm_this_or_base_access))
                     continue;
+                // Avoid base struct creation and static methods
+                if (((method_sym is Vala.CreationMethod) || method_sym.binding == Vala.MemberBinding.STATIC)) {
+                    if (current_scope.owner.name != null && current_scope.owner.name != struct_sym.scope.owner.name)
+                        continue;
+                }
                 var completion = new CompletionItem.from_symbol (type, method_sym, current_scope, CompletionItemKind.Method, lang_serv.get_symbol_documentation (project, method_sym));
                 completion.insertText = generate_insert_text_for_callable (type, method_sym, current_scope, method_spaces);
                 completion.insertTextFormat = InsertTextFormat.Snippet;
@@ -1050,8 +1055,17 @@ namespace Vls.CompletionEngine {
                 foreach (var constant_sym in struct_sym.get_constants ()) {
                     if (!CodeHelp.is_symbol_accessible (constant_sym, current_scope))
                         continue;
+                    // Avoid base struct constants
+                    if (current_scope.owner.name != null && current_scope.owner.name != struct_sym.scope.owner.name)
+                        continue;
                     completions.add (new CompletionItem.from_symbol (type, constant_sym, current_scope, CompletionItemKind.Constant, lang_serv.get_symbol_documentation (project, constant_sym)));
                 }
+            }
+
+            // get instance members of base_struct
+            if (struct_sym.base_struct != null) {
+                add_completions_for_type (lang_serv, project, code_style, type, struct_sym.base_struct,
+                        completions, struct_sym.scope, in_oce, false, seen_props, seen_type_symbols);
             }
         } else if (type_symbol is Vala.TypeParameter) {
             var typeparam_sym = (Vala.TypeParameter) type_symbol;
