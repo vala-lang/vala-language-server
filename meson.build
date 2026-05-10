@@ -4,11 +4,12 @@ project('vala-language-server', 'vala', 'c',
   default_options: [
     'default_library=static',
     'c_std=gnu11'       # for C subprojects
-  ]
+  ],
+  meson_version: '>=0.55',
 )
 
 valac = meson.get_compiler('vala')
-libvala_version = run_command(valac, '--api-version').stdout().strip()
+libvala_version = run_command(valac, '--api-version', check: true).stdout().strip()
 if not libvala_version.version_compare('>=0.48' )
   error('libvala needs to be 0.48 or above')
 endif
@@ -18,13 +19,7 @@ extra_vala_sources = []
 libvala = dependency('libvala-@0@'.format(libvala_version), version: '>= 0.48.12')
 
 libgobject_dep = dependency('gobject-2.0')
-libjsonrpc_glib_dep = dependency('jsonrpc-glib-1.0', version: '>= 3.28', required: false)
-if not libjsonrpc_glib_dep.found()
-    # don't use introspection with static library as it requires a recent version of GIR
-    jsonrpc_glib = subproject('jsonrpc-glib', default_options: ['with_introspection=false'])
-    libjsonrpc_glib_dep = jsonrpc_glib.get_variable('libjsonrpc_glib_dep')
-    extra_vala_sources += files('vapi/jsonrpc-glib-1.0.vapi')
-endif
+libjsonrpc_glib_dep = dependency('jsonrpc-glib-1.0', version: '>= 3.28')
 
 deps = [
     dependency('glib-2.0'),
@@ -36,6 +31,11 @@ deps = [
     libvala,
     valac.find_library('posix'),
 ]
+
+# Remove this once we can have a subproject using their own .vapi
+if libjsonrpc_glib_dep.type_name() == 'internal'
+  deps += valac.find_library('jsonrpc-glib-1.0', dirs: meson.current_source_dir() / 'vapi')
+endif
 
 if libjsonrpc_glib_dep.version() >= '3.30'
   add_project_arguments(['--define=WITH_JSONRPC_GLIB_3_30'], language: 'vala')
