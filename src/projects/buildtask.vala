@@ -274,6 +274,8 @@ class Vls.BuildTask : BuildTarget {
         }
 
         Subprocess process = launcher.spawnv (arguments);
+        Bytes stdout;
+        process.communicate (null, cancellable, out stdout, null);
         process.wait (cancellable);
         if (cancellable.is_cancelled ()) {
             process.force_exit ();
@@ -297,11 +299,7 @@ class Vls.BuildTask : BuildTarget {
             if (output.size == 1 && !output[0].query_exists (cancellable)) {
                 // write contents of stdout to the output file if it was not created
                 var output_file = output[0];
-                var process_output_istream = process.get_stdout_pipe ();
-                if (process_output_istream != null) {
-                    var outfile_ostream = output_file.replace (null, false, FileCreateFlags.NONE, cancellable);
-                    outfile_ostream.splice (process_output_istream, OutputStreamSpliceFlags.NONE, cancellable);
-                }
+                output_file.replace_contents (stdout.get_data (), null, false, FileCreateFlags.NONE, null, cancellable);
             }
             // update the file metadata cache
             foreach (var file in output)
