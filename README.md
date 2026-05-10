@@ -30,6 +30,7 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 ![VLS with VSCode](images/vls-vscode.png)
 ![VLS with Vim with coc.nvim and vista plugins](images/vls-vim.png)
 ![VLS with GNOME Builder](images/vls-gb.png)
+![VLS with Geany](images/vls_geany.png)
 
 ## Table of Contents
 - [Vala Language Server](#vala-language-server)
@@ -44,6 +45,7 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
     - [Kate](#kate)
     - [Emacs](#emacs)
     - [Sublime Text](#sublime-text)
+    - [Geany](#geany)
   - [Contributing](#contributing)
 
 ## Features
@@ -188,6 +190,20 @@ require'lspconfig'.vala_ls.setup {
 }
 ```
 - Run `Tools > LSP > Enable Language Server Globally... > vala-language-server`
+
+### geany
+- Install the [geany-lsp](https://github.com/techee/geany-lsp) plugin if Geany's version < 1.21. 
+- Add this at end of configuration file (user or global) `lsp.conf
+```EditorConfig
+[Vala]
+cmd=vala-language-server
+autocomplete_apply_additional_edits=true
+semantic_tokens_enable=true
+autocomplete_use_snippets=true
+```
+- Create or Open geany project (under `Project` tab in menubar) at the root of directory
+- `Tools > Plugin manager > LSP Client` box must be checked
+- `Project > Properties > LSP Client > Activate the client...` must be checked 
 
 ## Specifying dependencies
 
