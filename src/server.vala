@@ -166,6 +166,7 @@ class Vls.Server : Jsonrpc.Server {
             case "shutdown":
                 shutdown ();
                 reply_null (id, client, method);
+                exit ();
                 break;
 
             case "textDocument/definition":
