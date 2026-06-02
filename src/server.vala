@@ -45,8 +45,7 @@ class Vls.Server : Jsonrpc.Server {
      */
     public static Cancellable cancellable = new Cancellable ();
 
-    uint[] g_sources = {};
-    ulong client_closed_event_id;
+    uint check_update_context_source;
     HashTable<Project, ulong> projects;
     DefaultProject default_project;
 
@@ -114,7 +113,7 @@ class Vls.Server : Jsonrpc.Server {
 #endif
 
         // shutdown if/when we get a signal
-        g_sources += Timeout.add (1000, check_signal);
+        Timeout.add (1000, check_signal);
 
         accept_io_stream (new SimpleIOStream (input_stream, output_stream));
 
@@ -257,17 +256,21 @@ class Vls.Server : Jsonrpc.Server {
         return true;
     }
 
+    private void maybe_shutdown_and_exit () {
+        if (!this.shutting_down)
+            shutdown ();
+        exit ();
+    }
+
 #if WITH_JSONRPC_GLIB_3_30
     protected override void client_closed (Jsonrpc.Client client) {
-        shutdown ();
-        exit ();
+        maybe_shutdown_and_exit ();
     }
 #endif
 
     bool check_signal () {
         if (Server.received_signal) {
-            shutdown ();
-            exit ();
+            maybe_shutdown_and_exit ();
             return Source.REMOVE;
         }
         return !this.shutting_down;
@@ -463,7 +466,7 @@ class Vls.Server : Jsonrpc.Server {
 
         // listen for context update requests
         update_context_client = client;
-        g_sources += Timeout.add (check_update_context_period_ms, check_update_context);
+        check_update_context_source = Timeout.add (check_update_context_period_ms, check_update_context);
 
         // listen for project changed events
         foreach (Project project in new_projects)
@@ -2382,12 +2385,9 @@ class Vls.Server : Jsonrpc.Server {
         debug ("shutting down...");
         this.shutting_down = true;
         cancellable.cancel ();
-        if (client_closed_event_id != 0)
-            this.disconnect (client_closed_event_id);
         foreach (var project in projects.get_keys_as_array ())
             project.disconnect (projects[project]);
-        foreach (uint source_id in g_sources)
-            Source.remove (source_id);
+        Source.remove (check_update_context_source);
     }
 
     void exit () {
