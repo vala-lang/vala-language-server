@@ -493,7 +493,8 @@ class Vls.Server : Jsonrpc.Server {
 
     public static void reply_null (Variant id, Jsonrpc.Client client, string method) {
         try {
-            client.reply (id, new Variant.maybe (VariantType.VARIANT, null), cancellable);
+            // Do not use the global cancellable if the server is shutting down
+            client.reply (id, new Variant.maybe (VariantType.VARIANT, null), method == "shutdown" ? null : cancellable);
         } catch (Error e) {
             debug (@"[$method] failed to reply to client: $(e.message)");
         }
