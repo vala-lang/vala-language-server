@@ -9,8 +9,6 @@ We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudi
 - Arch Linux (via AUR): `yay -S vala-language-server`
   or `yay -S vala-language-server-git`
 
-- Ubuntu, Fedora, Debian, openSUSE, and Mageia: install from [the OBS repo](https://software.opensuse.org//download.html?project=home%3APrince781&package=vala-language-server) [![build result](https://build.opensuse.org/projects/home:Prince781/packages/vala-language-server/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:Prince781/vala-language-server)
-
 - Fedora (official): `sudo dnf install vala-language-server`
 
 - elementaryOS: `sudo apt install vala-language-server`
