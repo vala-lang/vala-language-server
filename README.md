@@ -169,7 +169,7 @@ require'lspconfig'.vala_ls.setup {
 - **Warning:** Kate will silently fail to find symbols when meson cannot be found in path without notifying the user.
 
 ### Emacs
-- supported with the [lsp-mode](https://github.com/emacs-lsp/lsp-mode) plugin
+- supported with [Eglot](https://www.gnu.org/software/emacs/manual/html_node/eglot/index.html) the [lsp-mode](https://github.com/emacs-lsp/lsp-mode) plugin
 
 ### Sublime Text
 - Install the [Vala-TMBundle](https://packagecontrol.io/packages/Vala-TMBundle) and [LSP](https://github.com/sublimelsp/LSP) packages
