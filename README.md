@@ -4,7 +4,7 @@ This is a language server for the [Vala programming language](https://vala-proje
 
 ## Installation
 
-We recommend using VSCode with the [Vala plugin](https://marketplace.visualstudio.com/items?itemName=prince781.vala).
+We recommend using [VSCodium](https://vscodium.com/) with the [Vala plugin](https://marketplace.visualstudio.com/items?itemName=prince781.vala).
 
 - Arch Linux (via AUR): `yay -S vala-language-server`
   or `yay -S vala-language-server-git`
