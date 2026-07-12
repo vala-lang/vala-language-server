@@ -1,0 +1,66 @@
+name: Vala CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - channel: stable
+            ppa: ppa:vala-team
+          - channel: daily
+            ppa: ppa:vala-team/daily
+
+    name: vala (${{ matrix.channel }})
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Install dependencies
+      run: |
+        sudo add-apt-repository ${{ matrix.ppa }}
+        sudo apt-get update
+        LIBVALA_DEV="$(apt-cache pkgnames | grep '^libvala-.*-dev$' | sort -V | tail -1)"
+        echo "Installing $LIBVALA_DEV"
+        sudo apt-get install -y \
+          python3-setuptools \
+          valac \
+          "$LIBVALA_DEV" \
+          libgee-0.8-dev \
+          libjsonrpc-glib-1.0-dev \
+          gobject-introspection \
+          libgirepository1.0-dev \
+          ninja-build
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.x'
+
+    - name: Install meson
+      run: python -m pip install meson
+
+    - name: Configure
+      run: meson setup build
+
+    - name: Build
+      run: ninja -C build
+
+    - name: Test
+      run: meson test -C build --print-errorlogs
+
+    - name: Lint
+      uses: elementary/actions/vala-lint@1.0.0
+      with:
+        conf: .vala-lint.conf
+        fail: false
