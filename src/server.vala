@@ -772,7 +772,9 @@ class Vls.Server : Lsp.Server {
         var uri = text_document.uri.to_string ();
         Vala.SourceFile? file = find_file (uri, out compilation, out project);
         if (file == null) {
-            debug ("[%s] file `%s' not found", method, uri);
+            string message = "[%s] file `%s' not found".printf (method, uri);
+            debug ("%s", message);
+            yield client.log_trace_async (message);
             return null;
         }
 
@@ -840,7 +842,9 @@ class Vls.Server : Lsp.Server {
         var uri = text_document.uri.to_string ();
         Vala.SourceFile? file = find_file (uri, out compilation, out project);
         if (file == null) {
-            debug ("[%s] file `%s' not found", method, uri);
+            string message = "[%s] file `%s' not found".printf (method, uri);
+            debug ("%s", message);
+            yield client.log_trace_async (message);
             return null;
         }
 
@@ -926,7 +930,9 @@ class Vls.Server : Lsp.Server {
         var uri = text_document.uri.to_string ();
         Vala.SourceFile? file = find_file (uri, out compilation, out project);
         if (file == null) {
-            debug ("[textDocument/completion] file `%s' not found", uri);
+            string message = "[textDocument/completion] file `%s' not found".printf (uri);
+            debug ("%s", message);
+            yield client.log_trace_async (message);
             return null;
         }
 
@@ -943,7 +949,9 @@ class Vls.Server : Lsp.Server {
         var uri = text_document.uri.to_string ();
         Vala.SourceFile? file = find_file (uri, out compilation, out project);
         if (file == null) {
-            debug ("[textDocument/signatureHelp] file `%s' not found", uri);
+            string message = "[textDocument/signatureHelp] file `%s' not found".printf (uri);
+            debug ("%s", message);
+            yield client.log_trace_async (message);
             return null;
         }
 
@@ -963,7 +971,9 @@ class Vls.Server : Lsp.Server {
         var uri = text_document.uri.to_string ();
         Vala.SourceFile? doc = find_file (uri, out compilation, out project);
         if (doc == null) {
-            debug ("[%s] file `%s' not found", method, uri);
+            string message = "[%s] file `%s' not found".printf (method, uri);
+            debug ("%s", message);
+            yield client.log_trace_async (message);
             return null;
         }
 
@@ -1238,7 +1248,9 @@ class Vls.Server : Lsp.Server {
         var uri = text_document.uri.to_string ();
         Vala.SourceFile? doc = find_file (uri, out compilation, out project);
         if (doc == null) {
-            debug ("[%s] file `%s' not found", method, uri);
+            string message = "[%s] file `%s' not found".printf (method, uri);
+            debug ("%s", message);
+            yield client.log_trace_async (message);
             return null;
         }
 
