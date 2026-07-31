@@ -20,10 +20,10 @@ using Gee;
 using Lsp;
 
 namespace Vls.SignatureHelpEngine {
-    void begin_response (Server lang_serv, Project project,
-                         Jsonrpc.Client client, Variant id, string method,
-                         Vala.SourceFile doc, Compilation compilation,
-                         Position pos) {
+    async SignatureHelp? get_async (Server lang_serv, Project project,
+                                    Vala.SourceFile doc, Compilation compilation,
+                                    Position pos, Cancellable request_cancellable) throws Error {
+        const string method = "textDocument/signatureHelp";
         // long idx = (long) Util.get_string_pos (doc.content, pos.line, pos.character);
 
         // if (idx >= 2 && doc.content[idx-1:idx] == "(") {
@@ -36,43 +36,40 @@ namespace Vls.SignatureHelpEngine {
         int active_param = -1;
 
         Vala.CodeContext.push (compilation.code_context);
-        // debug ("[%s] extracting expression ...", method);
-        var se = new SymbolExtractor (pos, doc, compilation.code_context);
-        if (se.extracted_expression != null) {
+        try {
+            // debug ("[%s] extracting expression ...", method);
+            var se = new SymbolExtractor (pos, doc, compilation.code_context);
+            if (se.extracted_expression != null) {
 #if !VALA_FEATURE_INITIAL_ARGUMENT_COUNT
-            active_param = se.method_arguments - 1;
+                active_param = se.method_arguments - 1;
 #endif
-            show_help (lang_serv,
-                       project,
-                       method, se.extracted_expression, se.block.scope, compilation,
-                       signatures, ref active_param);
-        } else {
-            // debug ("[%s] could not get extracted expression", method);
+                show_help (lang_serv,
+                           project,
+                           method, se.extracted_expression, se.block.scope, compilation,
+                           signatures, ref active_param);
+            } else {
+                // debug ("[%s] could not get extracted expression", method);
+            }
+        } finally {
+            Vala.CodeContext.pop ();
         }
         
         if (signatures.is_empty) {
-            lang_serv.wait_for_context_update (id, request_cancelled => {
-                if (request_cancelled) {
-                    Server.reply_null (id, client, method);
-                    return;
-                }
-
-                Vala.CodeContext.push (compilation.code_context);
-                show_help_with_updated_context (lang_serv, project,
-                                                method,
-                                                doc, compilation, pos, 
+            yield lang_serv.wait_for_context_update_async (request_cancellable);
+            Vala.CodeContext.push (compilation.code_context);
+            try {
+                show_help_with_updated_context (lang_serv, project, method,
+                                                doc, compilation, pos,
                                                 signatures, ref active_param);
-                
-                if (!signatures.is_empty)
-                    finish (client, id, signatures, active_param);
-                else
-                    Server.reply_null (id, client, method);
+            } finally {
                 Vala.CodeContext.pop ();
-            });
-        } else {
-            finish (client, id, signatures, active_param);
+            }
         }
-        Vala.CodeContext.pop ();
+
+        if (signatures.is_empty)
+            return null;
+        return new SignatureHelp (
+            signatures.to_array (), 0, (uint) int.max (active_param, 0));
     }
 
     void show_help (Server lang_serv, Project project,
@@ -86,7 +83,7 @@ namespace Vls.SignatureHelpEngine {
             // debug (@"[$method] peeling away expression statement: $(result)");
         }
 
-        var si = new SignatureInformation ();
+        var si = new SignatureInformation ("");
         Vala.List<Vala.Parameter>? param_list = null;
         // The explicit symbol referenced, like a local variable
         // or a method. Could be null if we invoke an array element, 
@@ -240,7 +237,7 @@ namespace Vls.SignatureHelpEngine {
         if (explicit_sym != null) {
             doc_comment = lang_serv.get_symbol_documentation (project, explicit_sym);
             if (doc_comment != null) {
-                si.documentation = new MarkupContent.from_markdown (doc_comment.body);
+                si.documentation = new MarkupContent (MarkupKind.MARKDOWN, doc_comment.body);
                 if (doc_comment.return_body != null)
                     si.documentation.value += "\n\n---\n**returns** " + doc_comment.return_body;
             }
@@ -249,12 +246,19 @@ namespace Vls.SignatureHelpEngine {
         if (param_list != null) {
             foreach (var parameter in param_list) {
                 var param_doc_comment = doc_comment != null ? doc_comment.parameters[parameter.name] : null;
-                si.parameters.add (new ParameterInformation () {
-                    label = CodeHelp.get_symbol_representation (data_type, parameter, scope, false, method_type_arguments),
-                    documentation = param_doc_comment != null ? new MarkupContent.from_markdown (param_doc_comment) : null
-                });
+                var parameter_info = new ParameterInformation (
+                    CodeHelp.get_symbol_representation (
+                        data_type, parameter, scope, false, method_type_arguments));
+                if (param_doc_comment != null)
+                    parameter_info.documentation = new MarkupContent (
+                        MarkupKind.MARKDOWN, param_doc_comment);
+                ParameterInformation[] parameters = {};
+                if (si.parameters != null)
+                    parameters = (!) si.parameters;
+                parameters += parameter_info;
+                si.parameters = parameters;
             }
-            if (!si.parameters.is_empty)
+            if (si.parameters != null && si.parameters.length > 0)
                 signatures.add (si);
         }
     }
@@ -300,18 +304,6 @@ namespace Vls.SignatureHelpEngine {
         // debug (@"[$method] got best: $(result.type_name) @ $(result.source_reference)");
 
         show_help (lang_serv, project, method, result, scope, compilation, signatures, ref active_param);
-    }
-
-    void finish (Jsonrpc.Client client, Variant id, Collection<SignatureInformation> signatures, int active_param) {
-        try {
-            // debug ("sending with active_param = %d", active_param);
-            client.reply (id, Util.object_to_variant (new SignatureHelp () {
-                signatures = signatures,
-                activeParameter = active_param
-            }), Server.cancellable);
-        } catch (Error e) {
-            warning (@"[textDocument/signatureHelp] failed to reply to client: $(e.message)");
-        }
     }
 
     Vala.List<Vala.Parameter>? generate_parameters_for_printf_method (Vala.Method method,

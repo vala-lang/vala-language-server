@@ -48,14 +48,22 @@ class Vls.FindScope : Vala.CodeVisitor {
 
     void compute_best_block () {
         Vala.Symbol smallest_block = context.root;
-        Range? best_range = smallest_block.source_reference != null ?
-            new Range.from_sourceref (smallest_block.source_reference) : null;
+        Range? best_range = null;
+        if (smallest_block.source_reference != null)
+            best_range = Util.range_from_sourceref (smallest_block.source_reference);
 
         foreach (Vala.Symbol block in candidate_blocks) {
-            var scope_range = new Range.from_sourceref (block.source_reference);
-            if (best_range == null ||
-                best_range.start.compare_to (scope_range.start) <= 0 &&
-                !(best_range.start.compare_to (scope_range.start) == 0 && scope_range.end.compare_to (best_range.end) == 0)) {
+            var scope_range = Util.range_from_sourceref (block.source_reference);
+            if (best_range == null) {
+                smallest_block = block;
+                best_range = scope_range;
+                continue;
+            }
+
+            Range current_best = (!) best_range;
+            if (Util.position_compare (current_best.start, scope_range.start) <= 0 &&
+                !(Util.position_compare (current_best.start, scope_range.start) == 0 &&
+                  Util.position_compare (scope_range.end, current_best.end) == 0)) {
                 smallest_block = block;
                 best_range = scope_range;
             }
@@ -80,23 +88,26 @@ class Vls.FindScope : Vala.CodeVisitor {
             return;
         }
 
-        var range = new Range.from_sourceref (sr);
+        var range = Util.range_from_sourceref (sr);
 
         if (symbol is Vala.TypeSymbol || symbol is Vala.Namespace) {
             var symtab = symbol.scope.get_symbol_table ();
             if (symtab != null) {
                 foreach (Vala.Symbol member in symtab.get_values ()) {
                     if (member.source_reference != null && member.source_reference.file == sr.file)
-                        range = range.union (new Range.from_sourceref (member.source_reference));
+                        range = Util.range_union (
+                            range, Util.range_from_sourceref (member.source_reference));
                 }
             }
         }
 
         // compare to range.end.line + 1 if before context update, assuming that
         // it's possible the user expanded the current scope
-        Position new_end = before_context_update ? range.end.translate (2) : range.end;
-        bool pos_within_start = range.start.compare_to (pos) <= 0;
-        bool pos_within_end = pos.compare_to (range.end) <= 0 || pos.compare_to (new_end) <= 0;
+        Position new_end = before_context_update ?
+            Util.position_translate (range.end, 2) : range.end;
+        bool pos_within_start = Util.position_compare (range.start, pos) <= 0;
+        bool pos_within_end = Util.position_compare (pos, range.end) <= 0 ||
+            Util.position_compare (pos, new_end) <= 0;
         if (pos_within_start && pos_within_end) {
             candidate_blocks.add (symbol);
             // debug ("%s (%s, @ %s / %s) added to candidates for %s",

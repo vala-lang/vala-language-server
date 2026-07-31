@@ -22,6 +22,90 @@ using Vala;
 using Lsp;
 
 namespace Vls.TypeHierarchy {
+    TypeHierarchyItem item_from_symbol (TypeSymbol symbol) {
+        SymbolKind kind;
+        if (symbol is Class)
+            kind = SymbolKind.CLASS;
+        else if (symbol is Delegate)
+            kind = SymbolKind.INTERFACE;
+        else if (symbol is Enum)
+            kind = SymbolKind.ENUM;
+        else if (symbol is ErrorCode)
+            kind = SymbolKind.ENUM_MEMBER;
+        else if (symbol is ErrorDomain)
+            kind = SymbolKind.ENUM;
+        else if (symbol is Interface)
+            kind = SymbolKind.INTERFACE;
+        else if (symbol is Struct)
+            kind = SymbolKind.STRUCT;
+        else if (symbol is TypeParameter)
+            kind = SymbolKind.TYPE_PARAMETER;
+        else {
+            kind = SymbolKind.MODULE;
+            warning ("unexpected symbol kind in type hierarchy: `%s'", symbol.type_name);
+        }
+
+        var tags = SymbolTag.UNSET;
+        var version = symbol.get_attribute ("Version");
+        if (version != null &&
+            (version.get_bool ("deprecated") ||
+             version.get_string ("deprecated_since") != null)) {
+            tags |= SymbolTag.DEPRECATED;
+        }
+
+        var selection_range = Util.range_from_sourceref (symbol.source_reference);
+        var range = selection_range;
+        if (symbol is ObjectTypeSymbol) {
+            foreach (var member in ((ObjectTypeSymbol) symbol).get_members ()) {
+                if (member.source_reference != null)
+                    range = Util.range_union (
+                        range, Util.range_from_sourceref (member.source_reference));
+            }
+        } else if (symbol is Enum) {
+            foreach (var member in ((Enum) symbol).get_values ()) {
+                if (member.source_reference != null)
+                    range = Util.range_union (
+                        range, Util.range_from_sourceref (member.source_reference));
+            }
+            foreach (var method in ((Enum) symbol).get_methods ()) {
+                if (method.source_reference != null)
+                    range = Util.range_union (
+                        range, Util.range_from_sourceref (method.source_reference));
+            }
+        } else if (symbol is ErrorDomain) {
+            foreach (var member in ((ErrorDomain) symbol).get_codes ()) {
+                if (member.source_reference != null)
+                    range = Util.range_union (
+                        range, Util.range_from_sourceref (member.source_reference));
+            }
+            foreach (var method in ((ErrorDomain) symbol).get_methods ()) {
+                if (method.source_reference != null)
+                    range = Util.range_union (
+                        range, Util.range_from_sourceref (method.source_reference));
+            }
+        } else if (symbol is Struct) {
+            foreach (var field in ((Struct) symbol).get_fields ()) {
+                if (field.source_reference != null)
+                    range = Util.range_union (
+                        range, Util.range_from_sourceref (field.source_reference));
+            }
+            foreach (var method in ((Struct) symbol).get_methods ()) {
+                if (method.source_reference != null)
+                    range = Util.range_union (
+                        range, Util.range_from_sourceref (method.source_reference));
+            }
+        }
+
+        return new TypeHierarchyItem (
+            symbol.get_full_name (),
+            kind,
+            Util.uri_from_filename (symbol.source_reference.file.filename),
+            range,
+            selection_range,
+            CodeHelp.get_symbol_representation (null, symbol, null, true),
+            tags);
+    }
+
     TypeHierarchyItem[] get_subtypes (Project project, TypeSymbol symbol) {
         TypeHierarchyItem[] subtypes = {};
 
@@ -51,7 +135,7 @@ namespace Vls.TypeHierarchy {
                     true
                 ).result;
                 foreach (var node in result)
-                    subtypes += new TypeHierarchyItem.from_symbol ((Vala.TypeSymbol)node);
+                    subtypes += item_from_symbol ((Vala.TypeSymbol)node);
                 Vala.CodeContext.pop ();
 
                 shown_files.add (gfile);
@@ -69,7 +153,7 @@ namespace Vls.TypeHierarchy {
             foreach (var iface in ots.get_interfaces ()) {
                 var real_iface = SymbolReferences.find_real_symbol (project, iface) as TypeSymbol;
                 if (real_iface != null)
-                    supertypes += new TypeHierarchyItem.from_symbol (real_iface);
+                    supertypes += item_from_symbol (real_iface);
             }
         }
         if (symbol is Class) {
@@ -78,7 +162,7 @@ namespace Vls.TypeHierarchy {
                 if (base_type.type_symbol != null) {
                     var real_type_symbol = SymbolReferences.find_real_symbol (project, base_type.type_symbol) as TypeSymbol;
                     if (real_type_symbol != null)
-                        supertypes += new TypeHierarchyItem.from_symbol (real_type_symbol);
+                        supertypes += item_from_symbol (real_type_symbol);
                 }
             }
         } else if (symbol is Struct) {
@@ -86,7 +170,7 @@ namespace Vls.TypeHierarchy {
             if (st.base_type != null && st.base_type.type_symbol != null) {
                 var real_type_symbol = SymbolReferences.find_real_symbol (project, st.base_type.type_symbol) as TypeSymbol;
                 if (real_type_symbol != null)
-                    supertypes += new TypeHierarchyItem.from_symbol (real_type_symbol);
+                    supertypes += item_from_symbol (real_type_symbol);
             }
         }
 

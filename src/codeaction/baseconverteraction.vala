@@ -29,7 +29,9 @@ using Gee;
  * ```
  */
 class Vls.BaseConverterAction : CodeAction {
-    public BaseConverterAction (Vala.IntegerLiteral lit, VersionedTextDocumentIdentifier document) {
+    public BaseConverterAction (Vala.IntegerLiteral lit, TextDocumentIdentifier document) {
+        base ("");
+
         string val = lit.value;
         // bool signed = lit.type_suffix[0] == 'u' || lit.type_suffix[0] == 'U';
         bool negative = false;
@@ -37,27 +39,27 @@ class Vls.BaseConverterAction : CodeAction {
             negative = true;
             val = val.substring (1);
         }
-        var workspace_edit = new WorkspaceEdit ();
-        var document_edit = new TextDocumentEdit (document);
-        var text_edit = new TextEdit (new Range.from_sourceref (lit.source_reference));
+        string new_text;
         if (val.has_prefix ("0x")) {
             // base 16  -> base 8
             val = val.substring (2);
-            text_edit.newText = "%s%#llo".printf (negative ? "-" : "", ulong.parse (val, 16));
+            new_text = "%s%#llo".printf (negative ? "-" : "", ulong.parse (val, 16));
             this.title = "Convert hexadecimal value to octal";
         } else if (val[0] == '0') {
             // base 8   -> base 10
             val = val.substring (1);
-            text_edit.newText = "%s%#lld".printf (negative ? "-" : "", ulong.parse (val, 8));
+            new_text = "%s%#lld".printf (negative ? "-" : "", ulong.parse (val, 8));
             this.title = "Convert octal value to decimal";
         } else {
             // base 10  -> base 16
-            text_edit.newText = "%s%#llx".printf (negative ? "-" : "", ulong.parse (val));
+            new_text = "%s%#llx".printf (negative ? "-" : "", ulong.parse (val));
             this.title = "Convert decimal value to hexadecimal";
         }
-        document_edit.edits.add (text_edit);
-        workspace_edit.documentChanges = new ArrayList<TextDocumentEdit> ();
-        workspace_edit.documentChanges.add (document_edit);
+
+        var text_edit = TextEdit (Util.range_from_sourceref (lit.source_reference), new_text);
+        var document_edit = new TextDocumentEdit (document, {text_edit});
+        var workspace_edit = new WorkspaceEdit ();
+        workspace_edit.add_document_change (document_edit);
         this.edit = workspace_edit;
     }
 }

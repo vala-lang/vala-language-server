@@ -34,10 +34,9 @@ vls_src = files([
   'projects/project.vala',
   'projects/textdocument.vala',
   'projects/types.vala',
-  'protocol.vala',
   'reporter.vala',
-  'request.vala',
   'server.vala',
+  'util.vala',
 ])
 
 if get_option('active_parameter')
@@ -46,6 +45,6 @@ endif
 
 vls = executable('vala-language-server',
   dependencies: deps,
-  sources: [vls_src, conf_file, version_file, extra_vala_sources],
+  sources: [vls_src, conf_file, version_file, platform_vala_sources],
   c_args: ['-DG_LOG_DOMAIN="vls"'],
   install: true)

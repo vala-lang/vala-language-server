@@ -17,13 +17,15 @@
  */
 
 using Gee;
+using Lsp;
 
-class Vls.TestClient : Jsonrpc.Server {
+class Vls.TestClient : Lsp.Editor {
     private static HashSet<weak TestClient> instances = new HashSet<weak TestClient> ();
-    private Jsonrpc.Client? vls_jsonrpc_client;
     private Subprocess vls_subprocess;
     private SubprocessLauncher launcher;
     private IOStream subprocess_stream;
+    private MainLoop loop = new MainLoop ();
+    private bool shutdown_started;
 
     public string root_path { get; private set; }
 
@@ -83,71 +85,117 @@ class Vls.TestClient : Jsonrpc.Server {
         stderr.printf ("%s: %s\n", log_domain == null ? "vls-testclient" : log_domain, message);
     }
 
-    // a{sv} only
-    public Variant buildDict (...) {
-        var builder = new VariantBuilder (new VariantType ("a{sv}"));
-        var l = va_list ();
-        while (true) {
-            string? key = l.arg ();
-            if (key == null) {
-                break;
-            }
-            Variant val = l.arg ();
-            builder.add ("{sv}", key, val);
-        }
-        return builder.end ();
-    }
+    private async void initialize_server () throws Error {
+        var uri = Uri.parse (
+            File.new_for_path (root_path).get_uri (), UriFlags.NONE);
+        var workspace = new WorkspaceFolder (uri, Path.get_basename (root_path));
+        var parameters = new InitializeParams.with_workspace_folders (workspace);
+        parameters.process_id = Posix.getpid ();
+        parameters.client_info = new ClientInfo ("VLS Test Client");
+        parameters.capabilities.text_document = new TextDocumentClientCaps ();
+        parameters.capabilities.text_document.document_symbol = DocumentSymbolClientCaps (
+            DocumentSymbolClientFlags.HIERARCHICAL_DOCUMENT_SYMBOLS);
 
-    public override void client_accepted (Jsonrpc.Client client) {
-        if (vls_jsonrpc_client == null) {
-            vls_jsonrpc_client = client;
-            try {
-                initialize_server ();
-            } catch (Error e) {
-                try {
-                    printerr ("failed to initialize server: %s", e.message);
-                    client.close ();
-                } catch (Error e) {}
-            }
-        }
-    }
+        yield initialize_with_params_async (parameters);
+        yield initialized_async ();
 
-#if WITH_JSONRPC_GLIB_3_30
-    public override void client_closed (Jsonrpc.Client client) {
-        if (client == vls_jsonrpc_client) {
-            vls_jsonrpc_client = null;
-        }
-    }
-#endif
-
-    private void initialize_server () throws Error {
-        Variant? return_value;
-        vls_jsonrpc_client.call (
-            "initialize",
-            buildDict (
-                processId: new Variant.int32 ((int32) Posix.getpid ()),
-                rootPath: new Variant.string (root_path),
-                rootUri: new Variant.string (File.new_for_path (root_path).get_uri ())
-            ),
-            null,
-            out return_value
-        );
-        debug ("VLS replied with %s", Json.to_string (Json.gvariant_serialize (return_value), true));
+        debug ("VLS initialized with %s", init_result.to_variant ().print (true));
     }
 
     public void wait_for_server () throws Error {
-        vls_subprocess.wait ();
+        Error? run_error = null;
+        run.begin ((obj, result) => {
+            try {
+                run.end (result);
+            } catch (Error e) {
+                run_error = e;
+                vls_subprocess.force_exit ();
+            }
+            loop.quit ();
+        });
+        loop.run ();
+
+        if (run_error != null)
+            throw (!) run_error;
     }
 
-    public override void notification (Jsonrpc.Client client, string method, Variant @params) {
-        debug ("VLS sent notification `%s': %s", method, Json.to_string (Json.gvariant_serialize (@params), true));
+    private async void run () throws Error {
+        yield initialize_server ();
+        if (document_symbol_file != null) {
+            yield check_document_symbols ((!) document_symbol_file);
+            yield stop_server ();
+        }
+        yield vls_subprocess.wait_async ();
+    }
+
+    private static int position_compare (Position left, Position right) {
+        if (left.line != right.line)
+            return left.line > right.line ? 1 : -1;
+        if (left.character != right.character)
+            return left.character > right.character ? 1 : -1;
+        return 0;
+    }
+
+    private static bool range_contains (Range outer, Range inner) {
+        return position_compare (outer.start, inner.start) <= 0 &&
+            position_compare (inner.end, outer.end) <= 0;
+    }
+
+    private static DocumentSymbol? find_symbol (DocumentSymbol[] symbols,
+                                                string name) {
+        foreach (var symbol in symbols) {
+            if (symbol.name == name)
+                return symbol;
+            var result = find_symbol (symbol.children, name);
+            if (result != null)
+                return result;
+        }
+        return null;
+    }
+
+    private static void assert_symbol_ranges (DocumentSymbol symbol) {
+        foreach (var child in symbol.children) {
+            assert (range_contains (symbol.range, child.range));
+            assert_symbol_ranges (child);
+        }
+    }
+
+    private async void check_document_symbols (string filename) throws Error {
+        var uri = Uri.parse (File.new_for_path (filename).get_uri (), UriFlags.NONE);
+        var result = yield document_symbol_async (uri);
+        assert (result != null);
+        assert (result.document_symbols != null);
+
+        var symbols = result.document_symbols;
+        var server_symbol = find_symbol (symbols, "Server");
+        var construct_symbol = find_symbol (symbols, "Server (static construct block)");
+        assert (server_symbol != null);
+        assert (construct_symbol != null);
+        assert (range_contains (server_symbol.range, construct_symbol.range));
+        foreach (var symbol in symbols)
+            assert_symbol_ranges (symbol);
     }
 
     public void shutdown () {
-        try {
-            subprocess_stream.close ();
-            debug ("closed subprocess stream");
-        } catch (Error e) {}
+        if (shutdown_started)
+            return;
+        shutdown_started = true;
+
+        stop_server.begin ((obj, result) => {
+            try {
+                stop_server.end (result);
+            } catch (Error e) {
+                warning ("failed to shut down VLS: %s", e.message);
+                vls_subprocess.force_exit ();
+            }
+        });
+    }
+
+    private async void stop_server () throws Error {
+        if (init_result != null && !is_shutting_down)
+            yield shutdown_async ();
+        if (!exited)
+            yield exit_async ();
     }
 }
 
@@ -155,6 +203,7 @@ string? server_location;
 [CCode (array_length = false, array_null_terminated = true)]
 string[]? env_vars;
 string? root_path;
+string? document_symbol_file;
 bool unset_env;
 bool pause_for_debugger = false;
 const OptionEntry[] options = {
@@ -163,6 +212,7 @@ const OptionEntry[] options = {
     { "environ", 'e', 0, OptionArg.STRING_ARRAY, ref env_vars, "List of environment variables", null },
     { "unset-environment", 'u', 0, OptionArg.NONE, ref unset_env, "Don't inherit parent environment", null },
     { "pause", 'p', 0, OptionArg.NONE, ref pause_for_debugger, "Pause before calling VLS to get a chance to attach a debugger", null },
+    { "document-symbols", 0, 0, OptionArg.FILENAME, ref document_symbol_file, "Check document symbols for FILE", "FILE" },
     { null }
 };
 

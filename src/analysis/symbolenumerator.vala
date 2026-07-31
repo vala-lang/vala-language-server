@@ -25,12 +25,11 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
     private Vala.SourceFile file;
     private Gee.Deque<DocumentSymbol> containers;
     private Gee.List<DocumentSymbol> top_level_syms;
-    private Gee.TreeMap<Range, DocumentSymbol> syms_flat;
-    private Gee.List<DocumentSymbol> all_syms;
+    private Gee.TreeMap<Range?, DocumentSymbol> syms_flat;
     private Gee.List<SymbolInformation>? all_sym_infos;
     private Gee.HashMap<string, DocumentSymbol> ns_name_to_dsym;
     Vala.TypeSymbol? str_sym; 
-    string uri;
+    Uri uri;
 
     public DateTime last_updated { get; set; }
 
@@ -38,20 +37,72 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
         this.file = file;
         this.top_level_syms = new Gee.LinkedList<DocumentSymbol> ();
         this.containers = new Gee.LinkedList<DocumentSymbol> ();
-        this.syms_flat = new Gee.TreeMap<Range, DocumentSymbol> ();
-        this.all_syms = new Gee.LinkedList<DocumentSymbol> ();
+        this.syms_flat = new Gee.TreeMap<Range?, DocumentSymbol> (range_compare);
         this.ns_name_to_dsym = new Gee.HashMap<string, DocumentSymbol> ();
-
-        try {
-            uri = Filename.to_uri (file.filename);
-        } catch (Error e) {
-            warning ("%s is not a URI!", file.filename);
-            return;
-        }
+        uri = Util.uri_from_filename (file.filename);
 
         str_sym = file.context.root.scope.lookup ("string") as Vala.TypeSymbol;
         this.visit_source_file (file);
+        foreach (var symbol in top_level_syms)
+            item_update_range (symbol);
         str_sym = null;
+    }
+
+    private static int range_compare (Range? left, Range? right) {
+        return Util.range_compare ((!) left, (!) right);
+    }
+
+    private static DocumentSymbol item_from_symbol (Vala.DataType? type,
+                                                    Vala.Symbol symbol,
+                                                    SymbolKind kind) {
+        var range = Util.range_from_sourceref (symbol.source_reference);
+        if (symbol is Vala.Subroutine) {
+            var subroutine = (Vala.Subroutine) symbol;
+            var body_reference = subroutine.body != null ?
+                subroutine.body.source_reference : null;
+            if (body_reference != null &&
+                (body_reference.begin.line < body_reference.end.line ||
+                 body_reference.begin.line == body_reference.end.line &&
+                 body_reference.begin.pos <= body_reference.end.pos)) {
+                range = Util.range_union (
+                    range, Util.range_from_sourceref (body_reference));
+            }
+        }
+
+        var tags = symbol.version.deprecated ? SymbolTag.DEPRECATED : SymbolTag.UNSET;
+        return new DocumentSymbol (
+            symbol.name ?? "(construct block)",
+            kind,
+            range,
+            Util.range_from_sourceref (symbol.source_reference),
+            CodeHelp.get_symbol_representation (type, symbol, null, false),
+            tags);
+    }
+
+    private static void add_child (DocumentSymbol parent, DocumentSymbol child) {
+        DocumentSymbol[] children = parent.children;
+        children += child;
+        parent.children = children;
+        parent.range = Util.range_union (parent.range, child.range);
+    }
+
+    private static Range item_update_range (DocumentSymbol symbol) {
+        var range = symbol.range;
+        foreach (var child in symbol.children)
+            range = Util.range_union (range, item_update_range (child));
+        symbol.range = range;
+        return range;
+    }
+
+    private static SymbolInformation info_from_item (DocumentSymbol symbol,
+                                                     Uri uri,
+                                                     string? parent_name) {
+        return new SymbolInformation (
+            symbol.name,
+            symbol.kind,
+            Location (uri, symbol.range),
+            parent_name,
+            symbol.tags);
     }
 
     public Gee.Iterator<DocumentSymbol> iterator () {
@@ -61,11 +112,17 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
     public Gee.Iterable<SymbolInformation> flattened () {
         if (all_sym_infos == null) {
             all_sym_infos = new Gee.LinkedList<SymbolInformation> ();
-            all_sym_infos.add_all_iterator (
-                all_syms
-                .map<SymbolInformation> (s => new SymbolInformation.from_document_symbol (s, uri)));
+            foreach (var symbol in top_level_syms)
+                flatten (symbol, null);
         }
         return all_sym_infos;
+    }
+
+    private void flatten (DocumentSymbol symbol, string? parent_name) {
+        all_sym_infos.add (info_from_item (
+            symbol, uri, parent_name));
+        foreach (var child in symbol.children)
+            flatten (child, symbol.name);
     }
 
     public DocumentSymbol? add_symbol (Vala.Symbol sym, SymbolKind kind, bool adding_parent = false) {
@@ -78,35 +135,36 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
             dsym = ns_name_to_dsym [sym_full_name];
             unique = false;
         } else {
-            dsym = new DocumentSymbol.from_vala_symbol (null, sym, kind);
+            dsym = item_from_symbol (null, sym, kind);
         }
 
         // handle conflicts
-        if (syms_flat.has_key (dsym.selectionRange)) {
-            var existing_sym = syms_flat [dsym.selectionRange];
+        if (syms_flat.has_key (dsym.selection_range)) {
+            var existing_sym = syms_flat [dsym.selection_range];
             // var dsym_name = dsym.kind == Constructor && dsym.name == null ? "(contruct block)" : (dsym.name ?? "(unknown)");
             // debug (@"found dup! $(existing_sym.name) ($(existing_sym.kind)) and $(dsym_name) ($(dsym.kind))");
             if (existing_sym.kind == dsym.kind)
                 return existing_sym;
-            else if (existing_sym.kind == Class && dsym.kind == Constructor)
+            else if (existing_sym.kind == SymbolKind.CLASS && dsym.kind == SymbolKind.CONSTRUCTOR)
                 return existing_sym;
-            else if (existing_sym.kind == Field && dsym.kind == Property) {
+            else if (existing_sym.kind == SymbolKind.FIELD && dsym.kind == SymbolKind.PROPERTY) {
                 existing_sym.name = dsym.name;
                 existing_sym.detail = dsym.detail;
                 existing_sym.kind = dsym.kind;
                 return existing_sym;
-            } else if (existing_sym.kind == Property && dsym.kind == Field)
+            } else if (existing_sym.kind == SymbolKind.PROPERTY && dsym.kind == SymbolKind.FIELD)
                 return existing_sym;
-            else if (existing_sym.kind == Function && dsym.kind == Method)
+            else if (existing_sym.kind == SymbolKind.FUNCTION && dsym.kind == SymbolKind.METHOD)
                 return existing_sym;
         }
 
-        if (dsym.kind == Constructor) {
-            if (current_sym != null && (current_sym.kind == Class || current_sym.kind == Struct)) {
+        if (dsym.kind == SymbolKind.CONSTRUCTOR) {
+            if (current_sym != null &&
+                (current_sym.kind == SymbolKind.CLASS || current_sym.kind == SymbolKind.STRUCT)) {
                 if (dsym.name == ".new")
                     dsym.name = current_sym.name;
                 else {
-                    if (dsym.name == null) {
+                    if (sym.name == null) {
                         var name_builder = new StringBuilder (current_sym.name);
                         name_builder.append (" (");
                         if (sym is Vala.Constructor) {
@@ -124,7 +182,7 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
             }
         }
 
-        if (dsym.kind == Method || dsym.kind == Function) {
+        if (dsym.kind == SymbolKind.METHOD || dsym.kind == SymbolKind.FUNCTION) {
             if (dsym.name != null && /_lambda\d+_/.match (dsym.name))
                 return null;
         }
@@ -132,17 +190,18 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
         if (unique) {
             if (current_sym != null) {
                 // debug (@"adding $(dsym.name) to current_sym $(current_sym.name)");
-                current_sym.children.add (dsym);
+                add_child (current_sym, dsym);
             } else {
                 if (sym.parent_symbol is Vala.Namespace 
                     && sym.parent_symbol.to_string () != "(root namespace)") {
                     DocumentSymbol parent_dsym;
                     if (!ns_name_to_dsym.has_key (sym.parent_symbol.get_full_name ())) {
-                        parent_dsym = (!) add_symbol (sym.parent_symbol, SymbolKind.Namespace, true);
+                        parent_dsym = (!) add_symbol (
+                            sym.parent_symbol, SymbolKind.NAMESPACE, true);
                     } else
                         parent_dsym = ns_name_to_dsym [sym.parent_symbol.get_full_name ()];
                     // debug (@"adding $(dsym.name) to $(parent_dsym.name)");
-                    parent_dsym.children.add (dsym);
+                    add_child (parent_dsym, dsym);
                 } else {
                     // debug (@"adding $(dsym.name) to top_level_syms");
                     top_level_syms.add (dsym);
@@ -154,8 +213,7 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
                 // debug (@"\tadding $(dsym.name) to ns_name_to_dsym");
                 ns_name_to_dsym [sym_full_name] = dsym;
             }
-            syms_flat [dsym.selectionRange] = dsym;
-            all_syms.add (dsym);
+            syms_flat [dsym.selection_range] = dsym;
         }
 
         return dsym;
@@ -222,7 +280,7 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
 
     public override void visit_class (Vala.Class cl) {
         if (cl.source_reference != null && cl.source_reference.file != file) return;
-        var dsym = add_symbol (cl, Class);
+        var dsym = add_symbol (cl, SymbolKind.CLASS);
         containers.offer_head (dsym);
         cl.accept_children (this);
         containers.poll_head ();
@@ -237,18 +295,19 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
         if (c.source_reference != null && c.source_reference.file != file) return;
         if (!containers.is_empty) {
             var kind = containers.peek_head ().kind;
-            if (kind == Method || kind == Function || kind == Constructor) return;
+            if (kind == SymbolKind.METHOD || kind == SymbolKind.FUNCTION ||
+                kind == SymbolKind.CONSTRUCTOR) return;
         }
-        var skind = SymbolKind.Constant;
+        var skind = SymbolKind.CONSTANT;
 
         if (c.type_reference.type_symbol != null) {
             if (str_sym != null && c.type_reference.type_symbol.is_subtype_of (str_sym))
-                skind = SymbolKind.String;
+                skind = SymbolKind.STRING;
             else if (c.type_reference.type_symbol.get_attribute ("IntegerType") != null ||
                     c.type_reference.type_symbol.get_attribute ("FloatingType") != null)
-                skind = SymbolKind.Number;
+                skind = SymbolKind.NUMBER;
             else if (c.type_reference.type_symbol.get_attribute ("BooleanType") != null)
-                skind = SymbolKind.Boolean;
+                skind = SymbolKind.BOOLEAN;
         }
         add_symbol (c, skind);
         c.accept_children (this);
@@ -256,7 +315,7 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
 
     public override void visit_constructor (Vala.Constructor c) {
         if (c.source_reference != null && c.source_reference.file != file) return;
-        var dsym = add_symbol (c, Constructor);
+        var dsym = add_symbol (c, SymbolKind.CONSTRUCTOR);
         containers.offer_head (dsym);
         c.accept_children (this);
         containers.poll_head ();
@@ -269,7 +328,7 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
 
     public override void visit_creation_method (Vala.CreationMethod m) {
         if (m.source_reference != null && m.source_reference.file != file) return;
-        add_symbol (m, Constructor);
+        add_symbol (m, SymbolKind.CONSTRUCTOR);
         m.accept_children (this);
     }
 
@@ -280,7 +339,7 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
 
     public override void visit_delegate (Vala.Delegate cb) {
         if (cb.source_reference != null && cb.source_reference.file != file) return;
-        add_symbol (cb, Interface);
+        add_symbol (cb, SymbolKind.INTERFACE);
         cb.accept_children (this);
     }
 
@@ -291,7 +350,7 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
 
     public override void visit_destructor (Vala.Destructor dtor) {
         if (dtor.source_reference != null && dtor.source_reference.file != file) return;
-        var dsym = add_symbol (dtor, Method);
+        var dsym = add_symbol (dtor, SymbolKind.METHOD);
         if (!containers.is_empty) {
             var csym = containers.peek_head ();
             dsym.name = @"~$(csym.name)";
@@ -316,7 +375,7 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
 
     public override void visit_enum (Vala.Enum en) {
         if (en.source_reference != null && en.source_reference.file != file) return;
-        var dsym = add_symbol (en, Enum);
+        var dsym = add_symbol (en, SymbolKind.ENUM);
         containers.offer_head (dsym);
         en.accept_children (this);
         containers.poll_head ();
@@ -324,19 +383,19 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
 
     public override void visit_enum_value (Vala.EnumValue ev) {
         if (ev.source_reference != null && ev.source_reference.file != file) return;
-        add_symbol (ev, EnumMember);
+        add_symbol (ev, SymbolKind.ENUM_MEMBER);
         ev.accept_children (this);
     }
 
     public override void visit_error_code (Vala.ErrorCode ecode) {
         if (ecode.source_reference != null && ecode.source_reference.file != file) return;
-        add_symbol (ecode, EnumMember);
+        add_symbol (ecode, SymbolKind.ENUM_MEMBER);
         ecode.accept_children (this);
     }
 
     public override void visit_error_domain (Vala.ErrorDomain edomain) {
         if (edomain.source_reference != null && edomain.source_reference.file != file) return;
-        var dsym = add_symbol (edomain, Enum);
+        var dsym = add_symbol (edomain, SymbolKind.ENUM);
         containers.offer_head (dsym);
         edomain.accept_children (this);
         containers.poll_head ();
@@ -349,7 +408,7 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
 
     public override void visit_field (Vala.Field f) {
         if (f.source_reference != null && f.source_reference.file != file) return;
-        add_symbol (f, Field);
+        add_symbol (f, SymbolKind.FIELD);
         f.accept_children (this);
     }
 
@@ -380,7 +439,7 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
 
     public override void visit_interface (Vala.Interface iface) {
         if (iface.source_reference != null && iface.source_reference.file != file) return;
-        var dsym = add_symbol (iface, Interface);
+        var dsym = add_symbol (iface, SymbolKind.INTERFACE);
         containers.offer_head (dsym);
         iface.accept_children (this);
         containers.poll_head ();
@@ -419,9 +478,12 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
         if (m.source_reference != null && m.source_reference.file != file) return;
         if (!containers.is_empty) {
             var kind = containers.peek_head ().kind;
-            if (kind == Method || kind == Function || kind == Constructor) return;
+            if (kind == SymbolKind.METHOD || kind == SymbolKind.FUNCTION ||
+                kind == SymbolKind.CONSTRUCTOR) return;
         }
-        var dsym = add_symbol (m, containers.is_empty ? SymbolKind.Function : SymbolKind.Method);
+        var dsym = add_symbol (
+            m,
+            containers.is_empty ? SymbolKind.FUNCTION : SymbolKind.METHOD);
         if (dsym != null)
             containers.offer_head (dsym);
         m.accept_children (this);
@@ -436,7 +498,7 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
 
     public override void visit_namespace (Vala.Namespace ns) {
         if (ns.source_reference != null && ns.source_reference.file != file) return;
-        var dsym = add_symbol (ns, Namespace);
+        var dsym = add_symbol (ns, SymbolKind.NAMESPACE);
         containers.offer_head (dsym);
         ns.accept_children (this);
         containers.poll_head ();
@@ -464,7 +526,7 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
 
     public override void visit_property (Vala.Property prop) {
         if (prop.source_reference != null && prop.source_reference.file != file) return;
-        var dsym = add_symbol (prop, Property);
+        var dsym = add_symbol (prop, SymbolKind.PROPERTY);
         containers.offer_head (dsym);
         prop.accept_children (this);
         containers.poll_head ();
@@ -487,7 +549,7 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
 
     public override void visit_signal (Vala.Signal sig) {
         if (sig.source_reference != null && sig.source_reference.file != file) return;
-        add_symbol (sig, Event);
+        add_symbol (sig, SymbolKind.EVENT);
         sig.accept_children (this);
     }
 
@@ -508,7 +570,7 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
 
     public override void visit_struct (Vala.Struct st) {
         if (st.source_reference != null && st.source_reference.file != file) return;
-        var dsym = add_symbol (st, Struct);
+        var dsym = add_symbol (st, SymbolKind.STRUCT);
         containers.offer_head (dsym);
         st.accept_children (this);
         containers.poll_head ();

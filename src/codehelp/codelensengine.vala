@@ -106,85 +106,47 @@ namespace Vls.CodeLensEngine {
         return builder.str;
     }
 
-    Array<Variant> create_arguments (Vala.Symbol current_symbol, Vala.Symbol target_symbol) {
-        var arguments = new Array<Variant> ();
-
-        try {
-            arguments.append_val (Util.object_to_variant (new Location.from_sourceref (current_symbol.source_reference)));
-            arguments.append_val (Util.object_to_variant (new Location.from_sourceref (target_symbol.source_reference)));
-        } catch (Error e) {
-            warning ("failed to create arguments for command: %s", e.message);
-        }
-
-        return arguments;
+    Variant[] create_arguments (Vala.Symbol current_symbol, Vala.Symbol target_symbol) {
+        return {
+            Util.location_from_sourceref (current_symbol.source_reference).to_variant (),
+            Util.location_from_sourceref (target_symbol.source_reference).to_variant ()
+        };
     }
 
-    void begin_response (Server lang_serv, Project project,
-                         Jsonrpc.Client client, Variant id, string method,
-                         Vala.SourceFile doc, Compilation compilation) {
-        lang_serv.wait_for_context_update (id, request_cancelled => {
-            if (request_cancelled) {
-                Server.reply_null (id, client, method);
-                return;
-            }
+    CodeLens[] get (Vala.SourceFile doc, Compilation compilation) {
+        Vala.CodeContext.push (compilation.code_context);
+        var collected_symbols = compilation.get_analysis_for_file<CodeLensAnalyzer> (doc);
+        Vala.CodeContext.pop ();
 
-            Vala.CodeContext.push (compilation.code_context);
-            var collected_symbols = compilation.get_analysis_for_file<CodeLensAnalyzer> (doc);
-            Vala.CodeContext.pop ();
+        var lenses = new ArrayList<CodeLens> ();
 
-            var lenses = new ArrayList<CodeLens> ();
-
-            lenses.add_all_iterator (
-                collected_symbols.found_overrides
-                .map<CodeLens> (entry =>
-                                new CodeLens () {
-                                    range = new Range.from_sourceref (entry.key.source_reference),
-                                    command = new Lsp.Command () {
-                                        title = "overrides " + represent_symbol (entry.key, entry.value),
-                                        command = Command.EDITOR_SHOW_BASE_SYMBOL.to_string (),
-                                        arguments = create_arguments (entry.key, entry.value)
-                                    }
-                                }));
-
-            lenses.add_all_iterator (
-                collected_symbols.found_implementations
-                .map<CodeLens> (entry =>
-                                new CodeLens () {
-                                    range = new Range.from_sourceref (entry.key.source_reference),
-                                    command = new Lsp.Command () {
-                                        title = "implements " + represent_symbol (entry.key, entry.value),
-                                        command = Command.EDITOR_SHOW_BASE_SYMBOL.to_string (),
-                                        arguments = create_arguments (entry.key, entry.value)
-                                    }
-                                }));
-
-            lenses.add_all_iterator (
-                collected_symbols.found_hides
-                .map<CodeLens> (entry =>
-                                new CodeLens () {
-                                    range = new Range.from_sourceref (entry.key.source_reference),
-                                    command = new Lsp.Command () {
-                                        title = "hides " + represent_symbol (entry.key, entry.value),
-                                        command = Command.EDITOR_SHOW_HIDDEN_SYMBOL.to_string (),
-                                        arguments = create_arguments (entry.key, entry.value)
-                                    }
-                                }));
-
-            finish (client, id, method, lenses);
-        });
-    }
-
-    void finish (Jsonrpc.Client client, Variant id, string method, Collection<CodeLens> lenses) {
-        try {
-            var json_array = new Json.Array ();
-
-            foreach (var lens in lenses)
-                json_array.add_element (Json.gobject_serialize (lens));
-
-            Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
-            client.reply (id, variant_array, Server.cancellable);
-        } catch (Error e) {
-            warning ("[%s] failed to reply to client: %s", method, e.message);
+        foreach (var entry in collected_symbols.found_overrides) {
+            lenses.add (new CodeLens (
+                Util.range_from_sourceref (entry.key.source_reference),
+                new Lsp.Command (
+                    "overrides " + represent_symbol (entry.key, entry.value),
+                    Command.EDITOR_SHOW_BASE_SYMBOL.to_string (),
+                    create_arguments (entry.key, entry.value))));
         }
+
+        foreach (var entry in collected_symbols.found_implementations) {
+            lenses.add (new CodeLens (
+                Util.range_from_sourceref (entry.key.source_reference),
+                new Lsp.Command (
+                    "implements " + represent_symbol (entry.key, entry.value),
+                    Command.EDITOR_SHOW_BASE_SYMBOL.to_string (),
+                    create_arguments (entry.key, entry.value))));
+        }
+
+        foreach (var entry in collected_symbols.found_hides) {
+            lenses.add (new CodeLens (
+                Util.range_from_sourceref (entry.key.source_reference),
+                new Lsp.Command (
+                    "hides " + represent_symbol (entry.key, entry.value),
+                    Command.EDITOR_SHOW_HIDDEN_SYMBOL.to_string (),
+                    create_arguments (entry.key, entry.value))));
+        }
+
+        return lenses.to_array ();
     }
 }

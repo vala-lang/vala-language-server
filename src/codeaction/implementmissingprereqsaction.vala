@@ -31,17 +31,14 @@ class Vls.ImplementMissingPrereqsAction : CodeAction {
                                           Vala.Collection<Pair<Vala.DataType, Vala.Symbol>> missing_symbols,
                                           Position classdef_end,
                                           CodeStyleAnalyzer code_style,
-                                          VersionedTextDocumentIdentifier document) {
-        this.title = "Implement missing prerequisites for class";
-        this.kind = "quickfix";
-        this.edit = new WorkspaceEdit ();
+                                          TextDocumentIdentifier document) {
+        base ("Implement missing prerequisites for class");
+        this.kind = CodeActionKind.QUICK_FIX;
 
-        var changes = new ArrayList<TextDocumentEdit> ();
-        var document_edit = new TextDocumentEdit (document);
-        changes.add (document_edit);
+        TextEdit[] edits = {};
 
         // insert the types after the class declaration
-        var cls_endpos = new Position.from_libvala (class_sym.source_reference.end);
+        var cls_endpos = Util.position_from_libvala (class_sym.source_reference.end);
         var typelist_text = new StringBuilder ();
         var prereq_i = 0;
         foreach (var prereq_type in missing_prereqs) {
@@ -53,10 +50,7 @@ class Vls.ImplementMissingPrereqsAction : CodeAction {
             typelist_text.append (CodeHelp.get_data_type_representation (prereq_type, class_sym.scope, true));
             prereq_i++;
         }
-        document_edit.edits.add (new TextEdit (new Range () {
-            start = cls_endpos,
-            end = cls_endpos
-        }, typelist_text.str));
+        edits += TextEdit (Range (cls_endpos, cls_endpos), typelist_text.str);
 
         // insert the methods and properties that need to be implemented
         var symbols_insert_text = new StringBuilder ();
@@ -159,16 +153,15 @@ class Vls.ImplementMissingPrereqsAction : CodeAction {
                 symbols_insert_text.append (" }");
             }
         }
-        document_edit.edits.add (new TextEdit (new Range () {
-            start = classdef_end,
-            end = classdef_end 
-        }, symbols_insert_text.str));
+        edits += TextEdit (Range (classdef_end, classdef_end), symbols_insert_text.str);
 
-        this.edit.documentChanges = changes;
+        var document_edit = new TextDocumentEdit (document, edits);
+        this.edit = new WorkspaceEdit ();
+        this.edit.add_document_change (document_edit);
 
         // now, include all relevant diagnostics
         foreach (var diag in context.diagnostics)
             if (/does not implement|some prerequisites .*are not met/.match (diag.message))
-                add_diagnostic (diag);
+                CodeActions.add_diagnostic (this, diag);
     }
 }

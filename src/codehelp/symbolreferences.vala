@@ -19,6 +19,30 @@
 using Lsp;
 using Gee;
 
+/**
+ * A source range used as an internal reference-map key.
+ *
+ * LSP ranges do not identify a document, but references at the same range in
+ * different files must remain distinct.
+ */
+class Vls.SourceRange : Object, Gee.Hashable<SourceRange> {
+    public string filename { get; private set; }
+    public Range range { get; private set; }
+
+    public SourceRange (string filename, Range range) {
+        this.filename = filename;
+        this.range = range;
+    }
+
+    public uint hash () {
+        return filename.hash () ^ Util.range_hash (range);
+    }
+
+    public bool equal_to (SourceRange other) {
+        return filename == other.filename && Util.range_equal (range, other.range);
+    }
+}
+
 /** 
  * Contains routines for analyzing references to symbols across the project.
  * Used by `textDocument/definition`, `textDocument/rename`, `textDocument/prepareRename`,
@@ -107,22 +131,25 @@ namespace Vls.SymbolReferences {
      * @return      a new {@link Lsp.Range} narrowed from the source reference
      */
     Range get_narrowed_source_reference (Vala.SourceReference source_reference, string representation, int start, int end) {
-        var range = new Range.from_sourceref (source_reference);
+        var range = Util.range_from_sourceref (source_reference);
 
         // move the start of the range up [last_index_of_symbol] characters
         string prefix = representation[0:start];
         int prefix_last_nl_pos;
         int prefix_nl_count = (int) Util.count_chars_in_string (prefix, '\n', out prefix_last_nl_pos);
 
-        range.start = range.start.translate (prefix_nl_count, prefix.length - prefix_last_nl_pos - 1);
+        range.start = Util.position_translate (
+            range.start, prefix_nl_count, prefix.length - prefix_last_nl_pos - 1);
 
         // move the end of the range up
-        range.end = range.start.dup ();
+        range.end = range.start;
         string text_inside = representation[start:end];
         int text_inside_last_nl_pos;
         int text_inside_nl_count = (int) Util.count_chars_in_string (text_inside, '\n', out text_inside_last_nl_pos);
 
-        range.end = range.end.translate (text_inside_nl_count, (end - start) - text_inside_last_nl_pos - 1);
+        range.end = Util.position_translate (
+            range.end, text_inside_nl_count,
+            (end - start) - text_inside_last_nl_pos - 1);
         return range;
     }
 
@@ -286,8 +313,8 @@ namespace Vls.SymbolReferences {
      *                          ``File``. If the latter, then the returned collection
      *                          contains both ``GLib`` and ``File``.
      */
-    Collection<Pair<Vala.Symbol, Range>> get_visible_components_of_code_node (Vala.CodeNode code_node) {
-        var components = new ArrayQueue<Pair<Vala.Symbol, Range>> ();
+    Collection<Pair<Vala.Symbol, Range?>> get_visible_components_of_code_node (Vala.CodeNode code_node) {
+        var components = new ArrayQueue<Pair<Vala.Symbol, Range?>> ();
         Vala.Symbol? symbol = null;
 
         if (code_node is Vala.DataType)
@@ -354,7 +381,7 @@ namespace Vls.SymbolReferences {
                         Vala.SourceLocation (null, begin_line, begin_column),
                         Vala.SourceLocation (null, end_line, end_column));
 
-                    components.offer_head (new Pair<Vala.Symbol, Range> (current_sym, new Range.from_sourceref (sr)));
+                    components.offer_head (new Pair<Vala.Symbol, Range?> (current_sym, Util.range_from_sourceref (sr)));
 
                     end -= current_sym.name.length;
                     // skip spaces, then '.', then spaces
@@ -410,16 +437,17 @@ namespace Vls.SymbolReferences {
      * @param include_invisible     include invisible symbol references (set to `false` if not replacing)
      * @param references            the collection to fill with references
      */
-    void list_in_file (Vala.SourceFile file, Vala.Symbol symbol, bool include_declaration, bool include_invisible, HashMap<Range, Vala.CodeNode> references) {
+    void list_in_file (Vala.SourceFile file, Vala.Symbol symbol, bool include_declaration,
+                       bool include_invisible, HashMap<SourceRange, Vala.CodeNode> references) {
         new SymbolVisitor (file, symbol, include_declaration, node => {
-            Collection<Pair<Vala.Symbol, Range>>? components = null;
+            Collection<Pair<Vala.Symbol, Range?>>? components = null;
             Vala.CodeNode? member_name = null;     // member_name
 
             // check for visible components
             if (node == symbol || CodeHelp.namespaces_equal (node, symbol)) {
                 var rrange = get_replacement_range (node, (Vala.Symbol)node);
                 if (rrange != null)
-                    references[rrange] = node;
+                    references[new SourceRange (file.filename, (!) rrange)] = node;
             } else if (node is Vala.MemberAccess && ((Vala.Expression)node).symbol_reference == symbol) {
                 components = get_visible_components_of_code_node (node);
             } else if (node is Vala.ObjectCreationExpression && oce_references_symbol ((Vala.ObjectCreationExpression)node, symbol)) {
@@ -428,15 +456,15 @@ namespace Vls.SymbolReferences {
             } else if (node is Vala.UsingDirective && ((Vala.UsingDirective)node).namespace_symbol == symbol) {
                 var rrange = get_replacement_range (node, symbol);
                 if (rrange != null)
-                    references[rrange] = node;
+                    references[new SourceRange (file.filename, (!) rrange)] = node;
             } else if (node is Vala.CreationMethod && ((Vala.CreationMethod)node).parent_symbol == symbol) {
                 var rrange = get_replacement_range (node, symbol);
                 if (rrange != null)
-                    references[rrange] = node;
+                    references[new SourceRange (file.filename, (!) rrange)] = node;
             } else if (node is Vala.Destructor && ((Vala.Destructor)node).parent_symbol == symbol) {
                 var rrange = get_replacement_range (node, symbol);
                 if (rrange != null)
-                    references[rrange] = node;
+                    references[new SourceRange (file.filename, (!) rrange)] = node;
             } else {
                 if (node is Vala.Namespace || node is Vala.TypeSymbol)
                     components = get_visible_components_of_code_node (node);
@@ -458,22 +486,26 @@ namespace Vls.SymbolReferences {
             if (components != null) {
                 var result = components.first_match (pair => pair.first == symbol || CodeHelp.namespaces_equal (pair.first, symbol));
                 if (result != null) {
-                    references[result.second] = member_name ?? node;
+                    references[new SourceRange (file.filename, (!) result.second)] =
+                        member_name ?? node;
                 } else if (symbol is Vala.CreationMethod && symbol.name == ".new") {
                     // retry with parent symbol for default creation methods
                     var type_symbol = symbol.parent_symbol;
                     result = components.first_match (pair => pair.first == type_symbol || CodeHelp.namespaces_equal (pair.first, type_symbol));
                     if (result != null)
-                        references[result.second] = member_name ?? node;
+                        references[new SourceRange (file.filename, (!) result.second)] =
+                            member_name ?? node;
                 }
             } else if (include_invisible && node is Vala.Expression && ((Vala.Expression)node).symbol_reference == symbol) {
-                references[new Range.from_sourceref (node.source_reference)] = node;
+                references[new SourceRange (
+                    file.filename,
+                    Util.range_from_sourceref (node.source_reference))] = node;
             }
 
             // get references to symbol in ValaDoc comments
             if (node is Vala.Symbol) {
                 foreach (var range in list_in_comment ((Vala.Symbol)node, symbol))
-                    references[range] = node;
+                    references[new SourceRange (file.filename, range)] = node;
             }
         });
     }
@@ -485,7 +517,11 @@ namespace Vls.SymbolReferences {
      * @param symbol        the virtual symbol to compare against implementation symbols
      * @param references    a collection of references that will be updated
      */
-    void list_implementations_of_virtual_symbol (Vala.SourceFile file, Vala.Symbol symbol, HashMap<Range, Vala.CodeNode> references) {
+    void list_implementations_of_virtual_symbol (
+        Vala.SourceFile file,
+        Vala.Symbol symbol,
+        HashMap<SourceRange, Vala.CodeNode> references
+    ) {
         new SymbolVisitor (file, symbol, true, node => {
             bool is_implementation = false;
             if (node is Vala.Property) {
@@ -508,7 +544,7 @@ namespace Vls.SymbolReferences {
                     int begin, end;
                     if (match_info.fetch_pos (1, out begin, out end)) {
                         var rrange = get_narrowed_source_reference (node.source_reference, representation, begin, end);
-                        references[rrange] = node;
+                        references[new SourceRange (file.filename, rrange)] = node;
                     }
                 }
             }
