@@ -29,18 +29,16 @@ namespace Vls.CodeActions {
      * @param range     the range to show code actions for
      * @param uri       the document URI
      */
-    Collection<CodeAction> extract (CodeActionContext context, Compilation compilation, TextDocument file, Range range, string uri) {
+    CodeAction[] extract (CodeActionContext context, Compilation compilation,
+                          TextDocument file, Range range, Uri uri) {
         var code_actions = new ArrayList<CodeAction> ();
 
         if (file.last_updated.compare (compilation.last_updated) > 0)
             // don't show code actions for a stale document
-            return code_actions;
+            return code_actions.to_array ();
 
-        var class_ranges = new HashMap<TypeSymbol, Range> ();
-        var document = new VersionedTextDocumentIdentifier () {
-            version = file.version,
-            uri = uri
-        };
+        var class_ranges = new HashMap<TypeSymbol, Range?> ();
+        var document = TextDocumentIdentifier (uri, file.version);
 
         // search for nodes containing the query range
         var finder = new NodeSearch (file, range.start, true, range.end, false);
@@ -49,8 +47,9 @@ namespace Vls.CodeActions {
         foreach (CodeNode code_node in finder.result) {
             if (code_node is IntegerLiteral) {
                 var lit = (IntegerLiteral)code_node;
-                var lit_range = new Range.from_sourceref (lit.source_reference);
-                if (lit_range.contains (range.start) && lit_range.contains (range.end))
+                var lit_range = Util.range_from_sourceref (lit.source_reference);
+                if (Util.range_contains (lit_range, range.start) &&
+                    Util.range_contains (lit_range, range.end))
                     code_actions.add (new BaseConverterAction (lit, document));
             } else if (code_node is Class) {
                 var csym = (Class)code_node;
@@ -116,11 +115,11 @@ namespace Vls.CodeActions {
             }
         }
 
-        return code_actions;
+        return code_actions.to_array ();
     }
 
     Position compute_real_symbol_end (Symbol sym, char terminator) {
-        var pos = new Position.from_libvala (sym.source_reference.end);
+        var pos = Util.position_from_libvala (sym.source_reference.end);
         var offset = sym.source_reference.end.pos - (char *)sym.source_reference.file.content;
         var dl = 0;
         var dc = 0;
@@ -134,27 +133,33 @@ namespace Vls.CodeActions {
             }
             offset++;
         }
-        return pos.translate (dl, dc + 1);
+        return Util.position_translate (pos, dl, dc + 1);
     }
 
     /**
      * Compute the full range of a class definition.
      */
-    Range compute_class_def_range (Class csym, Map<TypeSymbol, Range> class_ranges) {
+    Range compute_class_def_range (Class csym, Map<TypeSymbol, Range?> class_ranges) {
         if (csym in class_ranges)
-            return class_ranges[csym];
+            return (!) class_ranges[csym];
         // otherwise compute the result and cache it
         // csym.source_reference must be non-null otherwise NodeSearch wouldn't have found csym
-        var classdef_range = new Range.from_sourceref (csym.source_reference);
-        var range = classdef_range.union (new Range.from_pos (compute_real_symbol_end (csym, '{')));
+        var classdef_range = Util.range_from_sourceref (csym.source_reference);
+        var range = Util.range_union (
+            classdef_range,
+            Util.range_from_position (compute_real_symbol_end (csym, '{')));
         // debug ("csym range: %s -> %s", csym.to_string (), classdef_range.to_string ());
         foreach (Symbol member in csym.get_members ()) {
             if (member.source_reference == null)
                 continue;
             if (member is Field)
-                range = range.union (new Range.from_pos (compute_real_symbol_end (member, ';')));
+                range = Util.range_union (
+                    range,
+                    Util.range_from_position (compute_real_symbol_end (member, ';')));
             if (member is Method && ((Method)member).body != null && ((Method)member).body.source_reference != null)
-                range = range.union (new Range.from_sourceref (((Method)member).body.source_reference));
+                range = Util.range_union (
+                    range,
+                    Util.range_from_sourceref (((Method)member).body.source_reference));
             // debug ("expanding range to %s", range.to_string ());
         }
         class_ranges[csym] = range;

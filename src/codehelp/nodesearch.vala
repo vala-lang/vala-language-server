@@ -23,7 +23,7 @@ using Lsp;
  * A code visitor for any position queries.
  */
 class Vls.NodeSearch : Vala.CodeVisitor {
-    public Position? pos { get; private set; }
+    public Position pos { get; private set; }
     private Position? end_pos;
     private Vala.SourceFile file;
     public bool search_multiline { get; private set; }
@@ -50,7 +50,8 @@ class Vls.NodeSearch : Vala.CodeVisitor {
             return false;
         }
 
-        if (node is Vala.SwitchStatement && new Range.from_sourceref (sr).contains (pos)) {
+        if (node is Vala.SwitchStatement &&
+            Util.range_contains (Util.range_from_sourceref (sr), pos)) {
             return true;
         }
 
@@ -66,7 +67,7 @@ class Vls.NodeSearch : Vala.CodeVisitor {
             return filter (needle, node);
         }
 
-        var sr_range = new Range.from_sourceref (sr);
+        var sr_range = Util.range_from_sourceref (sr);
 
         if (!search_multiline) {
             if (sr_range.start.line != sr_range.end.line) {
@@ -90,10 +91,13 @@ class Vls.NodeSearch : Vala.CodeVisitor {
 
         if (!inverted) {
             // check that the code node SR (range) contains the position (and possible end position)
-            return sr_range.contains (pos) && (end_pos == null || sr_range.contains (end_pos));
+            return Util.range_contains (sr_range, pos) &&
+                (end_pos == null || Util.range_contains (sr_range, (!) end_pos));
         } else {
             // check that start of the code node is contained in [pos,end_pos]
-            return pos.compare_to (sr_range.start) <= 0 && (end_pos == null || sr_range.start.compare_to (end_pos) <= 0);
+            return Util.position_compare (pos, sr_range.start) <= 0 &&
+                (end_pos == null ||
+                 Util.position_compare (sr_range.start, (!) end_pos) <= 0);
         }
     }
 

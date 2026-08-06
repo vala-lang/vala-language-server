@@ -24,10 +24,9 @@ using Gee;
 class Vls.AddDefaultToSwitchAction : CodeAction {
     public AddDefaultToSwitchAction (CodeActionContext context,
                                      Vala.SwitchStatement sws,
-                                     VersionedTextDocumentIdentifier document,
+                                     TextDocumentIdentifier document,
                                      CodeStyleAnalyzer code_style) {
-        this.title = "Add default case to switch-statement";
-        this.edit = new WorkspaceEdit ();
+        base ("Add default case to switch-statement");
 
         var sections = sws.get_sections ();
         uint end_line, end_column;
@@ -56,25 +55,20 @@ class Vls.AddDefaultToSwitchAction : CodeAction {
         };
         var insert_text = "%sdefault:\n%sassert_not_reached%*s();\n"
             .printf (label_indent, inner_indent, code_style.average_spacing_before_parens, "");
-        var document_edit = new TextDocumentEdit (document);
-        var end_pos = new Position () {
-            line = end_line - 1,
-            character = end_column
-        };
-        var text_edit = new TextEdit (new Range () {
-            start = end_pos,
-            end = end_pos
-        }, insert_text);
-        document_edit.edits.add (text_edit);
-        this.edit.documentChanges = new ArrayList<TextDocumentEdit>.wrap ({document_edit});
+        var end_pos = Position (end_line - 1, end_column);
+        var document_edit = new TextDocumentEdit (
+            document,
+            {TextEdit (Range (end_pos, end_pos), insert_text)});
+        this.edit = new WorkspaceEdit ();
+        this.edit.add_document_change (document_edit);
 
         // now, include all relevant diagnostics
         foreach (var diag in context.diagnostics)
             if (diag.message.contains ("Switch does not handle"))
-                add_diagnostic (diag);
-        if (diagnostics != null && !diagnostics.is_empty)
-            this.kind = "quickfix";
+                this.add_diagnostic (diag);
+        if (diagnostics != null && diagnostics.length > 0)
+            this.kind = CodeActionKind.QUICK_FIX;
         else
-            this.kind = "refactor.rewrite";
+            this.kind = CodeActionKind.REFACTOR_REWRITE;
     }
 }

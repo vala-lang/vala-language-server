@@ -20,14 +20,84 @@ using Lsp;
 using Gee;
 
 namespace Vls.CompletionEngine {
-    void begin_response (Server lang_serv, Project project,
-                         Jsonrpc.Client client, Variant id, string method,
-                         Vala.SourceFile doc, Compilation compilation,
-                         Position pos, CompletionContext? completion_context) {
+    CompletionItem item_keyword (string keyword, string? insert_text = null,
+                                 string? documentation = null) {
+        var item = new CompletionItem (keyword, CompletionItemKind.KEYWORD);
+        item.insert_text = insert_text;
+        if (insert_text != null &&
+            (insert_text.contains ("$0") || insert_text.contains ("${0"))) {
+            item.insert_text_format = InsertTextFormat.SNIPPET;
+        }
+        if (documentation != null)
+            item.documentation = new MarkupContent (MarkupKind.PLAINTEXT, documentation);
+        return item;
+    }
+
+    CompletionItem item_from_symbol (Vala.DataType? instance_type,
+                                     Vala.Symbol symbol,
+                                     Vala.Scope? scope,
+                                     CompletionItemKind kind,
+                                     DocComment? documentation,
+                                     string? label_override = null) {
+        var item = new CompletionItem (label_override ?? symbol.name, kind);
+        item.detail = CodeHelp.get_symbol_representation (
+            instance_type, symbol, scope, true, null, label_override, false);
+        if (documentation != null)
+            item.documentation = new MarkupContent (MarkupKind.MARKDOWN, documentation.body);
+
+        var version = symbol.get_attribute ("Version");
+        if (version != null &&
+            (version.get_bool ("deprecated") ||
+             version.get_string ("deprecated_since") != null)) {
+            item.tags |= CompletionItemTag.DEPRECATED;
+            item.deprecated = true;
+        }
+        return item;
+    }
+
+    CompletionItem item_from_synthetic (Vala.DataType symbol_type,
+                                        string symbol_name,
+                                        Vala.Scope? scope,
+                                        CompletionItemKind kind,
+                                        DocComment? documentation) {
+        var item = new CompletionItem (symbol_name, kind);
+        var type_detail = CodeHelp.get_symbol_representation (
+            symbol_type, null, scope, true, null, null, false);
+        item.detail = @"$type_detail $symbol_name";
+        if (documentation != null)
+            item.documentation = new MarkupContent (MarkupKind.MARKDOWN, documentation.body);
+        return item;
+    }
+
+    CompletionItem item_from_unimplemented (string label,
+                                            CompletionItemKind kind,
+                                            string insert_text,
+                                            DocComment? documentation) {
+        var item = new CompletionItem (label, kind);
+        item.insert_text = insert_text;
+        if (insert_text.contains ("$0") || insert_text.contains ("${0"))
+            item.insert_text_format = InsertTextFormat.SNIPPET;
+        if (documentation != null)
+            item.documentation = new MarkupContent (MarkupKind.MARKDOWN, documentation.body);
+        return item;
+    }
+
+    uint item_hash (CompletionItem item) {
+        return @"$(item.label) $(item.kind)".hash ();
+    }
+
+    bool item_equal (CompletionItem left, CompletionItem right) {
+        return left.label == right.label && left.kind == right.kind;
+    }
+
+    async CompletionItem[] complete_async (Server lang_serv, Project project,
+                                           Vala.SourceFile doc, Compilation compilation,
+                                           Position pos, CompletionContext? completion_context,
+                                           Cancellable request_cancellable) throws Error {
         bool is_pointer_access = false;
         long idx = (long) Util.get_string_pos (doc.content, pos.line, pos.character);
 
-        Position end_pos = pos.dup ();
+        Position end_pos = pos;
         bool is_member_access = false;
         bool is_null_safe_access = false;
 
@@ -48,12 +118,12 @@ namespace Vls.CompletionEngine {
                  ((doc.content[lb_idx-1] == '-' && doc.content[lb_idx] == '>') ||
                   (doc.content[lb_idx-1] == '?' && doc.content[lb_idx] == '.'))) ||
                 doc.content[lb_idx] == '.') {
-                var new_pos = pos.translate (0, (int) (lb_idx - idx));
+                var new_pos = Util.position_translate (pos, 0, (int) (lb_idx - idx));
                 // debug ("[%s] moved cursor back from '%c'@%s -> '%c'@%s",
                 //     method, doc.content[idx], pos.to_string (), doc.content[lb_idx], new_pos.to_string ());
                 idx = lb_idx;
                 pos = new_pos;
-                end_pos = pos.dup ();
+                end_pos = pos;
                 break;
             } else if (!doc.content[lb_idx].isalnum() && doc.content[lb_idx] != '_') {
                 // if this character does not belong to an identifier, break
@@ -66,7 +136,8 @@ namespace Vls.CompletionEngine {
             lb_idx--;
         }
         
-        var completions = new HashSet<CompletionItem> ();
+        var completions = new HashSet<CompletionItem> (
+            item_hash, item_equal);
 
         if (idx >= 1 && doc.content[idx-1] == '-' && doc.content[idx] == '>') {
             is_pointer_access = true;
@@ -85,90 +156,72 @@ namespace Vls.CompletionEngine {
         } else {
             // The editor requested a member access completion from a '>'.
             // This is a hack since the LSP doesn't allow us to specify a trigger string ("->" in this case)
-            if (completion_context != null && completion_context.triggerKind == CompletionTriggerKind.TriggerCharacter) {
+            if (completion_context != null &&
+                completion_context.trigger_kind == CompletionTriggerKind.TRIGGER_CHARACTER) {
                 // completion conditions are not satisfied
-                finish (client, id, completions);
-                return;
+                return completions.to_array ();
             }
             // TODO: incomplete completions
         }
 
-        Vala.CodeContext.push (compilation.code_context);
         if (is_member_access) {
             // attempt SymbolExtractor first, and if that fails, then wait for
             // the next context update
 
-            var se = new SymbolExtractor (pos, doc);
-            if (se.extracted_expression != null)
-                show_members (lang_serv, project, doc, compilation,
-                              is_null_safe_access, is_pointer_access, se.in_oce,
-                              se.extracted_expression, se.block.scope, completions, false);
+            Vala.CodeContext.push (compilation.code_context);
+            try {
+                var se = new SymbolExtractor (pos, doc);
+                if (se.extracted_expression != null)
+                    show_members (lang_serv, project, doc, compilation,
+                                  is_null_safe_access, is_pointer_access, se.in_oce,
+                                  se.extracted_expression, se.block.scope, completions, false);
+            } finally {
+                Vala.CodeContext.pop ();
+            }
 
             if (completions.is_empty) {
-                // debug ("[%s] trying MA completion again after context update ...", method);
-                lang_serv.wait_for_context_update (id, request_cancelled => {
-                    if (request_cancelled) {
-                        Server.reply_null (id, client, method);
-                        return;
-                    }
-
-                    Vala.CodeContext.push (compilation.code_context);
-                    show_members_with_updated_context (lang_serv, project,
-                                                       client, id, 
-                                                       doc, compilation, 
-                                                       is_null_safe_access, is_pointer_access,
-                                                       pos, end_pos, completions);
-                    finish (client, id, completions);
-                    Vala.CodeContext.pop ();
-                });
-            } else {
-                finish (client, id, completions);
+                yield lang_serv.wait_for_context_update_async (request_cancellable);
+                show_members_with_updated_context (
+                    lang_serv, project, doc, compilation,
+                    is_null_safe_access, is_pointer_access,
+                    pos, end_pos, completions);
             }
         } else {
-            Vala.Scope best_scope;
-            Vala.Symbol nearest_symbol;
-            /**
-             * The expression inside a Vala `with(<expr>) { ... }` statement.
-             */
-            Vala.Expression? nearest_with_expression;
-            bool in_loop;
-            bool showing_override_suggestions = false;
-            walk_up_current_scope (lang_serv, doc, pos, out best_scope, out nearest_symbol, out nearest_with_expression, out in_loop);
-            if (nearest_with_expression != null) {
-                show_members (lang_serv, project, doc, compilation, false, false, false, nearest_with_expression, best_scope, completions);
+            Vala.CodeContext.push (compilation.code_context);
+            try {
+                Vala.Scope best_scope;
+                Vala.Symbol nearest_symbol;
+                /**
+                 * The expression inside a Vala `with(<expr>) { ... }` statement.
+                 */
+                Vala.Expression? nearest_with_expression;
+                bool in_loop;
+                bool showing_override_suggestions = false;
+                walk_up_current_scope (lang_serv, doc, pos, out best_scope, out nearest_symbol, out nearest_with_expression, out in_loop);
+                if (nearest_with_expression != null) {
+                    show_members (lang_serv, project, doc, compilation, false, false, false, nearest_with_expression, best_scope, completions);
+                }
+                if (nearest_symbol is Vala.Class) {
+                    var results = CodeHelp.gather_missing_prereqs_and_unimplemented_symbols ((Vala.Class) nearest_symbol);
+                    // TODO: use missing prereqs (results.first)
+                    list_implementable_symbols (lang_serv, project, compilation, doc, (Vala.Class) nearest_symbol, best_scope, results.second, completions);
+                    showing_override_suggestions = !completions.is_empty;
+                }
+                if (nearest_symbol is Vala.ObjectTypeSymbol) {
+                    list_implementable_symbols (lang_serv, project, compilation, doc,
+                                                (Vala.ObjectTypeSymbol) nearest_symbol, best_scope,
+                                                CodeHelp.gather_base_virtual_symbols_not_overridden ((Vala.ObjectTypeSymbol) nearest_symbol),
+                                                completions);
+                }
+                if (!showing_override_suggestions) {
+                    list_symbols (lang_serv, project, compilation, doc, pos, best_scope, completions, (new SymbolExtractor (pos, doc)).in_oce);
+                    list_keywords (lang_serv, doc, nearest_symbol, in_loop, completions);
+                }
+            } finally {
+                Vala.CodeContext.pop ();
             }
-            if (nearest_symbol is Vala.Class) {
-                var results = CodeHelp.gather_missing_prereqs_and_unimplemented_symbols ((Vala.Class) nearest_symbol);
-                // TODO: use missing prereqs (results.first)
-                list_implementable_symbols (lang_serv, project, compilation, doc, (Vala.Class) nearest_symbol, best_scope, results.second, completions);
-                showing_override_suggestions = !completions.is_empty;
-            }
-            if (nearest_symbol is Vala.ObjectTypeSymbol) {
-                list_implementable_symbols (lang_serv, project, compilation, doc,
-                                            (Vala.ObjectTypeSymbol) nearest_symbol, best_scope,
-                                            CodeHelp.gather_base_virtual_symbols_not_overridden ((Vala.ObjectTypeSymbol) nearest_symbol),
-                                            completions);
-            }
-            if (!showing_override_suggestions) {
-                list_symbols (lang_serv, project, compilation, doc, pos, best_scope, completions, (new SymbolExtractor (pos, doc)).in_oce);
-                list_keywords (lang_serv, doc, nearest_symbol, in_loop, completions);
-            }
-            finish (client, id, completions);
         }
-        Vala.CodeContext.pop ();
-    }
-
-    void finish (Jsonrpc.Client client, Variant id, Collection<CompletionItem> completions) {
-        var json_array = new Json.Array ();
-        foreach (CompletionItem comp in completions)
-            json_array.add_element (Json.gobject_serialize (comp));
-
-        try {
-            Variant variant_array = Json.gvariant_deserialize (new Json.Node.alloc ().init_array (json_array), null);
-            client.reply (id, variant_array, Server.cancellable);
-        } catch (Error e) {
-            warning (@"[textDocument/completion] failed to reply to client: $(e.message)");
-        }
+        return completions.to_array ();
     }
 
     void walk_up_current_scope (Server lang_serv, 
@@ -268,19 +321,19 @@ namespace Vls.CompletionEngine {
                     }
 
                     // add `this' parameter
-                    completions.add (new CompletionItem.from_symbol (
+                    completions.add (item_from_symbol (
                                         null, 
                                         this_param, 
                                         current_scope,
-                                        CompletionItemKind.Keyword, 
+                                        CompletionItemKind.KEYWORD,
                                         new DocComment (@"Access the current instance of this $instance_type_string")));
 
                     // add `base` parameter if this is a subtype
                     if (base_type != null) {
-                        completions.add (new CompletionItem.from_synthetic_symbol (base_type,
+                        completions.add (item_from_synthetic (base_type,
                                                                                    "base",
                                                                                    current_scope,
-                                                                                   CompletionItemKind.Keyword,
+                                                                                   CompletionItemKind.KEYWORD,
                                                                                    new DocComment (@"Accesses the base $instance_type_string")));
                     }
                 }
@@ -292,13 +345,13 @@ namespace Vls.CompletionEngine {
                         var sr = sym.source_reference;
                         if (sr == null)
                             continue;
-                        var sr_begin = new Position.from_libvala (sr.begin);
+                        var sr_begin = Util.position_from_libvala (sr.begin);
 
                         // don't show local variables that are declared ahead of the cursor
-                        if (sr_begin.compare_to (pos) > 0)
+                        if (Util.position_compare (sr_begin, pos) > 0)
                             continue;
-                        completions.add (new CompletionItem.from_symbol (null, sym, current_scope,
-                            (sym is Vala.Constant) ? CompletionItemKind.Constant : CompletionItemKind.Variable,
+                        completions.add (item_from_symbol (null, sym, current_scope,
+                            (sym is Vala.Constant) ? CompletionItemKind.CONSTANT : CompletionItemKind.VARIABLE,
                             lang_serv.get_symbol_documentation (project, sym)));
                     }
                 }
@@ -340,81 +393,81 @@ namespace Vls.CompletionEngine {
                         Set<CompletionItem> completions) {
         if (nearest_symbol is Vala.TypeSymbol) {
             completions.add_all_array({
-                new CompletionItem.keyword ("async"),
-                new CompletionItem.keyword ("override"),
-                new CompletionItem.keyword ("protected"),
-                new CompletionItem.keyword ("weak"),
+                item_keyword ("async"),
+                item_keyword ("override"),
+                item_keyword ("protected"),
+                item_keyword ("weak"),
             });
         }
 
         if (nearest_symbol is Vala.Namespace) {
             completions.add_all_array ({
-                new CompletionItem.keyword ("delegate"),
-                new CompletionItem.keyword ("errordomain", "errordomain $0"),
-                new CompletionItem.keyword ("internal"),
-                new CompletionItem.keyword ("namespace", "namespace $0"),
-                new CompletionItem.keyword ("params"),
-                new CompletionItem.keyword ("private"),
-                new CompletionItem.keyword ("public"),
-                new CompletionItem.keyword ("unowned"),
-                new CompletionItem.keyword ("void"),
+                item_keyword ("delegate"),
+                item_keyword ("errordomain", "errordomain $0"),
+                item_keyword ("internal"),
+                item_keyword ("namespace", "namespace $0"),
+                item_keyword ("params"),
+                item_keyword ("private"),
+                item_keyword ("public"),
+                item_keyword ("unowned"),
+                item_keyword ("void"),
             });
         }
 
         if (nearest_symbol is Vala.Namespace || nearest_symbol is Vala.ObjectTypeSymbol) {
             completions.add_all_array ({
-                new CompletionItem.keyword ("abstract"),
-                new CompletionItem.keyword ("class", "class $0"),
-                new CompletionItem.keyword ("enum", "enum $0"),
-                new CompletionItem.keyword ("interface", "interface $0"),
-                new CompletionItem.keyword ("struct", "struct $0"),
-                new CompletionItem.keyword ("throws", "throws $0"),
-                new CompletionItem.keyword ("virtual")
+                item_keyword ("abstract"),
+                item_keyword ("class", "class $0"),
+                item_keyword ("enum", "enum $0"),
+                item_keyword ("interface", "interface $0"),
+                item_keyword ("struct", "struct $0"),
+                item_keyword ("throws", "throws $0"),
+                item_keyword ("virtual")
             });
         }
 
         if (nearest_symbol is Vala.Callable) {
             completions.add_all_array ({
-                new CompletionItem.keyword ("catch", "catch ($1) {$2}$0"),
-                new CompletionItem.keyword ("delete", "delete $1;$0"),
-                new CompletionItem.keyword ("do", "do {$2} while (${1:<condition>});$0"),
-                new CompletionItem.keyword ("else"),
-                new CompletionItem.keyword ("else if", "else if (${1:<condition>})$0"),
-                new CompletionItem.keyword ("finally", "finally {$1}$0"),
-                new CompletionItem.keyword ("false"),
-                new CompletionItem.keyword ("for", "for (${3:var} ${1:i} = ${2:<expression>}; ${4:<condition>}; ${5:<expression>})$0"),
-                new CompletionItem.keyword ("foreach", "foreach (${3:var} ${1:item} in ${2:<expression>})$0"),
-                new CompletionItem.keyword ("if", "if (${1:<condition>})$0"),
-                new CompletionItem.keyword ("in", "in ${1:<expression>}$0"),
-                new CompletionItem.keyword ("is", "is ${1:<type>}$0"),
-                new CompletionItem.keyword ("new"),
-                new CompletionItem.keyword ("null"),
-                new CompletionItem.keyword ("return", "return ${1:<expression>};$0"),
-                new CompletionItem.keyword ("switch", "switch (${1:<expression>}) {$0}"),
-                new CompletionItem.keyword ("throw"),
-                new CompletionItem.keyword ("true"),
-                new CompletionItem.keyword ("try", "try {$1} catch ($2) {$3}$0"),
-                new CompletionItem.keyword ("var", "var ${1:<var-name>} = $0"),
-                new CompletionItem.keyword ("while", "while (${1:<condition>})$0"),
+                item_keyword ("catch", "catch ($1) {$2}$0"),
+                item_keyword ("delete", "delete $1;$0"),
+                item_keyword ("do", "do {$2} while (${1:<condition>});$0"),
+                item_keyword ("else"),
+                item_keyword ("else if", "else if (${1:<condition>})$0"),
+                item_keyword ("finally", "finally {$1}$0"),
+                item_keyword ("false"),
+                item_keyword ("for", "for (${3:var} ${1:i} = ${2:<expression>}; ${4:<condition>}; ${5:<expression>})$0"),
+                item_keyword ("foreach", "foreach (${3:var} ${1:item} in ${2:<expression>})$0"),
+                item_keyword ("if", "if (${1:<condition>})$0"),
+                item_keyword ("in", "in ${1:<expression>}$0"),
+                item_keyword ("is", "is ${1:<type>}$0"),
+                item_keyword ("new"),
+                item_keyword ("null"),
+                item_keyword ("return", "return ${1:<expression>};$0"),
+                item_keyword ("switch", "switch (${1:<expression>}) {$0}"),
+                item_keyword ("throw"),
+                item_keyword ("true"),
+                item_keyword ("try", "try {$1} catch ($2) {$3}$0"),
+                item_keyword ("var", "var ${1:<var-name>} = $0"),
+                item_keyword ("while", "while (${1:<condition>})$0"),
 #if VALA_0_50
-                new CompletionItem.keyword ("with", "with (${1:<expression>}) {$0}"),
+                item_keyword ("with", "with (${1:<expression>}) {$0}"),
 #endif
-                new CompletionItem.keyword ("yield"),
+                item_keyword ("yield"),
             });
         }
 
         if (nearest_symbol == Vala.CodeContext.get ().root)
-            completions.add (new CompletionItem.keyword ("using", "using ${1:<namespace>};$0"));
+            completions.add (item_keyword ("using", "using ${1:<namespace>};$0"));
         
         if (in_loop) {
             completions.add_all_array ({
-                new CompletionItem.keyword ("break"),
-                new CompletionItem.keyword ("continue"),
+                item_keyword ("break"),
+                item_keyword ("continue"),
             });
         }
 
         completions.add_all_array ({
-            new CompletionItem.keyword ("global", "global::")
+            item_keyword ("global", "global::")
         });
     }
 
@@ -434,10 +487,10 @@ namespace Vls.CompletionEngine {
         foreach (var pair in missing_symbols) {
             var instance_type = pair.first;
             var sym = pair.second;
-            var kind = CompletionItemKind.Method;
+            var kind = CompletionItemKind.METHOD;
 
             if (sym is Vala.Property)
-                kind = CompletionItemKind.Property;
+                kind = CompletionItemKind.PROPERTY;
             
             var label = new StringBuilder ();
             var insert_text = new StringBuilder ();
@@ -555,8 +608,8 @@ namespace Vls.CompletionEngine {
 
             insert_text.append ("$0");
             completions.add (
-                new CompletionItem.from_unimplemented_symbol (
-                    sym, label.str, kind, insert_text.str, 
+                item_from_unimplemented (
+                    label.str, kind, insert_text.str,
                     lang_serv.get_symbol_documentation (project, sym)
                 ));
         }
@@ -655,7 +708,6 @@ namespace Vls.CompletionEngine {
      * Use this for accurate member access completions after the code context has been updated.
      */
     void show_members_with_updated_context (Server lang_serv, Project project,
-                                            Jsonrpc.Client client, Variant id,
                                             Vala.SourceFile doc, Compilation compilation,
                                             bool is_null_safe_access, bool is_pointer_access,
                                             Position pos, Position? end_pos, Set<CompletionItem> completions) {
@@ -667,7 +719,6 @@ namespace Vls.CompletionEngine {
 
         if (fs.result.size == 0) {
             debug (@"[$method] no results found for member access");
-            Server.reply_null (id, client, method);
             Vala.CodeContext.pop ();
             return;
         }
@@ -856,11 +907,11 @@ namespace Vls.CompletionEngine {
                         in_oce,
                         is_cm_this_or_base_access))
                     continue;
-                var completion = new CompletionItem.from_symbol (type, method_sym, current_scope,
-                    (method_sym is Vala.CreationMethod) ? CompletionItemKind.Constructor : CompletionItemKind.Method, 
+                var completion = item_from_symbol (type, method_sym, current_scope,
+                    (method_sym is Vala.CreationMethod) ? CompletionItemKind.CONSTRUCTOR : CompletionItemKind.METHOD,
                     lang_serv.get_symbol_documentation (project, method_sym));
-                completion.insertText = generate_insert_text_for_callable (type, method_sym, current_scope, method_spaces);
-                completion.insertTextFormat = InsertTextFormat.Snippet;
+                completion.insert_text = generate_insert_text_for_callable (type, method_sym, current_scope, method_spaces);
+                completion.insert_text_format = InsertTextFormat.SNIPPET;
                 completions.add (completion);
             }
 
@@ -870,7 +921,7 @@ namespace Vls.CompletionEngine {
                         || field_sym.is_instance_member () != is_instance
                         || !CodeHelp.is_symbol_accessible (field_sym, current_scope))
                         continue;
-                    completions.add (new CompletionItem.from_symbol (type, field_sym, current_scope, CompletionItemKind.Field, lang_serv.get_symbol_documentation (project, field_sym)));
+                    completions.add (item_from_symbol (type, field_sym, current_scope, CompletionItemKind.FIELD, lang_serv.get_symbol_documentation (project, field_sym)));
                 }
             }
 
@@ -880,24 +931,24 @@ namespace Vls.CompletionEngine {
                         || !CodeHelp.is_symbol_accessible (signal_sym, current_scope))
                         continue;
                     // generate one completion for invoking the signal and another without, for member access
-                    completions.add (new CompletionItem.from_symbol (type, signal_sym, current_scope, CompletionItemKind.Event, lang_serv.get_symbol_documentation (project, signal_sym)));
+                    completions.add (item_from_symbol (type, signal_sym, current_scope, CompletionItemKind.EVENT, lang_serv.get_symbol_documentation (project, signal_sym)));
                     var emitter_documentation = lang_serv.get_symbol_documentation (project, signal_sym);
                     if (emitter_documentation != null)
                         emitter_documentation.body = "_(Invokes this signal)_\n\n" + emitter_documentation.body;
-                    completions.add (new CompletionItem.from_symbol (type, signal_sym, 
-                                                                     current_scope, 
-                                                                     CompletionItemKind.Method, 
-                                                                     emitter_documentation) {
-                        insertText = generate_insert_text_for_callable (type, signal_sym, current_scope, method_spaces),
-                        insertTextFormat = InsertTextFormat.Snippet
-                    });
+                    var emitter = item_from_symbol (
+                        type, signal_sym, current_scope, CompletionItemKind.METHOD,
+                        emitter_documentation);
+                    emitter.insert_text = generate_insert_text_for_callable (
+                        type, signal_sym, current_scope, method_spaces);
+                    emitter.insert_text_format = InsertTextFormat.SNIPPET;
+                    completions.add (emitter);
                 }
 
                 foreach (var prop_sym in object_sym.get_properties ()) {
                     if (prop_sym.is_instance_member () != is_instance
                         || !CodeHelp.is_symbol_accessible (prop_sym, current_scope))
                         continue;
-                    completions.add (new CompletionItem.from_symbol (type, prop_sym, current_scope, CompletionItemKind.Property, lang_serv.get_symbol_documentation (project, prop_sym)));
+                    completions.add (item_from_symbol (type, prop_sym, current_scope, CompletionItemKind.PROPERTY, lang_serv.get_symbol_documentation (project, prop_sym)));
                     seen_props.add (prop_sym.name);
                 }
             }
@@ -907,14 +958,14 @@ namespace Vls.CompletionEngine {
                 foreach (var constant_sym in object_sym.get_constants ()) {
                     if (!CodeHelp.is_symbol_accessible (constant_sym, current_scope))
                         continue;
-                    completions.add (new CompletionItem.from_symbol (type, constant_sym, current_scope, CompletionItemKind.Constant, lang_serv.get_symbol_documentation (project, constant_sym)));
+                    completions.add (item_from_symbol (type, constant_sym, current_scope, CompletionItemKind.CONSTANT, lang_serv.get_symbol_documentation (project, constant_sym)));
                 }
 
                 foreach (var enum_sym in object_sym.get_enums ())
-                    completions.add (new CompletionItem.from_symbol (type, enum_sym, current_scope, CompletionItemKind.Enum, lang_serv.get_symbol_documentation (project, enum_sym)));
+                    completions.add (item_from_symbol (type, enum_sym, current_scope, CompletionItemKind.ENUM, lang_serv.get_symbol_documentation (project, enum_sym)));
 
                 foreach (var delegate_sym in object_sym.get_delegates ())
-                    completions.add (new CompletionItem.from_symbol (type, delegate_sym, current_scope, CompletionItemKind.Interface, lang_serv.get_symbol_documentation (project, delegate_sym)));
+                    completions.add (item_from_symbol (type, delegate_sym, current_scope, CompletionItemKind.INTERFACE, lang_serv.get_symbol_documentation (project, delegate_sym)));
             }
 
             // if we're inside an OCE (which are treated as instances), get only inner types
@@ -923,10 +974,10 @@ namespace Vls.CompletionEngine {
                     add_class_completion (lang_serv, project, code_style, class_sym, current_scope, in_oce, completions);
 
                 foreach (var iface_sym in object_sym.get_interfaces ())
-                    completions.add (new CompletionItem.from_symbol (type, iface_sym, current_scope, CompletionItemKind.Interface, lang_serv.get_symbol_documentation (project, iface_sym)));
+                    completions.add (item_from_symbol (type, iface_sym, current_scope, CompletionItemKind.INTERFACE, lang_serv.get_symbol_documentation (project, iface_sym)));
 
                 foreach (var struct_sym in object_sym.get_structs ())
-                    completions.add (new CompletionItem.from_symbol (type, struct_sym, current_scope, CompletionItemKind.Struct, lang_serv.get_symbol_documentation (project, struct_sym)));
+                    completions.add (item_from_symbol (type, struct_sym, current_scope, CompletionItemKind.STRUCT, lang_serv.get_symbol_documentation (project, struct_sym)));
             }
 
             // get instance members of supertypes
@@ -955,9 +1006,9 @@ namespace Vls.CompletionEngine {
                 if (method_sym.is_instance_member () != is_instance
                     || !CodeHelp.is_symbol_accessible (method_sym, current_scope))
                     continue;
-                var completion = new CompletionItem.from_symbol (type, method_sym, current_scope, CompletionItemKind.Method, lang_serv.get_symbol_documentation (project, method_sym));
-                completion.insertText = generate_insert_text_for_callable (type, method_sym, current_scope, method_spaces);
-                completion.insertTextFormat = InsertTextFormat.Snippet;
+                var completion = item_from_symbol (type, method_sym, current_scope, CompletionItemKind.METHOD, lang_serv.get_symbol_documentation (project, method_sym));
+                completion.insert_text = generate_insert_text_for_callable (type, method_sym, current_scope, method_spaces);
+                completion.insert_text_format = InsertTextFormat.SNIPPET;
                 completions.add (completion);
             }
 
@@ -965,10 +1016,10 @@ namespace Vls.CompletionEngine {
                 foreach (var constant_sym in enum_sym.get_constants ()) {
                     if (!CodeHelp.is_symbol_accessible (constant_sym, current_scope))
                         continue;
-                    completions.add (new CompletionItem.from_symbol (type, constant_sym, current_scope, CompletionItemKind.Constant, lang_serv.get_symbol_documentation (project, constant_sym)));
+                    completions.add (item_from_symbol (type, constant_sym, current_scope, CompletionItemKind.CONSTANT, lang_serv.get_symbol_documentation (project, constant_sym)));
                 }
                 foreach (var value_sym in enum_sym.get_values ())
-                    completions.add (new CompletionItem.from_symbol (type, value_sym, current_scope, CompletionItemKind.EnumMember, lang_serv.get_symbol_documentation (project, value_sym)));
+                    completions.add (item_from_symbol (type, value_sym, current_scope, CompletionItemKind.ENUM_MEMBER, lang_serv.get_symbol_documentation (project, value_sym)));
             }
         } else if (type_symbol is Vala.ErrorDomain) {
             /**
@@ -982,7 +1033,7 @@ namespace Vls.CompletionEngine {
                 // can also be used as pseudo-creation methods
                 if (code_sym.is_instance_member () != is_instance && !in_oce)
                     continue;
-                completions.add (new CompletionItem.from_symbol (type, code_sym, current_scope, CompletionItemKind.Value, lang_serv.get_symbol_documentation (project, code_sym)));
+                completions.add (item_from_symbol (type, code_sym, current_scope, CompletionItemKind.VALUE, lang_serv.get_symbol_documentation (project, code_sym)));
             }
 
             if (!in_oce) {
@@ -990,9 +1041,9 @@ namespace Vls.CompletionEngine {
                     if (method_sym.is_instance_member () != is_instance
                         || !CodeHelp.is_symbol_accessible (method_sym, current_scope))
                         continue;
-                    var completion = new CompletionItem.from_symbol (type, method_sym, current_scope, CompletionItemKind.Method, lang_serv.get_symbol_documentation (project, method_sym));
-                    completion.insertText = generate_insert_text_for_callable (type, method_sym, current_scope, method_spaces);
-                    completion.insertTextFormat = InsertTextFormat.Snippet;
+                    var completion = item_from_symbol (type, method_sym, current_scope, CompletionItemKind.METHOD, lang_serv.get_symbol_documentation (project, method_sym));
+                    completion.insert_text = generate_insert_text_for_callable (type, method_sym, current_scope, method_spaces);
+                    completion.insert_text_format = InsertTextFormat.SNIPPET;
                     completions.add (completion);
                 }
             }
@@ -1022,7 +1073,7 @@ namespace Vls.CompletionEngine {
                 // struct fields are always public
                 if (field_sym.is_instance_member () != is_instance)
                     continue;
-                completions.add (new CompletionItem.from_symbol (type, field_sym, current_scope, CompletionItemKind.Field, lang_serv.get_symbol_documentation (project, field_sym)));
+                completions.add (item_from_symbol (type, field_sym, current_scope, CompletionItemKind.FIELD, lang_serv.get_symbol_documentation (project, field_sym)));
             }
 
             foreach (var method_sym in struct_sym.get_methods ()) {
@@ -1033,9 +1084,9 @@ namespace Vls.CompletionEngine {
                         in_oce,
                         is_cm_this_or_base_access))
                     continue;
-                var completion = new CompletionItem.from_symbol (type, method_sym, current_scope, CompletionItemKind.Method, lang_serv.get_symbol_documentation (project, method_sym));
-                completion.insertText = generate_insert_text_for_callable (type, method_sym, current_scope, method_spaces);
-                completion.insertTextFormat = InsertTextFormat.Snippet;
+                var completion = item_from_symbol (type, method_sym, current_scope, CompletionItemKind.METHOD, lang_serv.get_symbol_documentation (project, method_sym));
+                completion.insert_text = generate_insert_text_for_callable (type, method_sym, current_scope, method_spaces);
+                completion.insert_text_format = InsertTextFormat.SNIPPET;
                 completions.add (completion);
             }
 
@@ -1043,21 +1094,21 @@ namespace Vls.CompletionEngine {
                 if (prop_sym.is_instance_member () != is_instance
                     || !CodeHelp.is_symbol_accessible (prop_sym, current_scope))
                     continue;
-                completions.add (new CompletionItem.from_symbol (type, prop_sym, current_scope, CompletionItemKind.Property, lang_serv.get_symbol_documentation (project, prop_sym)));
+                completions.add (item_from_symbol (type, prop_sym, current_scope, CompletionItemKind.PROPERTY, lang_serv.get_symbol_documentation (project, prop_sym)));
             }
 
             if (!is_instance) {
                 foreach (var constant_sym in struct_sym.get_constants ()) {
                     if (!CodeHelp.is_symbol_accessible (constant_sym, current_scope))
                         continue;
-                    completions.add (new CompletionItem.from_symbol (type, constant_sym, current_scope, CompletionItemKind.Constant, lang_serv.get_symbol_documentation (project, constant_sym)));
+                    completions.add (item_from_symbol (type, constant_sym, current_scope, CompletionItemKind.CONSTANT, lang_serv.get_symbol_documentation (project, constant_sym)));
                 }
             }
         } else if (type_symbol is Vala.TypeParameter) {
             var typeparam_sym = (Vala.TypeParameter) type_symbol;
             var generic_type = new Vala.GenericType (typeparam_sym);
-            completions.add (new CompletionItem.from_symbol (type, generic_type.get_member ("dup"), current_scope, CompletionItemKind.Field, new DocComment (@"a function that knows how to duplicate instances of $(typeparam_sym.name)")));
-            completions.add (new CompletionItem.from_symbol (type, generic_type.get_member ("destroy"), current_scope, CompletionItemKind.Field, new DocComment (@"a function that knows how to destroy instances of $(typeparam_sym.name)")));
+            completions.add (item_from_symbol (type, generic_type.get_member ("dup"), current_scope, CompletionItemKind.FIELD, new DocComment (@"a function that knows how to duplicate instances of $(typeparam_sym.name)")));
+            completions.add (item_from_symbol (type, generic_type.get_member ("destroy"), current_scope, CompletionItemKind.FIELD, new DocComment (@"a function that knows how to destroy instances of $(typeparam_sym.name)")));
         } else {
             warning (@"other type symbol $type_symbol.\n");
         }
@@ -1074,28 +1125,28 @@ namespace Vls.CompletionEngine {
         // raw interfaces, it's possible for interfaces to contain instantiable types declared inside,
         // so that we would call `new Iface.Thing ()'
         foreach (var iface_sym in ns.get_interfaces ())
-            completions.add (new CompletionItem.from_symbol (null, iface_sym, scope, CompletionItemKind.Interface, lang_serv.get_symbol_documentation (project, iface_sym)));
+            completions.add (item_from_symbol (null, iface_sym, scope, CompletionItemKind.INTERFACE, lang_serv.get_symbol_documentation (project, iface_sym)));
         foreach (var struct_sym in ns.get_structs ())
-            completions.add (new CompletionItem.from_symbol (null, struct_sym, scope, CompletionItemKind.Struct, lang_serv.get_symbol_documentation (project, struct_sym)));
+            completions.add (item_from_symbol (null, struct_sym, scope, CompletionItemKind.STRUCT, lang_serv.get_symbol_documentation (project, struct_sym)));
         foreach (var err_sym in ns.get_error_domains ())
-            completions.add (new CompletionItem.from_symbol (null, err_sym, scope, CompletionItemKind.Enum, lang_serv.get_symbol_documentation (project, err_sym)));
+            completions.add (item_from_symbol (null, err_sym, scope, CompletionItemKind.ENUM, lang_serv.get_symbol_documentation (project, err_sym)));
         foreach (var ns_sym in ns.get_namespaces ())
-            completions.add (new CompletionItem.from_symbol (null, ns_sym, scope, CompletionItemKind.Module, lang_serv.get_symbol_documentation (project, ns_sym)));
+            completions.add (item_from_symbol (null, ns_sym, scope, CompletionItemKind.MODULE, lang_serv.get_symbol_documentation (project, ns_sym)));
         if (!in_oce) {
             foreach (var const_sym in ns.get_constants ())
-                completions.add (new CompletionItem.from_symbol (null, const_sym, scope, CompletionItemKind.Constant, lang_serv.get_symbol_documentation (project, const_sym)));
+                completions.add (item_from_symbol (null, const_sym, scope, CompletionItemKind.CONSTANT, lang_serv.get_symbol_documentation (project, const_sym)));
             foreach (var method_sym in ns.get_methods ()) {
-                var completion = new CompletionItem.from_symbol (null, method_sym, scope, CompletionItemKind.Method, lang_serv.get_symbol_documentation (project, method_sym));
-                completion.insertText = generate_insert_text_for_callable (null, method_sym, scope, method_spaces);
-                completion.insertTextFormat = InsertTextFormat.Snippet;
+                var completion = item_from_symbol (null, method_sym, scope, CompletionItemKind.METHOD, lang_serv.get_symbol_documentation (project, method_sym));
+                completion.insert_text = generate_insert_text_for_callable (null, method_sym, scope, method_spaces);
+                completion.insert_text_format = InsertTextFormat.SNIPPET;
                 completions.add (completion);
             }
             foreach (var delg_sym in ns.get_delegates ())
-                completions.add (new CompletionItem.from_symbol (null, delg_sym, scope, CompletionItemKind.Interface, lang_serv.get_symbol_documentation (project, delg_sym)));
+                completions.add (item_from_symbol (null, delg_sym, scope, CompletionItemKind.INTERFACE, lang_serv.get_symbol_documentation (project, delg_sym)));
             foreach (var enum_sym in ns.get_enums ())
-                completions.add (new CompletionItem.from_symbol (null, enum_sym, scope, CompletionItemKind.Enum, lang_serv.get_symbol_documentation (project, enum_sym)));
+                completions.add (item_from_symbol (null, enum_sym, scope, CompletionItemKind.ENUM, lang_serv.get_symbol_documentation (project, enum_sym)));
             foreach (var field_sym in ns.get_fields ())
-                completions.add (new CompletionItem.from_symbol (null, field_sym, scope, CompletionItemKind.Field, lang_serv.get_symbol_documentation (project, field_sym)));
+                completions.add (item_from_symbol (null, field_sym, scope, CompletionItemKind.FIELD, lang_serv.get_symbol_documentation (project, field_sym)));
         }
     }
     
@@ -1105,23 +1156,24 @@ namespace Vls.CompletionEngine {
     void add_completions_for_signal (CodeStyleAnalyzer? code_style, Vala.DataType? instance_type, Vala.Signal sig, Vala.Scope scope, Set<CompletionItem> completions) {
         uint method_spaces = code_style != null ? code_style.average_spacing_before_parens : 1;
         var sig_type = new Vala.SignalType (sig);
-        completions.add_all_array (new CompletionItem []{
-            new CompletionItem.from_symbol (instance_type, sig_type.get_member ("connect"), scope, CompletionItemKind.Method, 
-                new DocComment ("Connect to signal")) {
-                insertText = generate_insert_text_for_callable (instance_type, sig_type.get_member ("connect") as Vala.Method, scope, method_spaces),
-                insertTextFormat = InsertTextFormat.Snippet
-            },
-            new CompletionItem.from_symbol (instance_type, sig_type.get_member ("connect_after"), scope, CompletionItemKind.Method,
-                new DocComment ("Connect to signal after default handler")) {
-                insertText = generate_insert_text_for_callable (instance_type, sig_type.get_member ("connect_after") as Vala.Method, scope, method_spaces),
-                insertTextFormat = InsertTextFormat.Snippet
-            },
-            new CompletionItem.from_symbol (instance_type, sig_type.get_member ("disconnect"), scope, CompletionItemKind.Method,
-                new DocComment ("Disconnect signal")) {
-                insertText = generate_insert_text_for_callable (instance_type, sig_type.get_member ("disconnect") as Vala.Method, scope, method_spaces),
-                insertTextFormat = InsertTextFormat.Snippet
-            }
-        });
+        foreach (string member_name in new string[] {"connect", "connect_after", "disconnect"}) {
+            var member = sig_type.get_member (member_name);
+            string description;
+            if (member_name == "connect")
+                description = "Connect to signal";
+            else if (member_name == "connect_after")
+                description = "Connect to signal after default handler";
+            else
+                description = "Disconnect signal";
+
+            var completion = item_from_symbol (
+                instance_type, member, scope, CompletionItemKind.METHOD,
+                new DocComment (description));
+            completion.insert_text = generate_insert_text_for_callable (
+                instance_type, member as Vala.Method, scope, method_spaces);
+            completion.insert_text_format = InsertTextFormat.SNIPPET;
+            completions.add (completion);
+        }
     }
 
     /**
@@ -1132,25 +1184,22 @@ namespace Vls.CompletionEngine {
         var length_member = atype.get_member ("length");
         uint method_spaces = code_style != null ? code_style.average_spacing_before_parens : 1;
         if (length_member != null)
-            completions.add (new CompletionItem.from_symbol (
+            completions.add (item_from_symbol (
                 atype,
                 length_member, 
                 scope,
-                CompletionItemKind.Property,
+                CompletionItemKind.PROPERTY,
                 (atype.fixed_length && atype.length != null ? 
                     new DocComment (@"(= $(CodeHelp.get_code_node_source (atype.length)))") : null)));
         foreach (string method_name in new string[] {"copy", "move", "resize"}) {
             var method = atype.get_member (method_name);
             if (method is Vala.Method) {
-                completions.add (new CompletionItem.from_symbol (
-                        atype,
-                        method,
-                        scope,
-                        CompletionItemKind.Method,
-                        null) {
-                    insertText = generate_insert_text_for_callable (atype, (Vala.Method)method, scope, method_spaces),
-                    insertTextFormat = InsertTextFormat.Snippet
-                });
+                var completion = item_from_symbol (
+                    atype, method, scope, CompletionItemKind.METHOD, null);
+                completion.insert_text = generate_insert_text_for_callable (
+                    atype, (Vala.Method) method, scope, method_spaces);
+                completion.insert_text_format = InsertTextFormat.SNIPPET;
+                completions.add (completion);
             }
         }
     }
@@ -1160,24 +1209,30 @@ namespace Vls.CompletionEngine {
      */
     void add_completions_for_async_method (CodeStyleAnalyzer? code_style,
                                            Vala.DataType? instance_type, Vala.Method m, Vala.Scope scope, Set<CompletionItem> completions) {
+        uint method_spaces = code_style != null ? code_style.average_spacing_before_parens : 1;
         Vala.Scope topmost = get_topmost_scope (scope);
         Vala.Symbol? glib_ns = topmost.lookup ("GLib");
         // don't show async members if we don't have GAsyncResult available (included in gio-2.0)
         if (glib_ns != null && glib_ns.scope.lookup ("AsyncResult") != null) {
-            completions.add_all_array(new CompletionItem []{
-                new CompletionItem.from_symbol (instance_type, m, scope, CompletionItemKind.Method,
-                    new DocComment ("Begin asynchronous operation"), "begin") {
-                    insertText = generate_insert_text_for_callable (instance_type, m, scope, code_style.average_spacing_before_parens, "begin"),
-                    insertTextFormat = InsertTextFormat.Snippet
-                },
-                new CompletionItem.from_symbol (instance_type, m.get_end_method (), scope, CompletionItemKind.Method,
-                    new DocComment ("Get results of asynchronous operation")) {
-                    insertText = generate_insert_text_for_callable (instance_type, m.get_end_method (), scope, code_style.average_spacing_before_parens),
-                    insertTextFormat = InsertTextFormat.Snippet
-                },
-                new CompletionItem.from_symbol (instance_type, m.get_callback_method (), scope, CompletionItemKind.Field,
-                    new DocComment ("Callback into asynchronous method"))
-            });
+            var begin = item_from_symbol (
+                instance_type, m, scope, CompletionItemKind.METHOD,
+                new DocComment ("Begin asynchronous operation"), "begin");
+            begin.insert_text = generate_insert_text_for_callable (
+                instance_type, m, scope, method_spaces, "begin");
+            begin.insert_text_format = InsertTextFormat.SNIPPET;
+            completions.add (begin);
+
+            var end = item_from_symbol (
+                instance_type, m.get_end_method (), scope, CompletionItemKind.METHOD,
+                new DocComment ("Get results of asynchronous operation"));
+            end.insert_text = generate_insert_text_for_callable (
+                instance_type, m.get_end_method (), scope, method_spaces);
+            end.insert_text_format = InsertTextFormat.SNIPPET;
+            completions.add (end);
+
+            completions.add (item_from_symbol (
+                instance_type, m.get_callback_method (), scope, CompletionItemKind.FIELD,
+                new DocComment ("Callback into asynchronous method")));
         }
     }
 
@@ -1197,27 +1252,27 @@ namespace Vls.CompletionEngine {
             seen_klasses.add (ks);
             foreach (var method_sym in ks.get_methods ()) {
                 if (!(method_sym is Vala.CreationMethod) && method_sym.is_class_member ()) {
-                    var completion = new CompletionItem.from_symbol (null,
+                    var completion = item_from_symbol (null,
                                                                      method_sym, current_scope,
-                                                                     CompletionItemKind.Method,
+                                                                     CompletionItemKind.METHOD,
                                                                      lang_serv.get_symbol_documentation (project, method_sym));
-                    completion.insertText = generate_insert_text_for_callable (null, method_sym, current_scope, method_spaces);
-                    completion.insertTextFormat = InsertTextFormat.Snippet;
+                    completion.insert_text = generate_insert_text_for_callable (null, method_sym, current_scope, method_spaces);
+                    completion.insert_text_format = InsertTextFormat.SNIPPET;
                     completions.add (completion);
                 }
             }
             foreach (var field_sym in ks.get_fields ()) {
                 if (field_sym.is_class_member ())
-                    completions.add (new CompletionItem.from_symbol (null,
+                    completions.add (item_from_symbol (null,
                                                                      field_sym, current_scope,
-                                                                     CompletionItemKind.Field,
+                                                                     CompletionItemKind.FIELD,
                                                                      lang_serv.get_symbol_documentation (project, field_sym)));
             }
             foreach (var prop_sym in ks.get_properties ()) {
                 if (prop_sym.is_class_member ())
-                    completions.add (new CompletionItem.from_symbol (null,
+                    completions.add (item_from_symbol (null,
                                                                      prop_sym, current_scope,
-                                                                     CompletionItemKind.Property,
+                                                                     CompletionItemKind.PROPERTY,
                                                                      lang_serv.get_symbol_documentation (project, prop_sym)));
             }
             // look at base types
@@ -1249,31 +1304,33 @@ namespace Vls.CompletionEngine {
         if (!in_oce || has_named_ctors
             || !class_sym.get_classes ().is_empty || !class_sym.get_interfaces ().is_empty
             || !class_sym.get_structs ().is_empty) {
-            completions.add (new CompletionItem.from_symbol (
+            var completion = item_from_symbol (
                 null,
                 class_sym,
                 scope,
-                CompletionItemKind.Class,
-                lang_serv.get_symbol_documentation (project, class_sym)) {
-                insertText = generate_insert_text_for_type_symbol (class_sym, scope, method_spaces),
-                insertTextFormat = InsertTextFormat.Snippet
-            });
+                CompletionItemKind.CLASS,
+                lang_serv.get_symbol_documentation (project, class_sym));
+            completion.insert_text = generate_insert_text_for_type_symbol (
+                class_sym, scope, method_spaces);
+            completion.insert_text_format = InsertTextFormat.SNIPPET;
+            completions.add (completion);
         }
 
         if (in_oce && !class_sym.is_abstract && class_sym.default_construction_method != null) {
             var ctor_documentation = lang_serv.get_symbol_documentation (project, class_sym.default_construction_method);
             if (ctor_documentation == null)
                 ctor_documentation = lang_serv.get_symbol_documentation (project, class_sym);
-            completions.add (new CompletionItem.from_symbol (
+            var completion = item_from_symbol (
                 null,
                 class_sym.default_construction_method,
                 scope,
-                CompletionItemKind.Constructor,
+                CompletionItemKind.CONSTRUCTOR,
                 ctor_documentation,
-                class_sym.name) {
-                insertText = generate_insert_text_for_callable (null, class_sym.default_construction_method, scope, method_spaces),
-                insertTextFormat = InsertTextFormat.Snippet
-            });
+                class_sym.name);
+            completion.insert_text = generate_insert_text_for_callable (
+                null, class_sym.default_construction_method, scope, method_spaces);
+            completion.insert_text_format = InsertTextFormat.SNIPPET;
+            completions.add (completion);
         }
     }
 

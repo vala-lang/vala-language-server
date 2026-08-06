@@ -41,8 +41,11 @@ namespace Vls.Formatter {
         if (range == null) {
             stdin_buf = source.content;
         } else {
-            var from = (long)Util.get_string_pos (source.content, range.start.line, range.start.character);
-            var to = (long)Util.get_string_pos (source.content, range.end.line, range.end.character);
+            Range selected_range = (!) range;
+            var from = (long) Util.get_string_pos (
+                source.content, selected_range.start.line, selected_range.start.character);
+            var to = (long) Util.get_string_pos (
+                source.content, selected_range.end.line, selected_range.end.character);
             stdin_buf = source.content[from:to];
         }
         string? stdout_buf = null, stderr_buf = null;
@@ -59,23 +62,18 @@ namespace Vls.Formatter {
         }
         Range edit_range;
         if (range != null) {
-            edit_range = range;
+            edit_range = (!) range;
         } else {
             int last_nl_pos;
             uint nl_count = Util.count_chars_in_string (stdin_buf, '\n', out last_nl_pos);
-            edit_range = new Range () {
-                start = new Position () {
-                    line = 0,
-                    character = 0
-                },
-                end = new Position () {
-                    line = nl_count + 1,
+            edit_range = Range (
+                Position (0, 0),
+                Position (
+                    nl_count + 1,
                     // handle trailing newline
-                    character = last_nl_pos == stdin_buf.length - 1 ? 1 : 0
-                }
-            };
+                    last_nl_pos == stdin_buf.length - 1 ? 1 : 0));
         }
-        return new TextEdit (edit_range, stdout_buf);
+        return TextEdit (edit_range, stdout_buf);
     }
 
     string[] get_uncrustify_args (Vala.SourceFile source, FormattingOptions options, CodeStyleAnalyzer? analyzed_style, Cancellable? cancellable = null) {
@@ -92,16 +90,18 @@ namespace Vls.Formatter {
         // No config file found... Use defaults
         var conf = new HashMap<string, string> ();
         // https://github.com/uncrustify/uncrustify/blob/master/documentation/htdocs/default.cfg
-        conf["indent_with_tabs"] = "%d".printf (options.insertSpaces ? 0 : 1);
-        conf["nl_end_of_file"] = options.insertFinalNewline ? "force" : "remove";
-        conf["nl_end_of_file_min"] = "%d".printf (options.trimFinalNewlines ? 1 : 0);
-        conf["output_tab_size"] = "%u".printf (options.tabSize);
+        conf["indent_with_tabs"] = "%d".printf (options.insert_spaces ? 0 : 1);
+        conf["nl_end_of_file"] = FormattingOptionFlags.INSERT_FINAL_NEWLINE in options.flags ?
+            "force" : "remove";
+        conf["nl_end_of_file_min"] = "%d".printf (
+            FormattingOptionFlags.TRIM_FINAL_NEWLINES in options.flags ? 1 : 0);
+        conf["output_tab_size"] = "%d".printf (options.tab_size);
         conf["pos_arith"] = "lead";
         conf["indent_paren_nl"] = "true";
         conf["indent_comma_brace"] = "1";
-        conf["indent_columns"] = "%u".printf (options.tabSize);
+        conf["indent_columns"] = "%d".printf (options.tab_size);
         conf["indent_align_string"] = "true";
-        conf["indent_xml_string"] = "%u".printf (options.tabSize);
+        conf["indent_xml_string"] = "%d".printf (options.tab_size);
         conf["indent_namespace"] = "true";
         conf["indent_class"] = "true";
         conf["indent_var_def_cont"] = "true";

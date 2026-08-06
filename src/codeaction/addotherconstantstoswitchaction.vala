@@ -24,12 +24,11 @@ using Lsp;
 class Vls.AddOtherConstantsToSwitchAction : CodeAction {
     public AddOtherConstantsToSwitchAction (CodeActionContext context,
                                             Vala.SwitchStatement sws,
-                                            VersionedTextDocumentIdentifier document,
+                                            TextDocumentIdentifier document,
                                             Vala.Enum e,
                                             HashSet<string> missing,
                                             CodeStyleAnalyzer code_style) {
-        this.title = "Add missing constants to switch";
-        this.edit = new WorkspaceEdit ();
+        base ("Add missing constants to switch");
 
         var sections = sws.get_sections ();
         uint end_line, end_column;
@@ -68,24 +67,19 @@ class Vls.AddOtherConstantsToSwitchAction : CodeAction {
             }
         }
         var insert_text = sb.str;
-        var document_edit = new TextDocumentEdit (document);
-        var end_pos = new Position () {
-            line = end_line - 1,
-            character = end_column
-        };
-        var text_edit = new TextEdit (new Range () {
-            start = end_pos,
-            end = end_pos
-        }, insert_text);
-        document_edit.edits.add (text_edit);
-        this.edit.documentChanges = new ArrayList<TextDocumentEdit>.wrap ({document_edit});
+        var end_pos = Position (end_line - 1, end_column);
+        var document_edit = new TextDocumentEdit (
+            document,
+            {TextEdit (Range (end_pos, end_pos), insert_text)});
+        this.edit = new WorkspaceEdit ();
+        this.edit.add_document_change (document_edit);
         // now, include all relevant diagnostics
         foreach (var diag in context.diagnostics)
             if (diag.message.contains ("Switch does not handle"))
-                add_diagnostic (diag);
-        if (diagnostics != null && !diagnostics.is_empty)
-            this.kind = "quickfix";
+                this.add_diagnostic (diag);
+        if (diagnostics != null && diagnostics.length > 0)
+            this.kind = CodeActionKind.QUICK_FIX;
         else
-            this.kind = "refactor.rewrite";
+            this.kind = CodeActionKind.REFACTOR_REWRITE;
     }
 }

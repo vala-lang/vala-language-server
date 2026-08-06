@@ -25,6 +25,12 @@ using Gee;
  * `textDocument/references`, and `textDocument/documentHighlight`.
  */
 namespace Vls.SymbolReferences {
+    HashMap<Vala.SourceReference, Vala.CodeNode> create_reference_map () {
+        return new HashMap<Vala.SourceReference, Vala.CodeNode> (
+            Util.source_ref_hash,
+            Util.source_ref_equal);
+    }
+
     /**
      * Find a symbol in ``context`` matching ``symbol`` or ``null``.
      *
@@ -104,26 +110,34 @@ namespace Vls.SymbolReferences {
      * @param start            where to begin extraction
      * @param end              where to end extraction
      *
-     * @return      a new {@link Lsp.Range} narrowed from the source reference
+     * @return      a new source reference narrowed from the original
      */
-    Range get_narrowed_source_reference (Vala.SourceReference source_reference, string representation, int start, int end) {
-        var range = new Range.from_sourceref (source_reference);
+    Vala.SourceReference get_narrowed_source_reference (
+        Vala.SourceReference source_reference,
+        string representation,
+        int start,
+        int end
+    ) {
+        var range = Util.range_from_sourceref (source_reference);
 
         // move the start of the range up [last_index_of_symbol] characters
         string prefix = representation[0:start];
         int prefix_last_nl_pos;
         int prefix_nl_count = (int) Util.count_chars_in_string (prefix, '\n', out prefix_last_nl_pos);
 
-        range.start = range.start.translate (prefix_nl_count, prefix.length - prefix_last_nl_pos - 1);
+        range.start = Util.position_translate (
+            range.start, prefix_nl_count, prefix.length - prefix_last_nl_pos - 1);
 
         // move the end of the range up
-        range.end = range.start.dup ();
+        range.end = range.start;
         string text_inside = representation[start:end];
         int text_inside_last_nl_pos;
         int text_inside_nl_count = (int) Util.count_chars_in_string (text_inside, '\n', out text_inside_last_nl_pos);
 
-        range.end = range.end.translate (text_inside_nl_count, (end - start) - text_inside_last_nl_pos - 1);
-        return range;
+        range.end = Util.position_translate (
+            range.end, text_inside_nl_count,
+            (end - start) - text_inside_last_nl_pos - 1);
+        return Util.sourceref_from_range (source_reference.file, range);
     }
 
     /**
@@ -138,9 +152,12 @@ namespace Vls.SymbolReferences {
      *
      * @param code_node             A code node in the AST. Its ``source_reference`` must be non-``null``.
      * @param symbol                The symbol to replace inside the code node. ``symbol.name`` must be non-``null``.
-     * @return                      The replacement range, or ``null`` if ``symbol.name`` is not inside it
+     * @return                      The replacement source reference, or ``null`` if ``symbol.name`` is not inside it
      */
-    Range? get_replacement_range (Vala.CodeNode code_node, Vala.Symbol symbol) {
+    Vala.SourceReference? get_replacement_source_reference (
+        Vala.CodeNode code_node,
+        Vala.Symbol symbol
+    ) {
         string representation = CodeHelp.get_code_node_source (code_node);
         int index_of_symbol;
         MatchInfo match_info;
@@ -180,12 +197,12 @@ namespace Vls.SymbolReferences {
      * @param symbol    the symbol to search for
      * @return          a list of references to @symbol in @node's comment
      */
-    Range[] list_in_comment (Vala.Symbol node, Vala.Symbol symbol) {
+    Vala.SourceReference[] list_in_comment (Vala.Symbol node, Vala.Symbol symbol) {
         if (node.comment == null || node.comment.source_reference == null)
             return {};
 
         MatchInfo match_info;
-        Range[] ranges = {};
+        Vala.SourceReference[] references = {};
 
         if (/{@link\s+(?'link'\w+(\.\w+)*)}|@see\s+(?'see'(?&link))|@throws\s+(?'throws'(?&link))/
             .match (node.comment.content, 0, out match_info)) {
@@ -215,7 +232,11 @@ namespace Vls.SymbolReferences {
                         foreach (var component in components) {
                             if (component == symbol || CodeHelp.namespaces_equal (component, symbol)) {
                                 end = start + component.name.length;
-                                ranges += get_narrowed_source_reference (node.comment.source_reference, node.comment.content, start, end);
+                                references += get_narrowed_source_reference (
+                                    node.comment.source_reference,
+                                    node.comment.content,
+                                    start,
+                                    end);
                                 break;
                             }
                             start += component.name.length;
@@ -247,7 +268,11 @@ namespace Vls.SymbolReferences {
                             // see comment early up in this function
                             start -= 4;
                             end = start + param_name.length;
-                            ranges += get_narrowed_source_reference (node.comment.source_reference, node.comment.content, start, end);
+                            references += get_narrowed_source_reference (
+                                node.comment.source_reference,
+                                node.comment.content,
+                                start,
+                                end);
                         }
                     }
 
@@ -261,7 +286,7 @@ namespace Vls.SymbolReferences {
             }
         }
 
-        return ranges;
+        return references;
     }
 
     /** 
@@ -286,8 +311,10 @@ namespace Vls.SymbolReferences {
      *                          ``File``. If the latter, then the returned collection
      *                          contains both ``GLib`` and ``File``.
      */
-    Collection<Pair<Vala.Symbol, Range>> get_visible_components_of_code_node (Vala.CodeNode code_node) {
-        var components = new ArrayQueue<Pair<Vala.Symbol, Range>> ();
+    Collection<Pair<Vala.Symbol, Vala.SourceReference>> get_visible_components_of_code_node (
+        Vala.CodeNode code_node
+    ) {
+        var components = new ArrayQueue<Pair<Vala.Symbol, Vala.SourceReference>> ();
         Vala.Symbol? symbol = null;
 
         if (code_node is Vala.DataType)
@@ -354,7 +381,8 @@ namespace Vls.SymbolReferences {
                         Vala.SourceLocation (null, begin_line, begin_column),
                         Vala.SourceLocation (null, end_line, end_column));
 
-                    components.offer_head (new Pair<Vala.Symbol, Range> (current_sym, new Range.from_sourceref (sr)));
+                    components.offer_head (
+                        new Pair<Vala.Symbol, Vala.SourceReference> (current_sym, sr));
 
                     end -= current_sym.name.length;
                     // skip spaces, then '.', then spaces
@@ -410,33 +438,35 @@ namespace Vls.SymbolReferences {
      * @param include_invisible     include invisible symbol references (set to `false` if not replacing)
      * @param references            the collection to fill with references
      */
-    void list_in_file (Vala.SourceFile file, Vala.Symbol symbol, bool include_declaration, bool include_invisible, HashMap<Range, Vala.CodeNode> references) {
+    void list_in_file (Vala.SourceFile file, Vala.Symbol symbol, bool include_declaration,
+                       bool include_invisible,
+                       HashMap<Vala.SourceReference, Vala.CodeNode> references) {
         new SymbolVisitor (file, symbol, include_declaration, node => {
-            Collection<Pair<Vala.Symbol, Range>>? components = null;
+            Collection<Pair<Vala.Symbol, Vala.SourceReference>>? components = null;
             Vala.CodeNode? member_name = null;     // member_name
 
             // check for visible components
             if (node == symbol || CodeHelp.namespaces_equal (node, symbol)) {
-                var rrange = get_replacement_range (node, (Vala.Symbol)node);
-                if (rrange != null)
-                    references[rrange] = node;
+                var source_ref = get_replacement_source_reference (node, (Vala.Symbol)node);
+                if (source_ref != null)
+                    references[(!) source_ref] = node;
             } else if (node is Vala.MemberAccess && ((Vala.Expression)node).symbol_reference == symbol) {
                 components = get_visible_components_of_code_node (node);
             } else if (node is Vala.ObjectCreationExpression && oce_references_symbol ((Vala.ObjectCreationExpression)node, symbol)) {
                 components = get_visible_components_of_code_node (((Vala.ObjectCreationExpression)node).member_name);
                 member_name = ((Vala.ObjectCreationExpression)node).member_name;
             } else if (node is Vala.UsingDirective && ((Vala.UsingDirective)node).namespace_symbol == symbol) {
-                var rrange = get_replacement_range (node, symbol);
-                if (rrange != null)
-                    references[rrange] = node;
+                var source_ref = get_replacement_source_reference (node, symbol);
+                if (source_ref != null)
+                    references[(!) source_ref] = node;
             } else if (node is Vala.CreationMethod && ((Vala.CreationMethod)node).parent_symbol == symbol) {
-                var rrange = get_replacement_range (node, symbol);
-                if (rrange != null)
-                    references[rrange] = node;
+                var source_ref = get_replacement_source_reference (node, symbol);
+                if (source_ref != null)
+                    references[(!) source_ref] = node;
             } else if (node is Vala.Destructor && ((Vala.Destructor)node).parent_symbol == symbol) {
-                var rrange = get_replacement_range (node, symbol);
-                if (rrange != null)
-                    references[rrange] = node;
+                var source_ref = get_replacement_source_reference (node, symbol);
+                if (source_ref != null)
+                    references[(!) source_ref] = node;
             } else {
                 if (node is Vala.Namespace || node is Vala.TypeSymbol)
                     components = get_visible_components_of_code_node (node);
@@ -466,14 +496,16 @@ namespace Vls.SymbolReferences {
                     if (result != null)
                         references[result.second] = member_name ?? node;
                 }
-            } else if (include_invisible && node is Vala.Expression && ((Vala.Expression)node).symbol_reference == symbol) {
-                references[new Range.from_sourceref (node.source_reference)] = node;
+            } else if (include_invisible && node.source_reference != null &&
+                       node is Vala.Expression &&
+                       ((Vala.Expression)node).symbol_reference == symbol) {
+                references[node.source_reference] = node;
             }
 
             // get references to symbol in ValaDoc comments
             if (node is Vala.Symbol) {
-                foreach (var range in list_in_comment ((Vala.Symbol)node, symbol))
-                    references[range] = node;
+                foreach (var source_ref in list_in_comment ((Vala.Symbol)node, symbol))
+                    references[source_ref] = node;
             }
         });
     }
@@ -485,7 +517,11 @@ namespace Vls.SymbolReferences {
      * @param symbol        the virtual symbol to compare against implementation symbols
      * @param references    a collection of references that will be updated
      */
-    void list_implementations_of_virtual_symbol (Vala.SourceFile file, Vala.Symbol symbol, HashMap<Range, Vala.CodeNode> references) {
+    void list_implementations_of_virtual_symbol (
+        Vala.SourceFile file,
+        Vala.Symbol symbol,
+        HashMap<Vala.SourceReference, Vala.CodeNode> references
+    ) {
         new SymbolVisitor (file, symbol, true, node => {
             bool is_implementation = false;
             if (node is Vala.Property) {
@@ -507,8 +543,12 @@ namespace Vls.SymbolReferences {
                 if (/.+?([A-Za-z+]\w*)\s*$/.match (representation, 0, out match_info)) {
                     int begin, end;
                     if (match_info.fetch_pos (1, out begin, out end)) {
-                        var rrange = get_narrowed_source_reference (node.source_reference, representation, begin, end);
-                        references[rrange] = node;
+                        var source_ref = get_narrowed_source_reference (
+                            node.source_reference,
+                            representation,
+                            begin,
+                            end);
+                        references[source_ref] = node;
                     }
                 }
             }

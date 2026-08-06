@@ -68,7 +68,7 @@ class Vls.Reporter : Vala.Report {
         if (fatal_warnings)
             err (source, message);
         else {
-            add_message (source, message, DiagnosticSeverity.Warning);
+            add_message (source, message, DiagnosticSeverity.WARNING);
             ++warnings;
         }
     }
@@ -76,7 +76,7 @@ class Vls.Reporter : Vala.Report {
         if (source == null) { // non-source compiler error
             stderr.printf ("Error: %s\n", message);
         } else {
-            add_message (source, message, DiagnosticSeverity.Error);
+            add_message (source, message, DiagnosticSeverity.ERROR);
             ++errors;
         }
     }
@@ -84,7 +84,7 @@ class Vls.Reporter : Vala.Report {
         if (fatal_warnings)
             err (source, message);
         else {
-            add_message (source, message, DiagnosticSeverity.Information);
+            add_message (source, message, DiagnosticSeverity.INFORMATION);
             ++warnings;
         }
     }
@@ -92,7 +92,7 @@ class Vls.Reporter : Vala.Report {
         if (fatal_warnings)
             err (source, message);
         else {
-            add_message (source, message, DiagnosticSeverity.Warning);
+            add_message (source, message, DiagnosticSeverity.WARNING);
             ++warnings;
         }
     }

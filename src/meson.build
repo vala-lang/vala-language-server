@@ -1,3 +1,5 @@
+vls_util_src = files('util.vala')
+
 vls_src = files([
   'analysis/codeanalyzer.vala',
   'analysis/codelensanalyzer.vala',
@@ -34,11 +36,10 @@ vls_src = files([
   'projects/project.vala',
   'projects/textdocument.vala',
   'projects/types.vala',
-  'protocol.vala',
   'reporter.vala',
-  'request.vala',
   'server.vala',
 ])
+vls_src += vls_util_src
 
 if get_option('active_parameter')
   add_project_arguments(['--define=VALA_FEATURE_INITIAL_ARGUMENT_COUNT'], language: 'vala')
@@ -46,6 +47,6 @@ endif
 
 vls = executable('vala-language-server',
   dependencies: deps,
-  sources: [vls_src, conf_file, version_file, extra_vala_sources],
+  sources: [vls_src, conf_file, version_file, platform_vala_sources],
   c_args: ['-DG_LOG_DOMAIN="vls"'],
   install: true)

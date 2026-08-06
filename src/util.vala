@@ -17,28 +17,19 @@
  */
 
 using Gee;
+using Lsp;
 
 namespace Vls.Util {
-    public static T? parse_variant<T> (Variant variant) {
-        var json = Json.gvariant_serialize (variant);
-        return Json.gobject_deserialize (typeof (T), json);
-    }
-
-    public static Variant object_to_variant (Object object) throws Error {
-        var json = Json.gobject_serialize (object);
-        return Json.gvariant_deserialize (json, null);
-    }
-
     /**
      * Gets the offset, in bytes, of the UTF-8 character at the given line and
      * position.
      * Both lineno and charno must be zero-indexed.
      */
-    public static size_t get_string_pos (string str, uint lineno, uint charno) {
+    public static size_t get_string_pos (string str, uint64 lineno, uint64 charno) {
         int pos = 0;
         unowned string curstr = str;
 
-        for (uint lno = 0; lno < lineno; ++lno) {
+        for (uint64 lno = 0; lno < lineno; ++lno) {
             int rel_idx = curstr.index_of_char ('\n');
             if (rel_idx == -1)
                 break;
@@ -53,7 +44,7 @@ namespace Vls.Util {
             }
         }
 
-        return pos + curstr.index_of_nth_char (charno);
+        return pos + curstr.index_of_nth_char ((long) charno);
     }
 
     /**
@@ -359,10 +350,111 @@ namespace Vls.Util {
         return source_file_hash (source_file1) == source_file_hash (source_file2);
     }
 
-    public bool source_ref_equal (Vala.SourceReference source_ref1, Vala.SourceReference source_ref2) {
-        return source_ref1.contains (source_ref2.begin) && source_ref1.contains (source_ref2.end) &&
-            source_ref2.contains (source_ref1.begin) && source_ref2.contains (source_ref1.end);
+    public uint source_ref_hash (Vala.SourceReference source_ref) {
+        uint hash = source_ref.file.filename.hash ();
+        hash = hash * 31 + (uint) source_ref.begin.line;
+        hash = hash * 31 + (uint) source_ref.begin.column;
+        hash = hash * 31 + (uint) source_ref.end.line;
+        return hash * 31 + (uint) source_ref.end.column;
     }
+
+    public bool source_ref_equal (Vala.SourceReference source_ref1, Vala.SourceReference source_ref2) {
+        return source_ref1.file.filename == source_ref2.file.filename &&
+            source_ref1.begin.line == source_ref2.begin.line &&
+            source_ref1.begin.column == source_ref2.begin.column &&
+            source_ref1.end.line == source_ref2.end.line &&
+            source_ref1.end.column == source_ref2.end.column;
+    }
+
+    public Position position_from_libvala (Vala.SourceLocation location) {
+        return Position (location.line - 1, location.column);
+    }
+
+    public int position_compare (Position left, Position right) {
+        if (left.line != right.line)
+            return left.line > right.line ? 1 : -1;
+        if (left.character != right.character)
+            return left.character > right.character ? 1 : -1;
+        return 0;
+    }
+
+    public Position position_translate (Position position, int line_delta = 0,
+                                        int character_delta = 0) {
+        return Position (
+            (uint64) ((int64) position.line + line_delta),
+            (uint64) ((int64) position.character + character_delta));
+    }
+
+    public Range range_from_position (Position position) {
+        return Range (position, position);
+    }
+
+    public Range range_from_sourceref (Vala.SourceReference source_reference) {
+        var start = position_from_libvala (source_reference.begin);
+        start.character--;
+        return Range (start, position_from_libvala (source_reference.end));
+    }
+
+    public Vala.SourceReference sourceref_from_range (Vala.SourceFile file, Range range) {
+        return new Vala.SourceReference (
+            file,
+            Vala.SourceLocation (
+                null,
+                (int) range.start.line + 1,
+                (int) range.start.character + 1),
+            Vala.SourceLocation (
+                null,
+                (int) range.end.line + 1,
+                (int) range.end.character));
+    }
+
+    public int range_compare (Range left, Range right) {
+        return position_compare (left.start, right.start);
+    }
+
+    public uint range_hash (Range range) {
+        return @"$(range.start.line):$(range.start.character)-$(range.end.line):$(range.end.character)".hash ();
+    }
+
+    public bool range_equal (Range left, Range right) {
+        return position_compare (left.start, right.start) == 0 &&
+            position_compare (left.end, right.end) == 0;
+    }
+
+
+    public Range range_union (Range left, Range right) {
+        return Range (
+            position_compare (left.start, right.start) < 0 ? left.start : right.start,
+            position_compare (left.end, right.end) < 0 ? right.end : left.end);
+    }
+
+    public bool range_contains (Range range, Position position) {
+        return position_compare (range.start, position) <= 0 &&
+            position_compare (position, range.end) <= 0;
+    }
+
+    public Uri uri_from_filename (string filename) {
+        return uri_from_file (File.new_for_commandline_arg (filename));
+    }
+
+    public Uri uri_from_file (File file) {
+        try {
+            return Uri.parse (file.get_uri (), UriFlags.NONE);
+        } catch (UriError error) {
+            assert_not_reached ();
+        }
+    }
+
+    public Location location_from_filename (string filename, Range range) {
+        return Location (uri_from_filename (filename), range);
+    }
+
+    public Location location_from_sourceref (Vala.SourceReference source_reference) {
+        return location_from_filename (
+            source_reference.file.filename,
+            range_from_sourceref (source_reference));
+    }
+
 
     /**
      * (stolen from VersionAttribute.cmp_versions in `vala/valaversionattribute.vala`)
