@@ -20,7 +20,7 @@ libvala = dependency('libvala-@0@'.format(libvala_version), version: '>= 0.56')
 libgobject_dep = dependency('gobject-2.0')
 lsp_glib_dep = dependency(
   'lsp-glib-3.0',
-  version: '>= 3.18.0-alpha',
+  version: '>= 3.18.0-alpha.1',
   required: false,
   default_options: [
     'enable_valadoc=false',
