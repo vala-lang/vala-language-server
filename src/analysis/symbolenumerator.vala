@@ -92,9 +92,8 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
         return range;
     }
 
-    private static SymbolInformation info_from_item (DocumentSymbol symbol,
-                                                     Uri uri,
-                                                     string? parent_name) {
+    private SymbolInformation info_from_item (DocumentSymbol symbol,
+                                              string? parent_name) {
         return new SymbolInformation (
             symbol.name,
             symbol.kind,
@@ -117,8 +116,7 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
     }
 
     private void flatten (DocumentSymbol symbol, string? parent_name) {
-        all_sym_infos.add (info_from_item (
-            symbol, uri, parent_name));
+        all_sym_infos.add (info_from_item (symbol, parent_name));
         foreach (var child in symbol.children)
             flatten (child, symbol.name);
     }
