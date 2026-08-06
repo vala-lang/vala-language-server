@@ -1,6 +1,6 @@
 [wrap-git]
 url = https://github.com/vala-lang/lsp-glib
-revision = aba119fd5cd1553cde6addaa89c2de572769b7b9
+revision = 6880709a46c21313a92faae4fe93106e94a8c4fd
 
 [provide]
-lsp-glib-3.0 = lsp_glib_dep
+lsp-glib-3.0 = lsp_glib_vala_dep

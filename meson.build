@@ -21,27 +21,11 @@ libgobject_dep = dependency('gobject-2.0')
 lsp_glib_dep = dependency(
   'lsp-glib-3.0',
   version: '>= 3.18.0-alpha.1',
-  required: false,
   default_options: [
     'enable_valadoc=false',
     'gi-docgen=false',
   ],
 )
-lsp_glib_vala_dep = []
-if not lsp_glib_dep.found()
-  lsp_glib = subproject(
-    'lsp-glib',
-    default_options: [
-      'enable_valadoc=false',
-      'gi-docgen=false',
-    ],
-  )
-  lsp_glib_dep = lsp_glib.get_variable('lsp_glib_dep')
-  lsp_glib_vala_dep = lsp_glib.get_variable('lsp_glib_vala_dep')
-elif lsp_glib_dep.type_name() == 'internal'
-  lsp_glib = subproject('lsp-glib')
-  lsp_glib_vala_dep = lsp_glib.get_variable('lsp_glib_vala_dep')
-endif
 
 deps = [
     dependency('glib-2.0', version: '>= 2.66'),
@@ -52,7 +36,7 @@ deps = [
     lsp_glib_dep,
     libvala,
     valac.find_library('posix'),
-] + lsp_glib_vala_dep
+]
 
 # let Vala add the appropriate defines for GLIB_X_X
 add_project_arguments(['--target-glib=auto'], language: 'vala')
