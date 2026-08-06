@@ -154,9 +154,6 @@ namespace Vls.CallHierarchy {
                 }
             }
         }
-        CallHierarchyOutgoingCall[] outgoing = {};
-        foreach (var call in outgoing_calls.values)
-            outgoing += call;
-        return outgoing;
+        return (CallHierarchyOutgoingCall[]) outgoing_calls.values.to_array ();
     }
 }
