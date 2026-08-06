@@ -22,14 +22,6 @@ using Lsp;
 using Vala;
 
 namespace Vls.CodeActions {
-    void add_diagnostic (CodeAction action, Diagnostic diagnostic) {
-        Diagnostic[] diagnostics = {};
-        if (action.diagnostics != null)
-            diagnostics = (!) action.diagnostics;
-        diagnostics += diagnostic;
-        action.diagnostics = diagnostics;
-    }
-
     /**
      * Extracts a list of code actions for the given document and range.
      *

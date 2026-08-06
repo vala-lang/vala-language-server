@@ -35,7 +35,6 @@ class Vls.DiagnosticBatch {
 
 class Vls.Server : Lsp.Server {
     private static bool received_signal = false;
-    MainLoop loop;
 
     InitializeParams init_params;
 
@@ -84,8 +83,6 @@ class Vls.Server : Lsp.Server {
     public Server (MainLoop loop) {
         base (loop);
 
-        this.loop = loop;
-
         // hack to prevent other things from corrupting JSON-RPC pipe:
         // create a new handle to stdout, and close the old one (or move it to stderr)
 #if WINDOWS
@@ -114,7 +111,7 @@ class Vls.Server : Lsp.Server {
              error ("could not set pipes to nonblocking.\n");
         } catch (Error e) {
             warning ("failed to set FDs to nonblocking");
-            loop.quit ();
+            exit ();
             return;
         }
 #endif
@@ -122,15 +119,17 @@ class Vls.Server : Lsp.Server {
         // shutdown if/when we get a signal
         Timeout.add (1000, check_signal);
 
-        client_closed.connect ((_client) => {
-            shutdown ();
-            exit ();
-        });
         accept_io_stream (new SimpleIOStream (input_stream, output_stream));
 
         this.projects = new HashTable<Project, ulong> (GLib.direct_hash, GLib.direct_equal);
 
         debug ("Finished constructing");
+    }
+
+    protected override void client_closed (Jsonrpc.Client client) {
+        base.client_closed (client);
+        shutdown ();
+        exit ();
     }
 
     bool check_signal () {
@@ -1040,19 +1039,20 @@ class Vls.Server : Lsp.Server {
             //         CodeHelp.get_symbol_representation (null, symbol, scope, false));
 
             Range? hover_range = null;
-            Range? symbol_range = null;
+            Vala.SourceReference? symbol_source_ref = null;
             if (symbol != null) {
-                symbol_range = SymbolReferences.get_replacement_range (result, symbol);
-                if (symbol_range != null) {
-                    Range range = (!) symbol_range;
+                symbol_source_ref =
+                    SymbolReferences.get_replacement_source_reference (result, symbol);
+                if (symbol_source_ref != null) {
+                    Range range = Util.range_from_sourceref ((!) symbol_source_ref);
                     // if the symbol range does not include the cursor, then try
                     // to get the hidden symbol at the cursor first
                     bool found_component = false;
                     if (!Util.range_contains (range, position)) {
                         foreach (var component in SymbolReferences.get_visible_components_of_code_node (result)) {
-                            if (component.second != null &&
-                                Util.range_contains ((!) component.second, position)) {
-                                hover_range = (!) component.second;
+                            var component_range = Util.range_from_sourceref (component.second);
+                            if (Util.range_contains (component_range, position)) {
+                                hover_range = component_range;
                                 symbol = component.first;
                                 data_type = null;
                                 method_type_arguments = null;
@@ -1066,7 +1066,7 @@ class Vls.Server : Lsp.Server {
                 }
             }
 
-            if (symbol_range == null)
+            if (symbol_source_ref == null)
                 hover_range = Util.range_from_sourceref (result.source_reference);
 
             string? representation = CodeHelp.get_symbol_representation (data_type, symbol, scope, true, method_type_arguments);
@@ -1081,6 +1081,22 @@ class Vls.Server : Lsp.Server {
                 if (comment != null) {
                     contents.append ("\n\n");
                     contents.append (comment.body);
+                    // if (symbol is Vala.Callable &&
+                    //     ((Vala.Callable) symbol).get_parameters () != null) {
+                    //     var param_list = ((Vala.Callable) symbol).get_parameters ();
+                    //     foreach (var parameter in param_list) {
+                    //         if (parameter.name == null)
+                    //             break;
+                    //         string? param_doc = comment.parameters[parameter.name];
+                    //         if (param_doc == null)
+                    //             continue;
+                    //         contents.append_printf (
+                    //             "\n\n`%s` - %s", parameter.name, param_doc);
+                    //     }
+                    // }
+                    // if (comment.return_body != null)
+                    //     contents.append_printf (
+                    //         "\n\n**returns** %s", comment.return_body);
                 }
             }
 
@@ -1178,7 +1194,7 @@ class Vls.Server : Lsp.Server {
 
         Vala.CodeNode result = get_best (fs, doc);
         Vala.Symbol symbol;
-        var references = new Gee.HashMap<SourceRange, Vala.CodeNode> ();
+        var references = SymbolReferences.create_reference_map ();
 
         if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null)
             result = ((Vala.Expression) result).symbol_reference;
@@ -1223,10 +1239,10 @@ class Vls.Server : Lsp.Server {
         foreach (var entry in references) {
             if (is_highlight) {
                 found_highlights += DocumentHighlight (
-                    entry.key.range, determine_node_highlight_kind (entry.value));
+                    Util.range_from_sourceref (entry.key),
+                    determine_node_highlight_kind (entry.value));
             } else {
-                found_locations += Util.location_from_filename (
-                    entry.key.filename, entry.key.range);
+                found_locations += Util.location_from_sourceref (entry.key);
             }
         }
 
@@ -1335,7 +1351,7 @@ class Vls.Server : Lsp.Server {
         Lsp.Client client,
         TextDocumentIdentifier text_document,
         FormattingOptions options) throws Error {
-        return format (text_document, options, null);
+        return format (text_document, options);
     }
 
     protected override async TextEdit[]? range_formatting_async (
@@ -1347,7 +1363,7 @@ class Vls.Server : Lsp.Server {
     }
 
     TextEdit[]? format (TextDocumentIdentifier text_document,
-                        FormattingOptions options, Range? range) throws Error {
+                        FormattingOptions options, Range? range = null) throws Error {
         Compilation compilation;
         var uri = text_document.uri.to_string ();
         Vala.SourceFile? source_file = find_file (uri, out compilation);
@@ -1458,7 +1474,7 @@ class Vls.Server : Lsp.Server {
 
             Vala.CodeNode result = get_best (search, doc);
             Vala.Symbol symbol;
-            var references = new Gee.HashMap<SourceRange, Vala.CodeNode> ();
+            var references = SymbolReferences.create_reference_map ();
 
             if (result is Vala.Expression && ((Vala.Expression)result).symbol_reference != null)
                 result = ((Vala.Expression) result).symbol_reference;
@@ -1495,7 +1511,7 @@ class Vls.Server : Lsp.Server {
                     var file = File.new_for_commandline_arg (project_file.filename);
                     if (file in generated_vapis || file in shown_files)
                         continue;
-                    var file_references = new HashMap<SourceRange, Vala.CodeNode> ();
+                    var file_references = SymbolReferences.create_reference_map ();
                     debug ("[%s] looking for references in %s ...", method, file.get_uri ());
                     SymbolReferences.list_in_file (project_file, btarget_w_sym.second, true, false, file_references);
                     if (is_abstract_or_virtual) {
@@ -1523,18 +1539,18 @@ class Vls.Server : Lsp.Server {
 
             foreach (var entry in references) {
                 var code_node = entry.value;
-                Range source_range = entry.key.range;
+                Range source_range = Util.range_from_sourceref (entry.key);
                 debug ("[%s] editing reference %s @ %s ...", 
                     method, 
                     CodeHelp.get_code_node_source (code_node), 
                     code_node.source_reference.to_string ());
-                var file = File.new_for_commandline_arg (entry.key.filename);
+                var file = File.new_for_commandline_arg (entry.key.file.filename);
                 if (!edits.has_key (file.get_uri ()))
                     edits[file.get_uri ()] = new ArrayList<TextEdit?> ();
                 var file_edits = edits[file.get_uri ()];
                 // if this is a using directive, we want to only replace the part after the 'using' keyword
                 file_edits.add (TextEdit (source_range, new_name));
-                source_files[file.get_uri ()] = code_node.source_reference.file;
+                source_files[file.get_uri ()] = entry.key.file;
             }
 
             var workspace_edit = new WorkspaceEdit ();
@@ -1597,10 +1613,11 @@ class Vls.Server : Lsp.Server {
 
             symbol = (Vala.Symbol) result;
 
-            var replacement_range = SymbolReferences.get_replacement_range (initial_result, symbol);
+            var replacement_source_ref =
+                SymbolReferences.get_replacement_source_reference (initial_result, symbol);
             // If the source_reference is null, then this could be something like a
             // `this' parameter.
-            if (replacement_range == null || symbol.source_reference == null)
+            if (replacement_source_ref == null || symbol.source_reference == null)
                 throw new ProtocolError.REQUEST_FAILED (
                     "There is no symbol at the cursor.");
 
@@ -1615,7 +1632,9 @@ class Vls.Server : Lsp.Server {
                 }
             }
 
-            return PrepareRenameResult.for_range ((!) replacement_range, symbol.name);
+            return PrepareRenameResult.for_range (
+                Util.range_from_sourceref ((!) replacement_source_ref),
+                symbol.name);
         } finally {
             Vala.CodeContext.pop ();
         }
@@ -1800,10 +1819,10 @@ class Vls.Server : Lsp.Server {
                             continue;
                         }
 
-                        var hint_range = SymbolReferences.get_narrowed_source_reference (
+                        var hint_source_ref = SymbolReferences.get_narrowed_source_reference (
                             item.source_reference, representation, start, end);
                         var hint = new InlayHint (
-                            hint_range.end,
+                            Util.range_from_sourceref (hint_source_ref).end,
                             ":%s".printf (CodeHelp.get_data_type_representation (
                                 element_type, null)),
                             InlayHintKind.TYPE);
@@ -1928,8 +1947,10 @@ class Vls.Server : Lsp.Server {
                 // A qualified expression can expose more than one type symbol.
                 foreach (var component in
                          SymbolReferences.get_visible_components_of_code_node (result)) {
-                    if (component.first is Vala.TypeSymbol && component.second != null &&
-                        Util.range_contains ((!) component.second, position)) {
+                    if (component.first is Vala.TypeSymbol &&
+                        Util.range_contains (
+                            Util.range_from_sourceref (component.second),
+                            position)) {
                         type_symbol = (Vala.TypeSymbol) component.first;
                         break;
                     }
@@ -1999,9 +2020,9 @@ class Vls.Server : Lsp.Server {
             project.disconnect (projects[project]);
     }
 
-    public override void exit () {
+    protected override void exit () {
         cancellable.cancel ();
-        loop.quit ();
+        base.exit ();
     }
 }
 

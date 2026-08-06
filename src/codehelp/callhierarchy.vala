@@ -71,7 +71,7 @@ namespace Vls.CallHierarchy {
     }
 
     CallHierarchyIncomingCall[] get_incoming_calls (Project project, Symbol callable) {
-        var incoming_calls = new Gee.HashMap<Symbol, Gee.ArrayList<Range?>> ();
+        var incoming_calls = new Gee.HashMap<Symbol, CallHierarchyIncomingCall> ();
         Symbol[] symbols = {callable};
         if (callable is Method) {
             var method = (Method)callable;
@@ -81,7 +81,7 @@ namespace Vls.CallHierarchy {
                 symbols += method.base_method;
         }
         // find all references to this callable
-        var references = new Gee.HashMap<SourceRange, CodeNode> ();
+        var references = SymbolReferences.create_reference_map ();
         foreach (var symbol in symbols)
             foreach (var pair in SymbolReferences.get_compilations_using_symbol (project, symbol))
                 foreach (SourceFile file in pair.first.code_context.get_source_files ())
@@ -92,14 +92,11 @@ namespace Vls.CallHierarchy {
                 continue;
             var container = get_containing_sub_or_callable (reference.value);
             if (container != null) {
-                Gee.ArrayList<Range?> ranges;
-                if (!incoming_calls.has_key (container)) {
-                    ranges = new Gee.ArrayList<Range?> ();
-                    incoming_calls[container] = ranges;
-                } else {
-                    ranges = incoming_calls[container];
-                }
-                ranges.add (reference.key.range);
+                if (!incoming_calls.has_key (container))
+                    incoming_calls[container] = new CallHierarchyIncomingCall (
+                        item_from_symbol (container), {});
+                incoming_calls[container].add_from_range (
+                    Util.range_from_sourceref (reference.key));
             }
         }
         if (callable is Constructor) {
@@ -109,31 +106,27 @@ namespace Vls.CallHierarchy {
                 foreach (var member in type_symbol.get_members ()) {
                     if (member is CreationMethod) {
                         var cm = (CreationMethod)member;
-                        var ranges = new Gee.ArrayList<Range?> ();
-                        ranges.add (Util.range_from_sourceref (
+                        var call = new CallHierarchyIncomingCall (
+                            item_from_symbol (cm), {});
+                        call.add_from_range (Util.range_from_sourceref (
                             member.source_reference ?? type_symbol.source_reference));
-                        incoming_calls[cm] = ranges;
+                        incoming_calls[cm] = call;
                     }
                 }
             }
         }
         CallHierarchyIncomingCall[] incoming = {};
-        foreach (var item in incoming_calls) {
-            Range[] ranges = {};
-            foreach (var range in item.value)
-                ranges += (!) range;
-            incoming += new CallHierarchyIncomingCall (
-                item_from_symbol (item.key), ranges);
-        }
+        foreach (var call in incoming_calls.values)
+            incoming += call;
         return incoming;
     }
 
     CallHierarchyOutgoingCall[] get_outgoing_calls (Project project, Subroutine subroutine) {
-        var outgoing_calls = new Gee.HashMap<Symbol, Gee.ArrayList<Range?>> ();
+        var outgoing_calls = new Gee.HashMap<Symbol, CallHierarchyOutgoingCall> ();
         Subroutine[] subroutines = {subroutine};
         // add all implementing symbols
         foreach (var pair in SymbolReferences.get_compilations_using_symbol (project, subroutine)) {
-            var references = new Gee.HashMap<SourceRange, Vala.CodeNode> ();
+            var references = SymbolReferences.create_reference_map ();
             foreach (SourceFile file in pair.first.code_context.get_source_files ())
                 SymbolReferences.list_implementations_of_virtual_symbol (file, pair.second, references);
             foreach (var node in references.values)
@@ -153,25 +146,17 @@ namespace Vls.CallHierarchy {
                     if (node.source_reference == null || call.symbol_reference.source_reference == null)
                         continue;
                     var called_item = SymbolReferences.find_real_symbol (project, call.symbol_reference);
-                    Gee.ArrayList<Range?> ranges;
-                    if (!outgoing_calls.has_key (called_item)) {
-                        ranges = new Gee.ArrayList<Range?> ();
-                        outgoing_calls[called_item] = ranges;
-                    } else {
-                        ranges = outgoing_calls[called_item];
-                    }
-                    ranges.add (Util.range_from_sourceref (node.source_reference));
+                    if (!outgoing_calls.has_key (called_item))
+                        outgoing_calls[called_item] = new CallHierarchyOutgoingCall (
+                            item_from_symbol (called_item), {});
+                    outgoing_calls[called_item].add_from_range (
+                        Util.range_from_sourceref (node.source_reference));
                 }
             }
         }
         CallHierarchyOutgoingCall[] outgoing = {};
-        foreach (var item in outgoing_calls) {
-            Range[] ranges = {};
-            foreach (var range in item.value)
-                ranges += (!) range;
-            outgoing += new CallHierarchyOutgoingCall (
-                item_from_symbol (item.key), ranges);
-        }
+        foreach (var call in outgoing_calls.values)
+            outgoing += call;
         return outgoing;
     }
 }

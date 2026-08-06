@@ -252,11 +252,7 @@ namespace Vls.SignatureHelpEngine {
                 if (param_doc_comment != null)
                     parameter_info.documentation = new MarkupContent (
                         MarkupKind.MARKDOWN, param_doc_comment);
-                ParameterInformation[] parameters = {};
-                if (si.parameters != null)
-                    parameters = (!) si.parameters;
-                parameters += parameter_info;
-                si.parameters = parameters;
+                si.add_parameter (parameter_info);
             }
             if (si.parameters != null && si.parameters.length > 0)
                 signatures.add (si);

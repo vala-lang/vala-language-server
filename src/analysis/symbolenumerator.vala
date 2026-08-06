@@ -80,9 +80,7 @@ class Vls.SymbolEnumerator : Vala.CodeVisitor, CodeAnalyzer {
     }
 
     private static void add_child (DocumentSymbol parent, DocumentSymbol child) {
-        DocumentSymbol[] children = parent.children;
-        children += child;
-        parent.children = children;
+        parent.add_child (child);
         parent.range = Util.range_union (parent.range, child.range);
     }
 

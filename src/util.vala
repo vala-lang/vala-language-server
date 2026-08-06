@@ -350,9 +350,20 @@ namespace Vls.Util {
         return source_file_hash (source_file1) == source_file_hash (source_file2);
     }
 
+    public uint source_ref_hash (Vala.SourceReference source_ref) {
+        uint hash = source_ref.file.filename.hash ();
+        hash = hash * 31 + (uint) source_ref.begin.line;
+        hash = hash * 31 + (uint) source_ref.begin.column;
+        hash = hash * 31 + (uint) source_ref.end.line;
+        return hash * 31 + (uint) source_ref.end.column;
+    }
+
     public bool source_ref_equal (Vala.SourceReference source_ref1, Vala.SourceReference source_ref2) {
-        return source_ref1.contains (source_ref2.begin) && source_ref1.contains (source_ref2.end) &&
-            source_ref2.contains (source_ref1.begin) && source_ref2.contains (source_ref1.end);
+        return source_ref1.file.filename == source_ref2.file.filename &&
+            source_ref1.begin.line == source_ref2.begin.line &&
+            source_ref1.begin.column == source_ref2.begin.column &&
+            source_ref1.end.line == source_ref2.end.line &&
+            source_ref1.end.column == source_ref2.end.column;
     }
 
     public Position position_from_libvala (Vala.SourceLocation location) {
@@ -382,6 +393,19 @@ namespace Vls.Util {
         var start = position_from_libvala (source_reference.begin);
         start.character--;
         return Range (start, position_from_libvala (source_reference.end));
+    }
+
+    public Vala.SourceReference sourceref_from_range (Vala.SourceFile file, Range range) {
+        return new Vala.SourceReference (
+            file,
+            Vala.SourceLocation (
+                null,
+                (int) range.start.line + 1,
+                (int) range.start.character + 1),
+            Vala.SourceLocation (
+                null,
+                (int) range.end.line + 1,
+                (int) range.end.character));
     }
 
     public int range_compare (Range left, Range right) {

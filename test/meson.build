@@ -15,3 +15,11 @@ test('document symbols', vls_testclient,
   ],
   suite: 'vls',
   timeout: 120)
+
+source_reference_test = executable('source-reference-test',
+  dependencies: deps,
+  sources: files('source-reference.vala') + vls_util_src,
+  install: false)
+
+test('source reference keys', source_reference_test,
+  suite: 'vls')

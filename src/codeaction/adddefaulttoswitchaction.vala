@@ -65,7 +65,7 @@ class Vls.AddDefaultToSwitchAction : CodeAction {
         // now, include all relevant diagnostics
         foreach (var diag in context.diagnostics)
             if (diag.message.contains ("Switch does not handle"))
-                CodeActions.add_diagnostic (this, diag);
+                this.add_diagnostic (diag);
         if (diagnostics != null && diagnostics.length > 0)
             this.kind = CodeActionKind.QUICK_FIX;
         else

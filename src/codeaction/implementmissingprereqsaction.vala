@@ -162,6 +162,6 @@ class Vls.ImplementMissingPrereqsAction : CodeAction {
         // now, include all relevant diagnostics
         foreach (var diag in context.diagnostics)
             if (/does not implement|some prerequisites .*are not met/.match (diag.message))
-                CodeActions.add_diagnostic (this, diag);
+                this.add_diagnostic (diag);
     }
 }
