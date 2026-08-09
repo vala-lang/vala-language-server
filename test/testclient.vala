@@ -95,6 +95,12 @@ class Vls.TestClient : Lsp.Editor {
         parameters.capabilities.text_document = new TextDocumentClientCaps ();
         parameters.capabilities.text_document.document_symbol = DocumentSymbolClientCaps (
             DocumentSymbolClientFlags.HIERARCHICAL_DOCUMENT_SYMBOLS);
+        if (check_completions) {
+            var completion = new CompletionClientCaps ();
+            if (snippet_support)
+                completion.flags = CompletionClientFlags.SNIPPETS;
+            parameters.capabilities.text_document.completion = completion;
+        }
 
         yield initialize_with_params_async (parameters);
         yield initialized_async ();
@@ -123,6 +129,9 @@ class Vls.TestClient : Lsp.Editor {
         yield initialize_server ();
         if (document_symbol_file != null) {
             yield check_document_symbols ((!) document_symbol_file);
+            yield stop_server ();
+        } else if (check_completions) {
+            yield check_string_completions ();
             yield stop_server ();
         }
         yield vls_subprocess.wait_async ();
@@ -176,6 +185,165 @@ class Vls.TestClient : Lsp.Editor {
             assert_symbol_ranges (symbol);
     }
 
+    private async void check_snippet_completion (string basename,
+                                                 string contents,
+                                                 Position position,
+                                                 string label,
+                                                 CompletionItemKind kind) throws Error {
+        var filename = Path.build_filename (root_path, "test", basename);
+        var uri = Uri.parse (
+            File.new_for_path (filename).get_uri (), UriFlags.NONE);
+        yield open_text_document_async (uri, LanguageId.VALA, contents);
+
+        var items = yield completion_async (uri, position);
+        assert (items != null);
+        CompletionItem? completion = null;
+        foreach (var item in items) {
+            if (item.label == label && item.kind == kind)
+                completion = item;
+            if (!snippet_support) {
+                assert (item.insert_text_format != InsertTextFormat.SNIPPET);
+                assert (item.insert_text == null || !item.insert_text.contains ("$"));
+            }
+        }
+        assert (completion != null);
+        if (snippet_support) {
+            assert (completion.insert_text != null);
+            assert (completion.insert_text_format == InsertTextFormat.SNIPPET);
+            assert (completion.insert_text.contains ("$"));
+        } else {
+            assert (completion.insert_text == null);
+            assert (completion.insert_text_format == InsertTextFormat.UNSET);
+        }
+    }
+
+    private async void check_string_completions () throws Error {
+        const string contents = "void main () {\n" +
+            "    \n" +
+            "    string path = \"\";\n" +
+            "    path.spli\n" +
+            "}\n";
+        var filename = Path.build_filename (
+            root_path, "test", "completion-client.vala");
+        var uri = Uri.parse (
+            File.new_for_path (filename).get_uri (), UriFlags.NONE);
+        yield open_text_document_async (uri, LanguageId.VALA, contents);
+
+        var keyword_items = yield completion_async (uri, Position (1, 4));
+        assert (keyword_items != null);
+        CompletionItem? if_keyword = null;
+        foreach (var item in keyword_items) {
+            if (item.label == "if")
+                if_keyword = item;
+            if (!snippet_support) {
+                assert (item.insert_text_format != InsertTextFormat.SNIPPET);
+                assert (item.insert_text == null || !item.insert_text.contains ("$"));
+            }
+        }
+        assert (if_keyword != null);
+
+        var items = yield completion_async (uri, Position (3, 13));
+        assert (items != null);
+        CompletionItem? split = null;
+        foreach (var item in items) {
+            if (item.label == "split") {
+                split = item;
+            }
+            if (!snippet_support) {
+                assert (item.insert_text_format != InsertTextFormat.SNIPPET);
+                assert (item.insert_text == null || !item.insert_text.contains ("$"));
+            }
+        }
+        assert (split != null);
+        if (snippet_support) {
+            assert (if_keyword.insert_text != null);
+            assert (if_keyword.insert_text_format == InsertTextFormat.SNIPPET);
+            assert (if_keyword.insert_text.contains ("$"));
+            assert (split.insert_text != null);
+            assert (split.insert_text_format == InsertTextFormat.SNIPPET);
+            assert (split.insert_text.contains ("$"));
+        } else {
+            assert (if_keyword.insert_text == null);
+            assert (if_keyword.insert_text_format == InsertTextFormat.UNSET);
+            assert (split.insert_text == null);
+            assert (split.insert_text_format == InsertTextFormat.UNSET);
+        }
+
+        const string implementation_contents = "abstract class Base {\n" +
+            "    public abstract void foo ();\n" +
+            "}\n" +
+            "class Derived : Base {\n" +
+            "    \n" +
+            "}\n";
+        filename = Path.build_filename (
+            root_path, "test", "completion-implementation-client.vala");
+        uri = Uri.parse (
+            File.new_for_path (filename).get_uri (), UriFlags.NONE);
+        yield open_text_document_async (uri, LanguageId.VALA, implementation_contents);
+
+        var implementation_items = yield completion_async (uri, Position (4, 4));
+        assert (implementation_items != null);
+        CompletionItem? implementation = null;
+        foreach (var item in implementation_items) {
+            if (item.label.has_prefix ("public override void foo"))
+                implementation = item;
+        }
+        if (snippet_support) {
+            assert (implementation != null);
+            assert (implementation.insert_text_format == InsertTextFormat.SNIPPET);
+        } else {
+            assert (implementation == null);
+        }
+
+        const string signal_contents = "class Fixture : Object {\n" +
+            "    public signal void changed (int value);\n" +
+            "    void test () {\n" +
+            "        changed.con\n" +
+            "    }\n" +
+            "}\n";
+        yield check_snippet_completion (
+            "completion-signal-client.vala", signal_contents, Position (3, 19),
+            "connect", CompletionItemKind.METHOD);
+
+        const string array_contents = "void main () {\n" +
+            "    int[] values = {};\n" +
+            "    values.co\n" +
+            "}\n";
+        yield check_snippet_completion (
+            "completion-array-client.vala", array_contents, Position (2, 13),
+            "copy", CompletionItemKind.METHOD);
+
+        const string async_contents = "#!/usr/bin/env -S vala --pkg gio-2.0\n" +
+            "\n" +
+            "void main () {\n" +
+            "    File file = File.new_for_path (\"\");\n" +
+            "    file.read_async.begin ();\n" +
+            "}\n";
+        yield check_snippet_completion (
+            "completion-async-client.vala", async_contents, Position (4, 20),
+            "begin", CompletionItemKind.METHOD);
+
+        const string generic_contents = "class Box<T> {\n" +
+            "}\n" +
+            "void main () {\n" +
+            "    Bo\n" +
+            "}\n";
+        yield check_snippet_completion (
+            "completion-generic-client.vala", generic_contents, Position (3, 6),
+            "Box", CompletionItemKind.CLASS);
+
+        const string constructor_contents = "class Widget {\n" +
+            "    public Widget (int value) {\n" +
+            "    }\n" +
+            "}\n" +
+            "void main () {\n" +
+            "    var widget = new Wid\n" +
+            "}\n";
+        yield check_snippet_completion (
+            "completion-constructor-client.vala", constructor_contents, Position (5, 24),
+            "Widget", CompletionItemKind.CONSTRUCTOR);
+    }
+
     public void shutdown () {
         if (shutdown_started)
             return;
@@ -204,6 +372,8 @@ string? server_location;
 string[]? env_vars;
 string? root_path;
 string? document_symbol_file;
+bool check_completions;
+bool snippet_support;
 bool unset_env;
 bool pause_for_debugger = false;
 const OptionEntry[] options = {
@@ -213,6 +383,8 @@ const OptionEntry[] options = {
     { "unset-environment", 'u', 0, OptionArg.NONE, ref unset_env, "Don't inherit parent environment", null },
     { "pause", 'p', 0, OptionArg.NONE, ref pause_for_debugger, "Pause before calling VLS to get a chance to attach a debugger", null },
     { "document-symbols", 0, 0, OptionArg.FILENAME, ref document_symbol_file, "Check document symbols for FILE", "FILE" },
+    { "completions", 0, 0, OptionArg.NONE, ref check_completions, "Check string completions", null },
+    { "snippet-support", 0, 0, OptionArg.NONE, ref snippet_support, "Advertise completion snippet support", null },
     { null }
 };
 

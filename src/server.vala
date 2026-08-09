@@ -935,8 +935,12 @@ class Vls.Server : Lsp.Server {
             return null;
         }
 
+        var text_caps = init_params.capabilities.text_document;
+        var completion_caps = text_caps != null ? text_caps.completion : null;
+        bool supports_snippets = completion_caps != null &&
+            CompletionClientFlags.SNIPPETS in completion_caps.flags;
         return yield CompletionEngine.complete_async (
-            this, project, file, compilation, position, context, client.cancellable);
+            this, project, file, compilation, position, context, supports_snippets, client.cancellable);
     }
 
     protected override async SignatureHelp? signature_help_async (
