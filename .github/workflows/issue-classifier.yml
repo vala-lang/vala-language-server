@@ -1,0 +1,98 @@
+name: Issue classifier
+
+run-name: >-
+  ${{ github.event_name == 'pull_request'
+      && format('Issue classifier tests for PR #{0}', github.event.pull_request.number)
+      || format('Issue classifier #{0}', github.event.issue.number || inputs.issue_number || 'evaluation') }}
+
+on:
+  pull_request:
+    paths:
+      - .github/issue-classifier/**
+      - .github/workflows/issue-classifier.yml
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created, edited, deleted]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Classify one issue or evaluate the historical gold set
+        required: true
+        default: classify
+        type: choice
+        options:
+          - classify
+          - evaluate
+      issue_number:
+        description: Issue number when mode is classify
+        required: false
+        type: string
+      dry_run:
+        description: Calculate changes without modifying the issue
+        required: true
+        default: true
+        type: boolean
+
+permissions: {}
+
+jobs:
+  test:
+    name: Test classifier
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 22
+      - name: Run tests
+        run: node --test .github/issue-classifier/classifier.test.mjs
+
+  classify:
+    name: Classify issue
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        vars.ISSUE_CLASSIFIER_ENABLED == 'true' &&
+        (
+          github.event_name == 'issues' ||
+          (
+            github.event_name == 'issue_comment' &&
+            !github.event.issue.pull_request &&
+            (
+              github.event.comment.user.login == github.event.issue.user.login ||
+              contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+            )
+          )
+        )
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    concurrency:
+      group: issue-classifier-${{ github.event.issue.number || inputs.issue_number || github.run_id }}
+      cancel-in-progress: true
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      models: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 22
+      - name: Classify
+        run: node .github/issue-classifier/classifier.mjs
+        env:
+          CLASSIFIER_DRY_RUN: ${{ inputs.dry_run }}
+          CLASSIFIER_MODE: ${{ inputs.mode || 'classify' }}
+          CLASSIFIER_WORKFLOW_FILE: issue-classifier.yml
+          GITHUB_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ inputs.issue_number || github.event.issue.number }}

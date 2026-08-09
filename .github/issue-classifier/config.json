@@ -1,0 +1,37 @@
+{
+  "model": "openai/gpt-4o-mini",
+  "confidenceThreshold": 0.9,
+  "maxSupplementalLabels": 2,
+  "maxIssueBodyCharacters": 8000,
+  "maxTrustedComments": 20,
+  "maxTrustedCommentCharacters": 8000,
+  "maxSingleCommentCharacters": 2000,
+  "automaticRunsPerIssuePerDay": 5,
+  "debounceMilliseconds": 45000,
+  "evaluationDelayMilliseconds": 4100,
+  "primaryLabels": {
+    "bug": "Unexpected or incorrect behavior in VLS",
+    "enhancement": "A request for new or improved VLS behavior",
+    "question": "A request for help or clarification rather than a confirmed defect"
+  },
+  "supplementalLabels": {
+    "code": "Code quality, maintainability, tests, or coverage work rather than a user-facing feature",
+    "documentation": "Documentation for this project is missing, incorrect, or unclear",
+    "IDE support": "Integration or behavior specific to an editor or IDE client",
+    "meta": "Project organization, governance, infrastructure, or other repository-level work",
+    "packaging": "Distribution packages, repositories, installation channels, or release packaging",
+    "performance": "Latency, CPU, memory, hangs, or other performance behavior",
+    "upstream": "Resolution requires a change in an upstream component such as libvala or GLib",
+    "windows": "Behavior specific to Windows, MSYS2, MinGW, or win32"
+  },
+  "statusLabels": {
+    "Needs Information": "The report lacks enough concrete information for a maintainer to act"
+  },
+  "neverAutomate": [
+    "duplicate",
+    "help wanted",
+    "invalid",
+    "unconfirmed",
+    "wontfix"
+  ]
+}
