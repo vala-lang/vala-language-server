@@ -1,0 +1,57 @@
+name: Issue classifier validation
+
+on:
+  pull_request:
+    paths:
+      - .github/issue-classifier/**
+      - .github/workflows/issue-classifier.md
+      - .github/workflows/issue-classifier.lock.yml
+      - .github/workflows/issue-classifier-validation.yml
+      - .github/workflows/shared/issue-classification.md
+  workflow_dispatch:
+    inputs:
+      evaluate:
+        description: Run the 40-case historical evaluation (uses OpenAI API credits)
+        required: true
+        default: false
+        type: boolean
+
+permissions: {}
+
+jobs:
+  test:
+    name: Test classifier
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+      - name: Run tests
+        run: python -m unittest discover -s .github/issue-classifier -p "test_*.py"
+
+  evaluate:
+    name: Evaluate classifier
+    if: github.event_name == 'workflow_dispatch' && inputs.evaluate
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      issues: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+      - name: Evaluate historical issues
+        run: python .github/issue-classifier/classifier.py evaluate
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
