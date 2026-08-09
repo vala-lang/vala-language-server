@@ -1,7 +1,8 @@
 {
-  "model": "auto",
-  "maxAiCreditsPerClassification": 30,
-  "copilotTimeoutMilliseconds": 180000,
+  "model": "gpt-5.6-luna",
+  "reasoningEffort": "none",
+  "maxOutputTokens": 1200,
+  "openaiTimeoutMilliseconds": 180000,
   "confidenceThreshold": 0.9,
   "maxSupplementalLabels": 2,
   "maxIssueBodyCharacters": 8000,
