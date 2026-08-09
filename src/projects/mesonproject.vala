@@ -203,47 +203,46 @@ class Vls.MesonProject : Project {
                                           Cancellable? cancellable = null) throws Error {
         // first, try to load the file in ${build_dir}/meson-info/intro-${command}.json
         try {
-            var input_file = File.new_build_filename (build_dir, "meson-info", @"intro-$command.json");
+            File input_file;
+            if (command == "info")
+                input_file = File.new_build_filename (build_dir, "meson-info", "meson-info.json");
+            else
+                input_file = File.new_build_filename (build_dir, "meson-info", @"intro-$command.json");
             debug ("loading file %s ...", input_file.get_path ());
             parser.load_from_stream (input_file.read (cancellable), cancellable);
-        } catch (IOError e) {
-            if (e is IOError.NOT_FOUND) {
-                // retry with the other method: get output of `meson introspect --${command} ${build_dir}`
-                string subst_command = command.replace("_", "-");
-                string[] spawn_args = {"meson", "introspect", @"--$subst_command", "."};
-                string proc_stdout, proc_stderr;
-                int proc_status;
+        } catch (IOError.NOT_FOUND e) {
+            // retry with the other method: get output of `meson introspect --${command} ${build_dir}`
+            string subst_command = command.replace("_", "-");
+            string[] spawn_args = {"meson", "introspect", @"--$subst_command", "."};
+            string proc_stdout, proc_stderr;
+            int proc_status;
 
-                string command_str = "";
-                foreach (string part in spawn_args) {
-                    if (command_str != "")
-                        command_str += " ";
-                    command_str += part;
-                }
-
-                debug ("file does not exist, fallback to %s", command_str);
-
-                Process.spawn_sync (
-                    build_dir,
-                    spawn_args,
-                    null,
-                    SpawnFlags.SEARCH_PATH,
-                    null,
-                    out proc_stdout,
-                    out proc_stderr,
-                    out proc_status);
-
-                if (proc_status != 0) {
-                    warning ("command `%s' in %s failed with exit code %d\n----stdout:\n%s\n----stderr:\n%s", 
-                             command_str, build_dir, proc_status, proc_stdout, proc_stderr);
-                    throw new ProjectError.INTROSPECTION (@"meson command `$command_str' failed with exit code $proc_status");
-                }
-
-                parser.load_from_data (proc_stdout);
-            } else {
-                // otherwise, rethrow
-                throw e;
+            string command_str = "";
+            foreach (string part in spawn_args) {
+                if (command_str != "")
+                    command_str += " ";
+                command_str += part;
             }
+
+            debug ("file does not exist, fallback to %s", command_str);
+
+            Process.spawn_sync (
+                build_dir,
+                spawn_args,
+                null,
+                SpawnFlags.SEARCH_PATH,
+                null,
+                out proc_stdout,
+                out proc_stderr,
+                out proc_status);
+
+            if (proc_status != 0) {
+                warning ("command `%s' in %s failed with exit code %d\n----stdout:\n%s\n----stderr:\n%s", 
+                         command_str, build_dir, proc_status, proc_stdout, proc_stderr);
+                throw new ProjectError.INTROSPECTION (@"meson command `$command_str' failed with exit code $proc_status");
+            }
+
+            parser.load_from_data (proc_stdout);
         }
     }
 
@@ -310,6 +309,30 @@ class Vls.MesonProject : Project {
         if (proc_status != 0) {
             warning ("configuration failed with exit code %d\n----stdout:\n%s\n----stderr:\n%s", 
                      proc_status, proc_stdout, proc_stderr);
+
+            // try to provide a more detailed error message
+            try {
+                var parser = new Json.Parser.immutable_new ();
+                load_introspection_json (parser, build_dir, "info", cancellable);
+                debug ("loaded introspection json");
+                if (parser.get_root ()?.get_node_type () == Json.NodeType.OBJECT) {
+                    debug ("parsing 'info' json");
+                    var array = parser.get_root ().get_object ().get_array_member ("error_list");
+                    var builder = new StringBuilder ("meson configuration failed:\n");
+                    var orig_len = builder.len;
+                    array.foreach_element ((array, i, x) => {
+                        var message = x.get_string ();
+                        if (message != null)
+                            builder.append (" - ").append (message);
+                    });
+                    if (builder.len > orig_len)
+                        throw new ProjectError.CONFIGURATION (builder.str);
+                }
+            } catch (IOError e) {
+                debug ("failed to load info json: %s", e.message);
+            }
+
+            // fallback
             throw new ProjectError.CONFIGURATION (@"meson configuration failed with exit code $proc_status");
         }
 
