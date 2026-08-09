@@ -8,6 +8,7 @@ run-name: >-
 on:
   pull_request:
     paths:
+      - .github/agents/issue-classifier.agent.md
       - .github/issue-classifier/**
       - .github/workflows/issue-classifier.yml
   issues:
@@ -79,8 +80,8 @@ jobs:
     permissions:
       actions: read
       contents: read
+      copilot-requests: write
       issues: write
-      models: read
     steps:
       - name: Check out repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -88,11 +89,17 @@ jobs:
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 22
+      - name: Install GitHub Copilot CLI
+        run: >-
+          npm install --global --ignore-scripts --no-audit --no-fund
+          @github/copilot@1.0.78
       - name: Classify
         run: node .github/issue-classifier/classifier.mjs
         env:
           CLASSIFIER_DRY_RUN: ${{ inputs.dry_run }}
           CLASSIFIER_MODE: ${{ inputs.mode || 'classify' }}
           CLASSIFIER_WORKFLOW_FILE: issue-classifier.yml
+          COPILOT_GITHUB_TOKEN: ${{ github.token }}
+          COPILOT_HOME: ${{ runner.temp }}/issue-classifier-copilot
           GITHUB_TOKEN: ${{ github.token }}
           ISSUE_NUMBER: ${{ inputs.issue_number || github.event.issue.number }}
