@@ -49,6 +49,8 @@ def label_event(label, event, actor, created_at="2026-01-01T00:00:00Z"):
 def completed_response(value):
     return {
         "status": "completed",
+        "error": None,
+        "incomplete_details": None,
         "output": [
             {
                 "type": "message",
@@ -152,7 +154,11 @@ class ConfigurationTests(unittest.TestCase):
         self.assertEqual(len(value["trusted_comments_newest_first"]), 1)
 
     def test_generated_workflow_keeps_issue_write_in_reconciler(self):
+        source = (HERE.parent / "workflows" / "issue-classifier.md").read_text()
         lock = (HERE.parent / "workflows" / "issue-classifier.lock.yml").read_text()
+        validation = (
+            HERE.parent / "workflows" / "issue-classifier-validation.yml"
+        ).read_text()
         self.assertEqual(lock.count("      issues: write\n"), 1)
         reconciler = lock.split("\n  reconcile_issue_labels:\n", 1)[1]
         self.assertIn("      issues: write\n", reconciler)
@@ -160,6 +166,26 @@ class ConfigurationTests(unittest.TestCase):
         self.assertNotIn("create_issue", lock)
         self.assertNotIn("add_comment", lock)
         self.assertNotIn("close_issue", lock)
+        self.assertIn(
+            'run-name: "Issue classifier #${{ github.event.issue.number || inputs.issue_number }}"',
+            source,
+        )
+        self.assertIn(
+            'run-name: "Issue classifier #${{ github.event.issue.number || inputs.issue_number }}"',
+            lock,
+        )
+        prepare_name = lock.index("name: Prepare trusted issue input")
+        prepare_start = lock.rfind("      - ", 0, prepare_name)
+        prepare_end = lock.find("\n      - ", prepare_name)
+        prepare_step = lock[prepare_start:prepare_end]
+        self.assertIn(
+            "GH_AW_SAFE_OUTPUTS: ${{ steps.set-runtime-paths.outputs.GH_AW_SAFE_OUTPUTS }}",
+            prepare_step,
+        )
+        self.assertIn(
+            "OPENAI_API_KEY: ${{ secrets.CODEX_API_KEY || secrets.OPENAI_API_KEY }}",
+            validation,
+        )
 
 
 class ModelContractTests(unittest.TestCase):
@@ -340,6 +366,51 @@ class ReconciliationTests(unittest.TestCase):
         plan = classifier.build_reconciliation_plan([], [], value, CONFIG)
         self.assertEqual(set(plan["additions"]), {"performance", "windows"})
         self.assertIn("documentation (supplemental-label limit)", plan["abstained"])
+
+    def test_supplemental_cap_removes_extra_bot_owned_labels(self):
+        current = ["performance", "windows"]
+        events = [
+            label_event(label, "labeled", "github-actions[bot]") for label in current
+        ]
+        value = classification(
+            applicable={
+                "documentation": True,
+                "IDE support": True,
+                "performance": True,
+                "windows": True,
+            },
+            confidence={
+                "documentation": 0.99,
+                "IDE support": 0.98,
+                "performance": 0.97,
+                "windows": 0.96,
+            },
+        )
+        plan = classifier.build_reconciliation_plan(current, events, value, CONFIG)
+        final_bot_labels = (set(current) - set(plan["removals"])) | set(
+            plan["additions"]
+        )
+        self.assertEqual(final_bot_labels, {"documentation", "IDE support"})
+        self.assertEqual(set(plan["removals"]), {"performance", "windows"})
+
+    def test_supplemental_cap_preserves_extra_human_owned_labels(self):
+        current = ["performance"]
+        events = [label_event("performance", "labeled", "maintainer")]
+        value = classification(
+            applicable={
+                "documentation": True,
+                "IDE support": True,
+                "performance": True,
+            },
+            confidence={
+                "documentation": 0.99,
+                "IDE support": 0.98,
+                "performance": 0.97,
+            },
+        )
+        plan = classifier.build_reconciliation_plan(current, events, value, CONFIG)
+        self.assertNotIn("performance", plan["removals"])
+        self.assertIn("performance (human-owned)", plan["preserved"])
 
     def test_low_confidence_preserves_bot_owned_labels(self):
         value = classification(
@@ -538,7 +609,7 @@ class TriggerAndMutationTests(unittest.TestCase):
         api.get_workflow_runs.return_value = {"workflow_runs": runs}
         sleep = mock.Mock()
         with tempfile.TemporaryDirectory() as directory:
-            safe_outputs = Path(directory) / "safeoutputs.jsonl"
+            safe_outputs = Path(directory) / "missing" / "safeoutputs.jsonl"
             summary = Path(directory) / "summary.md"
             environment = {
                 "CLASSIFIER_CONFIG_PATH": str(HERE / "config.json"),

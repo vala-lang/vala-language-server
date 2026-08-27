@@ -1,7 +1,7 @@
 ---
 name: Issue classifier
 description: Classify and safely reconcile labels on new or updated issues
-run-name: Issue classifier #${{ github.event.issue.number || inputs.issue_number }}
+run-name: "Issue classifier #${{ github.event.issue.number || inputs.issue_number }}"
 
 on:
   issues:
@@ -63,6 +63,7 @@ steps:
     run: python3 .github/issue-classifier/classifier.py prepare
     env:
       CLASSIFIER_WORKFLOW_FILE: issue-classifier.lock.yml
+      GH_AW_SAFE_OUTPUTS: ${{ steps.set-runtime-paths.outputs.GH_AW_SAFE_OUTPUTS }}
       GITHUB_TOKEN: ${{ github.token }}
       ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
 

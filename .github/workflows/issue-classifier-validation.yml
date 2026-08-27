@@ -54,4 +54,4 @@ jobs:
         run: python .github/issue-classifier/classifier.py evaluate
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.CODEX_API_KEY || secrets.OPENAI_API_KEY }}

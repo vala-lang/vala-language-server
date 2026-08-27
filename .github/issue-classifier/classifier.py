@@ -290,12 +290,12 @@ def build_reconciliation_plan(
         decision = classification["decisions"][label]
         if label in selected:
             add(label)
-        elif not decision["applicable"] and decision["confidence"] >= threshold:
-            remove(label)
-        elif decision["applicable"] and decision["confidence"] >= threshold:
-            abstained.append(f"{label} (supplemental-label limit)")
-        else:
+        elif decision["confidence"] < threshold:
             abstained.append(f"{label} (low confidence)")
+        else:
+            remove(label)
+            if decision["applicable"]:
+                abstained.append(f"{label} (supplemental-label limit)")
 
     for label in config["statusLabels"]:
         decision = classification["decisions"][label]
@@ -616,9 +616,15 @@ def openai_request(
 
 def parse_openai_response(response: Any, config: dict[str, Any]) -> dict[str, Any]:
     require(isinstance(response, dict), "OpenAI response is missing")
+    error = response.get("error")
+    incomplete_details = response.get("incomplete_details")
     failure = (
-        response.get("error", {}).get("message")
-        or response.get("incomplete_details", {}).get("reason")
+        (error.get("message") if isinstance(error, dict) else None)
+        or (
+            incomplete_details.get("reason")
+            if isinstance(incomplete_details, dict)
+            else None
+        )
         or response.get("status")
         or "unknown status"
     )
@@ -725,7 +731,9 @@ def write_summary(environment: dict[str, str], content: str) -> None:
 def write_noop(environment: dict[str, str], message: str) -> None:
     output = environment.get("GH_AW_SAFE_OUTPUTS")
     require(bool(output), "GH_AW_SAFE_OUTPUTS is required to skip the agent")
-    with Path(output).open("a") as stream:
+    target = Path(output)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("a") as stream:
         stream.write(json.dumps({"type": "noop", "message": message}) + "\n")
 
 
