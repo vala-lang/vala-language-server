@@ -1,5 +1,6 @@
 project('vala-language-server', 'vala', 'c',
   version: '0.56.0',
+  meson_version: '>=1.2.0',
   license: 'LGPL2.1+',
   default_options: [
     'default_library=static',
@@ -8,7 +9,7 @@ project('vala-language-server', 'vala', 'c',
 )
 
 valac = meson.get_compiler('vala')
-libvala_version = run_command(valac, '--api-version').stdout().strip()
+libvala_version = run_command(valac, '--api-version', check: true).stdout().strip()
 if not libvala_version.version_compare('>=0.56')
   error('libvala needs to be 0.56 or above')
 endif
